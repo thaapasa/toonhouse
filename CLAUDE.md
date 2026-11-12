@@ -14,6 +14,9 @@ dependencies.
 - `pnpm test`
 - `pnpm build`
 
+- `pnpm generate-image`, `pnpm trace-image`, `pnpm render-svg`: make graphics.
+  Read [assets/CLAUDE.md](assets/CLAUDE.md) before you use them.
+
 The CI workflow runs the same checks, with `pnpm format:check` instead of
 `pnpm format`.
 

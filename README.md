@@ -17,6 +17,9 @@ the look we're aiming for: bright, colorful cartoon characters, animals,
 fairytale creatures and props, with bold outlines and a shared palette. It is a
 reference for the style, not a final asset.
 
+The graphics are generated with AI on a local Draw Things install, then traced
+to SVG. [assets/CLAUDE.md](assets/CLAUDE.md) describes how.
+
 ## Documentation
 
 - [ARCHITECTURE.md](ARCHITECTURE.md): the structure of the project and the main
@@ -26,7 +29,7 @@ reference for the style, not a final asset.
 ## Local development
 
 The project uses [mise](https://mise.jdx.dev) for its tools. `mise install`
-installs Node and pnpm, and then the project dependencies.
+installs Node, pnpm and VTracer, and then the project dependencies.
 
 ```sh
 mise install
@@ -49,8 +52,5 @@ The local ports follow the `1AARR` scheme. The app ID is `07`.
 
 ## Asset licenses
 
-Character libraries we plan to use:
-
-- [Open Peeps](https://www.openpeeps.com/) by Pablo Stanley: CC0.
-- [Humaaans](https://www.humaaans.com/) by Pablo Stanley: CC0. Older copies were
-  under CC BY 4.0, so check the license of the copy you use.
+The images are generated with Qwen Image 2.1 Turbo. Its license, the Qwen
+Research License Agreement, allows non-commercial use only.

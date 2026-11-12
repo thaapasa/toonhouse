@@ -10,3 +10,6 @@ CLAUDE.local.md
 node_modules/
 dist/
 coverage/
+
+# Image generation work files
+assets/work/

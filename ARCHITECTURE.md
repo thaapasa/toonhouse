@@ -56,10 +56,12 @@ All graphics are SVG, so they stay sharp at any size.
 - A **scene** has a background and actors. Each actor uses a rig and has a list
   of actions on the timeline.
 
-Rigs and clips are JSON files. The built-in characters, props, clips and
-backgrounds live in `assets/` and are committed to the repo. The server stores
-the cartoons that users make. The server cleans uploaded SVG files of scripts
-and external links before it stores them.
+The graphics are generated with AI and traced to SVG, as described in
+[assets/CLAUDE.md](assets/CLAUDE.md). Rigs and clips are JSON files. The
+built-in characters, props, clips and backgrounds live in `assets/` and are
+committed to the repo. The server stores the cartoons that users make. The
+server cleans uploaded SVG files of scripts and external links before it stores
+them.
 
 ## Hosting
 
