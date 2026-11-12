@@ -38,6 +38,7 @@ The local ports follow the `1AARR` scheme. The app ID is `07`.
 | ----- | ----------------------- |
 | 10700 | Server (API and assets) |
 | 10710 | Vite dev server         |
+| 10711 | Character studio        |
 
 ## Asset licenses
 

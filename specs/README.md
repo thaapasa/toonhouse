@@ -26,3 +26,4 @@ After editing a spec, format it with Prettier: `pnpm format`.
 - [Timeline](timeline.md): giving actors actions over time.
 - [Playback and export](playback-export.md): watching the cartoon and saving it
   as a video.
+- [Character studio](studio.md): the development tool for characters and clips.

@@ -5,14 +5,32 @@ planned structure. Most of it does not exist yet.
 
 The requirements are in [specs/](specs/README.md).
 
+## Apps
+
+- **Web app** (`apps/web`): the player and the editor, built with React and
+  Vite. The server serves it at https://piirretyt.pomeranssi.fi. The editor
+  works on an iPad.
+- **Server** (`apps/server`): a Node server that stores the cartoons and serves
+  the assets and the web app. It never renders video.
+- **Export client** (`apps/export`): a CLI that runs on the user's own computer.
+  It downloads a cartoon from the server, renders it frame by frame and writes
+  the video or the images to the local disk.
+- **Character studio** (`apps/studio`): a development tool for making
+  characters, props and clips. It runs only on the Vite dev server, and it
+  writes its changes to the files in `assets/`. The files are committed to the
+  repo. The production build doesn't include the studio.
+
+The editor exists only in the web app. To edit on a computer, the user opens the
+same web app in a browser.
+
 ## Packages
 
-- `packages/model`: the types and the schemas of the scene, rig and clip
+- `packages/model`: the types and the schemas of the cartoon, rig and clip
   formats.
-- `packages/renderer`: computes what the scene looks like at a given time. It
+- `packages/renderer`: computes what the cartoon looks like at a given time. It
   has no UI and runs in the browser, in Node and in headless Chromium.
-- `apps/web`: the editor and the player, built with React and Vite.
-- `apps/server`: a Node server that stores the scenes and the assets.
+- `packages/stage`: the React components that the web app and the studio share,
+  such as the stage that draws the renderer output and the playback controls.
 
 ## Deterministic rendering
 
@@ -21,12 +39,10 @@ The renderer returns a list of parts to draw, each with its transform and draw
 order. The editor draws that list as SVG, and export draws it on a canvas.
 
 Because of this, export never records live playback. It steps `t` one frame at a
-time and renders each frame at the chosen resolution. Two ways to export are
-planned:
-
-- in the browser, with WebCodecs and the File System Access API
-- with a CLI that runs the renderer in headless Chromium through Playwright and
-  pipes the frames to ffmpeg
+time and renders each frame at the chosen resolution. The export client runs the
+renderer in headless Chromium through Playwright and pipes the frames to ffmpeg.
+Export in the browser, with WebCodecs and the File System Access API, may come
+later.
 
 ## Assets
 
@@ -40,10 +56,12 @@ All graphics are SVG, so they stay sharp at any size.
 - A **scene** has a background and actors. Each actor uses a rig and has a list
   of actions on the timeline.
 
-Scenes, rigs and clips are stored as JSON. The server cleans uploaded SVG files
-of scripts and external links before it stores them.
+Rigs and clips are JSON files. The built-in characters, props, clips and
+backgrounds live in `assets/` and are committed to the repo. The server stores
+the cartoons that users make. The server cleans uploaded SVG files of scripts
+and external links before it stores them.
 
 ## Hosting
 
-The app will run on the pomeranssi.fi server, next to the other services. The
-host name is not decided.
+The app runs at https://piirretyt.pomeranssi.fi, on the pomeranssi.fi server
+next to the other services. An English host name may come later.

@@ -19,8 +19,9 @@ The CI workflow runs the same checks, with `pnpm format:check` instead of
 
 ## Ports
 
-The app ID is `07`: the server runs on 10700 and the Vite dev server on 10710.
-Every port comes from an env var with the scheme port as the default.
+The app ID is `07`: the server runs on 10700, the Vite dev server on 10710 and
+the character studio on 10711. Every port comes from an env var with the scheme
+port as the default.
 
 ## Rules
 
