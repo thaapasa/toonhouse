@@ -10,6 +10,13 @@ English.
 
 The project is at the planning stage. There is no app code yet.
 
+## Art style
+
+[assets/examples/asset-examples.png](assets/examples/asset-examples.png) shows
+the look we're aiming for: bright, colorful cartoon characters, animals,
+fairytale creatures and props, with bold outlines and a shared palette. It is a
+reference for the style, not a final asset.
+
 ## Documentation
 
 - [ARCHITECTURE.md](ARCHITECTURE.md): the structure of the project and the main
