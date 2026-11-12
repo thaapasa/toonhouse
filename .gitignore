@@ -1,0 +1,7 @@
+# IDE settings
+.idea/
+
+# Local airlock overrides
+airlock.local.toml
+# Local CLAUDE settings
+CLAUDE.local.md
