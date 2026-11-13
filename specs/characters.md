@@ -7,8 +7,8 @@ parts, such as the head, the torso and the arms, joined at pivot points.
 - [ ] A character has animations, such as standing, walking, waving and jumping.
 - [ ] The same animation works on every character that has the same body parts.
 - [ ] A character can face left or right.
+- [ ] A character's mouth moves while it talks.
 
 ## Open questions
 
 - Can users turn their own drawings into characters?
-- Should a character's mouth move while it talks?
