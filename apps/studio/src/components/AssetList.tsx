@@ -7,10 +7,13 @@ import { isTextKey, useI18n } from '../i18n/index.tsx';
 interface Props {
   characters: readonly Character[];
   selected: string;
+  /** The characters with rig changes that are not saved. */
+  unsaved: readonly string[];
   onSelect(id: string): void;
 }
 
-export function AssetList({ characters, selected, onSelect }: Props) {
+export function AssetList(props: Props) {
+  const { characters, selected, unsaved, onSelect } = props;
   const { tr } = useI18n();
   return (
     <aside className="assets" aria-label={tr('characters')}>
@@ -29,6 +32,14 @@ export function AssetList({ characters, selected, onSelect }: Props) {
             <span className="asset-name">
               {isTextKey(key) ? tr(key) : c.id}
             </span>
+            {unsaved.includes(c.id) && (
+              <span
+                className="unsaved-dot"
+                role="img"
+                aria-label={tr('unsaved')}
+                title={tr('unsaved')}
+              />
+            )}
           </button>
         );
       })}

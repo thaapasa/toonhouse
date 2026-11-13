@@ -6,6 +6,6 @@ the repo. See [Characters](characters.md).
 
 - [x] Developer can pick a character or a prop and play any of its clips.
 - [ ] Developer can play a clip on every character that it works on.
-- [ ] Developer can move the pivot points of a character and save the rig.
+- [x] Developer can move the pivot points of a character and save the rig.
 - [ ] Developer can edit the keyframes of a clip and save it.
 - [x] The studio isn't part of the production build.

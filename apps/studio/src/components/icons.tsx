@@ -89,3 +89,30 @@ export const LoopIcon = () => (
     <path d="M20 13v2a4 4 0 0 1-4 4H4" />
   </svg>
 );
+
+const ARROW_TURN = { up: 0, right: 90, down: 180, left: 270 } as const;
+
+export const ArrowIcon = ({ dir }: { dir: keyof typeof ARROW_TURN }) => (
+  <svg {...common} strokeWidth={2.2}>
+    <g transform={`rotate(${ARROW_TURN[dir]} 12 12)`}>
+      <path d="M12 19V5" />
+      <path d="M6 11l6-6 6 6" />
+    </g>
+  </svg>
+);
+
+export const BackIcon = () => (
+  <svg {...common} width={15} height={15}>
+    <path d="M15 5l-7 7 7 7" />
+  </svg>
+);
+
+/** A turn to the left (-1, counterclockwise) or to the right (1). */
+export const TurnIcon = ({ dir }: { dir: 1 | -1 }) => (
+  <svg {...common}>
+    <g transform={dir === -1 ? 'translate(24 0) scale(-1 1)' : undefined}>
+      <path d="M20 12a8 8 0 1 1-2.6-5.9" />
+      <path d="M20 4v5h-5" />
+    </g>
+  </svg>
+);

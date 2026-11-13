@@ -1,8 +1,9 @@
 import type { CharacterDrawing } from '@toonhouse/renderer';
 import { Drawing, type PartSources, PartSymbols } from '@toonhouse/stage';
-import { useEffect, useRef, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 
 import { useI18n } from '../i18n/index.tsx';
+import type { Box } from './DragHandles.tsx';
 import {
   BonesIcon,
   FlipIcon,
@@ -35,9 +36,14 @@ interface Props {
   travel: number;
   view: ViewOptions;
   onView(view: ViewOptions): void;
+  /**
+   * Drawn over the character, such as handles for editing the rig. Gets the
+   * size of a screen pixel and the visible area.
+   */
+  overlay?: ((px: number, box: Box) => ReactNode) | undefined;
 }
 
-function useSize() {
+export function useSize() {
   const ref = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
   useEffect(() => {
@@ -62,6 +68,7 @@ export function Viewport({
   travel,
   view,
   onView,
+  overlay,
 }: Props) {
   const { tr } = useI18n();
   const [ref, { width, height }] = useSize();
@@ -70,7 +77,13 @@ export function Viewport({
   const vw = width / scale;
   const vh = height / scale;
   // Zoom around the middle of the character.
-  const viewBox = `${-vw / 2} ${-CHARACTER_HEIGHT / 2 - vh * MIDDLE_AT} ${vw} ${vh}`;
+  const box = {
+    x: -vw / 2,
+    y: -CHARACTER_HEIGHT / 2 - vh * MIDDLE_AT,
+    width: vw,
+    height: vh,
+  };
+  const viewBox = `${box.x} ${box.y} ${box.width} ${box.height}`;
   // The ground moves back under the feet as fast as the character walks.
   const shift =
     (((-travel * view.facing) % MARK_SPACING) + MARK_SPACING) % MARK_SPACING;
@@ -148,7 +161,11 @@ export function Viewport({
       </div>
 
       {width > 0 && (
-        <svg className="stage" viewBox={viewBox} aria-hidden="true">
+        <svg
+          className={overlay ? 'stage editing' : 'stage'}
+          viewBox={viewBox}
+          aria-hidden="true"
+        >
           <PartSymbols prefix={prefix} sources={parts} />
           <line
             className="ground-line"
@@ -194,6 +211,7 @@ export function Viewport({
               ))}
             </g>
           )}
+          {overlay?.(px, box)}
         </svg>
       )}
     </div>

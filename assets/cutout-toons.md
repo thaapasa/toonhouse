@@ -344,3 +344,11 @@ his [log](characters/wizard/LOG.md) describes how it was set up:
 
 The studio finds the folder by itself. Start it with `pnpm studio` and play each
 clip on the new character.
+
+If a piece sits in the wrong place, such as a head that doesn't meet the neck of
+the torso, fix the rig in the studio. In the "Rig" panel, an attachment point
+moves where a piece or a limb joins its parent, on the posed character. A piece
+pivot moves the point on the piece itself, in a view of that piece alone. For
+the hands, the view also has a "Turn" mode, which sets `hands.relaxedAngle`,
+`hands.openAngle` or the `staff.handAngle` of the fist. Save writes the new
+numbers to `rig.json`.
