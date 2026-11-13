@@ -1,0 +1,23 @@
+{
+  "name": "@toonhouse/prototypes",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "typecheck": "tsc -p .",
+    "screenshot": "node scripts/screenshot.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "@types/pngjs": "^6.0.5",
+    "@types/three": "^0.187.0",
+    "playwright": "^1.65.0",
+    "pngjs": "^7.0.0",
+    "typescript": "~6.0.3",
+    "vite": "^8.3.8"
+  },
+  "dependencies": {
+    "three": "^0.187.0"
+  }
+}
