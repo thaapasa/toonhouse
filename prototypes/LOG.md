@@ -157,8 +157,8 @@ Other characters I downloaded and looked at, not used:
 - Older Quaternius humans without a wave clip (HMnuH5geEG, jpKRgGDxhk and
   others).
 
-I picked Anne because the chibi proportions look most like a cartoon for
-children, and she has all three clips.
+I picked Anne because the chibi proportions look most like a cartoon, and she
+has all three clips.
 
 Props, all Quaternius, CC0 1.0 on poly.pizza:
 
@@ -238,3 +238,12 @@ only the crown shows.
 - Darker flattened discs on the ground break up the plain green in front of the
   camera.
 - The camera moved closer, to 6.2 character heights from the middle of the path.
+
+### Checks
+
+- `/tmp` helper scripts with Playwright took contact sheets around the character
+  every 1/30 s for the start (0–0.9 s), one walk cycle (2.5–3.5 s), the stop
+  (4.8–6.0 s) and the wave (5.9–7.8 s). None showed a pop in the blends. They
+  are not committed; `scripts/screenshot.ts` with `SHOT_CLIP` does the same job
+  for single frames.
+- `pnpm build` passes. The 3D bundle is 644 kB, almost all of it three.js.
