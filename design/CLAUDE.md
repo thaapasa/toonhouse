@@ -15,15 +15,29 @@ the next sync overwrites them. To change the design, change the canvas and sync.
 
 ## Contents
 
-Not synced yet. The first sync fills in this section.
-
 The folder mirrors the files of the canvas, so a local path maps one-to-one to a
-canvas path. This section describes:
+canvas path.
 
-- the folders and files that the canvas has, and which file gives the board
-  layout, if there is one
-- each board by its title, grouped by screen size or app area, with a few words
-  on what it shows
+- `project/canvas.json`: the board layout. It gives the title, position and size
+  of each board, and the board order.
+- `project/*.dc.html`: one file per board.
+
+The iPad boards are 1194 × 834 px, with Finnish text:
+
+- `Main.dc.html`, "Home — my cartoons": the home screen. A grid of cartoon cards
+  with thumbnails, a language toggle and a "new cartoon" button.
+- `Editor.dc.html`, "Editor — giving an action": the editor with the stage, the
+  actions for the selected character (walk, jump, talk, wave and so on), the
+  speech bubble tool and the timeline.
+- `Library.dc.html`, "Editor — library open": the editor board with the library
+  panel open, with characters, objects, backgrounds and sounds.
+- `Player.dc.html`, "Player": playback with play and pause, a scrubber, the time
+  and a fullscreen button.
+
+The dev tool board is 1440 × 900 px, with English text:
+
+- `Studio.dc.html`, "Character studio (dev tool)": the character studio with
+  assets, clips, a viewport, keyframe controls and an inspector.
 
 Each board is an HTML page with inline styles and a `DCLogic` component script
 that fills in the sample data. The boards load `support.js` from the canvas
@@ -32,8 +46,8 @@ colors, spacing, type and structure, and open the canvas to see them.
 
 ## Last sync
 
-- Canvas version: none
-- Date: none
+- Canvas version: 1794553520-d70b
+- Date: 2026-11-13
 
 ## Sync
 

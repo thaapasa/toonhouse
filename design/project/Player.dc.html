@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<title>Toonhouse — katso</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 1194px; height: 834px; box-sizing: border-box; background: #1B1D24; font-family: 'Inter', system-ui, -apple-system, sans-serif; color: #ECEDF0; display: flex; flex-direction: column; overflow: hidden">
+
+  <header style="height: 81px; flex: none; box-sizing: border-box; display: flex; align-items: center; gap: 16px; padding: 0 24px">
+    <a href="Editor.dc.html" style="height: 52px; box-sizing: border-box; border: 3px solid #FFF4DD; border-radius: 16px; display: flex; align-items: center; gap: 8px; padding: 0 18px 0 14px; color: #ECEDF0; text-decoration: none; font-weight: 600; font-size: 14px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1-5L16 4l4 4L9 19z"></path><path d="M14 6l4 4"></path></svg>
+      Muokkaa
+    </a>
+    <div style="flex: 1; text-align: center; font-weight: 600; font-size: 17px; line-height: 1">Lohikäärmeen retki</div>
+    <a href="Main.dc.html" aria-label="Sulje" style="width: 52px; height: 52px; box-sizing: border-box; border: 3px solid #FFF4DD; border-radius: 16px; display: flex; align-items: center; justify-content: center; color: #FFF4DD">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+    </a>
+  </header>
+
+  <div style="width: 1194px; height: 672px; flex: none; position: relative; overflow: hidden; background: #BFE6FF">
+    <svg width="100%" height="100%" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" style="position: absolute; inset: 0; display: block">
+      <rect width="1600" height="900" fill="#BFE6FF"></rect>
+      <circle cx="1400" cy="140" r="66" fill="#FFC531" stroke="#23262F" stroke-width="7"></circle>
+      <path d="M300 220 a45 45 0 0 1 80 -32 a62 62 0 0 1 112 8 a42 42 0 0 1 24 80 h-200 a36 36 0 0 1 -16 -56z" fill="#FFFFFF" stroke="#23262F" stroke-width="7"></path>
+      <path d="M900 150 a34 34 0 0 1 62 -22 a48 48 0 0 1 86 8 a32 32 0 0 1 16 60 h-150 a28 28 0 0 1 -14 -46z" fill="#FFFFFF" stroke="#23262F" stroke-width="7"></path>
+      <path d="M-20 520 Q 250 380 520 480 T 1050 450 T 1620 470 V920 H-20z" fill="#8CCB5E" stroke="#23262F" stroke-width="7"></path>
+      <path d="M-20 600 Q 400 555 800 590 T 1620 580 V920 H-20z" fill="#63B03E" stroke="#23262F" stroke-width="7"></path>
+      <path d="M560 920 Q 720 740 1000 650 Q 1160 610 1320 616 L1350 646 Q 1120 668 1000 730 Q 840 810 800 920z" fill="#E9C27D" stroke="#23262F" stroke-width="7"></path>
+    </svg>
+    <img src="/_blob/a9f2da738fd13b1f2848a507334f76ec" alt="" style="position: absolute; left: 3%; bottom: 31%; height: 46%">
+    <img src="/_blob/30f56b1033842ee33ac689ae341c8261" alt="" style="position: absolute; left: 60%; bottom: 28%; height: 26%">
+    <img src="/_blob/3c7242eb905475b804a10b5b4557ef37" alt="" style="position: absolute; left: 90%; bottom: 31%; height: 15%">
+    <img src="/_blob/3d03a75affe24ddbf4cacc73f4d391ec" alt="" style="position: absolute; left: 47%; bottom: 18%; height: 18%">
+    <img src="/_blob/c4a9447bb173a635c890c9b0b4f7e6c2" alt="" style="position: absolute; left: 33%; bottom: 8%; height: 52%">
+    <img src="/_blob/dbbb8d1a87d198120c811089e9d0ff1a" alt="" style="position: absolute; left: 76%; bottom: 20%; height: 42%; transform: scaleX(-1) rotate(-6deg)">
+    <div style="position: absolute; left: 76%; bottom: 13%; width: 13%; height: 3%; border-radius: 50%; background: rgba(35,38,47,0.25)"></div>
+    <div style="position: absolute; left: 12%; top: 20%; width: 250px; box-sizing: border-box; padding: 14px 18px; background: #FFFFFF; border: 4px solid #23262F; border-radius: 26px; font-weight: 900; font-size: 24px; line-height: 1.2; text-align: center; color: #23262F">
+      Odota minua!
+      <svg width="34" height="28" viewBox="0 0 34 28" aria-hidden="true" style="position: absolute; right: 30px; bottom: -25px; display: block"><path d="M2 0 L30 26 L22 0" fill="#FFFFFF" stroke="#23262F" stroke-width="4" stroke-linejoin="round"></path><path d="M1 0 h24" stroke="#FFFFFF" stroke-width="5"></path></svg>
+    </div>
+  </div>
+
+  <div style="flex: 1; box-sizing: border-box; display: flex; align-items: center; gap: 20px; padding: 0 24px">
+    <button onClick="{{ toggle }}" aria-label="{{ playLabel }}" style="width: 60px; height: 60px; flex: none; box-sizing: border-box; border: 3px solid #23262F; border-radius: 50%; background: #F2B544; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0">
+      <sc-if value="{{ playing }}" hint-placeholder-val="{{ true }}">
+        <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="5" height="16" rx="1.5" fill="#23262F"></rect><rect x="14" y="4" width="5" height="16" rx="1.5" fill="#23262F"></rect></svg>
+      </sc-if>
+      <sc-if value="{{ paused }}" hint-placeholder-val="{{ false }}">
+        <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z" fill="#23262F"></path></svg>
+      </sc-if>
+    </button>
+    <div style="flex: 1; height: 16px; position: relative; border-radius: 8px; background: #3A3E4B">
+      <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 64%; border-radius: 8px; background: #F2B544"></div>
+      <div style="position: absolute; left: 64%; top: 50%; width: 30px; height: 30px; margin: -15px 0 0 -15px; box-sizing: border-box; border-radius: 50%; background: #FFF4DD; border: 3px solid #23262F"></div>
+    </div>
+    <div style="font-weight: 500; font-size: 15px; font-variant-numeric: tabular-nums; white-space: nowrap">0:06 / 0:10</div>
+    <button aria-label="Koko näyttö" style="width: 48px; height: 48px; box-sizing: border-box; border: 3px solid #FFF4DD; border-radius: 14px; background: transparent; display: flex; align-items: center; justify-content: center; color: #FFF4DD; cursor: pointer; padding: 0">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg>
+    </button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1194,"height":834}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { playing: true };
+  }
+  renderVals() {
+    const p = this.state.playing;
+    return {
+      playing: p,
+      paused: !p,
+      playLabel: p ? 'Tauko' : 'Toista',
+      toggle: () => this.setState({ playing: !p }),
+    };
+  }
+}
+</script>
+</body>
+</html>

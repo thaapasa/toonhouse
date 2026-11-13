@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Toonhouse Studio</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#ECEDF0}a:hover{color:#FFFFFF}
+</style>
+</helmet>
+<div style="min-height: 100vh; box-sizing: border-box; background: #141519; font-family: 'Inter', system-ui, -apple-system, sans-serif; color: #ECEDF0; display: flex; flex-direction: column; font-size: 13px">
+
+  <header style="height: 48px; flex: none; box-sizing: border-box; display: flex; align-items: center; gap: 12px; padding: 0 12px 0 16px; background: #1C1D22; border-bottom: 1px solid #2A2C34">
+    <div style="display: flex; align-items: center; gap: 8px">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F2B544" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"></path><path d="M5 10v10h14V10"></path><path d="M10 15l4 2.5-4 2.5z" fill="#F2B544"></path></svg>
+      <span style="font-weight: 700; font-size: 15px">Studio</span>
+      <span style="padding: 2px 6px; border-radius: 4px; background: #2A2C34; color: #9EA1AC; font-size: 11px; font-weight: 600">dev</span>
+    </div>
+    <div style="width: 1px; height: 20px; background: #2F313A"></div>
+    <div style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #9EA1AC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">assets/characters/<span style="color: #ECEDF0">girl.rig.json</span></div>
+    <span style="width: 7px; height: 7px; border-radius: 50%; background: #F2B544; flex: none" title="Unsaved changes"></span>
+    <div style="flex: 1"></div>
+    <button style="height: 32px; border: 0; border-radius: 7px; background: transparent; color: #C9CBD3; font: inherit; font-weight: 500; padding: 0 12px; cursor: pointer">Revert</button>
+    <button style="height: 32px; border: 0; border-radius: 7px; background: #F2B544; color: #15161A; font: inherit; font-weight: 600; padding: 0 14px; cursor: pointer; display: flex; align-items: center; gap: 6px">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11l3 3v13H5z"></path><path d="M8 4v5h7V4"></path><path d="M8 20v-6h8v6"></path></svg>
+      Save
+    </button>
+  </header>
+
+  <div style="flex: 1; min-height: 0; display: flex; flex-wrap: wrap">
+
+    <aside aria-label="Assets" style="width: 220px; flex: 1 1 220px; max-width: 220px; box-sizing: border-box; background: #1C1D22; border-right: 1px solid #2A2C34; padding: 10px 8px; display: flex; flex-direction: column; gap: 4px; min-width: 200px">
+      <div style="display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 8px; border-radius: 7px; background: #24262D; color: #8D909B; font-size: 12px; margin-bottom: 6px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+        <label for="asset-filter" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Filter assets</label>
+        <input id="asset-filter" placeholder="Filter" style="flex: 1; min-width: 0; border: 0; background: transparent; color: #ECEDF0; font: inherit; font-size: 12px; outline: none">
+      </div>
+      <div style="padding: 8px 8px 4px; color: #8D909B; font-size: 11px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase">Characters</div>
+      <sc-for list="{{ characters }}" as="c" hint-placeholder-count="8">
+        <button onClick="{{ c.pick }}" style="height: 36px; border: 0; border-radius: 7px; background: {{ c.bg }}; color: {{ c.fg }}; display: flex; align-items: center; gap: 10px; padding: 0 8px; font: inherit; font-weight: 500; font-size: 13px; cursor: pointer; text-align: left">
+          <span style="width: 24px; height: 24px; flex: none; border-radius: 6px; background: #2E3038; overflow: hidden; display: flex; align-items: flex-start; justify-content: center"><img src="{{ c.src }}" alt="" style="width: 22px"></span>
+          <span style="flex: 1">{{ c.name }}</span>
+          <span style="color: #6B6E79; font-size: 11px">{{ c.rig }}</span>
+        </button>
+      </sc-for>
+      <div style="padding: 12px 8px 4px; color: #8D909B; font-size: 11px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase">Props</div>
+      <sc-for list="{{ props }}" as="c" hint-placeholder-count="5">
+        <button style="height: 36px; border: 0; border-radius: 7px; background: transparent; color: #C9CBD3; display: flex; align-items: center; gap: 10px; padding: 0 8px; font: inherit; font-weight: 500; font-size: 13px; cursor: pointer; text-align: left">
+          <span style="width: 24px; height: 24px; flex: none; border-radius: 6px; background: #2E3038; overflow: hidden; display: flex; align-items: center; justify-content: center"><img src="{{ c.src }}" alt="" style="max-width: 20px; max-height: 20px"></span>
+          <span style="flex: 1">{{ c.name }}</span>
+        </button>
+      </sc-for>
+    </aside>
+
+    <main style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+
+      <div style="flex: 1; min-height: 520px; position: relative; background-color: #191A1F; background-image: radial-gradient(circle, #2C2E36 1px, transparent 1.2px); background-size: 20px 20px; overflow: hidden">
+        <div role="toolbar" aria-label="Viewport" style="position: absolute; left: 12px; top: 12px; display: flex; gap: 2px; padding: 3px; border-radius: 9px; background: #1C1D22; box-shadow: 0 0 0 1px #2A2C34; z-index: 2">
+          <button onClick="{{ toggleBones }}" aria-pressed="{{ bones }}" title="Show bones and pivots" style="height: 30px; border: 0; border-radius: 6px; background: {{ bonesBg }}; color: #ECEDF0; font: inherit; font-weight: 500; font-size: 12px; padding: 0 10px; cursor: pointer; display: flex; align-items: center; gap: 6px">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="6" cy="6" r="2.5"></circle><circle cx="18" cy="18" r="2.5"></circle><path d="M8 8l8 8"></path></svg>
+            Bones
+          </button>
+          <button onClick="{{ toggleOnion }}" aria-pressed="{{ onion }}" title="Onion skin: show the previous and next keyframe" style="height: 30px; border: 0; border-radius: 6px; background: {{ onionBg }}; color: #ECEDF0; font: inherit; font-weight: 500; font-size: 12px; padding: 0 10px; cursor: pointer; display: flex; align-items: center; gap: 6px">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><circle cx="9" cy="12" r="6"></circle><circle cx="15" cy="12" r="6" stroke-dasharray="2 2.5"></circle></svg>
+            Onion skin
+          </button>
+          <button title="Ground line" style="height: 30px; border: 0; border-radius: 6px; background: #2E3038; color: #ECEDF0; font: inherit; font-weight: 500; font-size: 12px; padding: 0 10px; cursor: pointer">Ground</button>
+        </div>
+        <div style="position: absolute; right: 12px; top: 12px; display: flex; align-items: center; gap: 2px; padding: 3px; border-radius: 9px; background: #1C1D22; box-shadow: 0 0 0 1px #2A2C34; z-index: 2">
+          <button aria-label="Zoom out" title="Zoom out" style="width: 30px; height: 30px; border: 0; border-radius: 6px; background: transparent; color: #ECEDF0; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg></button>
+          <span style="width: 44px; text-align: center; font-size: 12px; font-variant-numeric: tabular-nums">100%</span>
+          <button aria-label="Zoom in" title="Zoom in" style="width: 30px; height: 30px; border: 0; border-radius: 6px; background: transparent; color: #ECEDF0; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+        </div>
+
+        <div aria-hidden="true" style="position: absolute; left: 0; right: 0; bottom: 64px; border-top: 1px dashed #3A3D46"></div>
+
+        <div style="position: absolute; left: 50%; bottom: 64px; width: 233px; height: 480px; margin-left: -116px">
+          <sc-if value="{{ onion }}" hint-placeholder-val="{{ true }}">
+            <img src="/_blob/c4a9447bb173a635c890c9b0b4f7e6c2" alt="" style="position: absolute; left: -26px; top: 0; height: 480px; opacity: 0.14; filter: grayscale(1)">
+            <img src="/_blob/c4a9447bb173a635c890c9b0b4f7e6c2" alt="" style="position: absolute; left: 26px; top: 0; height: 480px; opacity: 0.14; filter: grayscale(1)">
+          </sc-if>
+          <img src="/_blob/c4a9447bb173a635c890c9b0b4f7e6c2" alt="Girl" style="position: absolute; left: 0; top: 0; height: 480px">
+          <sc-if value="{{ bones }}" hint-placeholder-val="{{ true }}">
+            <svg width="233" height="480" viewBox="0 0 183 377" aria-hidden="true" style="position: absolute; left: 0; top: 0; overflow: visible">
+              <g fill="none" stroke="#ECEDF0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.9">
+                <path d="M100 135 L103 265"></path>
+                <path d="M100 135 L68 160 L50 205 L85 215"></path>
+                <path d="M100 135 L140 160"></path>
+                <path d="M165 195 L150 215"></path>
+                <path d="M103 265 L85 268 L80 320 L72 350"></path>
+                <path d="M103 265 L120 268 L125 320 L130 350"></path>
+                <path d="M100 135 L104 70"></path>
+              </g>
+              <path d="M140 160 L165 195" fill="none" stroke="#F2B544" stroke-width="4" stroke-linecap="round"></path>
+              <g fill="#1C1D22" stroke="#ECEDF0" stroke-width="1.6">
+                <circle cx="104" cy="70" r="3.2"></circle><circle cx="100" cy="135" r="3.2"></circle><circle cx="103" cy="265" r="3.2"></circle>
+                <circle cx="68" cy="160" r="3.2"></circle><circle cx="50" cy="205" r="3.2"></circle><circle cx="85" cy="215" r="3.2"></circle>
+                <circle cx="165" cy="195" r="3.2"></circle><circle cx="150" cy="215" r="3.2"></circle>
+                <circle cx="85" cy="268" r="3.2"></circle><circle cx="80" cy="320" r="3.2"></circle><circle cx="72" cy="350" r="3.2"></circle>
+                <circle cx="120" cy="268" r="3.2"></circle><circle cx="125" cy="320" r="3.2"></circle><circle cx="130" cy="350" r="3.2"></circle>
+              </g>
+              <circle cx="140" cy="160" r="5" fill="#F2B544" stroke="#15161A" stroke-width="1.6"></circle>
+              <circle cx="140" cy="160" r="10" fill="none" stroke="#F2B544" stroke-width="1" stroke-dasharray="2 2"></circle>
+            </svg>
+            <div style="position: absolute; left: 196px; top: 176px; padding: 3px 7px; border-radius: 5px; background: #F2B544; color: #15161A; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; font-weight: 500; white-space: nowrap">arm_r.upper · 34°</div>
+          </sc-if>
+        </div>
+
+        <div style="position: absolute; left: 12px; bottom: 12px; display: flex; align-items: center; gap: 8px; color: #8D909B; font-size: 12px">
+          <span>Clip works on</span>
+          <div style="display: flex; gap: 4px">
+            <sc-for list="{{ compatible }}" as="c" hint-placeholder-count="4">
+              <span title="{{ c.name }}" style="width: 28px; height: 28px; border-radius: 7px; background: #24262D; overflow: hidden; display: flex; justify-content: center"><img src="{{ c.src }}" alt="{{ c.name }}" style="width: 24px"></span>
+            </sc-for>
+          </div>
+          <button style="height: 28px; border: 0; border-radius: 7px; background: #24262D; color: #ECEDF0; font: inherit; font-weight: 500; font-size: 12px; padding: 0 10px; cursor: pointer">Play on all</button>
+        </div>
+      </div>
+
+      <section aria-label="Clips" style="flex: none; background: #1C1D22; border-top: 1px solid #2A2C34">
+        <div style="display: flex; align-items: center; gap: 4px; padding: 8px 12px 0; flex-wrap: wrap">
+          <sc-for list="{{ clips }}" as="clip" hint-placeholder-count="7">
+            <button onClick="{{ clip.pick }}" aria-pressed="{{ clip.on }}" style="height: 30px; border: 0; border-radius: 7px; background: {{ clip.bg }}; color: {{ clip.fg }}; font: inherit; font-weight: 500; font-size: 13px; padding: 0 12px; cursor: pointer; display: flex; align-items: center; gap: 6px">
+              {{ clip.name }}<span style="color: {{ clip.sub }}; font-size: 11px">{{ clip.len }}</span>
+            </button>
+          </sc-for>
+          <button aria-label="New clip" title="New clip" style="width: 30px; height: 30px; border: 0; border-radius: 7px; background: transparent; color: #9EA1AC; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 2px; padding: 6px 8px 2px">
+          <button aria-label="Previous keyframe" title="Previous keyframe" style="width: 34px; height: 34px; border: 0; border-radius: 7px; background: transparent; color: #ECEDF0; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 5v14"></path><path d="M19 5l-10 7 10 7z"></path></svg></button>
+          <button onClick="{{ togglePlay }}" aria-label="{{ playLabel }}" title="{{ playLabel }}" style="width: 34px; height: 34px; border: 0; border-radius: 7px; background: #2E3038; color: #ECEDF0; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center">
+            <sc-if value="{{ playing }}" hint-placeholder-val="{{ true }}"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1" fill="currentColor"></rect><rect x="14" y="5" width="4" height="14" rx="1" fill="currentColor"></rect></svg></sc-if>
+            <sc-if value="{{ paused }}" hint-placeholder-val="{{ false }}"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z" fill="currentColor"></path></svg></sc-if>
+          </button>
+          <button aria-label="Next keyframe" title="Next keyframe" style="width: 34px; height: 34px; border: 0; border-radius: 7px; background: transparent; color: #ECEDF0; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 5v14"></path><path d="M5 5l10 7-10 7z"></path></svg></button>
+          <button aria-pressed="true" aria-label="Loop" title="Loop" style="width: 34px; height: 34px; border: 0; border-radius: 7px; background: transparent; color: #F2B544; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l3 3-3 3"></path><path d="M4 11V9a4 4 0 0 1 4-4h12"></path><path d="M7 22l-3-3 3-3"></path><path d="M20 13v2a4 4 0 0 1-4 4H4"></path></svg></button>
+          <div style="margin-left: 8px; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap"><span style="font-weight: 600">Frame 9</span><span style="color: #9EA1AC"> / 24 · 24 fps</span></div>
+          <div style="flex: 1"></div>
+          <div role="group" aria-label="Speed" style="display: flex; padding: 2px; border-radius: 7px; background: #26282F">
+            <sc-for list="{{ speeds }}" as="sp" hint-placeholder-count="4">
+              <button onClick="{{ sp.pick }}" aria-pressed="{{ sp.on }}" style="height: 26px; border: 0; border-radius: 5px; background: {{ sp.bg }}; color: {{ sp.fg }}; font: inherit; font-weight: 500; font-size: 12px; padding: 0 8px; cursor: pointer">{{ sp.label }}</button>
+            </sc-for>
+          </div>
+          <button style="height: 30px; border: 0; border-radius: 7px; background: #2E3038; color: #ECEDF0; font: inherit; font-weight: 500; font-size: 12px; padding: 0 10px; margin-left: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l7 8-7 8-7-8z"></path></svg>
+            Add keyframe
+          </button>
+        </div>
+
+        <div style="position: relative; padding: 0 12px 10px 0">
+          <div style="display: flex; height: 20px">
+            <div style="width: 132px; flex: none"></div>
+            <div style="flex: 1; position: relative; font-size: 10px; color: #8D909B; font-variant-numeric: tabular-nums">
+              <sc-for list="{{ frames }}" as="f" hint-placeholder-count="7">
+                <span style="position: absolute; left: {{ f.left }}; top: 0; height: 20px; border-left: 1px solid #34363F; padding-left: 3px; line-height: 14px">{{ f.label }}</span>
+              </sc-for>
+            </div>
+          </div>
+          <sc-for list="{{ boneRows }}" as="b" hint-placeholder-count="7">
+            <div style="display: flex; height: 22px; align-items: center; background: {{ b.rowBg }}">
+              <div style="width: 132px; flex: none; box-sizing: border-box; padding-left: 14px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; color: {{ b.fg }}">{{ b.name }}</div>
+              <div style="flex: 1; height: 22px; position: relative; border-bottom: 1px solid #24262D">
+                <sc-for list="{{ b.keys }}" as="k" hint-placeholder-count="3">
+                  <span style="position: absolute; left: {{ k.left }}; top: 50%; width: 8px; height: 8px; margin: -4px 0 0 -4px; transform: rotate(45deg); background: {{ b.key }}; border-radius: 1px"></span>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+          <div aria-hidden="true" style="position: absolute; top: 0; bottom: 10px; left: calc(132px + 0.3478 * (100% - 144px)); width: 0">
+            <div style="position: absolute; left: -1px; top: 0; bottom: 0; width: 2px; background: #F2B544"></div>
+            <div style="position: absolute; left: -6px; top: 0; width: 12px; height: 12px; background: #F2B544; border-radius: 2px 2px 6px 6px"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <aside aria-label="Inspector" style="width: 300px; flex: 1 1 300px; max-width: 300px; min-width: 260px; box-sizing: border-box; background: #1C1D22; border-left: 1px solid #2A2C34; display: flex; flex-direction: column">
+      <div role="tablist" style="display: flex; gap: 2px; padding: 8px 8px 0; border-bottom: 1px solid #2A2C34">
+        <button role="tab" onClick="{{ tabLook }}" aria-selected="{{ isLook }}" style="height: 36px; border: 0; background: transparent; color: {{ lookFg }}; box-shadow: inset 0 -2px 0 {{ lookLine }}; font: inherit; font-weight: 600; font-size: 13px; padding: 0 12px; cursor: pointer">Appearance</button>
+        <button role="tab" onClick="{{ tabRig }}" aria-selected="{{ isRig }}" style="height: 36px; border: 0; background: transparent; color: {{ rigFg }}; box-shadow: inset 0 -2px 0 {{ rigLine }}; font: inherit; font-weight: 600; font-size: 13px; padding: 0 12px; cursor: pointer">Rig</button>
+      </div>
+
+      <sc-if value="{{ isLook }}" hint-placeholder-val="{{ true }}">
+        <div style="padding: 14px 14px 18px; display: flex; flex-direction: column; gap: 18px">
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <div style="color: #8D909B; font-size: 11px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase">Colors</div>
+            <sc-for list="{{ slots }}" as="s" hint-placeholder-count="6">
+              <button onClick="{{ s.pick }}" aria-pressed="{{ s.on }}" style="height: 34px; border: 0; border-radius: 7px; background: {{ s.bg }}; box-shadow: inset 0 0 0 1px {{ s.ring }}; color: #ECEDF0; display: flex; align-items: center; gap: 10px; padding: 0 8px; font: inherit; font-size: 13px; cursor: pointer; text-align: left">
+                <span style="width: 20px; height: 20px; flex: none; border-radius: 5px; background: {{ s.color }}; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.18)"></span>
+                <span style="flex: 1">{{ s.name }}</span>
+                <span style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; color: #9EA1AC">{{ s.color }}</span>
+              </button>
+            </sc-for>
+            <div style="margin-top: 4px; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px">
+              <sc-for list="{{ palette }}" as="p" hint-placeholder-count="14">
+                <button onClick="{{ p.pick }}" aria-label="{{ p.hex }}" title="{{ p.hex }}" style="aspect-ratio: 1; border: 0; border-radius: 6px; background: {{ p.hex }}; box-shadow: {{ p.ring }}; cursor: pointer; padding: 0"></button>
+              </sc-for>
+            </div>
+            <div style="color: #8D909B; font-size: 11px">Shared palette · choose a slot, then a color</div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <div style="color: #8D909B; font-size: 11px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase">Variants</div>
+            <div style="display: flex; align-items: center; gap: 10px">
+              <label for="hair" style="width: 80px; color: #C9CBD3">Hair</label>
+              <select id="hair" style="flex: 1; height: 32px; border: 0; border-radius: 7px; background: #26282F; color: #ECEDF0; font: inherit; font-size: 13px; padding: 0 8px">
+                <option>Ponytail</option><option>Short</option><option>Bun</option>
+              </select>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px">
+              <label for="outfit" style="width: 80px; color: #C9CBD3">Outfit</label>
+              <select id="outfit" style="flex: 1; height: 32px; border: 0; border-radius: 7px; background: #26282F; color: #ECEDF0; font: inherit; font-size: 13px; padding: 0 8px">
+                <option>Overalls</option><option>Hoodie</option><option>Dress</option>
+              </select>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px">
+              <span style="width: 80px; color: #C9CBD3">Glasses</span>
+              <button role="switch" onClick="{{ toggleGlasses }}" aria-checked="{{ glasses }}" aria-label="Glasses" style="width: 36px; height: 20px; border: 0; border-radius: 10px; background: {{ glassesBg }}; position: relative; cursor: pointer; padding: 0">
+                <span style="position: absolute; top: 2px; left: {{ glassesKnob }}; width: 16px; height: 16px; border-radius: 50%; background: #FFFFFF"></span>
+              </button>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <div style="color: #8D909B; font-size: 11px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase">Proportions</div>
+            <div style="display: flex; align-items: center; gap: 10px">
+              <label for="height" style="width: 80px; color: #C9CBD3">Height</label>
+              <input id="height" type="range" min="70" max="130" value="100" style="flex: 1; accent-color: #F2B544">
+              <span style="width: 36px; text-align: right; font-variant-numeric: tabular-nums; color: #9EA1AC; font-size: 12px">100%</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px">
+              <label for="head" style="width: 80px; color: #C9CBD3">Head size</label>
+              <input id="head" type="range" min="70" max="130" value="108" style="flex: 1; accent-color: #F2B544">
+              <span style="width: 36px; text-align: right; font-variant-numeric: tabular-nums; color: #9EA1AC; font-size: 12px">108%</span>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isRig }}" hint-placeholder-val="{{ false }}">
+        <div style="padding: 14px 14px 18px; display: flex; flex-direction: column; gap: 18px">
+          <div style="display: flex; flex-direction: column; gap: 8px">
+            <div style="color: #8D909B; font-size: 11px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase">Selected bone</div>
+            <div style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px">arm_r.upper</div>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+              <label style="display: flex; flex-direction: column; gap: 4px; color: #9EA1AC; font-size: 11px">Pivot X<input value="140" style="height: 30px; border: 0; border-radius: 7px; background: #26282F; color: #ECEDF0; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; padding: 0 8px"></label>
+              <label style="display: flex; flex-direction: column; gap: 4px; color: #9EA1AC; font-size: 11px">Pivot Y<input value="160" style="height: 30px; border: 0; border-radius: 7px; background: #26282F; color: #ECEDF0; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; padding: 0 8px"></label>
+              <label style="display: flex; flex-direction: column; gap: 4px; color: #9EA1AC; font-size: 11px">Rotation<input value="34°" style="height: 30px; border: 0; border-radius: 7px; background: #26282F; color: #ECEDF0; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; padding: 0 8px"></label>
+              <label style="display: flex; flex-direction: column; gap: 4px; color: #9EA1AC; font-size: 11px">Draw order<input value="7" style="height: 30px; border: 0; border-radius: 7px; background: #26282F; color: #ECEDF0; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; padding: 0 8px"></label>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 2px">
+            <div style="color: #8D909B; font-size: 11px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; margin-bottom: 6px">Bones</div>
+            <sc-for list="{{ tree }}" as="t" hint-placeholder-count="10">
+              <div style="height: 26px; display: flex; align-items: center; padding-left: {{ t.indent }}; border-radius: 6px; background: {{ t.bg }}; color: {{ t.fg }}; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px">{{ t.name }}</div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+    </aside>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      char: 'girl', clip: 'walk', speed: '1×', playing: true, bones: true, onion: false, tab: 'look', slot: 2, glasses: false,
+      colors: ['#E2622B', '#F6C9A0', '#F7B92B', '#2F86C8', '#FCE8C4', '#2F86C8'],
+    };
+  }
+  renderVals() {
+    const s = this.state;
+    const U = {
+      boy: '/_blob/2f23f7b6c56616cdafbe2829609ddb9c', girl: '/_blob/c4a9447bb173a635c890c9b0b4f7e6c2', adult: '/_blob/68e10496b58b3e5601fc371571a99c06',
+      dog: '/_blob/4e78c9a71df7bb2fce676cb1740fabc9', cat: '/_blob/a7009ec24244c014aa55cd5bcb2c09eb', bear: '/_blob/bbd62fce766aaab50ebd205a3e1e7e8b',
+      dragon: '/_blob/dbbb8d1a87d198120c811089e9d0ff1a', wizard: '/_blob/52da563468aca2fb96dd189630e284e7',
+    };
+    const chars = [['boy', 'Boy', 'human'], ['girl', 'Girl', 'human'], ['adult', 'Adult', 'human'], ['wizard', 'Wizard', 'human'],
+      ['bear', 'Bear', 'biped'], ['dragon', 'Dragon', 'biped'], ['dog', 'Dog', 'quad'], ['cat', 'Cat', 'quad']];
+    const characters = chars.map(([id, name, rig]) => ({
+      name, rig, src: U[id], bg: s.char === id ? '#2E3038' : 'transparent', fg: s.char === id ? '#FFFFFF' : '#C9CBD3',
+      pick: () => this.setState({ char: id }),
+    }));
+    const props = [['Campfire', '/_blob/3d03a75affe24ddbf4cacc73f4d391ec'], ['Tree', '/_blob/a9f2da738fd13b1f2848a507334f76ec'],
+      ['Tent', '/_blob/30f56b1033842ee33ac689ae341c8261'], ['Chest', '/_blob/9dcab96129d374b082d5a8a91372b896'], ['Signpost', '/_blob/dc35d803fa5f17ce83e87f61bcddcf1a']]
+      .map(([name, src]) => ({ name, src }));
+    const compatible = ['boy', 'girl', 'adult', 'wizard'].map((id) => ({ name: id, src: U[id] }));
+    const clipList = [['idle', 'Idle', '48f'], ['walk', 'Walk', '24f'], ['run', 'Run', '16f'], ['wave', 'Wave', '30f'], ['talk', 'Talk', '12f'], ['jump', 'Jump', '28f'], ['sit', 'Sit', '20f']];
+    const clips = clipList.map(([id, name, len]) => ({
+      name, len, on: s.clip === id, bg: s.clip === id ? '#F2B544' : '#26282F', fg: s.clip === id ? '#15161A' : '#ECEDF0',
+      sub: s.clip === id ? '#5A4A20' : '#8D909B', pick: () => this.setState({ clip: id }),
+    }));
+    const speeds = ['0.25×', '0.5×', '1×', '2×'].map((label) => ({
+      label, on: s.speed === label, bg: s.speed === label ? '#3A3D46' : 'transparent', fg: s.speed === label ? '#ECEDF0' : '#9EA1AC',
+      pick: () => this.setState({ speed: label }),
+    }));
+    const frames = [0, 4, 8, 12, 16, 20].map((f) => ({ left: (f / 23 * 100).toFixed(2) + '%', label: String(f) }));
+    const pos = (fs) => fs.map((f) => ({ left: (f / 23 * 100).toFixed(2) + '%' }));
+    const boneRows = [
+      ['root', [0, 12, 23]], ['torso', [0, 6, 12, 18, 23]], ['head', [0, 12, 23]], ['arm_l.upper', [0, 6, 12, 18, 23]],
+      ['arm_r.upper', [0, 6, 12, 18, 23]], ['leg_l.upper', [0, 3, 6, 12, 15, 18, 23]], ['leg_r.upper', [0, 3, 6, 9, 12, 18, 23]],
+    ].map(([name, keys]) => ({
+      name, keys: pos(keys), rowBg: name === 'arm_r.upper' ? '#26282F' : 'transparent',
+      fg: name === 'arm_r.upper' ? '#F2B544' : '#C9CBD3', key: name === 'arm_r.upper' ? '#F2B544' : '#9EA1AC',
+    }));
+    const slotNames = ['Hair', 'Skin', 'Shirt', 'Overalls', 'Socks', 'Shoes'];
+    const slots = slotNames.map((name, i) => ({
+      name, color: s.colors[i], on: s.slot === i, bg: s.slot === i ? '#26282F' : 'transparent', ring: s.slot === i ? '#F2B544' : 'transparent',
+      pick: () => this.setState({ slot: i }),
+    }));
+    const pal = ['#D9342B', '#F08A24', '#F7B92B', '#5FA53A', '#2F86C8', '#7E4FA3', '#EF7A85', '#F0A868', '#8B5A2B', '#5A3A22', '#FCE8C4', '#A8ADB2', '#34404D', '#1E6B4A'];
+    const cur = s.colors[s.slot];
+    const palette = pal.map((hex) => ({
+      hex, ring: hex === cur ? '0 0 0 2px #1C1D22, 0 0 0 4px #ECEDF0' : 'inset 0 0 0 1px rgba(255,255,255,0.12)',
+      pick: () => { const c = s.colors.slice(); c[s.slot] = hex; this.setState({ colors: c }); },
+    }));
+    const tree = [['root', 0], ['torso', 1], ['head', 2], ['arm_l.upper', 2], ['arm_l.lower', 3], ['arm_r.upper', 2], ['arm_r.lower', 3], ['hips', 1], ['leg_l.upper', 2], ['leg_r.upper', 2]]
+      .map(([name, d]) => ({ name, indent: 8 + d * 14 + 'px', bg: name === 'arm_r.upper' ? '#2E3038' : 'transparent', fg: name === 'arm_r.upper' ? '#F2B544' : '#C9CBD3' }));
+    const isLook = s.tab === 'look';
+    return {
+      characters, props, compatible, clips, speeds, frames, boneRows, slots, palette, tree,
+      playing: s.playing, paused: !s.playing, playLabel: s.playing ? 'Pause' : 'Play', togglePlay: () => this.setState({ playing: !s.playing }),
+      bones: s.bones, bonesBg: s.bones ? '#2E3038' : 'transparent', toggleBones: () => this.setState({ bones: !s.bones }),
+      onion: s.onion, onionBg: s.onion ? '#2E3038' : 'transparent', toggleOnion: () => this.setState({ onion: !s.onion }),
+      isLook, isRig: !isLook, tabLook: () => this.setState({ tab: 'look' }), tabRig: () => this.setState({ tab: 'rig' }),
+      lookFg: isLook ? '#ECEDF0' : '#9EA1AC', lookLine: isLook ? '#F2B544' : 'transparent',
+      rigFg: !isLook ? '#ECEDF0' : '#9EA1AC', rigLine: !isLook ? '#F2B544' : 'transparent',
+      glasses: s.glasses, glassesBg: s.glasses ? '#F2B544' : '#3A3D46', glassesKnob: s.glasses ? '18px' : '2px',
+      toggleGlasses: () => this.setState({ glasses: !s.glasses }),
+    };
+  }
+}
+</script>
+</body>
+</html>

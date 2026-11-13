@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<title>Toonhouse — editori</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 1194px; height: 834px; box-sizing: border-box; background: #141519; font-family: 'Inter', system-ui, -apple-system, sans-serif; color: #ECEDF0; display: flex; flex-direction: column; position: relative; overflow: hidden; font-size: 13px">
+
+  <header style="height: 48px; flex: none; box-sizing: border-box; display: flex; align-items: center; gap: 4px; padding: 0 8px; background: #1C1D22; border-bottom: 1px solid #2A2C34">
+    <a href="Main.dc.html" aria-label="Koti" title="Koti" style="width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #ECEDF0">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+    </a>
+    <div style="display: flex; align-items: baseline; gap: 10px; padding-left: 2px">
+      <div style="font-weight: 600; font-size: 15px; white-space: nowrap">Lohikäärmeen retki</div>
+      <div style="font-size: 12px; color: #9EA1AC">Tallennettu</div>
+    </div>
+    <div style="flex: 1"></div>
+    <button aria-label="Kumoa" title="Kumoa" style="width: 40px; height: 40px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center; color: #ECEDF0; cursor: pointer; padding: 0">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14L4 9l5-5"></path><path d="M4 9h11a5 5 0 0 1 0 10h-3"></path></svg>
+    </button>
+    <button aria-label="Tee uudelleen" title="Tee uudelleen" style="width: 40px; height: 40px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center; color: #6B6E79; cursor: pointer; padding: 0">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 14l5-5-5-5"></path><path d="M20 9H9a5 5 0 0 0 0 10h3"></path></svg>
+    </button>
+    <div style="width: 1px; height: 20px; background: #2F313A; margin: 0 6px"></div>
+    <a href="Player.dc.html" style="height: 32px; margin: 0 4px 0 6px; box-sizing: border-box; border-radius: 8px; background: #F2B544; display: flex; align-items: center; gap: 6px; padding: 0 14px 0 10px; color: #15161A; text-decoration: none; font-weight: 600; font-size: 13px">
+      <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z" fill="currentColor"></path></svg>
+      Katso
+    </a>
+  </header>
+
+  <div style="flex: 1; min-height: 0; display: flex; position: relative">
+
+    <nav aria-label="Kirjasto" style="width: 52px; flex: none; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 4px; padding-top: 8px; background: #1C1D22; border-right: 1px solid #2A2C34">
+      <button onClick="{{ toggleLib }}" aria-pressed="{{ libOpen }}" aria-label="Hahmot" title="Hahmot" style="width: 40px; height: 40px; border: 0; border-radius: 8px; background: {{ charsBg }}; display: flex; align-items: center; justify-content: center; color: {{ charsFg }}; cursor: pointer; padding: 0">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7" r="3.5"></circle><path d="M5 21v-2a7 7 0 0 1 14 0v2"></path></svg>
+      </button>
+      <button aria-label="Esineet" title="Esineet" style="width: 40px; height: 40px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center; color: #ECEDF0; cursor: pointer; padding: 0">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l6 8h-3l4 6H5l4-6H6z"></path><path d="M12 17v4"></path></svg>
+      </button>
+      <button aria-label="Taustat" title="Taustat" style="width: 40px; height: 40px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center; color: #ECEDF0; cursor: pointer; padding: 0">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 16l5-5 4 4 3-3 6 6"></path><circle cx="16" cy="9" r="1.5"></circle></svg>
+      </button>
+      <button aria-label="Puhekupla" title="Puhekupla" style="width: 40px; height: 40px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center; color: #ECEDF0; cursor: pointer; padding: 0">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H11l-5 4v-4H4z"></path></svg>
+      </button>
+      <button aria-label="Äänet" title="Äänet" style="width: 40px; height: 40px; border: 0; border-radius: 8px; background: transparent; display: flex; align-items: center; justify-content: center; color: #ECEDF0; cursor: pointer; padding: 0">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l10-2v13"></path><circle cx="6.5" cy="18" r="2.5"></circle><circle cx="16.5" cy="16" r="2.5"></circle></svg>
+      </button>
+    </nav>
+
+    <div style="flex: 1; display: flex; align-items: center; justify-content: center">
+      <div style="width: 1077px; height: 606px; position: relative; border-radius: 8px; overflow: hidden; background: #BFE6FF; box-shadow: 0 0 0 1px #2A2C34, 0 12px 32px rgba(0,0,0,0.35)">
+        <svg width="100%" height="100%" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" style="position: absolute; inset: 0; display: block">
+          <rect width="1600" height="900" fill="#BFE6FF"></rect>
+          <circle cx="1400" cy="140" r="66" fill="#FFC531" stroke="#23262F" stroke-width="7"></circle>
+          <path d="M240 220 a45 45 0 0 1 80 -32 a62 62 0 0 1 112 8 a42 42 0 0 1 24 80 h-200 a36 36 0 0 1 -16 -56z" fill="#FFFFFF" stroke="#23262F" stroke-width="7"></path>
+          <path d="M860 150 a34 34 0 0 1 62 -22 a48 48 0 0 1 86 8 a32 32 0 0 1 16 60 h-150 a28 28 0 0 1 -14 -46z" fill="#FFFFFF" stroke="#23262F" stroke-width="7"></path>
+          <path d="M-20 520 Q 250 380 520 480 T 1050 450 T 1620 470 V920 H-20z" fill="#8CCB5E" stroke="#23262F" stroke-width="7"></path>
+          <path d="M-20 600 Q 400 555 800 590 T 1620 580 V920 H-20z" fill="#63B03E" stroke="#23262F" stroke-width="7"></path>
+          <path d="M560 920 Q 720 740 1000 650 Q 1160 610 1320 616 L1350 646 Q 1120 668 1000 730 Q 840 810 800 920z" fill="#E9C27D" stroke="#23262F" stroke-width="7"></path>
+        </svg>
+
+        <img src="/_blob/a9f2da738fd13b1f2848a507334f76ec" alt="Puu" style="position: absolute; left: 3%; bottom: 31%; height: 46%">
+        <img src="/_blob/30f56b1033842ee33ac689ae341c8261" alt="Teltta" style="position: absolute; left: 60%; bottom: 28%; height: 26%">
+        <img src="/_blob/3c7242eb905475b804a10b5b4557ef37" alt="Pensas" style="position: absolute; left: 90%; bottom: 31%; height: 15%">
+        <img src="/_blob/3d03a75affe24ddbf4cacc73f4d391ec" alt="Nuotio" style="position: absolute; left: 47%; bottom: 18%; height: 18%">
+        <img src="/_blob/c4a9447bb173a635c890c9b0b4f7e6c2" alt="Tyttö" style="position: absolute; left: 24%; bottom: 10%; height: 52%">
+        <img src="/_blob/dbbb8d1a87d198120c811089e9d0ff1a" alt="Lohikäärme" style="position: absolute; left: 78%; bottom: 8%; height: 42%; transform: scaleX(-1)">
+
+        <div style="position: absolute; left: 70.3%; top: 30%; width: 236px; box-sizing: border-box; padding: 12px 16px; background: #FFFFFF; border: 3px solid #23262F; border-radius: 22px; font-weight: 700; font-size: 19px; line-height: 1.25; text-align: center; color: #23262F">
+          Mennään retkelle!
+          <svg width="26" height="22" viewBox="0 0 26 22" aria-hidden="true" style="position: absolute; right: 52px; bottom: -19px; display: block"><path d="M2 0 L22 20 L16 0" fill="#FFFFFF" stroke="#23262F" stroke-width="3" stroke-linejoin="round"></path><path d="M1 0 h18" stroke="#FFFFFF" stroke-width="4"></path></svg>
+        </div>
+
+        <sc-if value="{{ showSelection }}" hint-placeholder-val="{{ true }}">
+          <sc-if value="{{ isWalk }}" hint-placeholder-val="{{ true }}">
+            <svg width="100%" height="100%" viewBox="0 0 853 480" preserveAspectRatio="none" aria-hidden="true" style="position: absolute; left: 0; top: 0; display: block">
+              <path d="M268 438 C 330 476, 430 474, 518 452" fill="none" stroke="#F2B544" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="6 6"></path>
+            </svg>
+            <div style="position: absolute; left: 58.4%; top: 89.6%; width: 16px; height: 16px; margin: -8px 0 0 -8px; box-sizing: border-box; border-radius: 50%; border: 2px solid #FFFFFF; background: #F2B544; box-shadow: 0 0 0 6px rgba(242,181,68,0.3)"></div>
+            <div style="position: absolute; left: 54%; top: 80.5%; box-sizing: border-box; padding: 5px 9px; background: rgba(20,21,25,0.85); color: #ECEDF0; border-radius: 6px; font-weight: 500; font-size: 12px; white-space: nowrap">Vedä reitti sormella</div>
+          </sc-if>
+
+          <div style="position: absolute; left: 22.9%; top: 35.8%; width: 17%; height: 56.3%; box-sizing: border-box; border: 1.5px solid #F2B544; border-radius: 4px">
+            <div style="position: absolute; left: -6px; top: -6px; width: 10px; height: 10px; background: #FFFFFF; border: 1.5px solid #F2B544; border-radius: 2px"></div>
+            <div style="position: absolute; right: -6px; top: -6px; width: 10px; height: 10px; background: #FFFFFF; border: 1.5px solid #F2B544; border-radius: 2px"></div>
+            <div style="position: absolute; left: -6px; bottom: -6px; width: 10px; height: 10px; background: #FFFFFF; border: 1.5px solid #F2B544; border-radius: 2px"></div>
+            <div style="position: absolute; right: -6px; bottom: -6px; width: 10px; height: 10px; background: #FFFFFF; border: 1.5px solid #F2B544; border-radius: 2px"></div>
+          </div>
+
+          <div role="toolbar" aria-label="Toiminnot" style="position: absolute; left: 14.8%; top: 26%; box-sizing: border-box; padding: 4px; display: flex; align-items: center; gap: 2px; background: #1C1D22; border-radius: 10px; box-shadow: 0 0 0 1px #2F313A, 0 8px 24px rgba(0,0,0,0.35)">
+            <button onClick="{{ pickWalk }}" aria-pressed="{{ isWalk }}" aria-label="Kävele" title="Kävele" style="width: 40px; height: 40px; border: 0; border-radius: 7px; background: {{ bgWalk }}; display: flex; align-items: center; justify-content: center; color: {{ fgWalk }}; cursor: pointer; padding: 0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13" cy="4" r="2"></circle><path d="M7 21l3-6 3 2v4"></path><path d="M10 15l1.5-6 4 3 3 1"></path><path d="M11.5 9L8 10.5 6.5 13"></path></svg>
+            </button>
+            <button onClick="{{ pickWave }}" aria-label="Vilkuta" title="Vilkuta" style="width: 40px; height: 40px; border: 0; border-radius: 7px; background: {{ bgWave }}; display: flex; align-items: center; justify-content: center; color: {{ fgWave }}; cursor: pointer; padding: 0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 13V6.5a1.5 1.5 0 0 1 3 0V11"></path><path d="M11 10.5V4.5a1.5 1.5 0 0 1 3 0V11"></path><path d="M14 11V6a1.5 1.5 0 0 1 3 0v6"></path><path d="M17 10a1.5 1.5 0 0 1 3 0v4a7 7 0 0 1-7 7h-1a6 6 0 0 1-5-3l-2.5-4.5a1.5 1.5 0 0 1 2.6-1.5L8 14"></path></svg>
+            </button>
+            <button onClick="{{ pickJump }}" aria-label="Hyppää" title="Hyppää" style="width: 40px; height: 40px; border: 0; border-radius: 7px; background: {{ bgJump }}; display: flex; align-items: center; justify-content: center; color: {{ fgJump }}; cursor: pointer; padding: 0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17V4"></path><path d="M7 9l5-5 5 5"></path><path d="M4 21h16"></path></svg>
+            </button>
+            <button onClick="{{ pickTalk }}" aria-label="Puhu" title="Puhu" style="width: 40px; height: 40px; border: 0; border-radius: 7px; background: {{ bgTalk }}; display: flex; align-items: center; justify-content: center; color: {{ fgTalk }}; cursor: pointer; padding: 0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H11l-5 4v-4H4z"></path></svg>
+            </button>
+            <button onClick="{{ pickStand }}" aria-label="Seiso" title="Seiso" style="width: 40px; height: 40px; border: 0; border-radius: 7px; background: {{ bgStand }}; display: flex; align-items: center; justify-content: center; color: {{ fgStand }}; cursor: pointer; padding: 0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="4" r="2"></circle><path d="M12 7v7"></path><path d="M8 9.5h8"></path><path d="M12 14l-3 7M12 14l3 7"></path></svg>
+            </button>
+            <div style="width: 1px; height: 22px; background: #2F313A; margin: 0 4px"></div>
+            <button aria-label="Käännä" title="Käännä" style="width: 40px; height: 40px; border: 0; border-radius: 7px; background: transparent; display: flex; align-items: center; justify-content: center; color: #ECEDF0; cursor: pointer; padding: 0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18"></path><path d="M8 7L3 17h5z"></path><path d="M16 7l5 10h-5z"></path></svg>
+            </button>
+            <button aria-label="Tuo eteen" title="Tuo eteen" style="width: 40px; height: 40px; border: 0; border-radius: 7px; background: transparent; display: flex; align-items: center; justify-content: center; color: #ECEDF0; cursor: pointer; padding: 0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5z"></path><path d="M3 13l9 5 9-5"></path></svg>
+            </button>
+            <button aria-label="Poista" title="Poista" style="width: 40px; height: 40px; border: 0; border-radius: 7px; background: transparent; display: flex; align-items: center; justify-content: center; color: #F0857A; cursor: pointer; padding: 0">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"></path><path d="M9 7V4h6v3"></path><path d="M6 7l1 13h10l1-13"></path></svg>
+            </button>
+          </div>
+          <div role="tooltip" style="position: absolute; left: calc(14.8% + 24px); top: calc(26% - 32px); transform: translateX(-50%); padding: 4px 8px; background: #ECEDF0; color: #15161A; border-radius: 6px; font-weight: 600; font-size: 12px; white-space: nowrap">{{ actionName }}</div>
+        </sc-if>
+      </div>
+    </div>
+
+    <sc-if value="{{ libOpen }}" hint-placeholder-val="{{ false }}">
+      <section aria-label="Kirjasto" style="position: absolute; left: 60px; top: 8px; width: 316px; box-sizing: border-box; padding: 12px; background: #1C1D22; border-radius: 12px; box-shadow: 0 0 0 1px #2F313A, 0 16px 40px rgba(0,0,0,0.45); display: flex; flex-direction: column; gap: 12px; z-index: 5">
+        <div style="display: flex; align-items: center; gap: 8px">
+          <h2 style="margin: 0; flex: 1; font-weight: 600; font-size: 15px">Hahmot</h2>
+          <button onClick="{{ closeLib }}" aria-label="Sulje" title="Sulje" style="width: 32px; height: 32px; border: 0; border-radius: 7px; background: transparent; display: flex; align-items: center; justify-content: center; color: #9EA1AC; cursor: pointer; padding: 0">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+          </button>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+          <sc-for list="{{ library }}" as="item" hint-placeholder-count="8">
+            <button title="{{ item.label }}" style="height: 104px; box-sizing: border-box; border: 0; border-radius: 8px; background: #26282F; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 6px; padding: 8px 4px 7px; color: #C9CBD3; font: inherit; font-weight: 500; font-size: 12px; cursor: grab">
+              <img src="{{ item.src }}" alt="" style="height: 68px; max-width: 100%; object-fit: contain">
+              {{ item.label }}
+            </button>
+          </sc-for>
+        </div>
+        <p style="margin: 0; font-size: 12px; color: #9EA1AC">Vedä näyttämölle tai napauta lisätäksesi</p>
+      </section>
+    </sc-if>
+  </div>
+
+  <section aria-label="Aikajana" style="height: 168px; flex: none; box-sizing: border-box; background: #1C1D22; border-top: 1px solid #2A2C34; display: flex; flex-direction: column">
+
+    <div style="height: 40px; flex: none; display: flex; align-items: center; gap: 2px; padding: 0 8px">
+      <button aria-label="Kuva taaksepäin" title="Kuva taaksepäin" style="width: 36px; height: 36px; border: 0; border-radius: 7px; background: transparent; display: flex; align-items: center; justify-content: center; color: #ECEDF0; cursor: pointer; padding: 0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 5v14"></path><path d="M19 5l-10 7 10 7z"></path></svg>
+      </button>
+      <button aria-label="Toista tästä" title="Toista tästä" style="width: 36px; height: 36px; border: 0; border-radius: 7px; background: transparent; display: flex; align-items: center; justify-content: center; color: #ECEDF0; cursor: pointer; padding: 0">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z" fill="currentColor"></path></svg>
+      </button>
+      <button aria-label="Kuva eteenpäin" title="Kuva eteenpäin" style="width: 36px; height: 36px; border: 0; border-radius: 7px; background: transparent; display: flex; align-items: center; justify-content: center; color: #ECEDF0; cursor: pointer; padding: 0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 5v14"></path><path d="M5 5l10 7-10 7z"></path></svg>
+      </button>
+      <div style="margin-left: 8px; font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap"><span style="font-weight: 600">0:04.2</span><span style="color: #9EA1AC"> / 0:10.0</span></div>
+      <div style="flex: 1"></div>
+      <button aria-label="Loitonna" title="Loitonna" style="width: 36px; height: 36px; border: 0; border-radius: 7px; background: transparent; display: flex; align-items: center; justify-content: center; color: #9EA1AC; cursor: pointer; padding: 0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"></path></svg>
+      </button>
+      <div style="width: 80px; height: 4px; border-radius: 2px; background: #2F313A; position: relative">
+        <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 45%; border-radius: 2px; background: #6B6E79"></div>
+        <div style="position: absolute; left: 45%; top: 50%; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: #ECEDF0"></div>
+      </div>
+      <button aria-label="Lähennä" title="Lähennä" style="width: 36px; height: 36px; border: 0; border-radius: 7px; background: transparent; display: flex; align-items: center; justify-content: center; color: #9EA1AC; cursor: pointer; padding: 0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+      </button>
+    </div>
+
+    <div style="position: relative; flex: 1; display: flex; flex-direction: column; gap: 3px; padding: 0 12px 10px 0">
+      <div style="height: 18px; flex: none; margin-left: 132px; position: relative; font-size: 11px; color: #8D909B; font-variant-numeric: tabular-nums">
+        <sc-for list="{{ ticks }}" as="t" hint-placeholder-count="11">
+          <span style="position: absolute; left: {{ t.left }}; top: 0; height: 18px; border-left: 1px solid #34363F; padding-left: 4px; line-height: 14px">{{ t.label }}</span>
+        </sc-for>
+      </div>
+
+      <div style="display: flex; height: 28px; align-items: center; background: #24262D">
+        <div style="width: 132px; flex: none; box-sizing: border-box; display: flex; align-items: center; gap: 8px; padding-left: 12px">
+          <span style="width: 22px; height: 22px; flex: none; border-radius: 50%; background: #34363F; overflow: hidden; display: block"><img src="/_blob/c4a9447bb173a635c890c9b0b4f7e6c2" alt="" style="width: 100%; display: block"></span>
+          <span style="font-weight: 600; font-size: 12px">Tyttö</span>
+        </div>
+        <div style="flex: 1; height: 24px; position: relative">
+          <div style="position: absolute; left: 0%; width: calc(20% - 2px); top: 0; bottom: 0; border-radius: 5px; background: #4A4D57; color: #ECEDF0; display: flex; align-items: center; padding: 0 8px; box-sizing: border-box; font-weight: 500; font-size: 12px; overflow: hidden; white-space: nowrap">Seiso</div>
+          <div style="position: absolute; left: 20%; width: calc(22% - 2px); top: 0; bottom: 0; border-radius: 5px; background: #E6C36E; color: #15161A; display: flex; align-items: center; padding: 0 8px; box-sizing: border-box; font-weight: 500; font-size: 12px; overflow: hidden; white-space: nowrap">Vilkuta</div>
+          <div style="position: absolute; left: 42%; right: 0; top: 0; bottom: 0; border-radius: 5px; background: #8DB4F0; color: #15161A; box-shadow: inset 0 0 0 1.5px #FFFFFF; display: flex; align-items: center; padding: 0 8px; box-sizing: border-box; font-weight: 600; font-size: 12px; overflow: hidden; white-space: nowrap">Kävele</div>
+        </div>
+      </div>
+
+      <div style="display: flex; height: 28px; align-items: center">
+        <div style="width: 132px; flex: none; box-sizing: border-box; display: flex; align-items: center; gap: 8px; padding-left: 12px">
+          <span style="width: 22px; height: 22px; flex: none; border-radius: 50%; background: #34363F; overflow: hidden; display: block"><img src="/_blob/dbbb8d1a87d198120c811089e9d0ff1a" alt="" style="width: 100%; display: block; transform: scaleX(-1)"></span>
+          <span style="font-weight: 600; font-size: 12px">Lohikäärme</span>
+        </div>
+        <div style="flex: 1; height: 24px; position: relative">
+          <div style="position: absolute; left: 0%; width: calc(15% - 2px); top: 0; bottom: 0; border-radius: 5px; background: #4A4D57; color: #ECEDF0; display: flex; align-items: center; padding: 0 8px; box-sizing: border-box; font-weight: 500; font-size: 12px; overflow: hidden; white-space: nowrap">Seiso</div>
+          <div style="position: absolute; left: 15%; width: calc(40% - 2px); top: 0; bottom: 0; border-radius: 5px; background: #E7A1B3; color: #15161A; display: flex; align-items: center; padding: 0 8px; box-sizing: border-box; font-weight: 500; font-size: 12px; overflow: hidden; white-space: nowrap">Puhu · ”Mennään retkelle!”</div>
+          <div style="position: absolute; left: 55%; width: calc(15% - 2px); top: 0; bottom: 0; border-radius: 5px; background: #9CCB8B; color: #15161A; display: flex; align-items: center; padding: 0 8px; box-sizing: border-box; font-weight: 500; font-size: 12px; overflow: hidden; white-space: nowrap">Hyppää</div>
+          <div style="position: absolute; left: 70%; right: 0; top: 0; bottom: 0; border-radius: 5px; background: #4A4D57; color: #ECEDF0; display: flex; align-items: center; padding: 0 8px; box-sizing: border-box; font-weight: 500; font-size: 12px; overflow: hidden; white-space: nowrap">Seiso</div>
+        </div>
+      </div>
+
+      <div style="display: flex; height: 28px; align-items: center">
+        <div style="width: 132px; flex: none; box-sizing: border-box; display: flex; align-items: center; gap: 8px; padding-left: 12px; color: #9EA1AC">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin: 0 2px"><path d="M9 18V5l10-2v13"></path><circle cx="6.5" cy="18" r="2.5"></circle><circle cx="16.5" cy="16" r="2.5"></circle></svg>
+          <span style="font-weight: 600; font-size: 12px; color: #ECEDF0">Äänet</span>
+        </div>
+        <div style="flex: 1; height: 24px; position: relative">
+          <div style="position: absolute; left: 0%; width: calc(60% - 2px); top: 0; bottom: 0; border-radius: 5px; background: #3A3428; color: #E9D2A6; display: flex; align-items: center; padding: 0 8px; box-sizing: border-box; font-weight: 500; font-size: 12px; overflow: hidden; white-space: nowrap">Linnunlaulu</div>
+          <div style="position: absolute; left: 55%; width: 6%; top: 0; bottom: 0; border-radius: 5px; background: #6E5A33; color: #F4E3C1; display: flex; align-items: center; padding: 0 8px; box-sizing: border-box; font-weight: 500; font-size: 12px; overflow: hidden; white-space: nowrap">Hyppy</div>
+        </div>
+      </div>
+
+      <div aria-hidden="true" style="position: absolute; top: 0; bottom: 10px; left: calc(132px + 0.42 * (100% - 144px)); width: 0">
+        <div style="position: absolute; left: -1px; top: 0; bottom: 0; width: 2px; background: #F2B544"></div>
+        <div style="position: absolute; left: -6px; top: 0; width: 12px; height: 12px; background: #F2B544; border-radius: 2px 2px 6px 6px"></div>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"libraryOpen":{"editor":"boolean","default":false},"$preview":{"width":1194,"height":834}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { action: 'walk', lib: null };
+  }
+  renderVals() {
+    const libOpen = this.state.lib === null ? !!this.props.libraryOpen : this.state.lib;
+    const a = this.state.action;
+    const names = { walk: ['Walk', 'Kävele'], wave: ['Wave', 'Vilkuta'], jump: ['Jump', 'Hyppää'], talk: ['Talk', 'Puhu'], stand: ['Stand', 'Seiso'] };
+    const v = {};
+    Object.keys(names).forEach((k) => {
+      const n = names[k][0];
+      v['bg' + n] = a === k ? '#F2B544' : 'transparent';
+      v['fg' + n] = a === k ? '#15161A' : '#ECEDF0';
+      v['pick' + n] = () => this.setState({ action: k });
+    });
+    const lib = [
+      ['Poika', '/_blob/2f23f7b6c56616cdafbe2829609ddb9c'],
+      ['Tyttö', '/_blob/c4a9447bb173a635c890c9b0b4f7e6c2'],
+      ['Aikuinen', '/_blob/68e10496b58b3e5601fc371571a99c06'],
+      ['Koira', '/_blob/4e78c9a71df7bb2fce676cb1740fabc9'],
+      ['Kissa', '/_blob/a7009ec24244c014aa55cd5bcb2c09eb'],
+      ['Karhu', '/_blob/bbd62fce766aaab50ebd205a3e1e7e8b'],
+      ['Lohikäärme', '/_blob/dbbb8d1a87d198120c811089e9d0ff1a'],
+      ['Velho', '/_blob/52da563468aca2fb96dd189630e284e7'],
+    ].map(([label, src]) => ({ label, src }));
+    const ticks = [];
+    for (let s = 0; s < 10; s++) ticks.push({ left: s * 10 + '%', label: '0:' + String(s).padStart(2, '0') });
+    return {
+      ...v,
+      isWalk: a === 'walk',
+      actionName: names[a][1],
+      libOpen,
+      showSelection: !libOpen,
+      charsBg: libOpen ? '#F2B544' : 'transparent',
+      charsFg: libOpen ? '#15161A' : '#ECEDF0',
+      toggleLib: () => this.setState({ lib: !libOpen }),
+      closeLib: () => this.setState({ lib: false }),
+      library: lib,
+      ticks,
+    };
+  }
+}
+</script>
+</body>
+</html>
