@@ -79,16 +79,19 @@ function hose(parent: Element, rig: RigData, width: number, color: string) {
   };
 }
 
-/** A short sleeve over the top of an arm, drawn along the same curve. */
+/**
+ * A short sleeve over the top of an arm, drawn along the same curve. Round
+ * caps give it a rounded shoulder and cuff.
+ */
 function sleeve(parent: Element, rig: RigData, width: number) {
-  const common = { fill: 'none', 'stroke-linecap': 'butt', pathLength: 1 };
+  const common = { fill: 'none', 'stroke-linecap': 'round', pathLength: 1 };
   const outline = el(
     'path',
     {
       ...common,
       stroke: rig.outline,
       'stroke-width': width + 2 * rig.outlineWidth + 8,
-      'stroke-dasharray': '0.3 2',
+      'stroke-dasharray': '0.2 2',
     },
     parent,
   );
@@ -98,23 +101,13 @@ function sleeve(parent: Element, rig: RigData, width: number) {
       ...common,
       stroke: '#e80000',
       'stroke-width': width + 8,
-      'stroke-dasharray': '0.27 2',
-    },
-    parent,
-  );
-  const stripe = el(
-    'path',
-    {
-      ...common,
-      stroke: '#060100',
-      'stroke-width': width + 8,
-      'stroke-dasharray': '0 0.1 0.08 2',
+      'stroke-dasharray': '0.2 2',
     },
     parent,
   );
   return (a: Pt, c: Pt, b: Pt) => {
     const d = `M${a.x} ${a.y}Q${c.x} ${c.y} ${b.x} ${b.y}`;
-    for (const p of [outline, red, stripe]) p.setAttribute('d', d);
+    for (const p of [outline, red]) p.setAttribute('d', d);
   };
 }
 
