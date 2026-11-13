@@ -1,7 +1,8 @@
 # Architecture
 
 Toonhouse is a TypeScript monorepo with pnpm workspaces. This page describes the
-planned structure. Most of it does not exist yet.
+planned structure. So far, the character studio and the packages it uses exist.
+The web app, the server and the export client don't.
 
 The requirements are in [specs/](specs/README.md), and the UI design is in
 [design/](design/CLAUDE.md).
@@ -51,11 +52,26 @@ All graphics are SVG, so they stay sharp at any size.
 
 - A **rig** is a character: a tree of bones joined at pivot points, with an SVG
   part on each bone. A prop is a rig with one bone.
-- A **clip** is a short animation, such as a walk cycle. It has keyframes for
-  the rotation and the offset of each bone. A clip works on any rig that has the
-  same bones.
+- A **clip** is a short animation, such as a walk cycle. A clip works on any rig
+  that has the same bones.
 - A **scene** has a background and actors. Each actor uses a rig and has a list
   of actions on the timeline.
+
+### Cutout characters and code clips
+
+The first characters are cutouts, as in the 2D motion prototype in
+`prototypes/`. Traced pieces make the head, the torso, the hands and the feet.
+The renderer draws the arms and the legs between them as rubber hoses, which
+bend to reach the hands and the feet. Each character has a folder in
+`assets/characters/` with a `rig.json` and its SVG pieces.
+
+For now, the clips are TypeScript code in `packages/renderer`: each clip is a
+function from the time `t` to a pose and a face. This kept the motion of the
+prototype, where the walk ties the steps to the distance walked so that the feet
+don't slide. Clips with keyframes, stored as JSON and edited in the studio, may
+come later as a second kind of clip.
+
+### Files
 
 The graphics are generated with AI and traced to SVG, as described in
 [assets/CLAUDE.md](assets/CLAUDE.md). Rigs and clips are JSON files. The

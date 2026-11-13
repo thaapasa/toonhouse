@@ -33,6 +33,12 @@ The character is a few traced pieces with the arms and legs drawn in code:
 Only the side view exists. A character that turns towards the camera needs
 another set of pieces for each view.
 
+The app uses a copy of the boy in `characters/boy/`. Its `rig.json` has the
+pivots of the prototype rig, and also the values that the prototype had in code:
+the face coordinates, the colors and the sleeve. The steps below still work in
+`prototypes/`. When the character is done, add it to the app as described in
+"Adding the character to the app" at the end.
+
 ## Steps
 
 Run the commands from the repo root unless the step says `prototypes/`. Keep the
@@ -296,3 +302,16 @@ files.
 - The sleeve is a plain tube drawn in code, without the pattern of the shirt.
 - The open hand faces the viewer while the body is in profile, so the wrist
   looks a little odd in the wave.
+
+## Adding the character to the app
+
+1. Make a folder `assets/characters/<name>/` and copy the SVG pieces, the mouth
+   patch and the `.prompt.json` of the parts sheet there.
+2. Write `rig.json` in the same shape as the boy's. The type `CutoutRig` in
+   `packages/model` describes each field. Take the pivots from the rig that
+   `build-rig-2d.ts` wrote, and the face coordinates from step 5.
+3. Add the name of the character in Finnish and English to the studio
+   translations, under `character.<name>`.
+
+The studio finds the folder by itself. Start it with `pnpm studio` and play each
+clip on the new character.

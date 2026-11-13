@@ -8,7 +8,8 @@ talking, and play the result as a movie. It is inspired by Cartooners
 The app is made for touch screens and iPads first. The UI is in Finnish and
 English.
 
-The project is at the planning stage. There is no app code yet.
+The project is at an early stage. The character studio, a development tool that
+plays the clips of a character, is the first part that runs.
 
 ## Art style
 
@@ -38,6 +39,7 @@ pnpm format        # format all files, including Markdown
 pnpm typecheck
 pnpm test
 pnpm build
+pnpm studio        # the character studio on http://localhost:10711
 ```
 
 ### Ports
