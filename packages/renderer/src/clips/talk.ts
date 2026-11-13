@@ -1,4 +1,4 @@
-import type { Clip } from '@toonhouse/model';
+import type { Clip, CutoutFrame } from '@toonhouse/model';
 
 import { blinkAt, talking } from '../face.ts';
 import { clamp01, deg, smoothstep } from '../math.ts';
@@ -13,8 +13,9 @@ const TALK_END = 2.7;
  * Talking while standing. The head nods along and the near hand makes a small
  * gesture.
  */
-export const talk: Clip = {
+export const talk: Clip<CutoutFrame> = {
   id: 'talk',
+  kind: 'cutout',
   duration: DURATION,
   loops: true,
   frameAt(t) {
@@ -33,6 +34,7 @@ export const talk: Clip = {
       smoothstep(TALK_START, TALK_START + 0.08, t) *
       (1 - smoothstep(TALK_END - 0.08, TALK_END, t));
     return {
+      kind: 'cutout',
       pose,
       face: {
         grin: false,

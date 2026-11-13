@@ -36,14 +36,26 @@ export function AssetList({ characters, selected, onSelect }: Props) {
   );
 }
 
+/** The thumbnail shows the head: a square of this size around a point above the neck. */
+const THUMB_SIZE = 460;
+const THUMB_ABOVE_NECK = 120;
+
 function Thumbnail({ character }: { character: Character }) {
   const prefix = `thumb-${character.id}`;
-  const { node } = drawCharacter(character.rig, clipById('idle').frameAt(0), {
-    facing: 1,
-  });
+  const { node, skeleton } = drawCharacter(
+    character.rig,
+    clipById(character.rig.kind, 'idle').frameAt(0),
+    { facing: 1 },
+  );
+  const neck = skeleton.joints.find((j) => j.name === 'neck')?.at ?? {
+    x: 0,
+    y: -THUMB_SIZE,
+  };
+  const half = THUMB_SIZE / 2;
+  const viewBox = `${-half} ${neck.y - THUMB_ABOVE_NECK - half} ${THUMB_SIZE} ${THUMB_SIZE}`;
   return (
     <span className="thumb">
-      <svg viewBox="-230 -880 460 460" aria-hidden="true">
+      <svg viewBox={viewBox} aria-hidden="true">
         <PartSymbols prefix={prefix} sources={character.parts} />
         <Drawing node={node} prefix={prefix} />
       </svg>

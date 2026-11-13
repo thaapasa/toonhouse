@@ -1,4 +1,4 @@
-import type { Matrix, RigPartId } from '@toonhouse/model';
+import type { Matrix, PartId } from '@toonhouse/model';
 import type { ClipShape, DrawNode } from '@toonhouse/renderer';
 import type { ReactNode } from 'react';
 
@@ -8,7 +8,7 @@ const matrix = (m: Matrix | undefined) =>
     : undefined;
 
 /** The id of the `<symbol>` of a rig part, made by `PartSymbols`. */
-export const partId = (prefix: string, part: RigPartId) => `${prefix}-${part}`;
+export const partId = (prefix: string, part: PartId) => `${prefix}-${part}`;
 
 function clipShape(shape: ClipShape) {
   return shape.type === 'ellipse' ? (

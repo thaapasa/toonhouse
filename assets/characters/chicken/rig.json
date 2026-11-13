@@ -1,0 +1,131 @@
+{
+  "kind": "bird",
+  "parts": {
+    "head": {
+      "svg": "head.svg",
+      "width": 243,
+      "height": 372,
+      "pivot": {
+        "x": 100,
+        "y": 300
+      }
+    },
+    "body": {
+      "svg": "body.svg",
+      "width": 247,
+      "height": 248,
+      "pivot": {
+        "x": 150,
+        "y": 210
+      }
+    },
+    "wing": {
+      "svg": "wing.svg",
+      "width": 184,
+      "height": 197,
+      "pivot": {
+        "x": 125,
+        "y": 30
+      }
+    },
+    "wingOpen": {
+      "svg": "wing-open.svg",
+      "width": 193,
+      "height": 223,
+      "pivot": {
+        "x": 140,
+        "y": 190
+      }
+    },
+    "foot": {
+      "svg": "foot.svg",
+      "width": 257,
+      "height": 126,
+      "pivot": {
+        "x": 60,
+        "y": 35
+      }
+    }
+  },
+  "body": {
+    "neck": {
+      "x": 172,
+      "y": 45
+    },
+    "shoulderNear": {
+      "x": 165,
+      "y": 100
+    },
+    "shoulderFar": {
+      "x": 150,
+      "y": 96
+    },
+    "hipNear": {
+      "x": 162,
+      "y": 210
+    },
+    "hipFar": {
+      "x": 138,
+      "y": 210
+    }
+  },
+  "scales": {
+    "head": 0.6,
+    "wing": 0.75,
+    "wingOpen": 1.05,
+    "foot": 0.45
+  },
+  "wings": {
+    "foldedAngle": 0,
+    "openAngle": 0
+  },
+  "neck": {
+    "width": 70
+  },
+  "ankleHeight": 75,
+  "legs": {
+    "thighLength": 55,
+    "shankLength": 55,
+    "thighWidth": 26,
+    "shankWidth": 11
+  },
+  "outlineWidth": 5,
+  "colors": {
+    "outline": "#4f382e",
+    "feathers": "#fbf9f4",
+    "leg": "#fbaf00",
+    "line": "#4f382e",
+    "beak": "#f9af01",
+    "mouth": "#7a1f1a"
+  },
+  "farShade": 0.82,
+  "shadow": {
+    "rx": 110,
+    "ry": 16
+  },
+  "face": {
+    "eye": {
+      "cx": 144,
+      "cy": 147,
+      "rx": 21,
+      "ry": 26
+    },
+    "shutY": 152,
+    "beak": {
+      "hinge": {
+        "x": 164,
+        "y": 197
+      },
+      "control": {
+        "x": 200,
+        "y": 186
+      },
+      "end": {
+        "x": 230,
+        "y": 195
+      },
+      "lower": "M164 197Q200 186 230 195Q220 206 200 210Q180 213 166 210Z",
+      "openAngle": 34
+    }
+  }
+}

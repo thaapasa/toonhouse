@@ -1,4 +1,4 @@
-import type { Clip, Pt } from '@toonhouse/model';
+import type { Clip, CutoutFrame, Pt } from '@toonhouse/model';
 
 import { blinkAt } from '../face.ts';
 import { deg } from '../math.ts';
@@ -27,8 +27,9 @@ const BLINKS = [0.9, 2.1];
  * A walk in place. The body stays at the origin, and `travel` says how far it
  * would have moved, so that the ground can move under the feet instead.
  */
-export const walk: Clip = {
+export const walk: Clip<CutoutFrame> = {
   id: 'walk',
+  kind: 'cutout',
   duration: CYCLE * CYCLES,
   loops: true,
   frameAt(t) {
@@ -51,6 +52,7 @@ export const walk: Clip = {
     const swing = deg(34);
     const armPhase = 2 * Math.PI * (q - 0.06);
     return {
+      kind: 'cutout',
       pose: {
         hip,
         torsoAngle,

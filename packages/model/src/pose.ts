@@ -34,10 +34,44 @@ export interface Face {
   blink: number;
 }
 
-/** What a clip gives for one moment. */
-export interface ClipFrame {
-  pose: Pose;
-  face: Face;
+/**
+ * The body of a bird at one moment, in sheet pixels, y down. The origin is the
+ * ground point under the bird, and the bird faces +x.
+ */
+export interface BirdPose {
+  /** The pivot of the body, between the hips. */
+  hip: Pt;
+  bodyAngle: number;
+  /**
+   * The base of the head against the neck point on the body, along the body.
+   * A bird moves its head forward and back, so this is a point and not only
+   * an angle.
+   */
+  head: Pt;
+  /** Rotation of the head against the body. */
+  headAngle: number;
+  /** Rotation of each wing against the body. */
+  wingNearAngle: number;
+  wingFarAngle: number;
+  /** 0 is a folded wing, 1 an open one. */
+  wingNearOpen: number;
+  wingFarOpen: number;
+  /** Ankles relative to the origin. */
+  footNear: Pt;
+  footFar: Pt;
+  footNearAngle: number;
+  footFarAngle: number;
+}
+
+/** The expression of a bird at one moment. */
+export interface BirdFace {
+  /** 0 is a closed beak, 1 a wide open one. */
+  open: number;
+  /** 0 is an open eye, 1 a closed one. */
+  blink: number;
+}
+
+interface FrameBase {
   /**
    * How far the character has moved forward since the start of the clip, in
    * sheet pixels. A walk in place uses this to move the ground under the feet.
@@ -45,13 +79,33 @@ export interface ClipFrame {
   travel: number;
 }
 
-export type ClipId = 'idle' | 'walk' | 'wave' | 'talk';
+/** What a clip of a cutout character gives for one moment. */
+export interface CutoutFrame extends FrameBase {
+  kind: 'cutout';
+  pose: Pose;
+  face: Face;
+}
 
-/** An animation. The frame at `t` depends only on `t`. */
-export interface Clip {
+/** What a clip of a bird gives for one moment. */
+export interface BirdFrame extends FrameBase {
+  kind: 'bird';
+  pose: BirdPose;
+  face: BirdFace;
+}
+
+export type ClipFrame = CutoutFrame | BirdFrame;
+
+export type ClipId = 'idle' | 'walk' | 'wave' | 'talk' | 'peck' | 'flap';
+
+/**
+ * An animation for the rigs of one kind. The frame at `t` depends only on
+ * `t`.
+ */
+export interface Clip<F extends ClipFrame = ClipFrame> {
   id: ClipId;
+  kind: F['kind'];
   /** Length in seconds. A looping clip ends where it starts. */
   duration: number;
   loops: boolean;
-  frameAt(t: number): ClipFrame;
+  frameAt(t: number): F;
 }

@@ -1,3 +1,25 @@
 export type { Matrix, Pt } from './geometry.ts';
-export type { Clip, ClipFrame, ClipId, Face, Pose } from './pose.ts';
-export type { CutoutFace, CutoutRig, Rig, RigPart, RigPartId } from './rig.ts';
+export type {
+  BirdFace,
+  BirdFrame,
+  BirdPose,
+  Clip,
+  ClipFrame,
+  ClipId,
+  CutoutFrame,
+  Face,
+  Pose,
+} from './pose.ts';
+export type {
+  BirdHead,
+  BirdPartId,
+  BirdRig,
+  CutoutFace,
+  CutoutRig,
+  EyeFace,
+  PartId,
+  Rig,
+  RigKind,
+  RigPart,
+  RigPartId,
+} from './rig.ts';

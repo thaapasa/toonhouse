@@ -2,13 +2,17 @@
 // plain data, so that the editor can draw it as SVG and export on a canvas.
 import type {
   ClipFrame,
+  CutoutFrame,
   CutoutRig,
   Matrix,
+  PartId,
   Pt,
+  Rig,
   RigPartId,
 } from '@toonhouse/model';
 
-import { lashLine, lids, mouthShape, tongue, upperLip } from './face.ts';
+import { drawBird } from './bird.ts';
+import { eyeLids, mouthShape, tongue, upperLip } from './face.ts';
 import {
   add,
   curveMiddle,
@@ -47,7 +51,7 @@ export type DrawNode =
   | {
       /** A traced piece of the rig, drawn in its own pixels. */
       type: 'part';
-      part: RigPartId;
+      part: PartId;
       width: number;
       height: number;
       transform: Matrix;
@@ -95,12 +99,65 @@ const curve = (a: Pt, c: Pt, b: Pt) =>
 const endAngle = (c: Pt, b: Pt) => Math.atan2(b.y - c.y, b.x - c.x);
 
 /**
- * Draws a cutout character with its ground point at the origin, in sheet
- * pixels, y down.
+ * Draws a character with its ground point at the origin, in sheet pixels,
+ * y down. The frame must come from a clip for the kind of the rig.
  */
 export function drawCharacter(
-  rig: CutoutRig,
+  rig: Rig,
   frame: ClipFrame,
+  options: DrawOptions,
+): CharacterDrawing {
+  if (rig.kind === 'cutout' && frame.kind === 'cutout') {
+    return drawCutout(rig, frame, options);
+  }
+  if (rig.kind === 'bird' && frame.kind === 'bird') {
+    return drawBird(rig, frame, options);
+  }
+  throw new Error(`A ${frame.kind} clip does not work on a ${rig.kind} rig`);
+}
+
+/** Lines through points, one list of points for each chain of bones. */
+export function skeleton(
+  joints: Record<string, Pt>,
+  chains: Pt[][],
+  facing: 1 | -1,
+): Skeleton {
+  const flip = (p: Pt): Pt => ({ x: p.x * facing, y: p.y });
+  return {
+    joints: Object.entries(joints).map(([name, at]) => ({
+      name,
+      at: flip(at),
+    })),
+    bones: chains.map((chain) => chain.map(flip)),
+  };
+}
+
+/** The ground shadow and the character, turned to face either way. */
+export function placed(
+  shadow: { rx: number; ry: number },
+  facing: 1 | -1,
+  children: DrawNode[],
+): DrawNode {
+  return {
+    type: 'group',
+    children: [
+      {
+        type: 'ellipse',
+        cx: 0,
+        cy: 0,
+        rx: shadow.rx,
+        ry: shadow.ry,
+        fill: '#000',
+        opacity: 0.18,
+      },
+      { type: 'group', transform: scaling(facing, 1), children },
+    ],
+  };
+}
+
+function drawCutout(
+  rig: CutoutRig,
+  frame: CutoutFrame,
   { facing }: DrawOptions,
 ): CharacterDrawing {
   const { pose } = frame;
@@ -244,23 +301,8 @@ export function drawCharacter(
     hand(nearArm, pose.handNearOpen > 0.5, pose.handNearAngle),
   ];
 
-  const node: DrawNode = {
-    type: 'group',
-    children: [
-      {
-        type: 'ellipse',
-        cx: 0,
-        cy: 0,
-        rx: rig.shadow.rx,
-        ry: rig.shadow.ry,
-        fill: '#000',
-        opacity: 0.18,
-      },
-      { type: 'group', transform: scaling(facing, 1), children: character },
-    ],
-  };
+  const node = placed(rig.shadow, facing, character);
 
-  const flip = (p: Pt): Pt => ({ x: p.x * facing, y: p.y });
   const joints = {
     hip: pose.hip,
     neck,
@@ -280,19 +322,17 @@ export function drawCharacter(
   const j = joints;
   return {
     node,
-    skeleton: {
-      joints: Object.entries(joints).map(([name, at]) => ({
-        name,
-        at: flip(at),
-      })),
-      bones: [
+    skeleton: skeleton(
+      joints,
+      [
         [j.hip, j.neck],
         [j.shoulderNear, j.elbowNear, j.wristNear],
         [j.shoulderFar, j.elbowFar, j.wristFar],
         [j.hipNear, j.kneeNear, j.ankleNear],
         [j.hipFar, j.kneeFar, j.ankleFar],
-      ].map((chain) => chain.map(flip)),
-    },
+      ],
+      facing,
+    ),
   };
 }
 
@@ -302,52 +342,14 @@ export function drawCharacter(
  */
 function headNodes(
   rig: CutoutRig,
-  face: ClipFrame['face'],
+  face: CutoutFrame['face'],
   part: (id: RigPartId, transform: Matrix) => DrawNode,
 ): DrawNode[] {
   const f = rig.face;
   const { colors } = rig;
   const nodes: DrawNode[] = [part('head', [1, 0, 0, 1, 0, 0])];
 
-  if (face.blink > 0.02) {
-    const { upper, lower } = lids(f, face.blink);
-    const top = f.eye.cy - f.eye.ry - 2;
-    const bottom = f.eye.cy + f.eye.ry + 2;
-    // The lids reach 10 px past the eye on each side; the clip trims them.
-    const x = f.eye.cx - f.eye.rx - 10;
-    const width = 2 * f.eye.rx + 20;
-    nodes.push({
-      type: 'group',
-      clip: f.eyeClip
-        ? { type: 'path', d: f.eyeClip }
-        : { type: 'ellipse', ...f.eye },
-      children: [
-        {
-          type: 'rect',
-          x,
-          y: top,
-          width,
-          height: upper - top,
-          fill: colors.lid,
-        },
-        {
-          type: 'rect',
-          x,
-          y: lower,
-          width,
-          height: bottom - lower,
-          fill: colors.lid,
-        },
-        {
-          type: 'path',
-          d: lashLine(f, upper, face.blink),
-          stroke: colors.line,
-          strokeWidth: 5,
-          lineCap: 'round',
-        },
-      ],
-    });
-  }
+  nodes.push(...eyeLids(f, face.blink, colors));
 
   if (!face.grin && rig.parts.mouthPatch) {
     // A closed mouth is the smile line alone; an open one is a filled shape

@@ -1,9 +1,9 @@
-import type { RigPartId } from '@toonhouse/model';
+import type { PartId } from '@toonhouse/model';
 import { useMemo } from 'react';
 
 import { partId } from './Drawing.tsx';
 
-export type PartSources = Partial<Record<RigPartId, string>>;
+export type PartSources = Partial<Record<PartId, string>>;
 
 interface ParsedPart {
   id: string;
@@ -16,7 +16,7 @@ function parse(prefix: string, sources: PartSources): ParsedPart[] {
   return Object.entries(sources).map(([part, text]) => {
     const svg = parser.parseFromString(text, 'image/svg+xml').documentElement;
     return {
-      id: partId(prefix, part as RigPartId),
+      id: partId(prefix, part as PartId),
       viewBox: svg.getAttribute('viewBox') ?? '',
       content: svg.innerHTML,
     };

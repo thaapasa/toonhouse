@@ -1,5 +1,5 @@
 import type { ClipId } from '@toonhouse/model';
-import { clipById, CLIPS, drawCharacter } from '@toonhouse/renderer';
+import { clipsFor, drawCharacter } from '@toonhouse/renderer';
 import { usePlayback } from '@toonhouse/stage';
 import { useEffect, useState } from 'react';
 
@@ -24,7 +24,9 @@ export function App() {
   });
 
   const character = CHARACTERS.find((c) => c.id === characterId)!;
-  const clip = clipById(clipId);
+  const clips = clipsFor(character.rig.kind);
+  // Another kind of character may not have the clip; then play its first.
+  const clip = clips.find((c) => c.id === clipId) ?? clips[0]!;
   const playback = usePlayback({
     duration: clip.duration,
     fps: FPS,
@@ -73,7 +75,7 @@ export function App() {
             onView={setView}
           />
           <ClipBar
-            clips={CLIPS}
+            clips={clips}
             clip={clip}
             fps={FPS}
             playback={playback}

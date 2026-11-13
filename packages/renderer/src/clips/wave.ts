@@ -1,4 +1,4 @@
-import type { Clip, Face, Pt } from '@toonhouse/model';
+import type { Clip, CutoutFrame, Face, Pt } from '@toonhouse/model';
 
 import { blinkAt, talking } from '../face.ts';
 import {
@@ -21,8 +21,9 @@ const BLINKS = [2.85];
  * hand opens and waves, and the arm comes down again. He grins as the arm goes
  * up and says hello while waving.
  */
-export const wave: Clip = {
+export const wave: Clip<CutoutFrame> = {
   id: 'wave',
+  kind: 'cutout',
   duration: DURATION,
   loops: true,
   frameAt(t) {
@@ -51,7 +52,12 @@ export const wave: Clip = {
     pose.headAngle +=
       lift *
       (deg(-6) + deg(3) * Math.sin((t - START) * 2 * Math.PI * 1.3) * waving);
-    return { pose, face: faceAt(t), travel: 0 };
+    return {
+      kind: 'cutout',
+      pose,
+      face: faceAt(t),
+      travel: 0,
+    };
   },
 };
 

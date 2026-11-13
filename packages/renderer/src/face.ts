@@ -1,6 +1,7 @@
 // Blinking and talking. Both are functions of the time alone.
-import type { CutoutFace } from '@toonhouse/model';
+import type { CutoutFace, EyeFace } from '@toonhouse/model';
 
+import type { DrawNode } from './draw.ts';
 import { hash, lerp, smoothstep } from './math.ts';
 
 /**
@@ -59,7 +60,7 @@ export function tongue(face: CutoutFace, open: number) {
 }
 
 /** Lid edges for a blink amount: the upper lid does most of the moving. */
-export function lids(face: CutoutFace, blink: number) {
+export function lids(face: EyeFace, blink: number) {
   const { eye, shutY } = face;
   return {
     upper: lerp(eye.cy - eye.ry, shutY, blink),
@@ -68,10 +69,62 @@ export function lids(face: CutoutFace, blink: number) {
 }
 
 /** The lash line along the edge of the upper lid, curving down when shut. */
-export function lashLine(face: CutoutFace, y: number, blink: number) {
+export function lashLine(face: EyeFace, y: number, blink: number) {
   const { cx, rx } = face.eye;
   // The line stops just inside the eye ellipse.
   const half = rx - 1;
   const sag = 3 + blink * 5;
   return `M${fmt(cx - half)} ${fmt(y - 1)}Q${fmt(cx)} ${fmt(y + sag)} ${fmt(cx + half)} ${fmt(y - 1)}`;
+}
+
+/**
+ * Lids over the eye for a blink amount, with the lash line along the upper
+ * lid. An open eye has none.
+ */
+export function eyeLids(
+  face: EyeFace,
+  blink: number,
+  colors: { lid: string; line: string },
+): DrawNode[] {
+  if (blink <= 0.02) return [];
+  const { upper, lower } = lids(face, blink);
+  const { eye } = face;
+  const top = eye.cy - eye.ry - 2;
+  const bottom = eye.cy + eye.ry + 2;
+  // The lids reach 10 px past the eye on each side; the clip trims them.
+  const x = eye.cx - eye.rx - 10;
+  const width = 2 * eye.rx + 20;
+  return [
+    {
+      type: 'group',
+      clip: face.eyeClip
+        ? { type: 'path', d: face.eyeClip }
+        : { type: 'ellipse', ...eye },
+      children: [
+        {
+          type: 'rect',
+          x,
+          y: top,
+          width,
+          height: upper - top,
+          fill: colors.lid,
+        },
+        {
+          type: 'rect',
+          x,
+          y: lower,
+          width,
+          height: bottom - lower,
+          fill: colors.lid,
+        },
+        {
+          type: 'path',
+          d: lashLine(face, upper, blink),
+          stroke: colors.line,
+          strokeWidth: 5,
+          lineCap: 'round',
+        },
+      ],
+    },
+  ];
 }
