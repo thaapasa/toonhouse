@@ -1,0 +1,73 @@
+{
+  "head": {
+    "svg": "head.svg",
+    "width": 347,
+    "height": 386,
+    "pivot": {
+      "x": 158.2,
+      "y": 360
+    }
+  },
+  "torso": {
+    "svg": "torso.svg",
+    "width": 149,
+    "height": 357,
+    "pivot": {
+      "x": 73.4,
+      "y": 301.1
+    },
+    "neck": {
+      "x": 68.2,
+      "y": 17
+    },
+    "shoulder": {
+      "x": 65.2,
+      "y": 68.6
+    },
+    "hipNear": {
+      "x": 81.4,
+      "y": 301.1
+    },
+    "hipFar": {
+      "x": 59.4,
+      "y": 301.1
+    }
+  },
+  "hand": {
+    "svg": "hand.svg",
+    "width": 112,
+    "height": 145,
+    "pivot": {
+      "x": 49.4,
+      "y": 13
+    }
+  },
+  "handOpen": {
+    "svg": "hand-open.svg",
+    "width": 158,
+    "height": 151,
+    "pivot": {
+      "x": 73,
+      "y": 137
+    }
+  },
+  "foot": {
+    "svg": "foot.svg",
+    "width": 255,
+    "height": 147,
+    "pivot": {
+      "x": 76.5,
+      "y": 54
+    }
+  },
+  "outline": "#422517",
+  "skin": "#fbc688",
+  "armLength": 175,
+  "legLength": 205,
+  "armWidth": 26,
+  "legWidth": 30,
+  "outlineWidth": 8,
+  "headScale": 0.82,
+  "footScale": 0.62,
+  "handScale": 0.62
+}

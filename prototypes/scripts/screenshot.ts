@@ -2,6 +2,7 @@
 // Usage: node scripts/screenshot.ts <page> <out-prefix> <t1> [t2 ...]
 // Example: node scripts/screenshot.ts 2d ../assets/work/shots/2d 0 2.5 6
 // The dev server must run on PROTOTYPES_PORT (default 10790).
+// SHOT_WIDTH and SHOT_HEIGHT set the window size (default 1280x800).
 import { chromium } from 'playwright';
 
 const [page, prefix, ...times] = process.argv.slice(2);
@@ -36,7 +37,19 @@ for (const t of times) {
   await tab.evaluate((v) => window.toon!.setTime(v), Number(t));
   await tab.waitForTimeout(150);
   const file = `${prefix}-${String(t).replace('.', '_')}.png`;
-  await tab.screenshot({ path: file });
+  // SHOT_CLIP=x,y,w,h takes a close-up of one part of the page.
+  const clip = process.env.SHOT_CLIP?.split(',').map(Number);
+  const opts = {
+    path: file,
+    timeout: 90000,
+    ...(clip
+      ? {
+          clip: { x: clip[0]!, y: clip[1]!, width: clip[2]!, height: clip[3]! },
+        }
+      : {}),
+  };
+  // A busy machine sometimes makes a screenshot time out; try once more.
+  await tab.screenshot(opts).catch(() => tab.screenshot(opts));
   console.log(file);
 }
 if (errors.length) console.error('Page errors:\n' + errors.join('\n'));
