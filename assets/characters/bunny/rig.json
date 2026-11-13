@@ -1,0 +1,79 @@
+{
+  "kind": "rabbit",
+  "parts": {
+    "head": {
+      "svg": "head.svg",
+      "width": 302,
+      "height": 277,
+      "pivot": { "x": 130, "y": 240 }
+    },
+    "ear": {
+      "svg": "ear.svg",
+      "width": 124,
+      "height": 342,
+      "pivot": { "x": 55, "y": 320 }
+    },
+    "body": {
+      "svg": "body.svg",
+      "width": 335,
+      "height": 275,
+      "pivot": { "x": 165, "y": 185 }
+    },
+    "paw": {
+      "svg": "paw.svg",
+      "width": 96,
+      "height": 87,
+      "pivot": { "x": 48, "y": 43 }
+    },
+    "foot": {
+      "svg": "foot.svg",
+      "width": 286,
+      "height": 110,
+      "pivot": { "x": 50, "y": 55 }
+    }
+  },
+  "body": {
+    "neck": { "x": 255, "y": 45 },
+    "shoulderNear": { "x": 285, "y": 150 },
+    "shoulderFar": { "x": 270, "y": 145 },
+    "hipNear": { "x": 170, "y": 190 },
+    "hipFar": { "x": 150, "y": 185 }
+  },
+  "ears": {
+    "near": { "x": 115, "y": 45 },
+    "far": { "x": 150, "y": 40 }
+  },
+  "scales": { "head": 0.8, "ear": 0.75, "paw": 0.5, "foot": 0.45 },
+  "heelHeight": 45,
+  "wristHeight": 42,
+  "legs": {
+    "armLength": 90,
+    "armWidth": 26,
+    "thighLength": 68,
+    "shankLength": 72,
+    "shankWidth": 26
+  },
+  "outlineWidth": 5,
+  "colors": {
+    "outline": "#442113",
+    "fur": "#e7a862",
+    "belly": "#fcf0da",
+    "line": "#442113",
+    "mouth": "#7a1f1a",
+    "tongue": "#f8778f",
+    "teeth": "#ffffff"
+  },
+  "farShade": 0.82,
+  "shadow": { "rx": 150, "ry": 18 },
+  "face": {
+    "eye": { "cx": 189, "cy": 124, "rx": 29, "ry": 33 },
+    "shutY": 130,
+    "mouth": {
+      "back": { "x": 238, "y": 186 },
+      "front": { "x": 277, "y": 196 },
+      "control": { "x": 254, "y": 206 },
+      "openDepth": 60,
+      "teeth": "M256 199h8v11q0 2-2 2h-4q-2 0-2-2zM265 199h8v11q0 2-2 2h-4q-2 0-2-2z"
+    }
+  }
+}

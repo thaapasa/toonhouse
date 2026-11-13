@@ -69,7 +69,16 @@ Birds have a rig of their own kind. Traced pieces make the head, the body with
 the tail, a folded and an open wing, and the feet. The renderer draws the neck
 and the legs. Each leg has two straight bones that bend backwards at the joint,
 as on a real bird, and the head can move forward and back on the neck as well as
-turn. A clip works on the rigs of one kind only.
+turn.
+
+Rabbits have a third kind of rig. Traced pieces make the head, an ear, the body
+with the haunch and the tail, a front paw and a long hind foot. Both ears use
+the same piece, and so do both paws and both feet. The ears turn on the head, so
+they can trail behind in a hop and flick to listen. The front legs are rubber
+hoses, and each hind leg has two straight bones from the hip to the heel with
+the knee bending forwards.
+
+A clip works on the rigs of one kind only.
 
 For now, the clips are TypeScript code in `packages/renderer`: each clip is a
 function from the time `t` to a pose and a face. This kept the motion of the

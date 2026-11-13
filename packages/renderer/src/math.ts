@@ -53,6 +53,30 @@ export function hoseControl(a: Pt, b: Pt, length: number, bend: number): Pt {
   return { x: mid.x + nx * 2 * h * bend, y: mid.y + ny * 2 * h * bend };
 }
 
+/**
+ * The middle joint of a limb of two straight bones from `a` to `b`. The joint
+ * bends to the back of the character (towards -x when the limb points down)
+ * when `bend` is 1, and to the front when it is -1. A reach longer than the
+ * limb straightens it.
+ */
+export function twoBoneJoint(
+  a: Pt,
+  b: Pt,
+  first: number,
+  second: number,
+  bend: 1 | -1,
+): Pt {
+  const d = sub(b, a);
+  const dist = Math.max(Math.hypot(d.x, d.y), 1e-6);
+  const reach = Math.min(dist, first + second - 1e-6);
+  const cos =
+    (first * first + reach * reach - second * second) / (2 * first * reach);
+  const turn = Math.acos(Math.min(Math.max(cos, -1), 1)) * bend;
+  const dir = { x: d.x / dist, y: d.y / dist };
+  // Turning the downward direction by a positive angle moves it towards -x.
+  return add(a, rotate({ x: dir.x * first, y: dir.y * first }, turn));
+}
+
 /** The middle point of the quadratic curve a-c-b. */
 export const curveMiddle = (a: Pt, c: Pt, b: Pt): Pt => ({
   x: 0.25 * a.x + 0.5 * c.x + 0.25 * b.x,

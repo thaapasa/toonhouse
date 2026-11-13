@@ -10,7 +10,7 @@ import type {
 import type { CharacterDrawing, DrawNode, DrawOptions } from './draw.ts';
 import { placed, skeleton } from './draw.ts';
 import { eyeLids } from './face.ts';
-import { add, deg, pinned, rotate, sub } from './math.ts';
+import { add, deg, pinned, rotate, sub, twoBoneJoint } from './math.ts';
 
 const fmt = (n: number) => Math.round(n * 100) / 100;
 const line = (...pts: Pt[]) =>
@@ -21,15 +21,7 @@ const line = (...pts: Pt[]) =>
  * backwards, as on a bird. A reach longer than the leg straightens it.
  */
 export function legJoint(hip: Pt, ankle: Pt, thigh: number, shank: number) {
-  const d = sub(ankle, hip);
-  const dist = Math.max(Math.hypot(d.x, d.y), 1e-6);
-  const reach = Math.min(dist, thigh + shank - 1e-6);
-  const cos =
-    (thigh * thigh + reach * reach - shank * shank) / (2 * thigh * reach);
-  const a = Math.acos(Math.min(Math.max(cos, -1), 1));
-  const dir = { x: d.x / dist, y: d.y / dist };
-  // Turning the downward direction by +a moves the joint towards -x, behind.
-  return add(hip, rotate({ x: dir.x * thigh, y: dir.y * thigh }, a));
+  return twoBoneJoint(hip, ankle, thigh, shank, 1);
 }
 
 /** Draws a bird with its ground point at the origin, in sheet pixels, y down. */

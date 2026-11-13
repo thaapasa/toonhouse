@@ -1,7 +1,14 @@
-import type { BirdRig, Clip, CutoutRig, Rig } from '@toonhouse/model';
+import type {
+  BirdRig,
+  Clip,
+  CutoutRig,
+  RabbitRig,
+  Rig,
+} from '@toonhouse/model';
 import { describe, expect, it } from 'vitest';
 
 import boy from '../../../assets/characters/boy/rig.json';
+import bunny from '../../../assets/characters/bunny/rig.json';
 import chicken from '../../../assets/characters/chicken/rig.json';
 import { legJoint } from './bird.ts';
 import {
@@ -9,12 +16,16 @@ import {
   BIRD_WALK_SPEED,
   clipById,
   CUTOUT_CLIPS,
+  RABBIT_CLIPS,
+  RABBIT_HOP_SPEED,
   WALK_SPEED,
 } from './clips/index.ts';
 import { drawCharacter, type DrawNode } from './draw.ts';
+import { twoBoneJoint } from './math.ts';
 
 const rig = boy as CutoutRig;
 const bird = chicken as BirdRig;
+const rabbit = bunny as RabbitRig;
 
 /** Every number in a value, in a fixed order. */
 function numbers(v: unknown): number[] {
@@ -33,6 +44,11 @@ function parts(node: DrawNode): string[] {
 const cases: [string, Clip, Rig][] = [
   ...CUTOUT_CLIPS.map((c): [string, Clip, Rig] => [`cutout ${c.id}`, c, rig]),
   ...BIRD_CLIPS.map((c): [string, Clip, Rig] => [`bird ${c.id}`, c, bird]),
+  ...RABBIT_CLIPS.map((c): [string, Clip, Rig] => [
+    `rabbit ${c.id}`,
+    c,
+    rabbit,
+  ]),
 ];
 
 describe.each(cases)('clip %s', (_, clip, clipRig) => {
@@ -135,5 +151,69 @@ describe('bird', () => {
         facing: 1,
       }),
     ).toThrow();
+  });
+});
+
+describe('rabbit', () => {
+  const hop = clipById('rabbit', 'hop');
+
+  /**
+   * The positions plus the distance travelled, in each run of frames where
+   * `planted` holds. Each run must stay in one place.
+   */
+  function plantedSpreads(
+    planted: (f: ReturnType<typeof hop.frameAt>) => number | undefined,
+  ) {
+    const spreads: number[] = [];
+    let run: number[] = [];
+    for (let t = 0; t < hop.duration; t += 1 / 120) {
+      const x = planted(hop.frameAt(t));
+      if (x !== undefined) run.push(x);
+      else if (run.length > 0) {
+        spreads.push(Math.max(...run) - Math.min(...run));
+        run = [];
+      }
+    }
+    return spreads;
+  }
+
+  it('keeps a planted front paw still against the ground', () => {
+    const spreads = plantedSpreads((f) =>
+      f.pose.pawNear.y === 0 ? f.pose.pawNear.x + f.travel : undefined,
+    );
+    expect(spreads.length).toBeGreaterThan(0);
+    for (const s of spreads) expect(s).toBeLessThan(0.5);
+  });
+
+  it('keeps a flat hind foot still against the ground', () => {
+    const spreads = plantedSpreads((f) =>
+      f.pose.footNear.y === 0 && f.pose.footNearAngle === 0
+        ? f.pose.footNear.x + f.travel
+        : undefined,
+    );
+    expect(spreads.length).toBeGreaterThan(0);
+    for (const s of spreads) expect(s).toBeLessThan(0.5);
+  });
+
+  it('hops at the hopping speed on average', () => {
+    expect(hop.frameAt(hop.duration).travel / hop.duration).toBeCloseTo(
+      RABBIT_HOP_SPEED,
+      6,
+    );
+  });
+
+  it('bends the knee of a hind leg forwards', () => {
+    const knee = twoBoneJoint({ x: 0, y: 0 }, { x: 10, y: 90 }, 68, 72, -1);
+    expect(Math.hypot(knee.x, knee.y)).toBeCloseTo(68, 6);
+    // In front of the line from the hip to the heel.
+    expect(10 * knee.y - 90 * knee.x).toBeLessThan(0);
+  });
+
+  it('opens the mouth to talk', () => {
+    const talk = clipById('rabbit', 'talk');
+    const paths = (t: number) =>
+      JSON.stringify(drawCharacter(rabbit, talk.frameAt(t), { facing: 1 }));
+    expect(paths(0)).not.toContain(rabbit.colors.teeth);
+    expect(paths(0.8)).toContain(rabbit.colors.teeth);
   });
 });

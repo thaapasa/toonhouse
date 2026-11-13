@@ -23,6 +23,7 @@ import {
   scaling,
   sub,
 } from './math.ts';
+import { drawRabbit } from './rabbit.ts';
 
 /** A shape that clips a group. */
 export type ClipShape =
@@ -112,6 +113,9 @@ export function drawCharacter(
   }
   if (rig.kind === 'bird' && frame.kind === 'bird') {
     return drawBird(rig, frame, options);
+  }
+  if (rig.kind === 'rabbit' && frame.kind === 'rabbit') {
+    return drawRabbit(rig, frame, options);
   }
   throw new Error(`A ${frame.kind} clip does not work on a ${rig.kind} rig`);
 }

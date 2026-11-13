@@ -71,6 +71,37 @@ export interface BirdFace {
   blink: number;
 }
 
+/**
+ * The body of a rabbit at one moment, in sheet pixels, y down. The origin is
+ * the ground point under the rabbit, and the rabbit faces +x.
+ */
+export interface RabbitPose {
+  /** The pivot of the body, the hip. */
+  hip: Pt;
+  bodyAngle: number;
+  /** Rotation of the head against the body. */
+  headAngle: number;
+  /** Rotation of each ear against the head. 0 stands straight up. */
+  earNearAngle: number;
+  earFarAngle: number;
+  /** Bottoms of the front paws, relative to the origin. */
+  pawNear: Pt;
+  pawFar: Pt;
+  /** Heels of the hind feet, relative to the origin. */
+  footNear: Pt;
+  footFar: Pt;
+  footNearAngle: number;
+  footFarAngle: number;
+}
+
+/** The expression of a rabbit at one moment. */
+export interface RabbitFace {
+  /** 0 is a closed smile, 1 a wide open mouth. */
+  open: number;
+  /** 0 is an open eye, 1 a closed one. */
+  blink: number;
+}
+
 interface FrameBase {
   /**
    * How far the character has moved forward since the start of the clip, in
@@ -93,9 +124,17 @@ export interface BirdFrame extends FrameBase {
   face: BirdFace;
 }
 
-export type ClipFrame = CutoutFrame | BirdFrame;
+/** What a clip of a rabbit gives for one moment. */
+export interface RabbitFrame extends FrameBase {
+  kind: 'rabbit';
+  pose: RabbitPose;
+  face: RabbitFace;
+}
 
-export type ClipId = 'idle' | 'walk' | 'wave' | 'talk' | 'peck' | 'flap';
+export type ClipFrame = CutoutFrame | BirdFrame | RabbitFrame;
+
+export type ClipId =
+  'idle' | 'walk' | 'wave' | 'talk' | 'peck' | 'flap' | 'hop' | 'lookout';
 
 /**
  * An animation for the rigs of one kind. The frame at `t` depends only on

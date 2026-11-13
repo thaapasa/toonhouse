@@ -4,6 +4,8 @@ export {
   clipById,
   clipsFor,
   CUTOUT_CLIPS,
+  RABBIT_CLIPS,
+  RABBIT_HOP_SPEED,
   WALK_SPEED,
 } from './clips/index.ts';
 export type {

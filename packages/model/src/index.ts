@@ -9,6 +9,9 @@ export type {
   CutoutFrame,
   Face,
   Pose,
+  RabbitFace,
+  RabbitFrame,
+  RabbitPose,
 } from './pose.ts';
 export type {
   BirdHead,
@@ -18,6 +21,9 @@ export type {
   CutoutRig,
   EyeFace,
   PartId,
+  RabbitHead,
+  RabbitPartId,
+  RabbitRig,
   Rig,
   RigKind,
   RigPart,

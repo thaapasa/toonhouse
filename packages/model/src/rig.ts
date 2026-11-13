@@ -175,7 +175,80 @@ export interface BirdHead extends EyeFace {
   };
 }
 
-export type Rig = CutoutRig | BirdRig;
+export type RabbitPartId = 'head' | 'ear' | 'body' | 'paw' | 'foot';
+
+/**
+ * A rabbit: traced pieces for the head, an ear, the body with the haunch and
+ * the tail, a front paw and a long hind foot. Both ears use the same piece,
+ * and so do both front paws and both hind feet. The front legs and the hind
+ * legs are drawn in code. A hind leg has two bones from the hip to the heel,
+ * with the knee bending forwards, and the long foot is the third bone. All
+ * lengths are in the pixels of the parts sheet, which is also the unit of a
+ * pose.
+ */
+export interface RabbitRig {
+  kind: 'rabbit';
+  parts: Record<RabbitPartId, RigPart>;
+  /**
+   * Joints on the body, in body pixels. The body pivot is the hip, in the
+   * middle of the haunch.
+   */
+  body: {
+    neck: Pt;
+    shoulderNear: Pt;
+    shoulderFar: Pt;
+    hipNear: Pt;
+    hipFar: Pt;
+  };
+  /** The roots of the ears on the head, in head pixels. */
+  ears: { near: Pt; far: Pt };
+  scales: { head: number; ear: number; paw: number; foot: number };
+  /** Height of the heel above the sole, in foot pixels. */
+  heelHeight: number;
+  /** Height of the wrist above the bottom of the paw, in paw pixels. */
+  wristHeight: number;
+  legs: {
+    /** A front leg is a rubber hose of this length. */
+    armLength: number;
+    armWidth: number;
+    thighLength: number;
+    shankLength: number;
+    shankWidth: number;
+  };
+  outlineWidth: number;
+  colors: {
+    outline: string;
+    fur: string;
+    /** The front of the front legs and the inside of the hind legs. */
+    belly: string;
+    line: string;
+    mouth: string;
+    tongue: string;
+    teeth: string;
+  };
+  /** Brightness of the far ear and legs, from 0 to 1. */
+  farShade: number;
+  shadow: { rx: number; ry: number };
+  face: RabbitHead;
+}
+
+/** The parts of a rabbit's face that are drawn in code, in head pixels. */
+export interface RabbitHead extends EyeFace {
+  /**
+   * The traced smile is the upper lip. An open mouth is the same curve closed
+   * by a lower curve that drops by up to `openDepth`.
+   */
+  mouth: {
+    back: Pt;
+    front: Pt;
+    control: Pt;
+    openDepth: number;
+    /** The two front teeth, as SVG path data, under the upper lip. */
+    teeth: string;
+  };
+}
+
+export type Rig = CutoutRig | BirdRig | RabbitRig;
 export type RigKind = Rig['kind'];
 /** A piece of any rig. */
-export type PartId = RigPartId | BirdPartId;
+export type PartId = RigPartId | BirdPartId | RabbitPartId;
