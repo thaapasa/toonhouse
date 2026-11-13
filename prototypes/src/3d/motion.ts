@@ -57,11 +57,14 @@ export function walkClipSeconds(t: number) {
   return rateIntegral[i]! * (1 - f) + rateIntegral[i + 1]! * f;
 }
 
-/** Weight of the wave clip: in after the settle, out after `waveEnd`. */
+/**
+ * Weight of the wave clip: in after the settle, out once the clip has lowered
+ * the arm after `waveEnd`.
+ */
 export function waveWeight(t: number) {
   return (
     smoothstep(SCENE.waveStart - 0.15, SCENE.waveStart + 0.25, t) *
-    (1 - smoothstep(SCENE.waveEnd - 0.1, SCENE.waveEnd + 0.35, t))
+    (1 - smoothstep(SCENE.waveEnd + 0.1, SCENE.waveEnd + 0.5, t))
   );
 }
 

@@ -93,12 +93,16 @@ for (const a of [idle, walk, wave]) {
 }
 
 const calib = calibrateWalk();
+const waveLoop = findWaveLoop();
+console.info('3d wave loop', JSON.stringify(waveLoop));
 console.info(
   '3d calibration',
   JSON.stringify({ ...calib, advance: undefined }),
 );
 
-toonify(model, { gradientMap });
+// The texture of the character is dark and brown; lift it so that it reads
+// against the grass.
+toonify(model, { gradientMap, tint: 1.35 });
 addOutlines(model, outline);
 scene.add(model);
 
@@ -157,6 +161,51 @@ function calibrateWalk() {
   };
 }
 
+/**
+ * Finds a part of the wave clip that loops: two times while the hand is up
+ * where the arm is in nearly the same pose. The clip raises the arm, waves and
+ * lowers it; repeating the middle part makes the wave last as long as the
+ * scene needs.
+ */
+function findWaveLoop() {
+  const D = wave.getClip().duration;
+  const n = 100;
+  const names = ['Index3R', 'LowerArmR', 'Index3L', 'LowerArmL'];
+  const bones = names.map((b) => model.getObjectByName(b)!);
+  wave.setEffectiveWeight(1);
+  const poses: THREE.Vector3[][] = [];
+  for (let i = 0; i <= n; i++) {
+    wave.time = (i / n) * D;
+    mixer.update(0);
+    model.updateMatrixWorld(true);
+    poses.push(bones.map((b) => b.getWorldPosition(new THREE.Vector3())));
+  }
+  wave.setEffectiveWeight(0);
+  // The waving hand is the one that gets highest.
+  const hand =
+    Math.max(...poses.map((p) => p[0]!.y)) >
+    Math.max(...poses.map((p) => p[2]!.y))
+      ? 0
+      : 2;
+  const ys = poses.map((p) => p[hand]!.y);
+  const lo = Math.min(...ys);
+  const hi = Math.max(...ys);
+  const up = ys.map((y) => y > lo + 0.85 * (hi - lo));
+  let best = { a: 0.3 * D, b: 0.7 * D, cost: Infinity };
+  const minSpan = Math.ceil((0.3 / D) * n);
+  for (let i = 0; i <= n; i++) {
+    for (let j = i + minSpan; j <= n; j++) {
+      if (!up[i] || !up[j]) continue;
+      const cost =
+        poses[i]![hand]!.distanceTo(poses[j]![hand]!) +
+        poses[i]![hand + 1]!.distanceTo(poses[j]![hand + 1]!);
+      if (cost < best.cost - 1e-4)
+        best = { a: (i / n) * D, b: (j / n) * D, cost };
+    }
+  }
+  return best;
+}
+
 // World ------------------------------------------------------------------------
 
 /** Path metres to world units, so that the top walk speed matches the clip. */
@@ -200,6 +249,68 @@ ground.receiveShadow = true;
 scene.add(ground);
 
 scene.add(pathRibbon());
+scene.add(grassPatches());
+scene.add(hills());
+
+/** Darker patches of grass, so that the ground in front of the camera is not one flat color. */
+function grassPatches() {
+  const group = new THREE.Group();
+  const mat = new THREE.MeshToonMaterial({
+    color: 0x7dc05c,
+    gradientMap,
+    polygonOffset: true,
+    polygonOffsetFactor: -1,
+  });
+  // x, z in path metres, radius in character heights, stretch along x.
+  const patches = [
+    [-6.5, 4.2, 0.6, 2.2],
+    [-2.8, 5.2, 0.45, 2.6],
+    [1.8, 4.4, 0.6, 2.0],
+    [5.2, 3.4, 0.5, 2.4],
+    [-4.0, 2.6, 0.4, 2.0],
+    [3.2, 0.2, 0.5, 2.5],
+    [-1.0, -3.2, 0.7, 2.8],
+    [-7.8, -1.8, 0.8, 2.2],
+  ] as const;
+  for (const [x, z, r, stretch] of patches) {
+    const m = new THREE.Mesh(new THREE.CircleGeometry(r * H, 24), mat);
+    m.rotation.x = -Math.PI / 2;
+    m.scale.set(stretch, 1, 1);
+    m.position.copy(toWorld(x, z)).setY(0.002);
+    m.receiveShadow = true;
+    group.add(m);
+  }
+  return group;
+}
+
+/** Low round hills on the horizon. */
+function hills() {
+  const group = new THREE.Group();
+  const colors = [0x86c866, 0x79bd5c, 0x92d071];
+  // x, z in path metres, width and height in character heights.
+  const list = [
+    [-22, -26, 9, 2.6],
+    [-9, -30, 11, 3.4],
+    [6, -28, 10, 2.8],
+    [19, -24, 8, 2.4],
+    [-30, -18, 7, 2.0],
+    [30, -20, 8, 2.2],
+  ] as const;
+  list.forEach(([x, z, w, h], i) => {
+    const m = new THREE.Mesh(
+      new THREE.SphereGeometry(1, 32, 16),
+      new THREE.MeshToonMaterial({
+        color: colors[i % colors.length],
+        gradientMap,
+      }),
+    );
+    m.scale.set(w * H, h * H, w * 0.5 * H);
+    m.position.copy(toWorld(x, z));
+    group.add(m);
+  });
+  addOutlines(group, outline);
+  return group;
+}
 
 function pathRibbon() {
   const steps = 120;
@@ -298,7 +409,7 @@ place(treeRound!, 5.6, -4.4, 2.4, 90);
 place(treeLayered!, -9.6, -3.0, 2.6, 200);
 place(treeWide!, 8.4, -7.0, 2.2, 160);
 // Bushes: the round tree sunk into the ground so that only the crown shows.
-place(treeRound!, -4.4, -3.0, 1.4, 0, 0.55);
+place(treeRound!, -6.0, -3.6, 1.4, 0, 0.55);
 place(treeRound!, 3.8, -2.6, 1.2, 120, 0.55);
 place(treeRound!, -7.6, 0.4, 1.6, 60, 0.55);
 place(bench!, 2.0, -1.0, 0.5, -10);
@@ -314,7 +425,7 @@ const mid = toWorld(-1.3, 0.1);
 function placeCamera(t: number) {
   const p = pointAt(distanceAt(t));
   const x = mid.x + (p.x * K - mid.x) * 0.55;
-  camera.position.set(x, 0.8 * H, mid.z + 7 * H);
+  camera.position.set(x, 0.8 * H, mid.z + 6.2 * H);
   camera.lookAt(x, 0.55 * H, mid.z);
 }
 
@@ -361,11 +472,31 @@ function pose(t: number) {
   walk.time =
     walkPhase.toPhase(mod(walkOffset + walkClipSeconds(t) / walkT, 1)) * walkT;
   idle.time = mod(t, idle.getClip().duration);
-  wave.time = mod(
-    Math.max(0, t - SCENE.waveStart + 0.15),
-    wave.getClip().duration,
-  );
+  wave.time = waveClipTime(t);
   mixer.update(0);
+}
+
+/** The clip starts this long before `waveStart`, as its weight fades in. */
+const WAVE_LEAD = 0.15;
+/** The clip has lowered the arm this long after `waveEnd`. */
+const WAVE_TAIL = 0.5;
+
+/**
+ * Time in the wave clip at scene time `t`: raise the arm, repeat the loop a
+ * whole number of times (played a little faster or slower to fit), then lower
+ * the arm.
+ */
+function waveClipTime(t: number) {
+  const D = wave.getClip().duration;
+  const { a, b } = waveLoop;
+  const total = SCENE.waveEnd + WAVE_TAIL - (SCENE.waveStart - WAVE_LEAD);
+  const middle = Math.max(total - a - (D - b), 0.01);
+  const loops = Math.max(1, Math.round(middle / (b - a)));
+  const rate = (loops * (b - a)) / middle;
+  const tau = t - (SCENE.waveStart - WAVE_LEAD);
+  if (tau <= a) return Math.max(tau, 0);
+  if (tau < a + middle) return a + mod((tau - a) * rate, b - a);
+  return Math.min(b + (tau - a - middle), D);
 }
 
 function mod(a: number, b: number) {

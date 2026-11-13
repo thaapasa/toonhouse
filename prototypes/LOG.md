@@ -222,3 +222,19 @@ only the crown shows.
   way towards the camera for the wave.
 - The `window.toon3d` debug hook returns the foot positions at a given `t`. I
   used it to measure the foot sliding.
+- The wave clip is 1.67 s long: it raises the arm, waves once or twice and
+  lowers it. Looping the whole clip raised the arm again at the end of the wave.
+  On load, the code now finds two times in the clip, both while the hand is up,
+  where the hand and forearm are in nearly the same pose (it found 0.50 s and
+  0.83 s). The wave plays the raise, repeats that middle part a whole number of
+  times, slightly slowed to fill the wave, then plays the lowering.
+
+### Look, second pass
+
+- The texture of the character is dark brown. Its colors are multiplied by 1.35
+  so that the character reads against the grass.
+- Low round hills (flattened spheres) on the horizon hide the pale band where
+  the ground disc meets the sky.
+- Darker flattened discs on the ground break up the plain green in front of the
+  camera.
+- The camera moved closer, to 6.2 character heights from the middle of the path.

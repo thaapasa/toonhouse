@@ -18,6 +18,8 @@ export interface ToonOptions {
   gradientMap: THREE.Texture;
   /** Replaces the color of materials with these names. */
   colors?: Record<string, THREE.ColorRepresentation>;
+  /** Multiplies every color, to lift dark textures. */
+  tint?: number;
 }
 
 /** Swaps every mesh material for a `MeshToonMaterial` with the same color and map. */
@@ -37,6 +39,7 @@ export function toonify(root: THREE.Object3D, opts: ToonOptions) {
         toon.name = m.name;
         const override = opts.colors?.[m.name];
         if (override !== undefined) toon.color.set(override);
+        if (opts.tint !== undefined) toon.color.multiplyScalar(opts.tint);
         cache.set(m, toon);
       }
       return toon;
