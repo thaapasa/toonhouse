@@ -1,7 +1,16 @@
 import { SCENE } from '../common/path.ts';
 import { createPlayer } from '../common/player.ts';
 import { frameAt, project, VIEW_H, VIEW_W } from './anim.ts';
-import { CORNER, faceAt, mouthShape, tongue, upperLip } from './face.ts';
+import {
+  CORNER,
+  EYE,
+  faceAt,
+  lashLine,
+  lids,
+  mouthShape,
+  tongue,
+  upperLip,
+} from './face.ts';
 import { add, hoseControl, type Pt, rotate, sub } from './math.ts';
 import type { PartData, RigData } from './rig.ts';
 
@@ -151,6 +160,30 @@ async function main() {
   // mouth drawn in code, all in the pixels of the head piece.
   const head = el('g', {}, character);
   placed(rig.head, 'head', head);
+  // Eyelids, clipped to the eye, for blinking.
+  const eyeClip = el('clipPath', { id: 'eye-clip' }, defs);
+  el('ellipse', { ...EYE }, eyeClip);
+  const eyelids = el('g', { 'clip-path': 'url(#eye-clip)' }, head);
+  const upperLid = el(
+    'rect',
+    { fill: '#fbc78c', x: EYE.cx - 30, width: 60 },
+    eyelids,
+  );
+  const lowerLid = el(
+    'rect',
+    { fill: '#fbc78c', x: EYE.cx - 30, width: 60 },
+    eyelids,
+  );
+  const lash = el(
+    'path',
+    {
+      fill: 'none',
+      stroke: '#44260c',
+      'stroke-width': 5,
+      'stroke-linecap': 'round',
+    },
+    eyelids,
+  );
   const mouth = el('g', {}, head);
   placed(rig.head, 'mouth-patch', mouth);
   const mouthClip = el('clipPath', { id: 'mouth-clip' }, defs);
@@ -197,6 +230,16 @@ async function main() {
     );
     const neck = onTorso(t0.neck);
     const face = faceAt(t);
+    eyelids.style.display = face.blink > 0.02 ? '' : 'none';
+    if (face.blink > 0.02) {
+      const { upper, lower } = lids(face.blink);
+      const top = EYE.cy - EYE.ry - 2;
+      upperLid.setAttribute('y', String(top));
+      upperLid.setAttribute('height', String(upper - top));
+      lowerLid.setAttribute('y', String(lower));
+      lowerLid.setAttribute('height', String(EYE.cy + EYE.ry + 2 - lower));
+      lash.setAttribute('d', lashLine(upper, face.blink));
+    }
     mouth.style.display = face.grin ? 'none' : '';
     if (!face.grin) {
       // A closed mouth is the smile line alone; an open one is a filled shape

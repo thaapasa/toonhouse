@@ -9,6 +9,26 @@ export interface Face {
   grin: boolean;
   /** 0 is a closed smile, 1 a wide open mouth. */
   open: number;
+  /** 0 is an open eye, 1 a closed one. */
+  blink: number;
+}
+
+// Blinks at fixed times: a few while walking, one right after the stop and one
+// at the end. Irregular gaps look more natural than a steady rhythm.
+const BLINKS = [0.9, 2.6, 3.1, 4.4, SCENE.walkEnd + 0.15, 7.55];
+
+/**
+ * How closed the eye is at `t`. A blink shuts fast, stays shut for a frame and
+ * opens a bit slower.
+ */
+export function blinkAt(t: number) {
+  let b = 0;
+  for (const start of BLINKS) {
+    const close = smoothstep(start, start + 0.06, t);
+    const reopen = smoothstep(start + 0.1, start + 0.2, t);
+    b = Math.max(b, close * (1 - reopen));
+  }
+  return b;
 }
 
 /** A number in [0, 1) that depends only on `n`, for made-up mouth shapes. */
@@ -41,15 +61,16 @@ export function faceAt(t: number): Face {
   const grinStart = waveStart + 0.15;
   const talkStart = waveStart + 0.7;
   const talkEnd = waveEnd - 0.3;
-  if (t >= grinStart && t < talkStart) return { grin: true, open: 0 };
+  const blink = blinkAt(t);
+  if (t >= grinStart && t < talkStart) return { grin: true, open: 0, blink };
   if (t >= talkStart && t < talkEnd) {
     // Ease the talking in and out so the first and last frames are closed.
     const fade =
       smoothstep(talkStart, talkStart + 0.08, t) *
       (1 - smoothstep(talkEnd - 0.08, talkEnd, t));
-    return { grin: false, open: clamp01(talking(t) * fade) };
+    return { grin: false, open: clamp01(talking(t) * fade), blink };
   }
-  return { grin: false, open: 0 };
+  return { grin: false, open: 0, blink };
 }
 
 // Mouth points in the pixels of the head piece. The front corner is near the
@@ -75,3 +96,25 @@ export function tongue(open: number) {
 
 /** The dimple at the back corner of the smile. */
 export const CORNER = 'M249 284Q251 290 257 291';
+
+// The eye in the pixels of the head piece: an outlined ellipse. The lids are
+// clipped to an ellipse a little larger, so that they also cover its outline.
+export const EYE = { cx: 254, cy: 221, rx: 20, ry: 28 };
+/** Where the lids meet when the eye is closed. */
+const SHUT_Y = 229;
+
+/** Lid edges for a blink amount: the upper lid does most of the moving. */
+export function lids(blink: number) {
+  const top = EYE.cy - EYE.ry;
+  const bottom = EYE.cy + EYE.ry;
+  return {
+    upper: lerp(top, SHUT_Y, blink),
+    lower: lerp(bottom, SHUT_Y, blink),
+  };
+}
+
+/** The lash line along the edge of the upper lid, curving down when shut. */
+export function lashLine(y: number, blink: number) {
+  const sag = 3 + blink * 5;
+  return `M${EYE.cx - 19} ${y - 1}Q${EYE.cx} ${y + sag} ${EYE.cx + 19} ${y - 1}`;
+}

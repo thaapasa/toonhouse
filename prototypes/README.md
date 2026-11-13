@@ -93,6 +93,8 @@ background and draws the arms and legs in code. All motion is written by hand in
   smiles with his mouth closed while walking, shows the traced grin as the arm
   goes up, and talks while waving. Talking opens and closes the mouth at random,
   from a hash of the frame number.
+- He blinks now and then. Skin-colored lids, clipped to the eye, close over it
+  and meet at a lash line.
 
 ### What looks good
 

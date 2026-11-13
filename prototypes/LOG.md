@@ -142,6 +142,17 @@ hash of the frame number, about ten new shapes a second, so it stays a function
 of `t`. The scene shows a closed smile while walking, the traced grin while the
 arm goes up, then talking during the wave.
 
+### Blinks
+
+`src/2d/face.ts` also draws the eyelids. I found the eye in
+`assets/work/2d/pieces/head.png` from its white pixels and the outline around
+them: an ellipse centered at (254, 221) in head pixels, about 40 by 56 px with
+its outline. The lids are two skin-colored rectangles clipped to that ellipse,
+so they also cover its outline, with a lash line along the edge of the upper
+lid. Shut, they meet at y = 229, below the middle, so the upper lid does most of
+the moving. Blinks happen at fixed times that I picked by hand: four while
+walking at irregular gaps, one just after the stop and one at the end.
+
 ## 3D
 
 ### Downloads
