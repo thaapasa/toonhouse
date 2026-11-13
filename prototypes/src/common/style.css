@@ -1,0 +1,99 @@
+html,
+body {
+  margin: 0;
+  height: 100%;
+  font-family: system-ui, sans-serif;
+  background: #222;
+  color: #eee;
+  overscroll-behavior: none;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+#stage {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+#stage > canvas,
+#stage > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: #111;
+  touch-action: manipulation;
+}
+
+#controls button,
+#controls .home {
+  min-width: 56px;
+  height: 56px;
+  font-size: 26px;
+  border: none;
+  border-radius: 12px;
+  background: #333;
+  color: #fff;
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+}
+
+#controls button:active {
+  background: #555;
+}
+
+#controls input[type='range'] {
+  flex: 1;
+  height: 56px;
+  accent-color: #f5b81c;
+}
+
+#controls input[type='range']::-webkit-slider-thumb {
+  width: 32px;
+  height: 32px;
+}
+
+#controls .time {
+  font-variant-numeric: tabular-nums;
+  min-width: 5em;
+  text-align: right;
+}
+
+body.index {
+  justify-content: center;
+  align-items: center;
+}
+
+body.index nav {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+body.index h1 {
+  font-size: 28px;
+}
+
+body.index nav a {
+  display: block;
+  padding: 24px 32px;
+  border-radius: 16px;
+  background: #333;
+  color: #fff;
+  font-size: 22px;
+  text-decoration: none;
+}
