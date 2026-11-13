@@ -4,6 +4,7 @@ export const en = {
   language: 'Language',
   characters: 'Characters',
   'character.boy': 'Boy',
+  'character.emo': 'Emo girl',
   viewport: 'Viewport',
   bones: 'Bones',
   bonesHint: 'Show the bones and the joints',

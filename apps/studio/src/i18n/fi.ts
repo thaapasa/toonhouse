@@ -6,6 +6,7 @@ export const fi: Texts = {
   language: 'Kieli',
   characters: 'Hahmot',
   'character.boy': 'Poika',
+  'character.emo': 'Emotyttö',
   viewport: 'Näkymä',
   bones: 'Luut',
   bonesHint: 'Näytä luut ja nivelet',

@@ -1,0 +1,14 @@
+{
+  "model": "qwen_image_2.1_turbo_q8p.ckpt",
+  "sampler": "DDIM Trailing",
+  "guidance_scale": 1,
+  "shift": 6.5,
+  "resolution_dependent_shift": false,
+  "batch_size": 1,
+  "prompt": "RGBA image with an alpha channel and a fully transparent background. A cutout\npuppet parts sheet for a 2D cartoon character, with only five separate pieces\nlaid out in a row with wide empty space between them, nothing touching or\noverlapping. The character is an original moody, bored teenage girl of about\nfourteen, side profile view, facing right, only one eye visible. She has long\nstraight bright violet purple hair down to her shoulders with one hot pink\nstreak, and a heavy straight fringe across the forehead that stops just above\nthe eye. The five pieces are: 1) the head with the hair, side profile facing\nright, one bored half-closed heavy-lidded eye with thick eyeliner, small nose,\na flat unimpressed closed mouth, a small silver ring earring, no neck; 2) the\ntorso and the skirt as one piece, a loose mid grey t-shirt with a small pink\nskull print, over a short pleated purple and pink plaid skirt, seen from the\nside, with no arms and no legs, rounded at the shoulder and the bottom of the\nskirt; 3) one small relaxed hand seen from the side, a simple mitten shape with\na thumb and purple nail polish; 4) one open hand with the palm facing the\nviewer and the fingers spread, as for waving; 5) one foot in a chunky purple\nplatform boot with a thick white sole and pink laces, side view, pointing\nright, with no leg. Flat vector illustration for a children's cartoon: solid\nbright color fills, no gradients, no texture, no shading. Bold, even dark brown\noutline around every piece. No text, no labels, no numbers, no ground shadow.",
+  "negative_prompt": "gradient, texture, crosshatching, sketch lines, shading, realistic, 3D render, photo, background, scenery, ground shadow, text, vignette, film grain",
+  "width": 1280,
+  "height": 1024,
+  "steps": 8,
+  "seed": 11
+}

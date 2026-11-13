@@ -69,7 +69,9 @@ export function lids(face: CutoutFace, blink: number) {
 
 /** The lash line along the edge of the upper lid, curving down when shut. */
 export function lashLine(face: CutoutFace, y: number, blink: number) {
-  const { cx } = face.eye;
+  const { cx, rx } = face.eye;
+  // The line stops just inside the eye ellipse.
+  const half = rx - 1;
   const sag = 3 + blink * 5;
-  return `M${fmt(cx - 19)} ${fmt(y - 1)}Q${fmt(cx)} ${fmt(y + sag)} ${fmt(cx + 19)} ${fmt(y - 1)}`;
+  return `M${fmt(cx - half)} ${fmt(y - 1)}Q${fmt(cx)} ${fmt(y + sag)} ${fmt(cx + half)} ${fmt(y - 1)}`;
 }

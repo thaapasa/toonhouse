@@ -313,16 +313,20 @@ function headNodes(
     const { upper, lower } = lids(f, face.blink);
     const top = f.eye.cy - f.eye.ry - 2;
     const bottom = f.eye.cy + f.eye.ry + 2;
-    const x = f.eye.cx - 30;
+    // The lids reach 10 px past the eye on each side; the clip trims them.
+    const x = f.eye.cx - f.eye.rx - 10;
+    const width = 2 * f.eye.rx + 20;
     nodes.push({
       type: 'group',
-      clip: { type: 'ellipse', ...f.eye },
+      clip: f.eyeClip
+        ? { type: 'path', d: f.eyeClip }
+        : { type: 'ellipse', ...f.eye },
       children: [
         {
           type: 'rect',
           x,
           y: top,
-          width: 60,
+          width,
           height: upper - top,
           fill: colors.lid,
         },
@@ -330,7 +334,7 @@ function headNodes(
           type: 'rect',
           x,
           y: lower,
-          width: 60,
+          width,
           height: bottom - lower,
           fill: colors.lid,
         },

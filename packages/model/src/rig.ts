@@ -65,7 +65,17 @@ export interface CutoutRig {
 
 /** The parts of the face that are drawn in code, in head pixels. */
 export interface CutoutFace {
+  /**
+   * The box of the eye as an ellipse. The lids move from its top and bottom to
+   * `shutY`, and are clipped to it.
+   */
   eye: { cx: number; cy: number; rx: number; ry: number };
+  /**
+   * The outline of the eye as SVG path data, for an eye that an ellipse does
+   * not fit, such as one with an eyeliner wing. If it is set, the lids are
+   * clipped to it instead of to `eye`.
+   */
+  eyeClip?: string;
   /** Where the lids meet when the eye is closed. */
   shutY: number;
   mouth: {

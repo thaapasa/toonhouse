@@ -87,6 +87,10 @@ Look at every image and pick one where:
 - the head faces right, has one eye and has a short neck stub at the bottom
 - the torso has no arms and no legs, and is drawn upright
 - the hands are hands only, without a forearm
+- the thumbs are on the right side of both hands, as on the boy's: at the front
+  of the relaxed hand, and on the right of the open palm. If a thumb is on the
+  left, mirror that traced hand. Otherwise the relaxed hand's thumb points down,
+  and the wave shows a twist that an arm can't make.
 - the foot has no leg
 - the colors are bright and different from the dark outline
 
@@ -175,6 +179,11 @@ node scripts/inspect-piece.ts ../assets/work/<name>/pieces/head.png 180 200 347 
 **Eye.** Set `EYE` to an ellipse a little larger than the eye with its outline,
 and `SHUT_Y` to where the lids meet, a little below the middle. Set the times of
 the blinks in `BLINKS`, at uneven gaps.
+
+In the app rig, the ellipse is `face.eye`. If an ellipse that covers the eye
+also covers a line around it, such as an eyeliner wing next to the lid crease,
+set `face.eyeClip` to a path around the eye. The lids are then clipped to the
+path, and `face.eye` only sets how far they move.
 
 **Mouth patch.** If the head came with an open mouth, cover it with a patch:
 

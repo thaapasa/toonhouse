@@ -1,0 +1,89 @@
+{
+  "kind": "cutout",
+  "parts": {
+    "head": {
+      "svg": "head.svg",
+      "width": 314,
+      "height": 530,
+      "pivot": { "x": 165, "y": 345 }
+    },
+    "mouthPatch": {
+      "svg": "mouth-patch.svg",
+      "width": 314,
+      "height": 530,
+      "pivot": { "x": 165, "y": 345 }
+    },
+    "torso": {
+      "svg": "torso.svg",
+      "width": 231,
+      "height": 415,
+      "pivot": { "x": 128, "y": 345 }
+    },
+    "hand": {
+      "svg": "hand.svg",
+      "width": 96,
+      "height": 174,
+      "pivot": { "x": 44, "y": 18 }
+    },
+    "handOpen": {
+      "svg": "hand-open.svg",
+      "width": 146,
+      "height": 203,
+      "pivot": { "x": 75, "y": 182 }
+    },
+    "foot": {
+      "svg": "foot.svg",
+      "width": 222,
+      "height": 186,
+      "pivot": { "x": 62, "y": 60 }
+    }
+  },
+  "torso": {
+    "neck": { "x": 106, "y": 24 },
+    "shoulderNear": { "x": 110, "y": 92 },
+    "shoulderFar": { "x": 94, "y": 96 },
+    "hipNear": { "x": 118, "y": 345 },
+    "hipFar": { "x": 98, "y": 345 }
+  },
+  "scales": { "head": 0.82, "hand": 0.6, "foot": 0.62 },
+  "hands": { "relaxedAngle": -90, "openAngle": 90 },
+  "ankleHeight": 116,
+  "limbs": {
+    "armLength": 175,
+    "legLength": 190,
+    "armWidth": 22,
+    "legWidth": 26,
+    "outlineWidth": 7,
+    "sleeve": { "color": "#8b8aa0", "length": 0.2, "extraWidth": 8 }
+  },
+  "colors": {
+    "outline": "#452332",
+    "skin": "#f8bd93",
+    "line": "#452332",
+    "lid": "#f8bd93",
+    "mouth": "#5a1414",
+    "tongue": "#e74f5a"
+  },
+  "farShade": 0.82,
+  "shadow": { "rx": 120, "ry": 22 },
+  "face": {
+    "eye": { "cx": 215, "cy": 214, "rx": 48, "ry": 21 },
+    "eyeClip": "M168 196Q172 193 178 196L262 194 263 201 257 206 255 214 251 220 249 226 243 230 232 235H208L198 231 190 225 184 219 179 213 175 207 170 201Z",
+    "shutY": 218,
+    "mouth": {
+      "back": { "x": 247, "y": 284 },
+      "front": { "x": 266, "y": 283 },
+      "control": { "x": 257, "y": 280 },
+      "openDepth": 26,
+      "corner": "M247 284Q244 285 243 288",
+      "tongue": {
+        "cx": 256,
+        "cy": 288,
+        "rx": 7,
+        "ry": 3,
+        "drop": 11,
+        "grow": 4
+      }
+    }
+  }
+}
