@@ -19,10 +19,10 @@ waves. The scene is about 8 seconds long.
 - One Vite app in `prototypes/`, added to the pnpm workspace, with two pages:
   `2d.html` and `3d.html`, plus an index page that links to both.
 - TypeScript without React. The UI is only the controls.
-- Vite runs on port 10710 with `strictPort: true`. The developer opens it on the
-  Mac at http://localhost:10710. The port forward is in `airlock.local.toml` and
+- Vite runs on port 10790 with `strictPort: true`. The developer opens it on the
+  Mac at http://localhost:10790. The port forward is in `airlock.local.toml` and
   needs a sandbox restart. Without one, the developer runs
-  `airlock network forward 10710` on the Mac.
+  `airlock network forward 10790` on the Mac.
 - Check your own work with screenshots from headless Chromium (Playwright).
 - Downloads and generated images go to `assets/work/`, which git ignores. Commit
   only the small files that the prototypes load, under `prototypes/public/`.
