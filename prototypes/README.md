@@ -88,6 +88,11 @@ background and draws the arms and legs in code. All motion is written by hand in
 - After the stop, the body sinks and springs back, and the head nods once.
 - The wave has a short wind-up, the arm shoots up with an overshoot, the hand
   switches to the open hand and wags, and the head tilts with it.
+- The traced head has an open grin. A patch drawn by hand covers it, and the
+  mouth is drawn in code on top: a closed smile, or an opening of any size. He
+  smiles with his mouth closed while walking, shows the traced grin as the arm
+  goes up, and talks while waving. Talking opens and closes the mouth at random,
+  from a hash of the frame number.
 
 ### What looks good
 

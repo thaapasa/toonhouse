@@ -124,6 +124,24 @@ The walk and the wave are in `src/2d/anim.ts`, drawn as SVG by `src/2d/main.ts`.
   the other passing it, close to the standing pose.
 - The far arm, leg, hand and foot are drawn 18 % darker.
 
+### Mouth
+
+The traced head has an open grin, which looked odd for the whole scene.
+`public/2d/mouth-patch.svg` covers it. I drew it by hand in the pixels of the
+head piece: a skin-colored shape over the mouth, and a new profile line from
+under the nose to the chin, where the open jaw had cut a notch into the outline.
+I placed the points by reading the alpha and colors of
+`assets/work/2d/pieces/head.png` row by row around the mouth, then checked the
+patch by rendering it over `public/2d/head.svg` with `pnpm render-svg` at 4×
+zoom. The skin color `#fbc78c` and the outline color `#44260c` come from
+`head.svg`.
+
+`src/2d/face.ts` draws the mouth on top of the patch: a smile line when closed,
+and a dark shape with a tongue when open. When talking, the opening comes from a
+hash of the frame number, about ten new shapes a second, so it stays a function
+of `t`. The scene shows a closed smile while walking, the traced grin while the
+arm goes up, then talking during the wave.
+
 ## 3D
 
 ### Downloads

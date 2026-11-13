@@ -1,6 +1,7 @@
 import { SCENE } from '../common/path.ts';
 import { createPlayer } from '../common/player.ts';
 import { frameAt, project, VIEW_H, VIEW_W } from './anim.ts';
+import { CORNER, faceAt, mouthShape, tongue, upperLip } from './face.ts';
 import { add, hoseControl, type Pt, rotate, sub } from './math.ts';
 import type { PartData, RigData } from './rig.ts';
 
@@ -126,6 +127,7 @@ async function main() {
   await Promise.all([
     loadSymbol(defs, 'park', 'park.svg'),
     loadSymbol(defs, 'head', rig.head.svg),
+    loadSymbol(defs, 'mouth-patch', 'mouth-patch.svg'),
     loadSymbol(defs, 'torso', rig.torso.svg),
     loadSymbol(defs, 'hand', rig.hand.svg),
     loadSymbol(defs, 'hand-open', rig.handOpen.svg),
@@ -145,7 +147,28 @@ async function main() {
   const nearLeg = hose(character, rig, rig.legWidth, rig.skin);
   const torso = placed(rig.torso, 'torso', character);
   const nearFoot = placed(rig.foot, 'foot', character);
-  const head = placed(rig.head, 'head', character);
+  // The head is a group: the traced head, the patch over its grin and the
+  // mouth drawn in code, all in the pixels of the head piece.
+  const head = el('g', {}, character);
+  placed(rig.head, 'head', head);
+  const mouth = el('g', {}, head);
+  placed(rig.head, 'mouth-patch', mouth);
+  const mouthClip = el('clipPath', { id: 'mouth-clip' }, defs);
+  const mouthClipPath = el('path', {}, mouthClip);
+  const mouthHole = el('path', { fill: '#5a1414' }, mouth);
+  const mouthTongue = el(
+    'ellipse',
+    { fill: '#e74f5a', 'clip-path': 'url(#mouth-clip)' },
+    mouth,
+  );
+  const lineStyle = {
+    fill: 'none',
+    stroke: '#44260c',
+    'stroke-linecap': 'round',
+    'stroke-linejoin': 'round',
+  };
+  const mouthLine = el('path', { ...lineStyle, 'stroke-width': 5 }, mouth);
+  el('path', { ...lineStyle, 'stroke-width': 4, d: CORNER }, mouth);
   const nearArm = hose(character, rig, rig.armWidth, rig.skin);
   const nearSleeve = sleeve(character, rig, rig.armWidth);
   const nearHand = placed(rig.hand, 'hand', character);
@@ -173,6 +196,22 @@ async function main() {
       pinned(pose.hip, pose.torsoAngle, 1, t0.pivot),
     );
     const neck = onTorso(t0.neck);
+    const face = faceAt(t);
+    mouth.style.display = face.grin ? 'none' : '';
+    if (!face.grin) {
+      // A closed mouth is the smile line alone; an open one is a filled shape
+      // with the tongue inside and the outline around it.
+      const open = face.open > 0.02;
+      const shape = open ? mouthShape(face.open) : upperLip();
+      mouthLine.setAttribute('d', shape);
+      mouthHole.setAttribute('d', open ? shape : '');
+      mouthClipPath.setAttribute('d', open ? shape : '');
+      mouthTongue.style.display = open ? '' : 'none';
+      const tg = tongue(face.open);
+      for (const [k, v] of Object.entries(tg)) {
+        mouthTongue.setAttribute(k, String(v));
+      }
+    }
     head.setAttribute(
       'transform',
       pinned(

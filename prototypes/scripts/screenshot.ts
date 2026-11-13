@@ -21,7 +21,11 @@ const browser = await chromium.launch({
     '--enable-unsafe-swiftshader',
   ],
 });
-const tab = await browser.newPage({ viewport: { width, height } });
+// SHOT_SCALE renders at a higher pixel density, for sharp close-ups.
+const tab = await browser.newPage({
+  viewport: { width, height },
+  deviceScaleFactor: Number(process.env.SHOT_SCALE ?? 1),
+});
 const errors: string[] = [];
 tab.on('pageerror', (e) => errors.push(String(e)));
 tab.on('console', (m) => {
