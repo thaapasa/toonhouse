@@ -42,10 +42,11 @@ export function project(p: Vec2) {
   };
 }
 
-// The walk ends a quarter cycle into a step, when one foot is planted under
-// the body and the other passes it. Then both feet are close to the standing
-// pose and the stop needs little sliding.
-const CYCLES = 8.25;
+// The walk starts and ends a quarter cycle into a step, when one foot is
+// planted under the body and the other passes it. Then both feet are close to
+// the standing pose, and starting and stopping need little sliding.
+const CYCLES = 8;
+const PHASE_OFFSET = 0.25;
 
 // The phase of the walk comes from the distance covered on the screen, in
 // sheet pixels at the scale of the character at that point. Then a planted
@@ -148,7 +149,7 @@ export function frameAt(t: number): Frame {
   // 0 when standing, 1 at full walking speed.
   const walk = smoothstep(0.02, 0.55, speed);
 
-  const q = walkPhase(dist);
+  const q = walkPhase(dist) + PHASE_OFFSET;
   const near = mixFoot(STAND_NEAR, footCycle(q), walk);
   const far = mixFoot(STAND_FAR, footCycle(q + 0.5), walk);
 
