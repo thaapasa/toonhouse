@@ -28,6 +28,20 @@ waves. The scene is about 8 seconds long.
   only the small files that the prototypes load, under `prototypes/public/`.
 - Work on the `prototypes` branch and commit when a step works.
 
+## Work log
+
+Keep a log in `prototypes/LOG.md` and commit it with the work, so that every
+asset can be made again without this session. Add an entry as you go, not at the
+end. Record:
+
+- every tool you install, with its version and how you installed it
+- every download: the URL, the pack name, the license and where the files went
+- every conversion or generation step: the command, the input, the output and
+  the settings, such as the prompt file and seed, or the trace palette
+- how each file in `prototypes/public/` was made, step by step from its source
+- choices you made by hand, such as pivot points or which generated image you
+  picked, and why
+
 ## 2D: cutout with rubber-hose limbs
 
 Read [assets/CLAUDE.md](../assets/CLAUDE.md) before you generate images.
