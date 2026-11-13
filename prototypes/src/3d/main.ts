@@ -300,7 +300,7 @@ function hills() {
     const m = new THREE.Mesh(
       new THREE.SphereGeometry(1, 32, 16),
       new THREE.MeshToonMaterial({
-        color: colors[i % colors.length],
+        color: colors[i % colors.length]!,
         gradientMap,
       }),
     );
