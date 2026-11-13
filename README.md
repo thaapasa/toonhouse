@@ -48,6 +48,7 @@ The same commands also run without dekit:
 
 ```sh
 mise install
+mise clean         # remove the dependencies, then mise install again
 pnpm lint
 pnpm format        # format all files, including Markdown
 pnpm typecheck

@@ -12,3 +12,13 @@ postinstall = "pnpm install"
 description = "Start the dev servers in dekit"
 run = "dekit"
 raw = true
+
+# Empties the node_modules folders instead of deleting them, because in the
+# sandbox each one is a mount point of an airlock cache.
+[tasks.clean]
+description = "Remove the installed dependencies; mise install installs them again"
+run = '''
+find . -name node_modules -type d -prune -print | while read -r dir; do
+  find "$dir" -mindepth 1 -maxdepth 1 -exec rm -rf {} +
+done
+'''

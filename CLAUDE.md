@@ -6,7 +6,8 @@ is and [ARCHITECTURE.md](ARCHITECTURE.md) for how it is built.
 ## Commands
 
 Run these from the repo root. `mise install` sets up the tools and the
-dependencies.
+dependencies, and `mise clean` removes the dependencies so that you can install
+them again.
 
 - `pnpm lint`
 - `pnpm format`: formats all files with Prettier, including Markdown.
