@@ -172,8 +172,53 @@ Props, all Quaternius, CC0 1.0 on poly.pizza:
 | `rock-big.glb`                  | Rock             | RtLRqYjfMs |
 | `rock-small.glb`                | Rocks            | OQvi8PIZ40 |
 | `bench.glb`                     | Bench            | jLxjFxFRpw |
-| `bush.glb`                      | Bush             | ooG6CkLyE8 |
 
 The files in `public/3d/` are copies of the downloaded GLBs without changes. I
 chose props with simple shapes and flat colors, because they read better with
 toon shading than the detailed leafy trees.
+
+I first used the textured "Bush" (ooG6CkLyE8) too, but dropped it. Its leaves
+are alpha-tested cards, and with the toon material and the outline they showed
+as dark streaks. The bushes are now the round tree sunk into the ground so that
+only the crown shows.
+
+### Look
+
+- `src/3d/toon.ts` swaps every material for a `MeshToonMaterial` with the same
+  color and texture, and a gradient map with three bands (90, 175, 255 of 255).
+  The prop colors are set by hand by material name to brighter greens, browns
+  and greys, because the original colors are dark under toon shading.
+- The outline is an inverted hull: a copy of each mesh drawn on its back faces
+  in a dark brown (`#2a1d1a`) and pushed outwards in screen space by 2.8 px. For
+  the character the hull is a `SkinnedMesh` bound to the same skeleton. The
+  models are flat-shaded, so their normals are split at every edge, and a hull
+  built from them tears open. The hull therefore uses normals averaged over all
+  vertices at the same position, stored in an extra attribute.
+- The sky is a vertical canvas gradient, the ground a large toon-shaded disc,
+  and the path a sand-colored ribbon along the shared Bézier.
+- The camera sits low in front of the path, at 0.8 character heights, and pans
+  part of the way with the character.
+
+### Motion
+
+- The world is the shared path scaled by `K = groundSpeed / MAX_SPEED`. At top
+  speed the character then walks exactly as fast as the walk clip was made for,
+  so the clip plays at its normal rate. The character keeps its size.
+- On load, the code samples the walk clip at 240 points with the model at the
+  origin and records how far the planted foot moves backwards in each slice. The
+  clip does not move the body forward at an even speed: in the first version,
+  with the phase growing evenly with distance, the planted foot slid at about
+  60% of the walking speed. Now the distance walked goes through the inverse of
+  that measured curve to get the clip phase, and the planted foot slides at
+  about 5–10% of the walking speed. The clip has a short hop where neither foot
+  is on the ground; there the body moves at the average speed.
+- When the character speeds up or slows down, the walk blends with idle by
+  `sqrt(speed / top speed)` and plays at the same factor, so the stride gets
+  shorter and the cadence slower at the same time. The phase is an integral of
+  that rate over `t`, kept in a table, so the pose still depends only on `t`.
+- The walk phase is offset so that the feet pass each other at the stop.
+- Idle plays on `t`. Wave fades in around `waveStart` and out after `waveEnd`.
+- The character faces the direction of travel and, from 4.6 s, turns 70% of the
+  way towards the camera for the wave.
+- The `window.toon3d` debug hook returns the foot positions at a given `t`. I
+  used it to measure the foot sliding.
