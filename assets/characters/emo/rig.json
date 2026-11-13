@@ -5,45 +5,45 @@
       "svg": "head.svg",
       "width": 314,
       "height": 530,
-      "pivot": { "x": 165, "y": 345 }
+      "pivot": { "x": 149, "y": 346 }
     },
     "mouthPatch": {
       "svg": "mouth-patch.svg",
       "width": 314,
       "height": 530,
-      "pivot": { "x": 165, "y": 345 }
+      "pivot": { "x": 149, "y": 346 }
     },
     "torso": {
       "svg": "torso.svg",
       "width": 231,
       "height": 415,
-      "pivot": { "x": 128, "y": 345 }
+      "pivot": { "x": 117, "y": 314 }
     },
     "hand": {
       "svg": "hand.svg",
       "width": 96,
       "height": 174,
-      "pivot": { "x": 44, "y": 18 }
+      "pivot": { "x": 39, "y": 19 }
     },
     "handOpen": {
       "svg": "hand-open.svg",
       "width": 146,
       "height": 203,
-      "pivot": { "x": 75, "y": 182 }
+      "pivot": { "x": 76, "y": 182 }
     },
     "foot": {
       "svg": "foot.svg",
       "width": 222,
       "height": 186,
-      "pivot": { "x": 62, "y": 60 }
+      "pivot": { "x": 44, "y": 55 }
     }
   },
   "torso": {
-    "neck": { "x": 106, "y": 24 },
-    "shoulderNear": { "x": 110, "y": 92 },
-    "shoulderFar": { "x": 94, "y": 96 },
-    "hipNear": { "x": 118, "y": 345 },
-    "hipFar": { "x": 98, "y": 345 }
+    "neck": { "x": 135, "y": 28 },
+    "shoulderNear": { "x": 108, "y": 91 },
+    "shoulderFar": { "x": 100, "y": 87 },
+    "hipNear": { "x": 116, "y": 314 },
+    "hipFar": { "x": 112, "y": 327 }
   },
   "scales": { "head": 0.82, "hand": 0.6, "foot": 0.62 },
   "hands": { "relaxedAngle": -90, "openAngle": 90 },
