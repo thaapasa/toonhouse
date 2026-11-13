@@ -47,3 +47,9 @@ the format.
 - Ask before changing or removing an existing requirement.
 - Each spec can end with an "Open questions" section. Ask the user before you
   implement anything that depends on an open question.
+
+## Design
+
+The UI design is in `design/`, synced from the Claude Design canvas. See
+`design/CLAUDE.md` for the boards and the sync steps. To update the local copy,
+use the `sync-design` skill.

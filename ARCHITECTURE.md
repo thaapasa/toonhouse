@@ -3,7 +3,8 @@
 Toonhouse is a TypeScript monorepo with pnpm workspaces. This page describes the
 planned structure. Most of it does not exist yet.
 
-The requirements are in [specs/](specs/README.md).
+The requirements are in [specs/](specs/README.md), and the UI design is in
+[design/](design/CLAUDE.md).
 
 ## Apps
 
