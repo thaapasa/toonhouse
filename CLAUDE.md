@@ -30,6 +30,12 @@ When you add, rename or remove a server, a check or a project script, update
 dekit has a terminal UI, so don't run `mise start` yourself. Run the commands in
 `dekit.yaml` directly.
 
+## Workspace packages
+
+The sandbox and the Mac share the project folder, so each keeps its own
+`node_modules` in an airlock cache. When you add a workspace package, add its
+`node_modules` to the `node-modules` cache in `airlock.toml`.
+
 ## Ports
 
 The app ID is `07`: the server runs on 10700, the Vite dev server on 10710 and
