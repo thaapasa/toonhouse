@@ -312,6 +312,26 @@ files.
 - The open hand faces the viewer while the body is in profile, so the wrist
   looks a little odd in the wave.
 
+## Long clothes
+
+If the clothes reach the ground, such as a long robe or a dress, set
+`feetBehindTorso` in the rig. The near foot is then drawn behind the torso, and
+the hem covers the top of both feet. Set `limbs.legColor` to the color of the
+clothes, so that a leg that shows in a long stride looks like a fold of them.
+
+## Holding a staff
+
+A cutout rig can have a staff in the near hand. The wizard is the example, and
+his [log](characters/wizard/LOG.md) describes how it was set up:
+
+- Ask for the staff as a sixth piece on the parts sheet, and for the relaxed
+  hand as a closed fist.
+- Add the staff to the parts of the rig, with its pivot at the point that sits
+  in the fist, and set `staff` in the rig. The type `StaffHold` in
+  `packages/model` describes each field.
+- The clips place the hands for the boy, so check that the staff stays clear of
+  the face in the walk and the wave. The hand stays a fist in the wave.
+
 ## Adding the character to the app
 
 1. Make a folder `assets/characters/<name>/` and copy the SVG pieces, the mouth

@@ -10,6 +10,7 @@ import { describe, expect, it } from 'vitest';
 import boy from '../../../assets/characters/boy/rig.json';
 import bunny from '../../../assets/characters/bunny/rig.json';
 import chicken from '../../../assets/characters/chicken/rig.json';
+import wizardRig from '../../../assets/characters/wizard/rig.json';
 import { legJoint } from './bird.ts';
 import {
   BIRD_CLIPS,
@@ -26,6 +27,7 @@ import { twoBoneJoint } from './math.ts';
 const rig = boy as CutoutRig;
 const bird = chicken as BirdRig;
 const rabbit = bunny as RabbitRig;
+const wizard = wizardRig as CutoutRig;
 
 /** Every number in a value, in a fixed order. */
 function numbers(v: unknown): number[] {
@@ -43,6 +45,11 @@ function parts(node: DrawNode): string[] {
 
 const cases: [string, Clip, Rig][] = [
   ...CUTOUT_CLIPS.map((c): [string, Clip, Rig] => [`cutout ${c.id}`, c, rig]),
+  ...CUTOUT_CLIPS.map((c): [string, Clip, Rig] => [
+    `cutout ${c.id} with a staff`,
+    c,
+    wizard,
+  ]),
   ...BIRD_CLIPS.map((c): [string, Clip, Rig] => [`bird ${c.id}`, c, bird]),
   ...RABBIT_CLIPS.map((c): [string, Clip, Rig] => [
     `rabbit ${c.id}`,
@@ -110,6 +117,28 @@ describe('drawCharacter', () => {
     expect(
       parts(drawCharacter(rig, wave.frameAt(1.5), { facing: 1 }).node),
     ).toContain('handOpen');
+  });
+
+  it('keeps the fist on the staff in the wave', () => {
+    const wave = clipById('cutout', 'wave');
+    const drawn = parts(
+      drawCharacter(wizard, wave.frameAt(1.5), { facing: 1 }).node,
+    );
+    expect(drawn).toContain('staff');
+    expect(drawn).not.toContain('handOpen');
+    expect(
+      parts(drawCharacter(rig, wave.frameAt(1.5), { facing: 1 }).node),
+    ).not.toContain('staff');
+  });
+
+  it('draws the feet behind a long robe', () => {
+    const frame = clipById('cutout', 'idle').frameAt(0);
+    const order = (r: CutoutRig) =>
+      parts(drawCharacter(r, frame, { facing: 1 }).node);
+    const robe = order(wizard);
+    expect(robe.lastIndexOf('foot')).toBeLessThan(robe.indexOf('torso'));
+    const shorts = order(rig);
+    expect(shorts.lastIndexOf('foot')).toBeGreaterThan(shorts.indexOf('torso'));
   });
 
   it('mirrors the skeleton when facing left', () => {

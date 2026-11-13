@@ -28,4 +28,5 @@ export type {
   RigKind,
   RigPart,
   RigPartId,
+  StaffHold,
 } from './rig.ts';

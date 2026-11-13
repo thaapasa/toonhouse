@@ -12,12 +12,14 @@ import type {
 } from '@toonhouse/model';
 
 import { drawBird } from './bird.ts';
+import { hang, NEAR_ARM_REST } from './clips/body.ts';
 import { eyeLids, mouthShape, tongue, upperLip } from './face.ts';
 import {
   add,
   curveMiddle,
   deg,
   hoseControl,
+  mix,
   pinned,
   rotate,
   scaling,
@@ -167,7 +169,7 @@ function drawCutout(
   const { pose } = frame;
   const { parts, limbs, colors } = rig;
   const part = (id: RigPartId, transform: Matrix): DrawNode => {
-    const p = id === 'mouthPatch' ? parts.mouthPatch! : parts[id];
+    const p = parts[id]!;
     return {
       type: 'part',
       part: id,
@@ -178,7 +180,11 @@ function drawCutout(
   };
 
   /** A rubber-hose limb: an outline stroke under a fill stroke. */
-  const hose = (d: string, width: number): DrawNode[] => [
+  const hose = (
+    d: string,
+    width: number,
+    color: string = colors.skin,
+  ): DrawNode[] => [
     {
       type: 'path',
       d,
@@ -189,7 +195,7 @@ function drawCutout(
     {
       type: 'path',
       d,
-      stroke: colors.skin,
+      stroke: color,
       strokeWidth: width,
       lineCap: 'round',
     },
@@ -236,7 +242,7 @@ function drawCutout(
       hip,
       knee: curveMiddle(hip, c, ankle),
       ankle,
-      limb: hose(curve(hip, c, ankle), limbs.legWidth),
+      limb: hose(curve(hip, c, ankle), limbs.legWidth, limbs.legColor),
       foot: part(
         'foot',
         pinned(ankle, angle, rig.scales.foot, parts.foot.pivot),
@@ -260,7 +266,21 @@ function drawCutout(
       nodes: [...hose(d, limbs.armWidth), ...sleeve(d)],
     };
   };
-  const nearArm = arm(rig.torso.shoulderNear, pose.handNear);
+  // The clips place the hands for the boy. If the rig has a staff, the near
+  // hand stays near the hold point of the rig and keeps only a part of the
+  // motion of the clip, so that the staff doesn't cross the face.
+  const staff = rig.staff && parts.staff ? rig.staff : undefined;
+  const handNear = staff
+    ? add(
+        staff.hold,
+        mix(
+          { x: 0, y: 0 },
+          sub(pose.handNear, hang(0, NEAR_ARM_REST)),
+          staff.follow,
+        ),
+      )
+    : pose.handNear;
+  const nearArm = arm(rig.torso.shoulderNear, handNear);
   const farArm = arm(rig.torso.shoulderFar, pose.handFar);
   const hand = (a: typeof nearArm, open: boolean, angle: number): DrawNode => {
     const id = open ? 'handOpen' : 'hand';
@@ -276,6 +296,30 @@ function drawCutout(
     );
   };
 
+  /** The fist around the staff, and the staff behind it. */
+  const staffHand = (s: NonNullable<typeof staff>): DrawNode[] => {
+    const turn = pose.torsoAngle + s.turn * pose.handNearAngle;
+    const fist = turn + deg(s.handAngle);
+    const grip = add(
+      nearArm.wrist,
+      rotate(
+        {
+          x: (s.grip.x - parts.hand.pivot.x) * rig.scales.hand,
+          y: (s.grip.y - parts.hand.pivot.y) * rig.scales.hand,
+        },
+        fist,
+      ),
+    );
+    return [
+      part('staff', pinned(grip, turn, s.scale, parts.staff!.pivot)),
+      ...nearArm.nodes,
+      part(
+        'hand',
+        pinned(nearArm.wrist, fist, rig.scales.hand, parts.hand.pivot),
+      ),
+    ];
+  };
+
   const character: DrawNode[] = [
     // The far side of the body is a little darker, so the limbs read apart.
     {
@@ -289,8 +333,9 @@ function drawCutout(
       ],
     },
     ...nearLeg.limb,
+    ...(rig.feetBehindTorso ? [nearLeg.foot] : []),
     part('torso', pinned(pose.hip, pose.torsoAngle, 1, t0.pivot)),
-    nearLeg.foot,
+    ...(rig.feetBehindTorso ? [] : [nearLeg.foot]),
     {
       type: 'group',
       transform: pinned(
@@ -301,8 +346,12 @@ function drawCutout(
       ),
       children: headNodes(rig, frame.face, part),
     },
-    ...nearArm.nodes,
-    hand(nearArm, pose.handNearOpen > 0.5, pose.handNearAngle),
+    ...(staff
+      ? staffHand(staff)
+      : [
+          ...nearArm.nodes,
+          hand(nearArm, pose.handNearOpen > 0.5, pose.handNearAngle),
+        ]),
   ];
 
   const node = placed(rig.shadow, facing, character);

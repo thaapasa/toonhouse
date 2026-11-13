@@ -7,6 +7,7 @@ export const en = {
   'character.chicken': 'Hen',
   'character.boy': 'Boy',
   'character.emo': 'Emo girl',
+  'character.wizard': 'Wizard',
   viewport: 'Viewport',
   bones: 'Bones',
   bonesHint: 'Show the bones and the joints',

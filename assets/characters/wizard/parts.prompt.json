@@ -1,0 +1,14 @@
+{
+  "model": "qwen_image_2.1_turbo_q8p.ckpt",
+  "sampler": "DDIM Trailing",
+  "guidance_scale": 1,
+  "shift": 6.5,
+  "resolution_dependent_shift": false,
+  "batch_size": 1,
+  "prompt": "RGBA image with an alpha channel and a fully transparent background. A cutout\npuppet parts sheet for a 2D cartoon character, with only six separate pieces\nlaid out in a row with wide empty space between them, nothing touching or\noverlapping. The character is an original old wandering wizard, tall and\nweathered, wise and a little grumpy, side profile view, facing right, only one\neye visible. He has a long flowing light grey-white beard down to his chest,\nbushy white eyebrows, a big long nose, and a tall battered pointed hat with a\nwide floppy brim in light blue-grey, slightly bent at the tip. The six pieces\nare: 1) the head with the hat and the beard, side profile facing right, one\neye under a bushy eyebrow, a big nose, a white moustache over a small closed\nmouth, an ear, no neck; 2) the torso in a long light grey wizard robe that\nfalls straight down to the ankles, with a tan rope belt at the waist, seen from\nthe side, upright, with no arms, no hands, no head and no feet, rounded at the\nshoulder; 3) one relaxed hand seen from the side, a simple closed mitten fist\nwith a thumb; 4) one open hand with the palm facing the viewer and the fingers\nspread, as for waving; 5) one foot in a worn brown leather boot, side view,\npointing right, with no leg; 6) a tall straight wooden walking staff standing\nupright, taller than the robe, light warm brown wood, with a gnarled knot of\ntwisted roots at the top that holds a small glowing pale blue crystal. Flat\nvector illustration for a cartoon: solid bright color fills, no gradients, no\ntexture, no shading. Bold, even dark brown outline around every piece. No\ntext, no labels, no numbers, no ground shadow.",
+  "negative_prompt": "gradient, texture, crosshatching, sketch lines, shading, realistic, 3D render, photo, background, scenery, ground shadow, text, vignette, film grain",
+  "width": 1280,
+  "height": 1024,
+  "steps": 8,
+  "seed": 11
+}

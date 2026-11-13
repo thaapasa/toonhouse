@@ -11,7 +11,7 @@ export interface RigPart {
 }
 
 export type RigPartId =
-  'head' | 'mouthPatch' | 'torso' | 'hand' | 'handOpen' | 'foot';
+  'head' | 'mouthPatch' | 'torso' | 'hand' | 'handOpen' | 'foot' | 'staff';
 
 /**
  * A cutout character: traced pieces for the head, the torso, the hands and the
@@ -21,9 +21,14 @@ export type RigPartId =
  */
 export interface CutoutRig {
   kind: 'cutout';
-  parts: Record<Exclude<RigPartId, 'mouthPatch'>, RigPart> & {
+  parts: Record<Exclude<RigPartId, 'mouthPatch' | 'staff'>, RigPart> & {
     /** Covers the mouth that the head was traced with. Drawn in head pixels. */
     mouthPatch?: RigPart;
+    /**
+     * A staff held in the near hand. The pivot is the point on the staff
+     * that sits in the fist.
+     */
+    staff?: RigPart;
   };
   /** Joints on the torso, in torso pixels. The torso pivot is the hip middle. */
   torso: {
@@ -47,7 +52,11 @@ export interface CutoutRig {
     outlineWidth: number;
     /** A short sleeve over the top of each arm. */
     sleeve?: { color: string; length: number; extraWidth: number };
+    /** The color of the legs, if not the skin, such as for trousers. */
+    legColor?: string;
   };
+  /** How the near hand holds the staff, if the rig has one. */
+  staff?: StaffHold;
   colors: {
     outline: string;
     skin: string;
@@ -57,10 +66,39 @@ export interface CutoutRig {
     mouth: string;
     tongue: string;
   };
+  /**
+   * Draw the near foot behind the torso, for clothes that reach the ground,
+   * such as a long robe. Otherwise the near foot is drawn over the torso.
+   */
+  feetBehindTorso?: boolean;
   /** Brightness of the far arm and leg, from 0 to 1. */
   farShade: number;
   shadow: { rx: number; ry: number };
   face: CutoutFace;
+}
+
+/**
+ * A staff in the near hand. The clips move the hands for the proportions of
+ * the boy, so the rig moves the near hand to where it holds the staff. The
+ * hand stays a fist, also when a clip opens it, and the staff stays upright
+ * apart from the lean of the torso and a part of the turn of the hand.
+ */
+export interface StaffHold {
+  /** The near wrist against the near shoulder, when standing. */
+  hold: Pt;
+  /** How much of the motion of the near hand in the clip to keep, 0 to 1. */
+  follow: number;
+  /**
+   * How much the staff turns with the hand angle of the clip. A negative
+   * value turns it the other way, so that the top tips forward when the clip
+   * tips an open hand back, as in the wave.
+   */
+  turn: number;
+  /** Rotation of the fist, in degrees. 0 is the relaxed hand hanging down. */
+  handAngle: number;
+  /** The point in the fist that the staff goes through, in hand pixels. */
+  grip: Pt;
+  scale: number;
 }
 
 /** An eye with lids drawn in code, in head pixels. */

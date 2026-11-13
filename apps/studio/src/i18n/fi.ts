@@ -9,6 +9,7 @@ export const fi: Texts = {
   'character.chicken': 'Kana',
   'character.boy': 'Poika',
   'character.emo': 'Emotyttö',
+  'character.wizard': 'Velho',
   viewport: 'Näkymä',
   bones: 'Luut',
   bonesHint: 'Näytä luut ja nivelet',
