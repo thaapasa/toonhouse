@@ -21,11 +21,20 @@ dependencies.
 The CI workflow runs the same checks, with `pnpm format:check` instead of
 `pnpm format`.
 
+## Local development tasks
+
+`mise start` runs [dekit](https://dekit.run), and `dekit.yaml` lists its tasks.
+When you add, rename or remove a server, a check or a project script, update
+`dekit.yaml` and the dekit section in `README.md` to match.
+
+dekit has a terminal UI, so don't run `mise start` yourself. Run the commands in
+`dekit.yaml` directly.
+
 ## Ports
 
 The app ID is `07`: the server runs on 10700, the Vite dev server on 10710 and
-the character studio on 10711. Every port comes from an env var with the scheme
-port as the default.
+the character studio on 10711. The motion prototypes run on 10790. Every port
+comes from an env var with the scheme port as the default.
 
 ## Rules
 

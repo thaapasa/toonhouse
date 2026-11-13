@@ -11,11 +11,13 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc -p . && pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test",
+    "test:watch": "pnpm --filter @toonhouse/renderer test:watch",
     "build": "pnpm -r --if-present build",
     "generate-image": "node scripts/generate-image.ts",
     "trace-image": "node scripts/trace-image.ts",
     "render-svg": "node scripts/render-svg.ts",
-    "studio": "pnpm --filter @toonhouse/studio dev"
+    "studio": "pnpm --filter @toonhouse/studio dev",
+    "prototypes": "pnpm --filter @toonhouse/prototypes dev"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -30,7 +30,21 @@ to SVG. [assets/CLAUDE.md](assets/CLAUDE.md) describes how.
 ## Local development
 
 The project uses [mise](https://mise.jdx.dev) for its tools. `mise install`
-installs Node, pnpm and VTracer, and then the project dependencies.
+installs Node, pnpm, VTracer and dekit, and then the project dependencies.
+
+Run `mise start` to start the local development tasks in
+[dekit](https://dekit.run), a process manager with a terminal UI. `dekit.yaml`
+lists its tasks. dekit starts the character studio on http://localhost:10711 and
+the motion prototypes on http://localhost:10790. The other tasks start only when
+you ask for them: the checks (lint with `--fix`, format, typecheck, tests and
+tests in watch mode) and the build.
+
+In the UI, select a task and press `s` to start it, `r` to restart it or `x` to
+stop it. Press `q` to quit, and then `d` to leave the tasks running in the
+background. A running dekit keeps its own copy of the tasks, so after you edit
+`dekit.yaml`, run `dekit reload --yes` to take the changes.
+
+The same commands also run without dekit:
 
 ```sh
 mise install
@@ -40,6 +54,7 @@ pnpm typecheck
 pnpm test
 pnpm build
 pnpm studio        # the character studio on http://localhost:10711
+pnpm prototypes    # the motion prototypes on http://localhost:10790
 ```
 
 ### Ports
@@ -51,6 +66,7 @@ The local ports follow the `1AARR` scheme. The app ID is `07`.
 | 10700 | Server (API and assets) |
 | 10710 | Vite dev server         |
 | 10711 | Character studio        |
+| 10790 | Motion prototypes       |
 
 ## Asset licenses
 

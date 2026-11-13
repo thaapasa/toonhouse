@@ -1,0 +1,31 @@
+# Local development tasks for dekit. `mise start` runs it, see README.md.
+tasks:
+  dev/:
+  dev/studio:
+    cmd: pnpm studio
+    ready: { tcp: 10711 }
+    autostart: true
+  dev/prototypes:
+    cmd: pnpm prototypes
+    ready: { tcp: 10790 }
+    autostart: true
+
+  check/:
+  check/lint:
+    type: job
+    cmd: pnpm lint --fix
+  check/format:
+    type: job
+    cmd: pnpm format
+  check/typecheck:
+    type: job
+    cmd: pnpm typecheck
+  check/test:
+    type: job
+    cmd: pnpm test
+  check/test-watch:
+    cmd: pnpm test:watch
+
+  build:
+    type: job
+    cmd: pnpm build
