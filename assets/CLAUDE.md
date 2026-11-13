@@ -7,6 +7,9 @@ generating images with AI, tracing them to SVG and checking the result.
   in the app.
 - `work/`: scratch files from generating and tracing. Git ignores it.
 
+To make an animated 2D character, follow [cutout-toons.md](cutout-toons.md). It
+builds on the steps below.
+
 ## Generating images
 
 Images come from [Draw Things](https://drawthings.ai), which runs on the Mac of
