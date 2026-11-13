@@ -34,10 +34,10 @@ installs Node, pnpm, VTracer and dekit, and then the project dependencies.
 
 Run `mise start` to start the local development tasks in
 [dekit](https://dekit.run), a process manager with a terminal UI. `dekit.yaml`
-lists its tasks. dekit starts the character studio on http://localhost:10711 and
-the motion prototypes on http://localhost:10790. The other tasks start only when
-you ask for them: the checks (lint with `--fix`, format, typecheck, tests and
-tests in watch mode) and the build.
+lists its tasks. dekit starts the character studio on http://localhost:10711.
+The other tasks start only when you ask for them: the motion prototypes on
+http://localhost:10790, the checks (lint with `--fix`, format, typecheck, tests
+and tests in watch mode) and the build.
 
 In the UI, select a task and press `s` to start it, `r` to restart it or `x` to
 stop it. Press `q` to quit, and then `d` to leave the tasks running in the

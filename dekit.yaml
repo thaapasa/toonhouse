@@ -8,7 +8,7 @@ tasks:
   dev/prototypes:
     cmd: pnpm prototypes
     ready: { tcp: 10790 }
-    autostart: true
+    autostart: false
 
   check/:
   check/lint:
