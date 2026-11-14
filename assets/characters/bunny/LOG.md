@@ -31,9 +31,7 @@ in `assets/work/bunny/`.
 I read the points from zoomed crops of the pieces with a 20 px grid
 (`inspect-piece.ts --zoom`).
 
-- The body pivot is the hip, in the middle of the round haunch. The body came
-  with a small foot drawn at the bottom, and the near hind foot covers it when
-  the bunny sits.
+- The body pivot is the hip, in the middle of the round haunch.
 - The head turns around a point at the bottom of the back of the head. The head
   is drawn at 0.8 and overlaps the top of the body, so no neck is needed.
 - The ears turn around the middle of their flat bottom edge. Both roots are
@@ -73,3 +71,20 @@ I rendered frames of each clip to SVG with a script in `assets/work/bunny/` and
 looked at them with `render-svg`: the hop every 0.04–0.07 s, the look out going
 up and coming down, and the open mouth at 5×. Then I opened the bunny in the
 studio.
+
+## Body without the hind foot
+
+The body came with a hind foot drawn at the bottom, under the front of the
+haunch. When the bunny sat, the near hind foot covered it, but in the hop the
+drawn foot showed next to the legs of the renderer, so the bunny had two pairs.
+I removed the foot from `body.svg`:
+
+- I dropped the paths of the toes and of the top line of the foot.
+- A clip path cuts off the bottom front corner of the body along a curve from
+  the flat bottom up to the belly, and a stroke in the outline color and width
+  closes the outline along the same curve.
+- Two patches in the fur and the belly colors cover what was left of the outline
+  around the foot, and the line of the haunch now runs down to the bottom.
+
+The hip and the pivot of the body did not need to move. I checked the hop, the
+idle, the look out and the talk in the studio.
