@@ -1,8 +1,8 @@
 # Architecture
 
 Toonhouse is a TypeScript monorepo with pnpm workspaces. This page describes the
-planned structure. So far, the character studio and the packages it uses exist.
-The web app, the server and the export client don't.
+planned structure. So far, the character studio, the packages it uses and the
+first parts of the server exist. The web app and the export client don't.
 
 The requirements are in [specs/](specs/README.md), and the UI design is in
 [design/](design/CLAUDE.md).
@@ -13,7 +13,7 @@ The requirements are in [specs/](specs/README.md), and the UI design is in
   Vite. The server serves it at https://piirretyt.pomeranssi.fi. The editor
   works on an iPad.
 - **Server** (`apps/server`): a Node server that stores the cartoons and serves
-  the assets and the web app. It never renders video.
+  the assets and the web app. It never renders video. See [Server](#server).
 - **Export client** (`apps/export`): a CLI that runs on the user's own computer.
   It downloads a cartoon from the server, renders it frame by frame and writes
   the video or the images to the local disk.
@@ -31,6 +31,8 @@ same web app in a browser.
   formats.
 - `packages/renderer`: computes what the cartoon looks like at a given time. It
   has no UI and runs in the browser, in Node and in headless Chromium.
+- `packages/api`: the Zod schemas of the API between the server and the web app.
+  Both validate the requests and the responses with them.
 - `packages/stage`: the React components that the web app and the studio share,
   such as the stage that draws the renderer output and the playback controls.
 
@@ -183,6 +185,48 @@ committed to the repo. The test art in `assets/fixtures/`, a background and two
 props made of simple shapes, is not part of the library. Only the tests use it.
 The server stores the cartoons that users make. The server cleans uploaded SVG
 files of scripts and external links before it stores them.
+
+## Server
+
+The server is a [Hono](https://hono.dev) app on Node. Node runs the `.ts` files
+directly, so the server has no build step. It stores its data in PostgreSQL and
+uses hand-written SQL with [`postgres`](https://github.com/porsager/postgres).
+The migrations are numbered `.sql` files in `apps/server/migrations`, and the
+server applies the new ones at startup. The server follows the server of the
+[cookbook](https://github.com/thaapasa/cookbook), so that the two work the same
+way.
+
+The web app calls the API under `/api/app`. The server serves the build of the
+web app from `apps/web/dist`, and every other path gets its `index.html`.
+
+### Users and sessions
+
+Users and groups are added on the server with the commands in
+`apps/server/src/cli`, and the app can't add them. A user can't choose their
+password: the command and the password reset on the profile page both generate
+one. The server stores an Argon2id hash of it.
+
+A login makes a session. The browser keeps the session token in an HTTP-only
+cookie, and the database stores only a SHA-256 hash of the token, so a copy of
+the database doesn't let anyone log in. The web app has no other way to
+authenticate, such as personal tokens.
+
+The server counts the login attempts per username and per client address in
+memory, and refuses a login before it checks the password. Each check takes tens
+of milliseconds of Argon2 work, so a flood of logins would slow down the whole
+server. One server process doesn't need the counts to survive a restart. The
+client address is the last entry of `X-Forwarded-For`, which Caddy adds.
+
+### Visibility
+
+Each cartoon has an owner and a visibility: public, logged-in users, a group or
+private. The SQL queries that read cartoons have the visibility check in their
+`WHERE` clause, so a list never has a cartoon that the user can't watch. The
+changes to a cartoon match the owner in their `WHERE` clause too.
+
+If a user asks for a cartoon that they can't watch, the server answers 404, the
+same as for a cartoon that doesn't exist. If they can watch it but try to change
+it, the answer is 403.
 
 ## Hosting
 

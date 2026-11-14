@@ -1,0 +1,28 @@
+{
+  "name": "@toonhouse/server",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch --env-file-if-exists=.env src/main.ts",
+    "start": "node --env-file-if-exists=.env src/main.ts",
+    "migrate": "node --env-file-if-exists=.env src/cli/migrate.ts",
+    "set-user": "node --env-file-if-exists=.env src/cli/set-user.ts",
+    "group": "node --env-file-if-exists=.env src/cli/group.ts",
+    "typecheck": "tsc -p .",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.8",
+    "@hono/zod-validator": "^0.9.1",
+    "@toonhouse/api": "workspace:*",
+    "hono": "^4.13.18",
+    "postgres": "^4.1.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.6",
+    "typescript": "~6.0.3",
+    "vitest": "^5.1.0"
+  }
+}

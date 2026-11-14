@@ -43,8 +43,9 @@ The sandbox and the Mac share the project folder, so each keeps its own
 ## Ports
 
 The app ID is `07`: the server runs on 10700, the Vite dev server on 10710 and
-the character studio on 10711. The motion prototypes run on 10790. Every port
-comes from an env var with the scheme port as the default.
+the character studio on 10711. The motion prototypes run on 10790, and the
+development database on 10732. Every port comes from an env var with the scheme
+port as the default.
 
 ## Rules
 

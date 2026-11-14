@@ -1,0 +1,72 @@
+import { argon2, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
+import { promisify } from 'node:util';
+
+const argon2Async = promisify(argon2);
+
+// RFC 9106 second recommended option: 64 MiB, 3 passes, 4 lanes.
+const params = { memory: 65536, passes: 3, parallelism: 4 };
+const tagLength = 32;
+
+/** Hashes a password into a PHC string: `$argon2id$v=19$m=...,t=...,p=...$salt$hash`. */
+export async function hashPassword(password: string): Promise<string> {
+  const salt = randomBytes(16);
+  const hash = await argon2Async('argon2id', {
+    message: password,
+    nonce: salt,
+    tagLength,
+    ...params,
+  });
+  return [
+    '',
+    'argon2id',
+    'v=19',
+    `m=${params.memory},t=${params.passes},p=${params.parallelism}`,
+    salt.toString('base64url'),
+    hash.toString('base64url'),
+  ].join('$');
+}
+
+/** Checks a password against a PHC string from `hashPassword`. */
+export async function verifyPassword(
+  password: string,
+  phc: string,
+): Promise<boolean> {
+  const [, algorithm, version, paramString, salt, hash] = phc.split('$');
+  if (
+    algorithm !== 'argon2id' ||
+    version !== 'v=19' ||
+    !paramString ||
+    !salt ||
+    !hash
+  ) {
+    return false;
+  }
+  const p = Object.fromEntries(
+    paramString.split(',').map((kv) => kv.split('=') as [string, string]),
+  );
+  const expected = Buffer.from(hash, 'base64url');
+  const actual = await argon2Async('argon2id', {
+    message: password,
+    nonce: Buffer.from(salt, 'base64url'),
+    tagLength: expected.length,
+    memory: Number(p.m),
+    passes: Number(p.t),
+    parallelism: Number(p.p),
+  });
+  return timingSafeEqual(actual, expected);
+}
+
+const passwordChars =
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+// 20 characters from 62 give about 119 bits. Letters and digits are easy to
+// type on an iPad if the password manager cannot fill the password in.
+const passwordLength = 20;
+
+/** Returns a random password for the user to save in a password manager. */
+export function generatePassword(): string {
+  // randomInt has no modulo bias.
+  return Array.from(
+    { length: passwordLength },
+    () => passwordChars[randomInt(passwordChars.length)],
+  ).join('');
+}

@@ -131,3 +131,13 @@ for something else or too vague.
 - **User**: a person who makes or watches cartoons in the web app.
 - **Developer**: a person who works on the app and its library, for example in
   the character studio.
+- **Owner**: the user who made a cartoon. Only the owner can edit it. Not:
+  author, creator.
+- **Group**: a set of users that a cartoon can be shared with, such as a family.
+  Not: team.
+- **Visibility**: who can watch a cartoon: public, logged-in users, a group or
+  private. Not: privacy, permissions.
+- **Session**: one login of a user on one device. It lasts 90 days from the last
+  use.
+- **Profile page**: the page where a user edits their own name and resets their
+  password.

@@ -6,6 +6,9 @@ airlock.local.toml
 # Local CLAUDE settings
 CLAUDE.local.md
 
+# Local environment
+.env
+
 # Dependencies and build output
 node_modules/
 dist/

@@ -1,6 +1,11 @@
 # Local development tasks for dekit. `mise start` runs it, see README.md.
 tasks:
   dev/:
+  dev/server:
+    cmd: pnpm server
+    deps: [db/postgres]
+    ready: { tcp: 10700 }
+    autostart: true
   dev/studio:
     cmd: pnpm studio
     ready: { tcp: 10711 }
@@ -23,8 +28,18 @@ tasks:
   check/test:
     type: job
     cmd: pnpm test
+    deps: [db/postgres]
   check/test-watch:
     cmd: pnpm test:watch
+
+  db/:
+  db/postgres:
+    type: job
+    cmd: docker compose up --detach --wait db
+  db/migrate:
+    type: job
+    cmd: pnpm migrate
+    deps: [db/postgres]
 
   build:
     type: job

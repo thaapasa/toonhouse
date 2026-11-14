@@ -9,7 +9,9 @@ The app is made for touch screens and iPads first. The UI is in Finnish and
 English.
 
 The project is at an early stage. The character studio, a development tool that
-plays the clips of a character, is the first part that runs.
+plays the clips of a character, is the first part that runs. The server has the
+login, the profile and the sharing of cartoons, but the web app doesn't exist
+yet.
 
 ## Art style
 
@@ -33,12 +35,17 @@ to SVG. [assets/CLAUDE.md](assets/CLAUDE.md) describes how.
 The project uses [mise](https://mise.jdx.dev) for its tools. `mise install`
 installs Node, pnpm, VTracer and dekit, and then the project dependencies.
 
+The server needs PostgreSQL, which runs in Docker. `docker compose up -d` starts
+the development database on port 10732. The server tests make a database of
+their own, `toonhouse_test`, on the same server.
+
 Run `mise start` to start the local development tasks in
 [dekit](https://dekit.run), a process manager with a terminal UI. `dekit.yaml`
-lists its tasks. dekit starts the character studio on http://localhost:10711.
-The other tasks start only when you ask for them: the motion prototypes on
-http://localhost:10790, the checks (lint with `--fix`, format, typecheck, tests
-and tests in watch mode) and the build.
+lists its tasks. dekit starts the database, the server on http://localhost:10700
+and the character studio on http://localhost:10711. The other tasks start only
+when you ask for them: the motion prototypes on http://localhost:10790, the
+checks (lint with `--fix`, format, typecheck, tests and tests in watch mode),
+the database migrations and the build.
 
 In the UI, select a task and press `s` to start it, `r` to restart it or `x` to
 stop it. Press `q` to quit, and then `d` to leave the tasks running in the
@@ -57,7 +64,30 @@ pnpm test
 pnpm build
 pnpm studio        # the character studio on http://localhost:10711
 pnpm prototypes    # the motion prototypes on http://localhost:10790
+docker compose up -d   # the database on port 10732
+pnpm server        # the server on http://localhost:10700
+pnpm migrate       # apply the database migrations; the server also does it at startup
 ```
+
+The server reads its settings from the environment, and in development also from
+`apps/server/.env`. [apps/server/.env.example](apps/server/.env.example) lists
+them. In production, `DATABASE_URL` must be set.
+
+### Users and groups
+
+The app can't add users or groups. Add them with these commands:
+
+```sh
+pnpm set-user <username> <display name>   # add a user, or give a new password
+pnpm group create <group>
+pnpm group add <group> <username>
+pnpm group remove <group> <username>
+pnpm group list
+```
+
+`pnpm set-user` generates the password and prints it once. If the user exists,
+it gets a new display name and password, and its logins end. With `--sql`, the
+command prints an SQL statement to run in the database instead of writing to it.
 
 ### Ports
 
@@ -68,6 +98,7 @@ The local ports follow the `1AARR` scheme. The app ID is `07`.
 | 10700 | Server (API and assets) |
 | 10710 | Vite dev server         |
 | 10711 | Character studio        |
+| 10732 | PostgreSQL, development |
 | 10790 | Motion prototypes       |
 
 ## Asset licenses
