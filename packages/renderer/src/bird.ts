@@ -87,7 +87,11 @@ export function drawBird(
       ankle,
       leg: [
         ...tube(line(knee, ankle), legs.shankWidth, colors.leg),
-        ...tube(line(hip, knee), legs.thighWidth, colors.feathers),
+        ...tube(
+          line(hip, knee),
+          legs.thighWidth,
+          colors.thigh ?? colors.feathers,
+        ),
       ],
       foot: piece(
         'foot',

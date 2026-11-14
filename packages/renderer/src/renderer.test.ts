@@ -26,8 +26,9 @@ import {
   WALK_SPEED,
 } from './clips/index.ts';
 import { drawCharacter, type DrawNode } from './draw.ts';
-import { twoBoneJoint } from './math.ts';
+import { rotate, sub, twoBoneJoint } from './math.ts';
 import { defaultDrawOrder, drawOrder } from './order.ts';
+import { clearOfGround } from './rabbit.ts';
 
 const rig = boy as CutoutRig;
 const bird = chicken as BirdRig;
@@ -182,6 +183,16 @@ describe('bird', () => {
     expect(cross).toBeGreaterThan(0);
   });
 
+  it('paints the thighs in the thigh color if the rig has one', () => {
+    const idle = clipById('bird', 'idle').frameAt(0);
+    const strokes = (r: BirdRig) =>
+      JSON.stringify(drawCharacter(r, idle, { facing: 1 }).node);
+    expect(strokes(bird)).not.toContain('#123456');
+    expect(
+      strokes({ ...bird, colors: { ...bird.colors, thigh: '#123456' } }),
+    ).toContain('"stroke":"#123456"');
+  });
+
   it('refuses a clip of another kind', () => {
     expect(() =>
       drawCharacter(bird, clipById('cutout', 'idle').frameAt(0), {
@@ -244,6 +255,26 @@ describe('rabbit', () => {
     expect(Math.hypot(knee.x, knee.y)).toBeCloseTo(68, 6);
     // In front of the line from the hip to the heel.
     expect(10 * knee.y - 90 * knee.x).toBeLessThan(0);
+  });
+
+  it('lifts the body so that its ground points stay above the ground', () => {
+    const lookout = clipById('rabbit', 'lookout');
+    const frame = lookout.frameAt(2);
+    // A point far back at the bottom of the body, which goes down when the
+    // body tips back to sit up.
+    const tail = { x: rabbit.parts.body.pivot.x - 150, y: 260 };
+    const withTail: RabbitRig = { ...rabbit, groundPoints: [tail] };
+    const hip = (r: RabbitRig) =>
+      drawCharacter(r, frame, { facing: 1 }).skeleton.joints.find(
+        (j) => j.name === 'hip',
+      )!.at;
+    const lifted = clearOfGround(withTail, frame.pose);
+    const p = rotate(sub(tail, rabbit.parts.body.pivot), lifted.bodyAngle);
+    expect(lifted.hip.y + p.y).toBeCloseTo(0, 6);
+    expect(hip(withTail).y).toBeLessThan(hip(rabbit).y);
+    // Standing points that are already above the ground change nothing.
+    const sitting = clipById('rabbit', 'idle').frameAt(0);
+    expect(clearOfGround(withTail, sitting.pose)).toBe(sitting.pose);
   });
 
   it('opens the mouth to talk', () => {

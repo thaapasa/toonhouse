@@ -4,6 +4,7 @@ import type {
   Pt,
   RabbitFrame,
   RabbitPartId,
+  RabbitPose,
   RabbitRig,
 } from '@toonhouse/model';
 
@@ -27,13 +28,28 @@ const line = (...pts: Pt[]) =>
 const curve = (a: Pt, c: Pt, b: Pt) =>
   `M${fmt(a.x)} ${fmt(a.y)}Q${fmt(c.x)} ${fmt(c.y)} ${fmt(b.x)} ${fmt(b.y)}`;
 
+/**
+ * The pose with the hip lifted so that no ground point of the body is below
+ * the ground. A rig without ground points keeps the pose of the clip.
+ */
+export function clearOfGround(rig: RabbitRig, pose: RabbitPose): RabbitPose {
+  const pivot = rig.parts.body.pivot;
+  let lowest = 0;
+  for (const p of rig.groundPoints ?? []) {
+    const y = pose.hip.y + rotate(sub(p, pivot), pose.bodyAngle).y;
+    lowest = Math.max(lowest, y);
+  }
+  if (lowest === 0) return pose;
+  return { ...pose, hip: { x: pose.hip.x, y: pose.hip.y - lowest } };
+}
+
 /** Draws a rabbit with its ground point at the origin, in sheet pixels, y down. */
 export function drawRabbit(
   rig: RabbitRig,
   frame: RabbitFrame,
   { facing }: DrawOptions,
 ): CharacterDrawing {
-  const { pose } = frame;
+  const pose = clearOfGround(rig, frame.pose);
   const { parts, colors, legs, scales } = rig;
   const ow = rig.outlineWidth;
   const part = (

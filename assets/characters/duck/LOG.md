@@ -50,11 +50,12 @@ I read the points from zoomed crops of the pieces with a 20 px grid
   changes lift the head: the body pivot is near the front and the bottom of the
   body, at (165, 192), and the neck point is further back on the top of the
   body. The hips stay at y 178, so the legs come out of the bottom of the body.
-- The neck, the thighs and the lids take the color in `colors.feathers`, which
-  is the green of the head. Green thighs looked like trousers, so the thighs are
-  short (28) and the shanks long (58). Only a short green stub shows under the
-  body.
-- The head is drawn at 0.6 and the feet at 0.6.
+- The neck and the lids take the color in `colors.feathers`, which is the green
+  of the head. The thighs take `colors.thigh`, the grey of the body, so that
+  they look like a part of it.
+- The legs are 45 + 78 px long. The hips are 117 px above the ankles when the
+  duck stands, so the legs bend a little and bend more in the walk.
+- The head is drawn at 0.56 and the feet at 0.6.
 
 ## Face
 
@@ -71,7 +72,23 @@ and checked them with `render-svg`: the idle, the walk every 0.15 s, the peck
 going down and coming up, the flap in the air, and the open bill and a blink at
 3×.
 
-- At the toe-off of the walk, the long foot points down and the toes dip a few
-  pixels under the ground.
-- At the lowest point of the peck, the tip of the bill still dips about 10 px
-  under the ground.
+## Fixes after the first version
+
+I measured how far each clip reaches below the ground by rendering every frame
+without the shadow and finding the lowest opaque row, with
+`assets/work/fixes/lowest.ts`. The first version had three problems:
+
+- **Peck:** the bill went up to 38 px into the ground at each stab. The peck
+  tips the body 75° around its pivot, and the bill of the duck is longer than
+  the beak of the hen. Moving the neck point 32 px back on the body, to (160,
+  48), raises it by about 30 px when the body is tipped, and drawing the head at
+  0.56 instead of 0.6 shortens the bill. The bill now touches the ground at each
+  stab.
+- **Walk:** at the toe-off, the foot turns around the ankle and the toes went 13
+  px into the ground. The ankle was near the heel, at x 42 of the 192 px foot.
+  At x 80, the toes reach less far in front of the ankle and stay on the ground.
+- **Thighs:** the bird rig painted the thighs in the color of the neck, so they
+  were green. The rig now has an optional `colors.thigh`, and the duck's thighs
+  are the grey of the body. With grey thighs, the legs could be long enough to
+  bend: they were 28 + 58 px, shorter than the 117 px from the hip to the ankle,
+  so they were always straight and the shanks stretched.

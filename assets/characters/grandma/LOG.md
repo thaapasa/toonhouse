@@ -47,9 +47,15 @@ I read the points from the zoomed crops of `inspect-piece.ts` instead of running
   and the bottom of the head covers the top of the torso.
 - The hips are 146 px above the hem, so the hem hangs about 100 px above the
   ground and the lower legs show below it. The feet stay in front of the dress.
-- The shoulders are in the sleeve hole of the cardigan. At first they were at
-  the top of the cardigan, right under the chin, and in the wave the raised arm
-  crossed the mouth. 24 px lower, the arm passes under the chin.
+- The shoulders are low in the cardigan, at (120, 116) and (112, 110). At first
+  they were at the top of the cardigan, right under the chin, and in the wave
+  the raised arm crossed the mouth. 24 px lower, it still brushed the jaw. The
+  wave puts the hand at a fixed offset from the shoulder, so a lower shoulder
+  lowers the whole raised arm, and 16 px more leaves a gap under the jaw.
+- The arms are 152 long. The clips hang the hand 150 px from the shoulder, and
+  at 165 the slack bent the arm into an arch that pointed up at the back of the
+  walk swing. At 152, the arm is almost straight there and still bends in the
+  wave.
 - The sleeves are the teal of the cardigan and cover 85 % of each arm.
 - The slipper is low, so `ankleHeight` is 62 foot pixels, against 85 for the
   boy's sneaker.
@@ -74,3 +80,8 @@ I rendered frames of each clip to SVG with `tools/frames.ts` in the work folder
 and checked them with `pnpm render-svg`: standing, eight frames of the walk, the
 wave, and the talk with a blink at 3×. To see the face, `tools/crop.ts` cuts
 regions out of a large render.
+
+## Known problems
+
+- In the walk, the top of the arm starts a little below the sleeve cap that is
+  drawn on the torso.

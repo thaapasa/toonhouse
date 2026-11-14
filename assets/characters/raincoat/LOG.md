@@ -64,6 +64,8 @@ I read the points from the alpha masks, row by row, and from `inspect-piece.ts`:
 
 - **Eye:** the white of the eye spans x 296–329 and y 222–272. The ellipse is a
   little larger, so that the closed lids also cover the brown ring around it.
+- **Pupil:** the pupil and the line of the upper lid traced in the hair brown,
+  `#6e3a16`, so she had brown eyes. They are now in the outline color.
 - **Mouth patch:** the cutout renderer draws the mouth only if the rig has a
   patch. The patch is a skin-colored shape over the traced smile line, up to
   where the line meets the lips in the profile.
@@ -75,3 +77,13 @@ I read the points from the alpha masks, row by row, and from `inspect-piece.ts`:
 I rendered frames of each clip to SVG with `tools/frames.ts` in the work folder
 and checked them with `pnpm render-svg`: standing, six frames of the walk, the
 wave, and the talk with a blink at 3×.
+
+## Known problems
+
+- When the eye is about 0.93 closed, a thin sliver of the white shows under the
+  lash line, near its ends. The gap between the lids is (1 − blink) × 2 ×
+  `eye.ry`, and the lash line covers only about 2.5 px below the upper lid. Her
+  eye is tall (`ry` 31), so the gap is about 4 px, and the white stands out
+  against the brown skin. A tighter ellipse would gain under a pixel. A fix
+  belongs in the renderer, for example a lash line that thickens as the eye
+  closes.

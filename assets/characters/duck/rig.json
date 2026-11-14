@@ -42,14 +42,14 @@
       "width": 192,
       "height": 70,
       "pivot": {
-        "x": 42,
+        "x": 80,
         "y": 26
       }
     }
   },
   "body": {
     "neck": {
-      "x": 192,
+      "x": 160,
       "y": 48
     },
     "shoulderNear": {
@@ -70,7 +70,7 @@
     }
   },
   "scales": {
-    "head": 0.6,
+    "head": 0.56,
     "wing": 1,
     "wingOpen": 0.8,
     "foot": 0.6
@@ -84,8 +84,8 @@
   },
   "ankleHeight": 42,
   "legs": {
-    "thighLength": 28,
-    "shankLength": 58,
+    "thighLength": 45,
+    "shankLength": 78,
     "thighWidth": 24,
     "shankWidth": 12
   },
@@ -93,6 +93,7 @@
   "colors": {
     "outline": "#392a20",
     "feathers": "#00ae47",
+    "thigh": "#c9c9c4",
     "leg": "#fc7100",
     "line": "#392a20",
     "beak": "#f8e600",

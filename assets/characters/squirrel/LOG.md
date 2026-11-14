@@ -66,7 +66,30 @@ and looked at them with `render-svg`: the idle with a blink, the hop every 0.08
 s, the look out going up and coming down, and the open mouth at 9×.
 
 - The hop works without changes: the tail rides along with the body.
-- In the look out, the body tips back around the hip, and the tail comes down to
-  lie along the ground behind the squirrel. Its lowest part goes about 15 px
-  below the ground line. The clip sets the tilt and the lift of the hips for the
-  bunny, so a fix needs a setting for the tilt in the rig or the clip.
+
+## Tail on the ground
+
+In the look out, the body tips back 52° around the hip, and the tail went up to
+24 px below the ground line. The clip sets the tilt and the lift of the hips for
+the bunny, and clips don't know the rig, so the fix is in the renderer.
+
+The rabbit rig has `groundPoints`: points along the bottom of the body, 8 px
+inside the outline, read from the lowest opaque row of every 20th column of
+`body.svg`. If a clip tips the body so that one of them would go below the
+ground, the renderer lifts the hip until it is on the ground, and the hind legs
+stretch to the feet. While the squirrel sits, the points are about 4 px above
+the ground, so the sitting pose doesn't change. The bunny has no ground points
+and draws as before.
+
+The tail now lies on the ground in the look out. The hop also changed a little:
+at the landing, the front of the body dipped 17 px into the ground, and now the
+body stays on it.
+
+To measure how far a clip reaches below the ground, I rendered every frame
+without the shadow and found the lowest opaque row. The script is
+`assets/work/fixes/lowest.ts`.
+
+## Known problems
+
+- At the mouth's full opening, the bottom of the mouth pokes a little past the
+  line of the chin. It shows only in a close-up.

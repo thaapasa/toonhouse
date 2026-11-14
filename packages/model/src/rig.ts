@@ -210,8 +210,13 @@ export interface BirdRig extends RigBase {
   outlineWidth: number;
   colors: {
     outline: string;
-    /** The feathers, for the neck, the thighs and the eyelids. */
+    /** The feathers, for the neck, the eyelids and the thighs. */
     feathers: string;
+    /**
+     * The thighs, if not the feathers, such as when the neck has a color of
+     * its own that the body doesn't share.
+     */
+    thigh?: string;
     leg: string;
     line: string;
     beak: string;
@@ -269,6 +274,14 @@ export interface RabbitRig extends RigBase {
     hipNear: Pt;
     hipFar: Pt;
   };
+  /**
+   * Points along the bottom of the body, in body pixels, a little inside the
+   * outline. The clips are made for the bunny, and a body of another shape,
+   * such as one with a long tail, can go into the ground when a clip tips it.
+   * If one of these points would go below the ground, the renderer lifts the
+   * body until it is on the ground, and the hind legs stretch to the feet.
+   */
+  groundPoints?: Pt[];
   /** The roots of the ears on the head, in head pixels. */
   ears: { near: Pt; far: Pt };
   scales: { head: number; ear: number; paw: number; foot: number };
