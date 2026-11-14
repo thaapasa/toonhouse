@@ -3,6 +3,9 @@
 A tool for making short cartoons. Read [README.md](README.md) for what the app
 is and [ARCHITECTURE.md](ARCHITECTURE.md) for how it is built.
 
+[GLOSSARY.md](GLOSSARY.md) lists the terms for the parts of a cartoon and for
+the tools. Use those terms in docs, specs, code and UI text.
+
 ## Commands
 
 Run these from the repo root. `mise install` sets up the tools and the

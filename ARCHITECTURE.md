@@ -52,7 +52,7 @@ All graphics are SVG, so they stay sharp at any size.
 
 - A **rig** is a character: a tree of bones joined at pivot points, with an SVG
   part on each bone. A prop is a rig with one bone.
-- A **clip** is a short animation, such as a walk cycle. A clip works on any rig
+- A **clip** is a short motion, such as a walk cycle. A clip works on any rig
   that has the same bones.
 - A **scene** has a background and actors. Each actor uses a rig and has a list
   of actions on the timeline.

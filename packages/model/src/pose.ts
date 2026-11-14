@@ -137,7 +137,7 @@ export type ClipId =
   'idle' | 'walk' | 'wave' | 'talk' | 'peck' | 'flap' | 'hop' | 'lookout';
 
 /**
- * An animation for the rigs of one kind. The frame at `t` depends only on
+ * A motion for the rigs of one kind. The frame at `t` depends only on
  * `t`.
  */
 export interface Clip<F extends ClipFrame = ClipFrame> {

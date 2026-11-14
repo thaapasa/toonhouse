@@ -25,6 +25,7 @@ to SVG. [assets/CLAUDE.md](assets/CLAUDE.md) describes how.
 
 - [ARCHITECTURE.md](ARCHITECTURE.md): the structure of the project and the main
   design decisions.
+- [GLOSSARY.md](GLOSSARY.md): the terms we use, and what they mean.
 - [specs/README.md](specs/README.md): the requirements, one file per app area.
 
 ## Local development

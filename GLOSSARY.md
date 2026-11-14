@@ -1,0 +1,117 @@
+# Glossary
+
+The terms that the docs, the specs and the code use. Use these words and no
+others for the same things. If a word is listed under "Not", it is either taken
+for something else or too vague.
+
+## The cartoon
+
+- **Cartoon**: the whole film that a user makes. It is made of shots. Not:
+  animation, movie, project.
+- **Shot**: one entry in a cartoon. It plays a part of one scene, at some speed,
+  and the shots play one after another. Several shots can use the same scene.
+  Not: clip, cut, segment.
+- **Scene**: a background with actors on it and a timeline for them. The user
+  edits each scene on its own. Each scene belongs to one cartoon.
+- **Background**: the actor behind the other actors in a scene. It has one or
+  more layers at different depths, and it can have clips, such as the sun moving
+  across the sky. The user picks it from the library.
+- **Depth**: how far a layer of the background is from the camera. When the
+  camera moves, the far layers move less than the near ones.
+- **Ground layer**: the layer of the background that the other actors stand on.
+- **Camera**: the view of the scene that the cartoon shows. By default it shows
+  the whole background, and it can zoom and pan inside it.
+- **Camera move**: a zoom or a pan of the camera on the timeline. Not: camera
+  action.
+- **Actor**: a character, a prop or a background that the user has placed in a
+  scene. An actor uses either a cast member or a library character or prop.
+- **Locked actor**: an actor that the user can't select or move on the stage.
+  The user unlocks it from outside the stage, such as from the timeline.
+- **Cast**: the characters and props of one cartoon, which the user makes from
+  the library and names. Not: cartoon library, presets.
+- **Cast member**: one entry in the cast, such as "Grandma", made from a library
+  character. Every actor that uses it changes when the user edits it.
+- **Setting**: something about a character or a prop that the user can change,
+  such as a color or the size. A setting gets its value from the library, then
+  the cast member, then the actor. Not: option, config.
+- **Color preset**: a named set of colors for a character or a prop, such as the
+  colors of all its clothes at once.
+- **Override**: a setting that an actor sets for one scene, instead of taking it
+  from its cast member.
+- **Timeline**: the time axis of one scene. The cartoon has no timeline of its
+  own, only shots in a row.
+- **Action**: something that an actor does on the timeline, from a point in time
+  until its next action, such as walking to a point or waving. An action plays
+  one or more clips.
+- **Speech bubble**: text that an actor says for a time.
+- **Sound**: a sound effect at a point on the timeline of a scene. A shot plays
+  the sounds of its scene.
+- **Music**: sound that belongs to the cartoon and plays across several shots.
+- **Frame**: one picture of the cartoon at a given time.
+
+## Characters and props
+
+- **Library**: the ready-made characters, props and backgrounds that the user
+  can pick from.
+- **Character**: a figure that can move, such as the boy or the hen. Not:
+  figure, toon.
+- **Prop**: an object that an actor can use or that stands in a scene, such as a
+  ball or a chair. A prop is a rig with one bone.
+- **Rig**: the structure of a character or a prop. It is a tree of bones joined
+  at pivot points, with a part on each bone. Not: skeleton.
+- **Rig kind**: the type of a rig: `cutout`, `bird` or `rabbit`. A clip works on
+  the rigs of one kind only.
+- **Bone**: one link in the tree of a rig. It turns at its pivot point.
+- **Pivot point**: the point where a bone joins its parent and turns. Not:
+  joint, anchor.
+- **Ground point**: the point of a character or a prop that stands on the
+  ground, usually under the feet. If the size of an actor changes, its ground
+  point stays in place. Not: pivot point, which belongs to a bone.
+- **Part**: a drawing on a bone, such as the head or a wing. A part has one or
+  more layers. Not: sprite.
+- **Layer**: one SVG drawing of a part or a background, such as the front hair
+  of the head or the sky of a background. The layers of a part move together,
+  but each has its own place in the draw order.
+- **Draw order**: the order in which the layers of a rig and the drawn limbs are
+  drawn, from the back to the front. Each rig has a default draw order, and a
+  clip can change it while it plays. Not: z-order, z-index.
+- **Piece**: an image that the asset scripts cut from a generated parts sheet
+  and trace to SVG. A piece becomes a layer of a part when it goes on a rig. The
+  word belongs to the asset scripts in `assets/` and `prototypes/`.
+- **Rubber hose**: an arm or a leg that the renderer draws as a bending line
+  between two parts, instead of a traced part.
+- **Clip**: a short motion that a character can play, such as a walk cycle or a
+  wave. A clip works on every rig of the same kind. Use "clip" everywhere, in
+  the code, the docs and the UI. Not: animation, move.
+- **Code clip**: a clip that is written as a TypeScript function from the time
+  to a pose and a face. All clips are code clips for now.
+- **Keyframe clip**: a clip that is stored as JSON keyframes and edited in the
+  character studio. Planned.
+- **Pose**: the angles and positions of the bones of a rig at one moment.
+- **Face**: the state of the eyes and the mouth at one moment.
+
+## Apps and tools
+
+- **Web app**: the app that users open in the browser, at
+  https://piirretyt.pomeranssi.fi. It has the player and the editor.
+- **Player**: the part of the web app that plays a cartoon.
+- **Editor**: the part of the web app where the user edits scenes and puts the
+  cartoon together from shots.
+- **Server**: stores the cartoons and serves the assets and the web app. It
+  doesn't render video.
+- **Export client**: a program on the user's own computer that downloads a
+  cartoon and saves it as a video or as images.
+- **Character studio**: a development tool for making the characters, props and
+  clips in the library. It runs only on the developer's computer. Short form:
+  the studio. Not: dev studio, editor.
+- **Motion prototypes**: the experiments in `prototypes/` that tried out the
+  motion before the renderer existed.
+- **Renderer**: the package that computes what a scene looks like at a given
+  time. It has no UI.
+- **Stage**: the area where a scene is drawn, in the web app and in the studio.
+
+## Users
+
+- **User**: a person who makes or watches cartoons in the web app.
+- **Developer**: a person who works on the app and its library, for example in
+  the character studio.
