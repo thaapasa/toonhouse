@@ -19,6 +19,7 @@ import {
   sub,
   twoBoneJoint,
 } from './math.ts';
+import { arrange, layered, type SlotDrawing } from './order.ts';
 
 const fmt = (n: number) => Math.round(n * 100) / 100;
 const line = (...pts: Pt[]) =>
@@ -35,13 +36,21 @@ export function drawRabbit(
   const { pose } = frame;
   const { parts, colors, legs, scales } = rig;
   const ow = rig.outlineWidth;
-  const part = (id: RabbitPartId, transform: Matrix): DrawNode => ({
+  const part = (
+    id: RabbitPartId,
+    transform: Matrix,
+    layer?: string,
+  ): DrawNode => ({
     type: 'part',
     part: id,
+    ...(layer === undefined ? {} : { layer }),
     width: parts[id].width,
     height: parts[id].height,
     transform,
   });
+  /** A part with all its layers, placed with one transform. */
+  const piece = (id: RabbitPartId, transform: Matrix): SlotDrawing =>
+    layered(parts[id], (layer) => [part(id, transform, layer)]);
   /** A thick line with an outline: a stroke under a narrower stroke. */
   const tube = (d: string, width: number): DrawNode[] => [
     {
@@ -94,7 +103,7 @@ export function drawRabbit(
       knee,
       heel,
       leg: tube(line(hip, knee, heel), legs.shankWidth),
-      foot: part('foot', pinned(heel, angle, scales.foot, parts.foot.pivot)),
+      foot: piece('foot', pinned(heel, angle, scales.foot, parts.foot.pivot)),
     };
   };
   const nearHind = hindLeg(rig.body.hipNear, pose.footNear, pose.footNearAngle);
@@ -111,46 +120,52 @@ export function drawRabbit(
       shoulder,
       elbow: curveMiddle(shoulder, c, wrist),
       wrist,
-      nodes: [
-        ...tube(curve(shoulder, c, wrist), legs.armWidth),
-        part('paw', pinned(wrist, 0, scales.paw, parts.paw.pivot)),
-      ],
+      leg: tube(curve(shoulder, c, wrist), legs.armWidth),
+      paw: piece('paw', pinned(wrist, 0, scales.paw, parts.paw.pivot)),
     };
   };
   const nearFront = frontLeg(rig.body.shoulderNear, pose.pawNear);
   const farFront = frontLeg(rig.body.shoulderFar, pose.pawFar);
 
   // The ears are drawn in head pixels, so that they move with the head.
-  const ear = (root: Pt, angle: number, shade = 1): DrawNode => ({
-    type: 'group',
-    transform: headTransform,
-    ...(shade < 1 ? { shade } : {}),
-    children: [
-      part(
-        'ear',
-        pinned(root, angle, scales.ear / scales.head, parts.ear.pivot),
-      ),
-    ],
-  });
+  const ear = (root: Pt, angle: number): SlotDrawing =>
+    layered(parts.ear, (layer) => [
+      {
+        type: 'group',
+        transform: headTransform,
+        children: [
+          part(
+            'ear',
+            pinned(root, angle, scales.ear / scales.head, parts.ear.pivot),
+            layer,
+          ),
+        ],
+      },
+    ]);
 
-  const character: DrawNode[] = [
-    {
-      type: 'group',
-      shade: rig.farShade,
-      children: [...farHind.leg, farHind.foot, ...farFront.nodes],
-    },
-    ear(rig.ears.far, pose.earFarAngle, rig.farShade),
-    ear(rig.ears.near, pose.earNearAngle),
-    ...nearHind.leg,
-    part('body', pinned(pose.hip, pose.bodyAngle, 1, b0.pivot)),
-    nearHind.foot,
-    {
-      type: 'group',
-      transform: headTransform,
-      children: headNodes(rig, frame.face, part),
-    },
-    ...nearFront.nodes,
-  ];
+  const character = arrange(rig, {
+    hindLegFar: { nodes: farHind.leg },
+    footFar: farHind.foot,
+    frontLegFar: { nodes: farFront.leg },
+    pawFar: farFront.paw,
+    earFar: ear(rig.ears.far, pose.earFarAngle),
+    earNear: ear(rig.ears.near, pose.earNearAngle),
+    hindLegNear: { nodes: nearHind.leg },
+    body: piece('body', pinned(pose.hip, pose.bodyAngle, 1, b0.pivot)),
+    footNear: nearHind.foot,
+    head: layered(parts.head, (layer) => [
+      {
+        type: 'group',
+        transform: headTransform,
+        children:
+          layer === undefined
+            ? headNodes(rig, frame.face, part)
+            : [part('head', [1, 0, 0, 1, 0, 0], layer)],
+      },
+    ]),
+    frontLegNear: { nodes: nearFront.leg },
+    pawNear: nearFront.paw,
+  });
 
   const j = {
     hip: pose.hip,

@@ -256,6 +256,7 @@ export function App() {
           angles={pieceAngles}
           angleMode={angleMode}
           onAngle={changeAngle}
+          onRig={setRig}
           dirty={dirty}
           status={status}
           onSave={() => void save()}

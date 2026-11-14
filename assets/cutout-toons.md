@@ -319,6 +319,16 @@ If the clothes reach the ground, such as a long robe or a dress, set
 the hem covers the top of both feet. Set `limbs.legColor` to the color of the
 clothes, so that a leg that shows in a long stride looks like a fold of them.
 
+## Layers of a part
+
+A part can have more layers than its main SVG, such as the back hair and the
+front hair of the head. Trace each layer at the size of the part, so that it
+lines up with the main layer, and list it in `layers` of the part with an id and
+the SVG file. Then open the draw order in the character studio, move the layers
+where they belong, such as the back hair behind the torso and the front hair in
+front of the near hand, and save the rig. To give a new layer id a name in the
+studio, add it to the translation files of the studio.
+
 ## Holding a staff
 
 A cutout rig can have a staff in the near hand. The wizard is the example, and

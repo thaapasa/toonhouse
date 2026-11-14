@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { patchNumbers } from './patchJson.ts';
+import { patchJson, patchNumbers } from './patchJson.ts';
 
 const text = `{
   "kind": "cutout",
@@ -39,5 +39,47 @@ describe('patchNumbers', () => {
     expect(patchNumbers(t, { 'a"b': 'c\\', n: 2 })).toBe(
       '{ "a\\"b": "c\\\\", "n": 2 }',
     );
+  });
+});
+
+describe('patchJson', () => {
+  const parsed = () => JSON.parse(text) as Record<string, unknown>;
+  const same = (out: string | null, next: unknown) =>
+    expect(JSON.parse(out!)).toEqual(next);
+
+  it('adds, replaces and removes top-level arrays', () => {
+    const added = { ...parsed(), order: ['b', 'a'] };
+    const withOrder = patchJson(text, added)!;
+    same(withOrder, added);
+    expect(
+      withOrder.startsWith(text.slice(0, text.lastIndexOf('}')).trimEnd()),
+    ).toBe(true);
+
+    const changed = { ...added, order: ['a', 'b'], list: [1] };
+    same(patchJson(withOrder, changed), changed);
+
+    const removed = parsed();
+    same(patchJson(withOrder, removed), removed);
+  });
+
+  it('removes the first member', () => {
+    const next = parsed();
+    delete next.kind;
+    delete next.parts;
+    same(patchJson(text, next), next);
+  });
+
+  it('keeps the layout of the numbers next to a new member', () => {
+    const next: Record<string, unknown> = { ...parsed(), order: ['a'] };
+    (next.parts as { head: { pivot: { x: number } } }).head.pivot.x = 1;
+    const out = patchJson(text, next)!;
+    same(out, next);
+    expect(out).toContain('"pivot": { "x": 1, "y": 345 }');
+  });
+
+  it('gives null when a nested string changes', () => {
+    const next = parsed();
+    (next.parts as { head: { svg: string } }).head.svg = 'other.svg';
+    expect(patchJson(text, next)).toBeNull();
   });
 });

@@ -13,6 +13,7 @@ import {
   angleOf,
   attachmentAt,
   attachments,
+  pieceLayers,
   pieceOf,
 } from '../rigEdit.ts';
 import { useRigNames } from '../rigNames.ts';
@@ -51,7 +52,7 @@ interface Props {
 }
 
 /**
- * One piece of the rig alone, in its own pixels. It edits the pivot of the
+ * One piece of the rig alone, with its layers, in its own pixels. It edits the pivot of the
  * piece, or the rest angle of a piece that has one. The attachment points on
  * the piece show where the other pieces join it.
  */
@@ -94,11 +95,14 @@ export function PieceView(props: Props) {
         strokeWidth={px}
         strokeDasharray={`${4 * px} ${4 * px}`}
       />
-      <use
-        href={`#${partId(prefix, part)}`}
-        width={piece.width}
-        height={piece.height}
-      />
+      {pieceLayers(rig, part).map((layer) => (
+        <use
+          key={layer ?? ''}
+          href={`#${partId(prefix, part, layer)}`}
+          width={piece.width}
+          height={piece.height}
+        />
+      ))}
     </>
   );
 

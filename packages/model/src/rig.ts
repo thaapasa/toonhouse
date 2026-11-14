@@ -1,13 +1,42 @@
 import type { Pt } from './geometry.ts';
 
-/** A traced SVG piece of a character, in the pixels of the piece. */
+/**
+ * A part of a character: traced SVG drawings in the pixels of the part. The
+ * `svg` file is the main layer, and the drawings that the renderer adds to the
+ * part, such as the eyelids on the head, go with it.
+ */
 export interface RigPart {
-  /** The SVG file, next to the rig file. */
+  /** The SVG file of the main layer, next to the rig file. */
   svg: string;
   width: number;
   height: number;
   /** The joint that the piece rotates around. */
   pivot: Pt;
+  /**
+   * More layers of the part, such as the back hair and the front hair of the
+   * head. They are drawn in the pixels of the part, so they move with it, and
+   * each has its own entry in the draw order.
+   */
+  layers?: RigLayer[];
+}
+
+/** A layer of a part, other than the main layer. */
+export interface RigLayer {
+  /** A camelCase name, unique within the part, such as `frontHair`. */
+  id: string;
+  /** The SVG file, next to the rig file, the same size as the part. */
+  svg: string;
+}
+
+/** The fields that every kind of rig has. */
+interface RigBase {
+  /**
+   * The draw order of the rig, from the back to the front, as the ids of its
+   * draw entries. The renderer has a default order for each rig kind. It
+   * uses that if this is not set, and it puts the entries that this leaves out
+   * after the entry before them in the default order.
+   */
+  drawOrder?: string[];
 }
 
 export type RigPartId =
@@ -19,7 +48,7 @@ export type RigPartId =
  * foot reuse the pieces of the near ones. All lengths are in the pixels of the
  * parts sheet, which is also the unit of a pose.
  */
-export interface CutoutRig {
+export interface CutoutRig extends RigBase {
   kind: 'cutout';
   parts: Record<Exclude<RigPartId, 'mouthPatch' | 'staff'>, RigPart> & {
     /** Covers the mouth that the head was traced with. Drawn in head pixels. */
@@ -69,6 +98,8 @@ export interface CutoutRig {
   /**
    * Draw the near foot behind the torso, for clothes that reach the ground,
    * such as a long robe. Otherwise the near foot is drawn over the torso.
+   * This sets the default draw order, so it has no effect if the rig has a
+   * draw order of its own.
    */
   feetBehindTorso?: boolean;
   /** Brightness of the far arm and leg, from 0 to 1. */
@@ -150,7 +181,7 @@ export type BirdPartId = 'head' | 'body' | 'wing' | 'wingOpen' | 'foot';
  * bending backwards. All lengths are in the pixels of the parts sheet, which is
  * also the unit of a pose.
  */
-export interface BirdRig {
+export interface BirdRig extends RigBase {
   kind: 'bird';
   parts: Record<BirdPartId, RigPart>;
   /**
@@ -224,7 +255,7 @@ export type RabbitPartId = 'head' | 'ear' | 'body' | 'paw' | 'foot';
  * lengths are in the pixels of the parts sheet, which is also the unit of a
  * pose.
  */
-export interface RabbitRig {
+export interface RabbitRig extends RigBase {
   kind: 'rabbit';
   parts: Record<RabbitPartId, RigPart>;
   /**

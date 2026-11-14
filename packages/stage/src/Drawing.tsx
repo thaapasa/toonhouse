@@ -7,8 +7,16 @@ const matrix = (m: Matrix | undefined) =>
     ? `matrix(${m.map((v) => Math.round(v * 10000) / 10000).join(' ')})`
     : undefined;
 
-/** The id of the `<symbol>` of a rig part, made by `PartSymbols`. */
-export const partId = (prefix: string, part: PartId) => `${prefix}-${part}`;
+/**
+ * The key of a layer in `PartSources`: the part id for the main layer, and
+ * `part.layer` for the other layers.
+ */
+export const layerKey = (part: PartId, layer?: string) =>
+  layer === undefined ? part : `${part}.${layer}`;
+
+/** The id of the `<symbol>` of a layer of a rig part, made by `PartSymbols`. */
+export const partId = (prefix: string, part: PartId, layer?: string) =>
+  `${prefix}-${layerKey(part, layer)}`;
 
 function clipShape(shape: ClipShape) {
   return shape.type === 'ellipse' ? (
@@ -44,7 +52,7 @@ function render(node: DrawNode, prefix: string, key: string): ReactNode {
       return (
         <use
           key={key}
-          href={`#${partId(prefix, node.part)}`}
+          href={`#${partId(prefix, node.part, node.layer)}`}
           width={node.width}
           height={node.height}
           transform={matrix(node.transform)}

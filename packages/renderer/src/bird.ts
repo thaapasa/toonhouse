@@ -11,6 +11,7 @@ import type { CharacterDrawing, DrawNode, DrawOptions } from './draw.ts';
 import { placed, skeleton } from './draw.ts';
 import { eyeLids } from './face.ts';
 import { add, deg, pinned, rotate, sub, twoBoneJoint } from './math.ts';
+import { arrange, layered, type SlotDrawing } from './order.ts';
 
 const fmt = (n: number) => Math.round(n * 100) / 100;
 const line = (...pts: Pt[]) =>
@@ -33,13 +34,21 @@ export function drawBird(
   const { pose } = frame;
   const { parts, colors, legs } = rig;
   const ow = rig.outlineWidth;
-  const part = (id: BirdPartId, transform: Matrix): DrawNode => ({
+  const part = (
+    id: BirdPartId,
+    transform: Matrix,
+    layer?: string,
+  ): DrawNode => ({
     type: 'part',
     part: id,
+    ...(layer === undefined ? {} : { layer }),
     width: parts[id].width,
     height: parts[id].height,
     transform,
   });
+  /** A part with all its layers, placed with one transform. */
+  const piece = (id: BirdPartId, transform: Matrix): SlotDrawing =>
+    layered(parts[id], (layer) => [part(id, transform, layer)]);
   /** A thick line with an outline: a stroke under a narrower stroke. */
   const tube = (d: string, width: number, color: string): DrawNode[] => [
     {
@@ -76,11 +85,14 @@ export function drawBird(
       hip,
       knee,
       ankle,
-      nodes: [
+      leg: [
         ...tube(line(knee, ankle), legs.shankWidth, colors.leg),
         ...tube(line(hip, knee), legs.thighWidth, colors.feathers),
-        part('foot', pinned(ankle, angle, rig.scales.foot, parts.foot.pivot)),
       ],
+      foot: piece(
+        'foot',
+        pinned(ankle, angle, rig.scales.foot, parts.foot.pivot),
+      ),
     };
   };
   const nearLeg = leg(rig.body.hipNear, pose.footNear, pose.footNearAngle);
@@ -94,7 +106,7 @@ export function drawBird(
     );
     return {
       shoulder,
-      node: part(
+      drawing: piece(
         id,
         pinned(
           shoulder,
@@ -116,23 +128,26 @@ export function drawBird(
     pose.wingFarOpen,
   );
 
-  const character: DrawNode[] = [
-    {
-      type: 'group',
-      shade: rig.farShade,
-      children: [farWing.node, ...farLeg.nodes],
-    },
-    ...nearLeg.nodes,
-    // The neck goes behind the body and the head, so only its middle shows.
-    ...tube(line(neck, headAt), rig.neck.width, colors.feathers),
-    part('body', pinned(pose.hip, pose.bodyAngle, 1, b0.pivot)),
-    {
-      type: 'group',
-      transform: pinned(headAt, headAngle, rig.scales.head, parts.head.pivot),
-      children: headNodes(rig, frame.face, part),
-    },
-    nearWing.node,
-  ];
+  const character = arrange(rig, {
+    wingFar: farWing.drawing,
+    legFar: { nodes: farLeg.leg },
+    footFar: farLeg.foot,
+    legNear: { nodes: nearLeg.leg },
+    footNear: nearLeg.foot,
+    neck: { nodes: tube(line(neck, headAt), rig.neck.width, colors.feathers) },
+    body: piece('body', pinned(pose.hip, pose.bodyAngle, 1, b0.pivot)),
+    head: layered(parts.head, (layer) => [
+      {
+        type: 'group',
+        transform: pinned(headAt, headAngle, rig.scales.head, parts.head.pivot),
+        children:
+          layer === undefined
+            ? headNodes(rig, frame.face, part)
+            : [part('head', [1, 0, 0, 1, 0, 0], layer)],
+      },
+    ]),
+    wingNear: nearWing.drawing,
+  });
 
   const j = {
     hip: pose.hip,

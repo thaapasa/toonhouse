@@ -26,6 +26,7 @@ export type {
   RabbitRig,
   Rig,
   RigKind,
+  RigLayer,
   RigPart,
   RigPartId,
   StaffHold,

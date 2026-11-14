@@ -18,3 +18,5 @@ export type {
 } from './draw.ts';
 export { drawCharacter } from './draw.ts';
 export { IDENTITY, multiply } from './math.ts';
+export type { DrawEntry, FarGroup } from './order.ts';
+export { defaultDrawOrder, drawOrder } from './order.ts';

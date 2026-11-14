@@ -25,6 +25,7 @@ import {
   scaling,
   sub,
 } from './math.ts';
+import { arrange, layered, type SlotDrawing } from './order.ts';
 import { drawRabbit } from './rabbit.ts';
 
 /** A shape that clips a group. */
@@ -52,9 +53,11 @@ export type DrawNode =
       children: DrawNode[];
     }
   | {
-      /** A traced piece of the rig, drawn in its own pixels. */
+      /** A layer of a part of the rig, drawn in the pixels of the part. */
       type: 'part';
       part: PartId;
+      /** The layer, if not the main layer of the part. */
+      layer?: string;
       width: number;
       height: number;
       transform: Matrix;
@@ -168,16 +171,20 @@ function drawCutout(
 ): CharacterDrawing {
   const { pose } = frame;
   const { parts, limbs, colors } = rig;
-  const part = (id: RigPartId, transform: Matrix): DrawNode => {
+  const part = (id: RigPartId, transform: Matrix, layer?: string): DrawNode => {
     const p = parts[id]!;
     return {
       type: 'part',
       part: id,
+      ...(layer === undefined ? {} : { layer }),
       width: p.width,
       height: p.height,
       transform,
     };
   };
+  /** A part with all its layers, placed with one transform. */
+  const piece = (id: RigPartId, transform: Matrix): SlotDrawing =>
+    layered(parts[id]!, (layer) => [part(id, transform, layer)]);
 
   /** A rubber-hose limb: an outline stroke under a fill stroke. */
   const hose = (
@@ -243,7 +250,7 @@ function drawCutout(
       knee: curveMiddle(hip, c, ankle),
       ankle,
       limb: hose(curve(hip, c, ankle), limbs.legWidth, limbs.legColor),
-      foot: part(
+      foot: piece(
         'foot',
         pinned(ankle, angle, rig.scales.foot, parts.foot.pivot),
       ),
@@ -282,10 +289,14 @@ function drawCutout(
     : pose.handNear;
   const nearArm = arm(rig.torso.shoulderNear, handNear);
   const farArm = arm(rig.torso.shoulderFar, pose.handFar);
-  const hand = (a: typeof nearArm, open: boolean, angle: number): DrawNode => {
+  const hand = (
+    a: typeof nearArm,
+    open: boolean,
+    angle: number,
+  ): SlotDrawing => {
     const id = open ? 'handOpen' : 'hand';
     const offset = deg(open ? rig.hands.openAngle : rig.hands.relaxedAngle);
-    return part(
+    return piece(
       id,
       pinned(
         a.wrist,
@@ -296,8 +307,8 @@ function drawCutout(
     );
   };
 
-  /** The fist around the staff, and the staff behind it. */
-  const staffHand = (s: NonNullable<typeof staff>): DrawNode[] => {
+  /** The fist around the staff, and the staff behind the arm. */
+  const staffHand = (s: NonNullable<typeof staff>) => {
     const turn = pose.torsoAngle + s.turn * pose.handNearAngle;
     const fist = turn + deg(s.handAngle);
     const grip = add(
@@ -310,49 +321,46 @@ function drawCutout(
         fist,
       ),
     );
-    return [
-      part('staff', pinned(grip, turn, s.scale, parts.staff!.pivot)),
-      ...nearArm.nodes,
-      part(
+    return {
+      staff: piece('staff', pinned(grip, turn, s.scale, parts.staff!.pivot)),
+      hand: piece(
         'hand',
         pinned(nearArm.wrist, fist, rig.scales.hand, parts.hand.pivot),
       ),
-    ];
+    };
   };
+  const held = staff ? staffHand(staff) : undefined;
 
-  const character: DrawNode[] = [
-    // The far side of the body is a little darker, so the limbs read apart.
-    {
-      type: 'group',
-      shade: rig.farShade,
-      children: [
-        ...farArm.nodes,
-        hand(farArm, false, pose.handFarAngle),
-        ...farLeg.limb,
-        farLeg.foot,
-      ],
-    },
-    ...nearLeg.limb,
-    ...(rig.feetBehindTorso ? [nearLeg.foot] : []),
-    part('torso', pinned(pose.hip, pose.torsoAngle, 1, t0.pivot)),
-    ...(rig.feetBehindTorso ? [] : [nearLeg.foot]),
-    {
-      type: 'group',
-      transform: pinned(
-        neck,
-        pose.torsoAngle + pose.headAngle,
-        rig.scales.head,
-        parts.head.pivot,
-      ),
-      children: headNodes(rig, frame.face, part),
-    },
-    ...(staff
-      ? staffHand(staff)
-      : [
-          ...nearArm.nodes,
-          hand(nearArm, pose.handNearOpen > 0.5, pose.handNearAngle),
-        ]),
-  ];
+  const headTransform = pinned(
+    neck,
+    pose.torsoAngle + pose.headAngle,
+    rig.scales.head,
+    parts.head.pivot,
+  );
+  // The far side of the body is a little darker, so the limbs read apart.
+  const character = arrange(rig, {
+    armFar: { nodes: farArm.nodes },
+    handFar: hand(farArm, false, pose.handFarAngle),
+    legFar: { nodes: farLeg.limb },
+    footFar: farLeg.foot,
+    legNear: { nodes: nearLeg.limb },
+    footNear: nearLeg.foot,
+    torso: piece('torso', pinned(pose.hip, pose.torsoAngle, 1, t0.pivot)),
+    head: layered(parts.head, (layer) => [
+      {
+        type: 'group',
+        transform: headTransform,
+        children:
+          layer === undefined
+            ? headNodes(rig, frame.face, part)
+            : [part('head', [1, 0, 0, 1, 0, 0], layer)],
+      },
+    ]),
+    staff: held?.staff,
+    armNear: { nodes: nearArm.nodes },
+    handNear:
+      held?.hand ?? hand(nearArm, pose.handNearOpen > 0.5, pose.handNearAngle),
+  });
 
   const node = placed(rig.shadow, facing, character);
 

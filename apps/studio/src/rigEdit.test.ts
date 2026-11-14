@@ -1,5 +1,5 @@
 import type { Rig } from '@toonhouse/model';
-import { clipsFor, drawCharacter } from '@toonhouse/renderer';
+import { clipsFor, drawCharacter, drawOrder } from '@toonhouse/renderer';
 import { describe, expect, it } from 'vitest';
 
 import bunny from '../../../assets/characters/bunny/rig.json';
@@ -13,8 +13,10 @@ import {
   attachmentMover,
   attachments,
   normalizeAngle,
+  pieceLayers,
   withAngle,
   withAttachment,
+  withEntryMoved,
   withPivot,
 } from './rigEdit.ts';
 
@@ -89,5 +91,57 @@ describe('angles', () => {
     const next = withAngle(rig, relaxed!, -80);
     expect(angleOf(next, relaxed!)).toBe(-80);
     expect(angleOf(next, open!)).toBe(angleOf(rig, open!));
+  });
+});
+
+describe('withEntryMoved', () => {
+  const rig = emo as unknown as Rig;
+  const ids = (r: Rig) => drawOrder(r).map((e) => e.id);
+
+  it('moves an entry towards the front or the back', () => {
+    const next = withEntryMoved(rig, 'torso', 1);
+    const order = ids(next);
+    expect(order.indexOf('torso')).toBe(ids(rig).indexOf('torso') + 1);
+    expect(next.drawOrder).toEqual(order);
+    expect(ids(withEntryMoved(rig, 'torso', -1)).indexOf('torso')).toBe(
+      ids(rig).indexOf('torso') - 1,
+    );
+  });
+
+  it('keeps the rig at the ends of the order', () => {
+    expect(withEntryMoved(rig, 'armFar', -1)).toBe(rig);
+    expect(withEntryMoved(rig, 'handNear', 1)).toBe(rig);
+  });
+
+  it('goes back to the default order when the order is the default', () => {
+    const back = withEntryMoved(withEntryMoved(rig, 'torso', 1), 'torso', -1);
+    expect(back).not.toHaveProperty('drawOrder');
+  });
+});
+
+describe('pieceLayers', () => {
+  it('gives the layers of a piece in the draw order', () => {
+    const rig = emo as unknown as Rig;
+    expect(pieceLayers(rig, 'head')).toEqual([undefined]);
+    const head = (rig.parts as Record<string, object>).head;
+    const layered = {
+      ...rig,
+      parts: {
+        ...rig.parts,
+        head: {
+          ...head,
+          layers: [
+            { id: 'backHair', svg: 'back.svg' },
+            { id: 'frontHair', svg: 'front.svg' },
+          ],
+        },
+      },
+      drawOrder: ['head.backHair', 'torso', 'head', 'head.frontHair'],
+    } as Rig;
+    expect(pieceLayers(layered, 'head')).toEqual([
+      'backHair',
+      undefined,
+      'frontHair',
+    ]);
   });
 });

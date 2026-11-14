@@ -1,8 +1,14 @@
-// Reads and changes the points of a rig for the rig editor. The editor moves
-// two kinds of points: the attachment points on a piece, where a child piece
-// or a limb joins it, and the pivot of each piece.
+// Reads and changes a rig for the rig editor. The editor moves two kinds of
+// points: the attachment points on a piece, where a child piece or a limb
+// joins it, and the pivot of each piece. It also changes the rest angles of
+// some pieces and the draw order.
 import type { ClipFrame, PartId, Pt, Rig, RigPart } from '@toonhouse/model';
-import { drawCharacter } from '@toonhouse/renderer';
+import {
+  defaultDrawOrder,
+  drawCharacter,
+  type DrawEntry,
+  drawOrder,
+} from '@toonhouse/renderer';
 
 /** What the rig editor has selected. */
 export type RigTarget =
@@ -234,4 +240,46 @@ export function withAngle(rig: Rig, f: AngleField, deg: number): Rig {
     ...rig,
     [f.group]: { ...groups[f.group], [f.key]: normalizeAngle(deg) },
   } as Rig;
+}
+
+/**
+ * The rig with the entry `id` moved by `by` places in the draw order, towards
+ * the front for a positive `by`. If the order becomes the default one, the rig
+ * goes back to the default order, so that its file has no draw order to keep
+ * up to date.
+ */
+export function withEntryMoved(rig: Rig, id: string, by: number): Rig {
+  const order = drawOrder(rig).map((e) => e.id);
+  const from = order.indexOf(id);
+  const to = Math.min(Math.max(from + by, 0), order.length - 1);
+  if (from < 0 || to === from) return rig;
+  order.splice(from, 1);
+  order.splice(to, 0, id);
+  const defaults = defaultDrawOrder(rig).map((e) => e.id);
+  return order.join() === defaults.join()
+    ? withDefaultDrawOrder(rig)
+    : ({ ...rig, drawOrder: order } as Rig);
+}
+
+export function withDefaultDrawOrder(rig: Rig): Rig {
+  const next = { ...rig };
+  delete next.drawOrder;
+  return next;
+}
+
+/**
+ * The layers of a piece in the order they are drawn, with `undefined` for
+ * the main layer. A piece that more than one slot draws, such as the foot,
+ * takes the order of the first slot.
+ */
+export function pieceLayers(rig: Rig, part: PartId): (string | undefined)[] {
+  const own = new Set((pieceOf(rig, part).layers ?? []).map((l) => l.id));
+  const entries: DrawEntry[] = drawOrder(rig);
+  const slot = entries.find((e) => e.parts.includes(part))?.slot;
+  if (slot === undefined) return [undefined];
+  return entries
+    .filter(
+      (e) => e.slot === slot && (e.layer === undefined || own.has(e.layer)),
+    )
+    .map((e) => e.layer);
 }

@@ -16,6 +16,7 @@ import {
   BIRD_CLIPS,
   BIRD_WALK_SPEED,
   clipById,
+  clipsFor,
   CUTOUT_CLIPS,
   RABBIT_CLIPS,
   RABBIT_HOP_SPEED,
@@ -23,6 +24,7 @@ import {
 } from './clips/index.ts';
 import { drawCharacter, type DrawNode } from './draw.ts';
 import { twoBoneJoint } from './math.ts';
+import { defaultDrawOrder, drawOrder } from './order.ts';
 
 const rig = boy as CutoutRig;
 const bird = chicken as BirdRig;
@@ -244,5 +246,188 @@ describe('rabbit', () => {
       JSON.stringify(drawCharacter(rabbit, talk.frameAt(t), { facing: 1 }));
     expect(paths(0)).not.toContain(rabbit.colors.teeth);
     expect(paths(0.8)).toContain(rabbit.colors.teeth);
+  });
+});
+
+describe('draw order', () => {
+  const idle = clipById('cutout', 'idle').frameAt(0);
+  const ids = (r: Rig) => drawOrder(r).map((e) => e.id);
+  /** The parts and layers in the order they are drawn, as `part.layer`. */
+  function layers(node: DrawNode): string[] {
+    if (node.type === 'part') {
+      return [node.layer ? `${node.part}.${node.layer}` : node.part];
+    }
+    if (node.type === 'group') return node.children.flatMap(layers);
+    return [];
+  }
+  /** The boy with back hair and front hair on the head. */
+  const withHair = (order?: string[]): CutoutRig => ({
+    ...rig,
+    parts: {
+      ...rig.parts,
+      head: {
+        ...rig.parts.head,
+        layers: [
+          { id: 'backHair', svg: 'head-back-hair.svg' },
+          { id: 'frontHair', svg: 'head-front-hair.svg' },
+        ],
+      },
+    },
+    ...(order ? { drawOrder: order } : {}),
+  });
+
+  it('has a default order for each rig kind', () => {
+    expect(ids(rig)).toEqual([
+      'armFar',
+      'handFar',
+      'legFar',
+      'footFar',
+      'legNear',
+      'torso',
+      'footNear',
+      'head',
+      'armNear',
+      'handNear',
+    ]);
+    expect(ids(wizard)).toEqual([
+      'armFar',
+      'handFar',
+      'legFar',
+      'footFar',
+      'legNear',
+      'footNear',
+      'torso',
+      'head',
+      'staff',
+      'armNear',
+      'handNear',
+    ]);
+    expect(ids(bird)).toEqual([
+      'wingFar',
+      'legFar',
+      'footFar',
+      'legNear',
+      'footNear',
+      'neck',
+      'body',
+      'head',
+      'wingNear',
+    ]);
+    expect(ids(rabbit)).toEqual([
+      'hindLegFar',
+      'footFar',
+      'frontLegFar',
+      'pawFar',
+      'earFar',
+      'earNear',
+      'hindLegNear',
+      'body',
+      'footNear',
+      'head',
+      'frontLegNear',
+      'pawNear',
+    ]);
+  });
+
+  it('draws the far side in one shaded group, as before', () => {
+    const node = drawCharacter(rig, idle, { facing: 1 }).node;
+    const character = node.type === 'group' ? node.children[1] : undefined;
+    const children = character?.type === 'group' ? character.children : [];
+    const far = children[0];
+    expect(far?.type === 'group' && far.shade).toBe(rig.farShade);
+    expect(far && layers(far)).toEqual(['hand', 'foot']);
+    expect(children.filter((c) => c.type === 'group' && c.shade)).toHaveLength(
+      1,
+    );
+    expect(layers(node)).toEqual([
+      'hand',
+      'foot',
+      'torso',
+      'foot',
+      'head',
+      'mouthPatch',
+      'hand',
+    ]);
+  });
+
+  it('draws the same with the default order written out', () => {
+    for (const r of [rig, wizard, bird, rabbit]) {
+      const clip = clipsFor(r.kind)[0]!;
+      const frame = clip.frameAt(0.4);
+      const explicit = {
+        ...r,
+        drawOrder: defaultDrawOrder(r).map((e) => e.id),
+      } as Rig;
+      expect(drawCharacter(explicit, frame, { facing: 1 })).toEqual(
+        drawCharacter(r, frame, { facing: 1 }),
+      );
+    }
+  });
+
+  it('puts the layers of a part after its main layer by default', () => {
+    expect(ids(withHair())).toContain('head.backHair');
+    expect(layers(drawCharacter(withHair(), idle, { facing: 1 }).node)).toEqual(
+      [
+        'hand',
+        'foot',
+        'torso',
+        'foot',
+        'head',
+        'mouthPatch',
+        'head.backHair',
+        'head.frontHair',
+        'hand',
+      ],
+    );
+  });
+
+  it('draws the front hair over the near hand and the back hair behind the torso', () => {
+    const order = defaultDrawOrder(rig)
+      .map((e) => e.id)
+      .filter((id) => id !== 'torso');
+    const hair = withHair([
+      'head.backHair',
+      'torso',
+      ...order,
+      'head.frontHair',
+    ]);
+    const drawn = layers(drawCharacter(hair, idle, { facing: 1 }).node);
+    expect(drawn.indexOf('head.backHair')).toBeLessThan(drawn.indexOf('torso'));
+    expect(drawn.at(-1)).toBe('head.frontHair');
+    expect(drawn.at(-2)).toBe('hand');
+  });
+
+  it('moves the layers with the head', () => {
+    const transforms: Record<string, unknown> = {};
+    const visit = (node: DrawNode, group?: unknown) => {
+      if (node.type === 'group') {
+        for (const c of node.children) visit(c, node.transform ?? group);
+      } else if (node.type === 'part' && node.part === 'head') {
+        transforms[node.layer ?? 'main'] = [group, node.transform];
+      }
+    };
+    const order = ['head.frontHair', 'head.backHair'];
+    visit(drawCharacter(withHair(order), idle, { facing: 1 }).node);
+    expect(transforms.backHair).toEqual(transforms.main);
+    expect(transforms.frontHair).toEqual(transforms.main);
+  });
+
+  it('places the entries that the order leaves out, and drops unknown ids', () => {
+    const hair = withHair(['head.frontHair', 'nose', ...ids(rig)]);
+    expect(ids(hair)).toEqual([
+      'head.frontHair',
+      ...ids(rig).slice(0, ids(rig).indexOf('head') + 1),
+      'head.backHair',
+      ...ids(rig).slice(ids(rig).indexOf('head') + 1),
+    ]);
+  });
+
+  it('can draw the near foot behind the torso without the robe flag', () => {
+    const order = ids(rig).filter((id) => id !== 'footNear');
+    order.splice(order.indexOf('torso'), 0, 'footNear');
+    const drawn = parts(
+      drawCharacter({ ...rig, drawOrder: order }, idle, { facing: 1 }).node,
+    );
+    expect(drawn.lastIndexOf('foot')).toBeLessThan(drawn.indexOf('torso'));
   });
 });

@@ -7,7 +7,7 @@ import { resolve } from 'node:path';
 import * as prettier from 'prettier';
 import type { Plugin } from 'vite';
 
-import { patchNumbers } from './patchJson.ts';
+import { patchJson } from './patchJson.ts';
 
 export const SAVE_RIG_URL = '/api/rig';
 
@@ -63,7 +63,7 @@ async function save(repoRoot: string, body: string): Promise<void> {
   ) {
     throw new Error(`The rig is not a ${kind} rig`);
   }
-  const text = patchNumbers(old, rig) ?? JSON.stringify(rig, null, 2);
+  const text = patchJson(old, rig) ?? JSON.stringify(rig, null, 2);
   const options = await prettier.resolveConfig(path);
   await writeFile(
     path,

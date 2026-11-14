@@ -1,9 +1,7 @@
-import type { PartId } from '@toonhouse/model';
 import { useMemo } from 'react';
 
-import { partId } from './Drawing.tsx';
-
-export type PartSources = Partial<Record<PartId, string>>;
+/** The SVG text of each layer of the rig parts, by `layerKey`. */
+export type PartSources = Record<string, string>;
 
 interface ParsedPart {
   id: string;
@@ -13,10 +11,10 @@ interface ParsedPart {
 
 function parse(prefix: string, sources: PartSources): ParsedPart[] {
   const parser = new DOMParser();
-  return Object.entries(sources).map(([part, text]) => {
+  return Object.entries(sources).map(([key, text]) => {
     const svg = parser.parseFromString(text, 'image/svg+xml').documentElement;
     return {
-      id: partId(prefix, part as PartId),
+      id: `${prefix}-${key}`,
       viewBox: svg.getAttribute('viewBox') ?? '',
       content: svg.innerHTML,
     };
@@ -25,7 +23,7 @@ function parse(prefix: string, sources: PartSources): ParsedPart[] {
 
 export interface PartSymbolsProps {
   prefix: string;
-  /** The SVG text of each part. The files come from the repo, not from users. */
+  /** The SVG text of each layer. The files come from the repo, not from users. */
   sources: PartSources;
 }
 

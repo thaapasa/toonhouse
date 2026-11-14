@@ -37,8 +37,8 @@ same web app in a browser.
 ## Deterministic rendering
 
 The picture of a scene is a pure function of the scene data and the time `t`.
-The renderer returns a list of parts to draw, each with its transform and draw
-order. The editor draws that list as SVG, and export draws it on a canvas.
+The renderer returns a tree of things to draw, in the draw order, each with its
+transform. The editor draws that tree as SVG, and export draws it on a canvas.
 
 Because of this, export never records live playback. It steps `t` one frame at a
 time and renders each frame at the chosen resolution. The export client runs the
@@ -50,8 +50,9 @@ later.
 
 All graphics are SVG, so they stay sharp at any size.
 
-- A **rig** is a character: a tree of bones joined at pivot points, with an SVG
-  part on each bone. A prop is a rig with one bone.
+- A **rig** is a character: a tree of bones joined at pivot points, with a part
+  on each bone. A part has one or more SVG layers. A prop is a rig with one
+  bone.
 - A **clip** is a short motion, such as a walk cycle. A clip works on any rig
   that has the same bones.
 - A **scene** has a background and actors. Each actor uses a rig and has a list
@@ -79,6 +80,30 @@ hoses, and each hind leg has two straight bones from the hip to the heel with
 the knee bending forwards.
 
 A clip works on the rigs of one kind only.
+
+### Layers and draw order
+
+Each part has a main layer, the `svg` of the part in `rig.json`, and it can list
+more layers in `layers`, such as the back hair and the front hair of the head.
+All layers of a part are drawn in the pixels of the part, so they move with its
+bone. The things that the renderer draws on a part, such as the eyelids on the
+head, go with the main layer.
+
+The renderer draws each rig kind as a fixed set of slots, such as the near hand,
+the far leg or the head. A slot is either a limb that the renderer draws or a
+part on a bone. Each slot has one entry in the draw order for the limb or the
+main layer, and one for each other layer of its part, with the id `slot.layer`.
+The renderer computes the full transform of every entry and then draws the
+entries in the draw order, not in the order of the bones. So the front hair can
+go in front of the near arm while the back hair is behind the torso, although
+both move with the head. The entries on the far side get the far shade of the
+rig each, wherever they are in the order.
+
+Each rig kind has a default draw order in `packages/renderer`. A rig can set its
+own in `drawOrder`, a flat list of entry ids from the back to the front. If that
+list leaves out an entry, such as a layer added later, the entry goes after the
+entry before it in the default order. The developer changes the draw order in
+the character studio.
 
 For now, the clips are TypeScript code in `packages/renderer`: each clip is a
 function from the time `t` to a pose and a face. This kept the motion of the

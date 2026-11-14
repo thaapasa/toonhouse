@@ -13,6 +13,7 @@ import {
   type RigTarget,
 } from '../rigEdit.ts';
 import { useRigNames } from '../rigNames.ts';
+import { DrawOrderPanel } from './DrawOrderPanel.tsx';
 import { ArrowIcon, TurnIcon } from './icons.tsx';
 
 export type SaveStatus =
@@ -34,6 +35,8 @@ interface Props {
   /** The angle that the piece view edits, or null for the pivot. */
   angleMode: AngleField | null;
   onAngle(field: AngleField, deg: number): void;
+  /** Changes the rig, such as its draw order. */
+  onRig(rig: Rig): void;
   dirty: boolean;
   status: SaveStatus;
   onSave(): void;
@@ -47,6 +50,7 @@ export function Inspector(props: Props) {
   const { tr } = useI18n();
   const names = useRigNames();
   const [step, setStep] = useState<number>(1);
+  const [tab, setTab] = useState<'rig' | 'drawOrder'>('rig');
   const found = findTarget(rig, target);
   const list = attachments(rig);
   const groups = [...new Set(list.map((a) => a.group))];
@@ -91,12 +95,26 @@ export function Inspector(props: Props) {
   return (
     <aside className="inspector" aria-label={tr('inspector')}>
       <div className="tabs" role="tablist">
-        <button type="button" role="tab" aria-selected="true">
-          {tr('rig')}
-        </button>
+        {(['rig', 'drawOrder'] as const).map((id) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={tab === id}
+            onClick={() => setTab(id)}
+          >
+            {tr(id)}
+          </button>
+        ))}
       </div>
 
-      <div className="inspector-body">
+      {tab === 'drawOrder' && (
+        <div className="inspector-body">
+          <DrawOrderPanel rig={rig} onRig={props.onRig} />
+        </div>
+      )}
+      {/* Hidden rather than removed, so that it keeps its scroll position. */}
+      <div className="inspector-body" hidden={tab !== 'rig'}>
         <section className="inspector-section">
           <div className="section-title">{tr('selected')}</div>
           {found ? (
@@ -254,18 +272,29 @@ export function Inspector(props: Props) {
 
         <section className="inspector-section">
           <div className="section-title">{tr('pivots')}</div>
-          {pieces(rig).map((p) => (
-            <button
-              key={p}
-              type="button"
-              className="target"
-              aria-pressed={target?.type === 'piece' && target.part === p}
-              onClick={() => pick({ type: 'piece', part: p })}
-            >
-              <span>{names.part(p)}</span>
-              <span className="coords">{fmt(pieceOf(rig, p).pivot)}</span>
-            </button>
-          ))}
+          {pieces(rig).map((p) => {
+            const layers = pieceOf(rig, p).layers ?? [];
+            return (
+              <div key={p}>
+                <button
+                  type="button"
+                  className="target"
+                  aria-pressed={target?.type === 'piece' && target.part === p}
+                  onClick={() => pick({ type: 'piece', part: p })}
+                >
+                  <span>{names.part(p)}</span>
+                  <span className="coords">{fmt(pieceOf(rig, p).pivot)}</span>
+                </button>
+                {layers.length > 0 && (
+                  <div className="target-layers">
+                    {tr('layersOf', {
+                      list: layers.map((l) => names.layer(l.id)).join(', '),
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </section>
       </div>
 
