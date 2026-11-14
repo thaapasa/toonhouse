@@ -1,7 +1,5 @@
 // The characters in assets/characters/ and the props in assets/props/, one
 // folder each, with a rig.json and the SVG layers of the parts that it names.
-// The test props in assets/fixtures/props/ come along until the real ones
-// exist.
 import type { Rig } from '@toonhouse/model';
 import { layerKey, type PartSources } from '@toonhouse/stage';
 
@@ -9,19 +7,12 @@ const characterRigs = import.meta.glob<Rig>(
   '../../../assets/characters/*/rig.json',
   { eager: true, import: 'default' },
 );
-const propRigs = import.meta.glob<Rig>(
-  [
-    '../../../assets/props/*/rig.json',
-    '../../../assets/fixtures/props/*/rig.json',
-  ],
-  { eager: true, import: 'default' },
-);
+const propRigs = import.meta.glob<Rig>('../../../assets/props/*/rig.json', {
+  eager: true,
+  import: 'default',
+});
 const svgs = import.meta.glob<string>(
-  [
-    '../../../assets/characters/*/*.svg',
-    '../../../assets/props/*/*.svg',
-    '../../../assets/fixtures/props/*/*.svg',
-  ],
+  ['../../../assets/characters/*/*.svg', '../../../assets/props/*/*.svg'],
   { eager: true, query: '?raw', import: 'default' },
 );
 
