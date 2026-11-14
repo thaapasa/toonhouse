@@ -1,0 +1,149 @@
+{
+  "kind": "cutout",
+  "parts": {
+    "head": {
+      "svg": "head.svg",
+      "width": 382,
+      "height": 412,
+      "pivot": {
+        "x": 218,
+        "y": 385
+      }
+    },
+    "mouthPatch": {
+      "svg": "mouth-patch.svg",
+      "width": 382,
+      "height": 412,
+      "pivot": {
+        "x": 218,
+        "y": 385
+      }
+    },
+    "torso": {
+      "svg": "torso.svg",
+      "width": 201,
+      "height": 392,
+      "pivot": {
+        "x": 100,
+        "y": 335
+      }
+    },
+    "hand": {
+      "svg": "hand.svg",
+      "width": 93,
+      "height": 132,
+      "pivot": {
+        "x": 42,
+        "y": 12
+      }
+    },
+    "handOpen": {
+      "svg": "hand-open.svg",
+      "width": 171,
+      "height": 176,
+      "pivot": {
+        "x": 73,
+        "y": 168
+      }
+    },
+    "foot": {
+      "svg": "foot.svg",
+      "width": 246,
+      "height": 224,
+      "pivot": {
+        "x": 80,
+        "y": 85
+      }
+    }
+  },
+  "torso": {
+    "neck": {
+      "x": 97,
+      "y": 16
+    },
+    "shoulderNear": {
+      "x": 100,
+      "y": 84
+    },
+    "shoulderFar": {
+      "x": 112,
+      "y": 80
+    },
+    "hipNear": {
+      "x": 108,
+      "y": 335
+    },
+    "hipFar": {
+      "x": 90,
+      "y": 335
+    }
+  },
+  "scales": {
+    "head": 0.8,
+    "hand": 0.62,
+    "foot": 0.55
+  },
+  "hands": {
+    "relaxedAngle": -90,
+    "openAngle": 90
+  },
+  "ankleHeight": 130,
+  "limbs": {
+    "armLength": 155,
+    "legLength": 190,
+    "armWidth": 24,
+    "legWidth": 28,
+    "outlineWidth": 7,
+    "sleeve": {
+      "color": "#fddc01",
+      "length": 0.55,
+      "extraWidth": 12
+    }
+  },
+  "colors": {
+    "outline": "#2a1202",
+    "skin": "#bc6b26",
+    "line": "#2a1202",
+    "lid": "#bc6b26",
+    "mouth": "#5a1414",
+    "tongue": "#e74f5a"
+  },
+  "farShade": 0.82,
+  "shadow": {
+    "rx": 120,
+    "ry": 22
+  },
+  "face": {
+    "eye": {
+      "cx": 314,
+      "cy": 246,
+      "rx": 24,
+      "ry": 31
+    },
+    "shutY": 254,
+    "mouth": {
+      "back": {
+        "x": 322,
+        "y": 306
+      },
+      "front": {
+        "x": 349,
+        "y": 316
+      },
+      "control": {
+        "x": 333,
+        "y": 318
+      },
+      "openDepth": 50,
+      "corner": "M322 306Q319 303 318 300",
+      "tongue": {
+        "cx": 336,
+        "cy": 322,
+        "rx": 9,
+        "ry": 3,
+        "drop": 18,
+        "grow": 5
+      }
+    }
+  }
+}

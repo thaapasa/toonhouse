@@ -1,0 +1,14 @@
+{
+  "model": "qwen_image_2.1_turbo_q8p.ckpt",
+  "sampler": "DDIM Trailing",
+  "guidance_scale": 1,
+  "shift": 6.5,
+  "resolution_dependent_shift": false,
+  "batch_size": 1,
+  "prompt": "RGBA image with an alpha channel and a fully transparent background. A cutout\npuppet parts sheet for a 2D cartoon character, with only five separate pieces\nlaid out in a row with wide empty space between them, nothing touching or\noverlapping. The character is an original plump, friendly cartoon duck with a\nbright emerald green head, a thin white collar ring, a light grey and tan body,\na broad flat bright yellow bill and bright orange webbed feet, side profile\nview, facing right, only one eye visible. The five pieces are: 1) the head on a\nshort neck, side profile facing right, one big round eye, a closed broad flat\nyellow duck bill, the white collar ring at the bottom, the neck cut off\nstraight at the bottom; 2) the body of the duck as one round boat-shaped piece,\nseen from the side facing right, a light grey back, a tan chest at the front,\nand a short tail that curls up at the back on the left, with no head, no neck,\nno wings and no legs; 3) one folded wing seen from the side, a rounded teardrop\nshape of brown-grey feathers with a small bright blue stripe and a few feather\ntips at the back; 4) one wing spread wide open, as for flapping, a fan of\nbrown-grey feathers with a bright blue stripe; 5) one webbed duck foot, side\nview, pointing right, a flat bright orange paddle with three toes joined by\nwebbing, with no leg. Flat vector illustration for a children's cartoon: solid\nbright color fills, no gradients, no texture, no shading. Bold, even dark brown\noutline around every piece. No text, no labels, no numbers, no ground shadow.",
+  "negative_prompt": "gradient, texture, crosshatching, sketch lines, shading, realistic, 3D render, photo, background, scenery, ground shadow, text, vignette, film grain",
+  "width": 1280,
+  "height": 1024,
+  "steps": 8,
+  "seed": 13
+}

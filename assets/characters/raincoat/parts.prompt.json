@@ -1,0 +1,14 @@
+{
+  "model": "qwen_image_2.1_turbo_q8p.ckpt",
+  "sampler": "DDIM Trailing",
+  "guidance_scale": 1,
+  "shift": 6.5,
+  "resolution_dependent_shift": false,
+  "batch_size": 1,
+  "prompt": "RGBA image with an alpha channel and a fully transparent background. A cutout\npuppet parts sheet for a 2D cartoon character, with only five separate pieces\nlaid out in a row with wide empty space between them, nothing touching or\noverlapping. The character is an original curious, energetic seven-year-old\ngirl with warm brown skin and two big round fluffy afro puff pigtails high on\nthe back of the head, side profile view, facing right, only one eye visible.\nThe five pieces are: 1) the head with the hair and the two puffs, side profile\nfacing right, one big curious eye, a small nose, a small closed smiling mouth,\nan ear, no hat, no neck; 2) the torso in a bright sunny yellow raincoat with big\nround light blue buttons, the raincoat reaching to the middle of the thighs,\nseen from the side, with no arms and no legs, rounded at the shoulder and the\nhem; 3) one small relaxed hand seen from the side, a simple mitten shape with a\nthumb; 4) one open hand with the palm facing the viewer and the fingers spread,\nas for waving; 5) one foot in a bright red rubber rain boot with a white sole,\nside view, pointing right, with no leg. Flat vector illustration for a\nchildren's cartoon: solid bright color fills, no gradients, no texture, no\nshading. Bold, even dark brown outline around every piece. No text, no labels,\nno numbers, no ground shadow.",
+  "negative_prompt": "gradient, texture, crosshatching, sketch lines, shading, realistic, 3D render, photo, background, scenery, ground shadow, text, vignette, film grain",
+  "width": 1280,
+  "height": 1024,
+  "steps": 8,
+  "seed": 11
+}

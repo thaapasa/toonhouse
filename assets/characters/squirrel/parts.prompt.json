@@ -1,0 +1,14 @@
+{
+  "model": "qwen_image_2.1_turbo_q8p.ckpt",
+  "sampler": "DDIM Trailing",
+  "guidance_scale": 1,
+  "shift": 6.5,
+  "resolution_dependent_shift": false,
+  "batch_size": 1,
+  "prompt": "RGBA image with an alpha channel and a fully transparent background. A cutout\npuppet parts sheet for a 2D cartoon character, with only five separate pieces\nlaid out in a row with wide empty space between them, nothing touching or\noverlapping. The character is an original cute, lively cartoon red squirrel\nwith bright orange-red fur, a cream white belly and muzzle, and a huge bushy\ntail, side profile view, facing right, only one eye visible. The five pieces\nare: 1) the head without ears, side profile facing right, round chubby cheeks,\none big round dark eye with a white shine, a small dark nose at the front, a\ncream white muzzle with a small closed smiling mouth, no ears, no neck; 2) one\nsmall pointed squirrel ear with a tuft of fur at the tip, orange-red with a\npink inside, standing straight up, cut off flat at the bottom; 3) the body of\nthe squirrel sitting, seen from the side facing right, a round pear shape with\na round haunch at the back and a huge fluffy orange-red tail that curls up high\nbehind the back on the left like a big question mark, a cream belly, with no\nhead, no ears, no front legs and no feet; 4) one small round front paw, a short\norange mitten shape with a cream tip, with no leg; 5) one long squirrel hind\nfoot, side view, pointing right, a long flat oval orange foot with a cream\nsole, with no leg. Flat vector illustration for a children's cartoon: solid\nbright color fills, no gradients, no texture, no shading. Bold, even dark brown\noutline around every piece. No text, no labels, no numbers, no ground shadow.",
+  "negative_prompt": "gradient, texture, crosshatching, sketch lines, shading, realistic, 3D render, photo, background, scenery, ground shadow, text, vignette, film grain",
+  "width": 1280,
+  "height": 1024,
+  "steps": 8,
+  "seed": 13
+}

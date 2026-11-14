@@ -1,0 +1,137 @@
+{
+  "kind": "rabbit",
+  "parts": {
+    "head": {
+      "svg": "head.svg",
+      "width": 309,
+      "height": 266,
+      "pivot": {
+        "x": 130,
+        "y": 225
+      }
+    },
+    "ear": {
+      "svg": "ear.svg",
+      "width": 97,
+      "height": 175,
+      "pivot": {
+        "x": 52,
+        "y": 160
+      }
+    },
+    "body": {
+      "svg": "body.svg",
+      "width": 438,
+      "height": 442,
+      "pivot": {
+        "x": 265,
+        "y": 355
+      }
+    },
+    "paw": {
+      "svg": "paw.svg",
+      "width": 77,
+      "height": 88,
+      "pivot": {
+        "x": 38,
+        "y": 44
+      }
+    },
+    "foot": {
+      "svg": "foot.svg",
+      "width": 290,
+      "height": 110,
+      "pivot": {
+        "x": 50,
+        "y": 55
+      }
+    }
+  },
+  "body": {
+    "neck": {
+      "x": 340,
+      "y": 195
+    },
+    "shoulderNear": {
+      "x": 385,
+      "y": 320
+    },
+    "shoulderFar": {
+      "x": 370,
+      "y": 315
+    },
+    "hipNear": {
+      "x": 270,
+      "y": 360
+    },
+    "hipFar": {
+      "x": 250,
+      "y": 355
+    }
+  },
+  "ears": {
+    "near": {
+      "x": 120,
+      "y": 40
+    },
+    "far": {
+      "x": 155,
+      "y": 30
+    }
+  },
+  "scales": {
+    "head": 0.8,
+    "ear": 0.7,
+    "paw": 0.55,
+    "foot": 0.45
+  },
+  "heelHeight": 45,
+  "wristHeight": 44,
+  "legs": {
+    "armLength": 90,
+    "armWidth": 24,
+    "thighLength": 68,
+    "shankLength": 72,
+    "shankWidth": 24
+  },
+  "outlineWidth": 5,
+  "colors": {
+    "outline": "#3b0603",
+    "fur": "#f23c06",
+    "belly": "#fceac6",
+    "line": "#3b0603",
+    "mouth": "#7a1f1a",
+    "tongue": "#f8778f",
+    "teeth": "#ffffff"
+  },
+  "farShade": 0.82,
+  "shadow": {
+    "rx": 150,
+    "ry": 18
+  },
+  "face": {
+    "eye": {
+      "cx": 192,
+      "cy": 116,
+      "rx": 31,
+      "ry": 36
+    },
+    "shutY": 122,
+    "mouth": {
+      "back": {
+        "x": 236,
+        "y": 192
+      },
+      "front": {
+        "x": 272,
+        "y": 196
+      },
+      "control": {
+        "x": 250,
+        "y": 209
+      },
+      "openDepth": 42,
+      "teeth": "M248 197h8v12q0 2-2 2h-4q-2 0-2-2zM257 197h8v12q0 2-2 2h-4q-2 0-2-2z"
+    }
+  }
+}
