@@ -87,6 +87,35 @@ the meadow, the farm and the village.
 - Draw the sky as a flat rectangle in the SVG. The sun and the clouds are
   separate pieces in `backgrounds/shared/`.
 
+## Props
+
+A prop that rustles, such as a tree or a bush, is in `props/<name>/`, with its
+crown in separate pieces on separate bones. The `LOG.md` of each prop has its
+prompt, its seed and how its rig is set up. These rules come from making the
+trees and the bushes.
+
+- Generate the pieces as a parts sheet at 1280×1024, as for a character: the
+  trunk and two to four leaf clumps, or only the clumps for a bush. The pieces
+  come in the same style and at the same scale, so the clumps fit the trunk at a
+  scale near 1.
+- If the trunk has branches, the image model puts the largest clump on top of
+  it. Ask for "a bare leafless tree trunk like a tree in winter … standing alone
+  with empty space all around it", and for leaf clumps "floating apart from each
+  other and from the trunk".
+- A spruce comes out well as a trunk that tapers to a point and three triangular
+  tiers with a zigzag lower edge.
+- For a bush, ask for clumps "with a flat bottom". Some seeds still draw a
+  ground shadow or a darker band under a clump.
+- Dark green fills can trace with specks and thin lines along a jagged edge.
+  Trace them again with a fixed palette of the outline and the fill.
+
+In the rig, the clumps overlap each other by a good part of their size, so that
+no gap opens when they sway. A clump behind the trunk lets the branches show in
+front of the leaves. The pivot of a clump of a tree is in its middle, a little
+below the center. The pivot of a clump of a bush is in the middle of its bottom
+edge, and the root of a bush sways only about 1°, because a larger angle lifts
+the ends of a wide clump off the ground.
+
 ## Tracing
 
 ```sh

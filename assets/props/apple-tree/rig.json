@@ -1,0 +1,98 @@
+{
+  "kind": "prop",
+  "parts": {
+    "trunk": {
+      "svg": "trunk.svg",
+      "width": 372,
+      "height": 886,
+      "pivot": {
+        "x": 205,
+        "y": 878
+      }
+    },
+    "clumpDark": {
+      "svg": "clumpDark.svg",
+      "width": 304,
+      "height": 265,
+      "pivot": {
+        "x": 152,
+        "y": 199
+      }
+    },
+    "clumpLight": {
+      "svg": "clumpLight.svg",
+      "width": 294,
+      "height": 236,
+      "pivot": {
+        "x": 147,
+        "y": 177
+      }
+    },
+    "clumpBright": {
+      "svg": "clumpBright.svg",
+      "width": 293,
+      "height": 236,
+      "pivot": {
+        "x": 146,
+        "y": 177
+      }
+    }
+  },
+  "bones": [
+    {
+      "id": "trunk",
+      "part": "trunk",
+      "scale": 1.25,
+      "sway": {
+        "angle": 0.7
+      }
+    },
+    {
+      "id": "back",
+      "part": "clumpDark",
+      "parent": "trunk",
+      "at": {
+        "x": 175,
+        "y": 170
+      },
+      "scale": 2,
+      "sway": {
+        "angle": 2,
+        "squash": 0.03
+      }
+    },
+    {
+      "id": "left",
+      "part": "clumpLight",
+      "parent": "trunk",
+      "at": {
+        "x": 30,
+        "y": 250
+      },
+      "scale": 1.5,
+      "sway": {
+        "angle": 3,
+        "squash": 0.04
+      }
+    },
+    {
+      "id": "right",
+      "part": "clumpBright",
+      "parent": "trunk",
+      "at": {
+        "x": 310,
+        "y": 180
+      },
+      "scale": 1.5,
+      "sway": {
+        "angle": 3,
+        "squash": 0.04
+      }
+    }
+  ],
+  "drawOrder": ["back", "trunk", "left", "right"],
+  "shadow": {
+    "rx": 200,
+    "ry": 26
+  }
+}

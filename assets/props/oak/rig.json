@@ -1,0 +1,121 @@
+{
+  "kind": "prop",
+  "parts": {
+    "trunk": {
+      "svg": "trunk.svg",
+      "width": 348,
+      "height": 737,
+      "pivot": {
+        "x": 180,
+        "y": 725
+      }
+    },
+    "clumpBig": {
+      "svg": "clumpBig.svg",
+      "width": 447,
+      "height": 373,
+      "pivot": {
+        "x": 224,
+        "y": 280
+      }
+    },
+    "clumpDark": {
+      "svg": "clumpDark.svg",
+      "width": 334,
+      "height": 310,
+      "pivot": {
+        "x": 167,
+        "y": 232
+      }
+    },
+    "clumpLight": {
+      "svg": "clumpLight.svg",
+      "width": 323,
+      "height": 307,
+      "pivot": {
+        "x": 162,
+        "y": 230
+      }
+    },
+    "clumpSmall": {
+      "svg": "clumpSmall.svg",
+      "width": 209,
+      "height": 199,
+      "pivot": {
+        "x": 104,
+        "y": 149
+      }
+    }
+  },
+  "bones": [
+    {
+      "id": "trunk",
+      "part": "trunk",
+      "scale": 1.65,
+      "sway": {
+        "angle": 0.5
+      }
+    },
+    {
+      "id": "back",
+      "part": "clumpBig",
+      "parent": "trunk",
+      "at": {
+        "x": 175,
+        "y": 180
+      },
+      "scale": 1.9,
+      "sway": {
+        "angle": 1.5,
+        "squash": 0.03
+      }
+    },
+    {
+      "id": "right",
+      "part": "clumpDark",
+      "parent": "trunk",
+      "at": {
+        "x": 380,
+        "y": 300
+      },
+      "scale": 1.5,
+      "sway": {
+        "angle": 2.5,
+        "squash": 0.04
+      }
+    },
+    {
+      "id": "left",
+      "part": "clumpLight",
+      "parent": "trunk",
+      "at": {
+        "x": -20,
+        "y": 300
+      },
+      "scale": 1.5,
+      "sway": {
+        "angle": 2.5,
+        "squash": 0.04
+      }
+    },
+    {
+      "id": "top",
+      "part": "clumpSmall",
+      "parent": "trunk",
+      "at": {
+        "x": 150,
+        "y": -180
+      },
+      "scale": 1.6,
+      "sway": {
+        "angle": 3.5,
+        "squash": 0.04
+      }
+    }
+  ],
+  "drawOrder": ["back", "right", "trunk", "left", "top"],
+  "shadow": {
+    "rx": 220,
+    "ry": 28
+  }
+}

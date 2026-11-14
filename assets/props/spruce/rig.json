@@ -1,0 +1,111 @@
+{
+  "kind": "prop",
+  "parts": {
+    "trunk": {
+      "svg": "trunk.svg",
+      "width": 83,
+      "height": 963,
+      "pivot": {
+        "x": 41,
+        "y": 955
+      }
+    },
+    "tierTop": {
+      "svg": "tierTop.svg",
+      "width": 245,
+      "height": 192,
+      "pivot": {
+        "x": 122,
+        "y": 134
+      }
+    },
+    "tierMiddle": {
+      "svg": "tierMiddle.svg",
+      "width": 481,
+      "height": 256,
+      "pivot": {
+        "x": 240,
+        "y": 179
+      }
+    },
+    "tierBottom": {
+      "svg": "tierBottom.svg",
+      "width": 726,
+      "height": 338,
+      "pivot": {
+        "x": 363,
+        "y": 237
+      }
+    }
+  },
+  "bones": [
+    {
+      "id": "trunk",
+      "part": "trunk",
+      "scale": 2.15,
+      "sway": {
+        "angle": 0.5
+      }
+    },
+    {
+      "id": "tierBottom",
+      "part": "tierBottom",
+      "parent": "trunk",
+      "at": {
+        "x": 46,
+        "y": 694
+      },
+      "scale": 1.1,
+      "sway": {
+        "angle": 1.5,
+        "squash": 0.03
+      }
+    },
+    {
+      "id": "tierMiddle",
+      "part": "tierMiddle",
+      "parent": "trunk",
+      "at": {
+        "x": 51,
+        "y": 440
+      },
+      "scale": 1.1,
+      "sway": {
+        "angle": 2,
+        "squash": 0.03
+      }
+    },
+    {
+      "id": "tierUpper",
+      "part": "tierMiddle",
+      "parent": "trunk",
+      "at": {
+        "x": 55,
+        "y": 267
+      },
+      "scale": 0.88,
+      "sway": {
+        "angle": 2.5,
+        "squash": 0.03
+      }
+    },
+    {
+      "id": "tierTop",
+      "part": "tierTop",
+      "parent": "trunk",
+      "at": {
+        "x": 59,
+        "y": 110
+      },
+      "scale": 1.1,
+      "sway": {
+        "angle": 3,
+        "squash": 0.03
+      }
+    }
+  ],
+  "shadow": {
+    "rx": 260,
+    "ry": 30
+  }
+}

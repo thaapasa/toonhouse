@@ -1,0 +1,74 @@
+{
+  "kind": "prop",
+  "parts": {
+    "sectionLong": {
+      "svg": "sectionLong.svg",
+      "width": 556,
+      "height": 231,
+      "pivot": {
+        "x": 278,
+        "y": 222
+      }
+    },
+    "sectionMiddle": {
+      "svg": "sectionMiddle.svg",
+      "width": 378,
+      "height": 181,
+      "pivot": {
+        "x": 189,
+        "y": 174
+      }
+    },
+    "sectionShort": {
+      "svg": "sectionShort.svg",
+      "width": 318,
+      "height": 168,
+      "pivot": {
+        "x": 159,
+        "y": 161
+      }
+    }
+  },
+  "bones": [
+    {
+      "id": "middle",
+      "part": "sectionLong",
+      "scale": 1.8,
+      "sway": {
+        "angle": 0.5,
+        "squash": 0.025
+      }
+    },
+    {
+      "id": "left",
+      "part": "sectionMiddle",
+      "parent": "middle",
+      "at": {
+        "x": 40,
+        "y": 222
+      },
+      "sway": {
+        "angle": 1.5,
+        "squash": 0.04
+      }
+    },
+    {
+      "id": "right",
+      "part": "sectionShort",
+      "parent": "middle",
+      "at": {
+        "x": 530,
+        "y": 222
+      },
+      "sway": {
+        "angle": 1.5,
+        "squash": 0.04
+      }
+    }
+  ],
+  "drawOrder": ["left", "right", "middle"],
+  "shadow": {
+    "rx": 560,
+    "ry": 22
+  }
+}

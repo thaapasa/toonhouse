@@ -1,0 +1,76 @@
+{
+  "kind": "prop",
+  "parts": {
+    "clumpBig": {
+      "svg": "clumpBig.svg",
+      "width": 523,
+      "height": 402,
+      "pivot": {
+        "x": 262,
+        "y": 390
+      }
+    },
+    "clumpMedium": {
+      "svg": "clumpMedium.svg",
+      "width": 342,
+      "height": 282,
+      "pivot": {
+        "x": 171,
+        "y": 274
+      }
+    },
+    "clumpSmall": {
+      "svg": "clumpSmall.svg",
+      "width": 247,
+      "height": 223,
+      "pivot": {
+        "x": 124,
+        "y": 216
+      }
+    }
+  },
+  "bones": [
+    {
+      "id": "middle",
+      "part": "clumpBig",
+      "scale": 1.45,
+      "sway": {
+        "angle": 1,
+        "squash": 0.03
+      }
+    },
+    {
+      "id": "left",
+      "part": "clumpMedium",
+      "parent": "middle",
+      "at": {
+        "x": 50,
+        "y": 392
+      },
+      "scale": 0.9,
+      "sway": {
+        "angle": 2.5,
+        "squash": 0.04
+      }
+    },
+    {
+      "id": "right",
+      "part": "clumpSmall",
+      "parent": "middle",
+      "at": {
+        "x": 495,
+        "y": 392
+      },
+      "scale": 0.9,
+      "sway": {
+        "angle": 2.5,
+        "squash": 0.04
+      }
+    }
+  ],
+  "drawOrder": ["left", "right", "middle"],
+  "shadow": {
+    "rx": 380,
+    "ry": 24
+  }
+}
