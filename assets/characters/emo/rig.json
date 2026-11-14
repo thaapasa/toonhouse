@@ -5,7 +5,11 @@
       "svg": "head.svg",
       "width": 314,
       "height": 530,
-      "pivot": { "x": 149, "y": 346 }
+      "pivot": { "x": 149, "y": 346 },
+      "layers": [
+        { "id": "backHair", "svg": "head-back-hair.svg" },
+        { "id": "frontHair", "svg": "head-front-hair.svg" }
+      ]
     },
     "mouthPatch": {
       "svg": "mouth-patch.svg",
@@ -85,5 +89,19 @@
         "grow": 4
       }
     }
-  }
+  },
+  "drawOrder": [
+    "armFar",
+    "handFar",
+    "legFar",
+    "footFar",
+    "head.backHair",
+    "legNear",
+    "torso",
+    "footNear",
+    "head",
+    "armNear",
+    "handNear",
+    "head.frontHair"
+  ]
 }

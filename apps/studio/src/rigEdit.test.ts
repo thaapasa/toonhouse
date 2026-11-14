@@ -94,8 +94,9 @@ describe('angles', () => {
   });
 });
 
+// The wizard has no layers and no draw order of its own.
 describe('withEntryMoved', () => {
-  const rig = emo as unknown as Rig;
+  const rig = wizard as unknown as Rig;
   const ids = (r: Rig) => drawOrder(r).map((e) => e.id);
 
   it('moves an entry towards the front or the back', () => {
@@ -121,7 +122,7 @@ describe('withEntryMoved', () => {
 
 describe('pieceLayers', () => {
   it('gives the layers of a piece in the draw order', () => {
-    const rig = emo as unknown as Rig;
+    const rig = wizard as unknown as Rig;
     expect(pieceLayers(rig, 'head')).toEqual([undefined]);
     const head = (rig.parts as Record<string, object>).head;
     const layered = {

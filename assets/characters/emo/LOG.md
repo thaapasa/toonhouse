@@ -76,3 +76,29 @@ alpha masks and from `inspect-piece.ts`:
 
 I rendered frames of each clip to SVG and checked them with `pnpm render-svg`:
 standing, five frames of the walk, the wave, and the talk with a blink at 2×.
+
+## Hair layers
+
+The traced head had all the hair in it, so the hair that hangs down from the
+head covered the shoulders and the chest of the torso. I split `head.svg` into
+three layers in the same pixels, each one the traced head with a clip path:
+
+- `head-back-hair.svg`: everything under a line below the jaw and above the
+  collar of the torso. This is the hanging hair, and also the neck, so that the
+  neck goes into the collar. It reaches 8 px above the line, under the main
+  layer, so that no seam shows.
+- `head.svg`: everything above that line, with the face, the ear and the top of
+  the hair.
+- `head-front-hair.svg`: the fringe over the forehead.
+
+The traced paths are big stacked shapes that cross the face and the hair, so
+sorting them by color did not give clean layers. The clip paths keep the look of
+the trace exactly. The ids of the clip paths start with `emo-`, because the
+layers of all parts are symbols in one SVG document.
+
+In `drawOrder`, the back hair goes after the far arm and leg and before the
+torso, so the long hair hangs behind the back but in front of the far arm. The
+front hair goes last, in front of the near arm.
+
+I checked the idle, the walk, the wave and the talk in the studio. The hair now
+goes behind the collar and shows only behind the back of the torso.
