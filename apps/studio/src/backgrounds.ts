@@ -1,26 +1,20 @@
 // The backgrounds in assets/backgrounds/, one folder each, with a
 // background.json and the SVG files of its layers and parts. The parts can
-// come from assets/backgrounds/shared/. The test background in
-// assets/fixtures/backgrounds/ comes along until the real ones exist.
+// come from assets/backgrounds/shared/.
 import type { Background } from '@toonhouse/model';
 import type { PartSources } from '@toonhouse/stage';
 
 import { repoPath } from './characters.ts';
 
 const files = import.meta.glob<Background>(
-  [
-    '../../../assets/backgrounds/*/background.json',
-    '../../../assets/fixtures/backgrounds/*/background.json',
-  ],
+  '../../../assets/backgrounds/*/background.json',
   { eager: true, import: 'default' },
 );
-const svgs = import.meta.glob<string>(
-  [
-    '../../../assets/backgrounds/*/*.svg',
-    '../../../assets/fixtures/backgrounds/*/*.svg',
-  ],
-  { eager: true, query: '?raw', import: 'default' },
-);
+const svgs = import.meta.glob<string>('../../../assets/backgrounds/*/*.svg', {
+  eager: true,
+  query: '?raw',
+  import: 'default',
+});
 
 export interface BackgroundAsset {
   id: string;

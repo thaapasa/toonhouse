@@ -180,10 +180,9 @@ The graphics are generated with AI and traced to SVG, as described in
 [assets/CLAUDE.md](assets/CLAUDE.md). Rigs and backgrounds are JSON files. The
 built-in characters, props, clips and backgrounds live in `assets/` and are
 committed to the repo. The test art in `assets/fixtures/`, a background and two
-props made of simple shapes, is not part of the library: the tests use it, and
-the studio shows it next to the library. The server stores the cartoons that
-users make. The server cleans uploaded SVG files of scripts and external links
-before it stores them.
+props made of simple shapes, is not part of the library. Only the tests use it.
+The server stores the cartoons that users make. The server cleans uploaded SVG
+files of scripts and external links before it stores them.
 
 ## Hosting
 

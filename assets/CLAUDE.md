@@ -56,6 +56,37 @@ These rules come from testing with Qwen Image 2.1 Turbo.
   an arm, the shorts, a leg and a foot as separate pieces. The arm and the leg
   don't come split at the elbow and the knee yet.
 
+## Backgrounds
+
+A background is a stack of layers in `backgrounds/<name>/`, one SVG for each
+depth, all with the same 2048×1152 frame. The `LOG.md` of each background lists
+its layers, their depths and how they were made. These rules come from making
+the meadow, the farm and the village.
+
+- Generate each layer except the sky as a wide strip, such as 2048×768, with the
+  transparent background sentence. Ask for a "wide panoramic background layer
+  for a side-scrolling 2D cartoon" that "runs across the whole width of the
+  image, touches the left, right and bottom edges", and say that the image above
+  it is fully transparent, with no sky, no sun and no clouds.
+- Add "with no border" for the ground. Without it, the image model often draws
+  an outline around the whole strip.
+- The content of a strip comes out shorter than the share you ask for. To make
+  trees smaller, use a wider strip, such as 2048×512, instead of asking for
+  smaller trees.
+- At 2048 px wide, round tree crowns can come with dots or smiles that look like
+  faces. Write "plain shapes with no faces, no eyes and no marks".
+- A large ground area comes out plain green or beige. Ask for scattered tufts,
+  flowers or pebbles to give it some detail.
+- Put the strip in the frame at a scale and an offset before tracing, with the
+  alpha rounded to fully transparent or fully opaque. A far layer that stops
+  above the bottom of the frame should repeat its last full row down to the
+  bottom, so that no gap opens behind the ground when the camera moves.
+- Make far layers paler by mixing their fill colors with the sky color after
+  tracing. The far fields of the farm came out almost as bright as the near
+  layers, even though the prompt asked for pale colors.
+- Draw the sky as a flat rectangle in the SVG. The sun and the clouds are
+  separate pieces in `backgrounds/shared/`.
+
 ## Tracing
 
 ```sh
