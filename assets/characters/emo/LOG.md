@@ -79,26 +79,29 @@ standing, five frames of the walk, the wave, and the talk with a blink at 2×.
 
 ## Hair layers
 
-The traced head had all the hair in it, so the hair that hangs down from the
-head covered the shoulders and the chest of the torso. I split `head.svg` into
-three layers in the same pixels, each one the traced head with a clip path:
+The traced head has all the hair in it. The hair on the near side of the head
+hangs down over the shoulder and should be in front of the arms, and the slice
+of far hair behind the neck should be behind the torso. I split `head.svg` into
+three layers in the same pixels, each one the traced head with a clip path. A
+line under the jaw and across the hair, above the collar of the torso, divides
+them:
 
-- `head-back-hair.svg`: everything under a line below the jaw and above the
-  collar of the torso. This is the hanging hair, and also the neck, so that the
-  neck goes into the collar. It reaches 8 px above the line, under the main
-  layer, so that no seam shows.
-- `head.svg`: everything above that line, with the face, the ear and the top of
-  the hair.
-- `head-front-hair.svg`: the fringe over the forehead.
+- `head.svg`: everything above the line: the face, the fringe, the ear and the
+  top of the hair.
+- `head-front-hair.svg`: the near hair under the line, left of the neck and
+  along the edge of the lock with the pink streak. It goes last in `drawOrder`,
+  in front of the near arm and the hand.
+- `head-back-hair.svg`: the neck and the slice of far hair behind it. It goes
+  right before the torso, so the neck goes into the collar and the torso covers
+  the far hair below the collar.
+
+The two layers under the line reach 8 px above it, so that no seam shows.
 
 The traced paths are big stacked shapes that cross the face and the hair, so
 sorting them by color did not give clean layers. The clip paths keep the look of
 the trace exactly. The ids of the clip paths start with `emo-`, because the
 layers of all parts are symbols in one SVG document.
 
-In `drawOrder`, the back hair goes after the far arm and leg and before the
-torso, so the long hair hangs behind the back but in front of the far arm. The
-front hair goes last, in front of the near arm.
-
-I checked the idle, the walk, the wave and the talk in the studio. The hair now
-goes behind the collar and shows only behind the back of the torso.
+A first version put all the hanging hair behind the torso. Then the hair showed
+only behind the back, and the near side of the head looked as if it had little
+hair. I checked the idle, the walk, the wave and the talk in the studio.
