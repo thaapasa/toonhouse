@@ -11,7 +11,8 @@ import { patchJson } from './patchJson.ts';
 
 export const SAVE_RIG_URL = '/api/rig';
 
-const RIG_FILE = /^assets\/characters\/[a-z0-9-]+\/rig\.json$/;
+const RIG_FILE =
+  /^assets\/(characters|props|fixtures\/props)\/[a-z0-9-]+\/rig\.json$/;
 const MAX_BODY = 1_000_000;
 
 function readBody(req: IncomingMessage): Promise<string> {

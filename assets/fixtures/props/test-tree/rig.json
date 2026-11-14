@@ -1,0 +1,65 @@
+{
+  "kind": "prop",
+  "parts": {
+    "trunk": {
+      "svg": "trunk.svg",
+      "width": 120,
+      "height": 400,
+      "pivot": { "x": 62, "y": 396 }
+    },
+    "crownBack": {
+      "svg": "crown-back.svg",
+      "width": 300,
+      "height": 260,
+      "pivot": { "x": 150, "y": 220 }
+    },
+    "crown": {
+      "svg": "crown.svg",
+      "width": 300,
+      "height": 260,
+      "pivot": { "x": 150, "y": 220 },
+      "layers": [{ "id": "leaves", "svg": "crown-leaves.svg" }]
+    }
+  },
+  "bones": [
+    {
+      "id": "trunk",
+      "part": "trunk",
+      "scale": 2.4,
+      "sway": { "angle": 1 }
+    },
+    {
+      "id": "crownBack",
+      "part": "crownBack",
+      "parent": "trunk",
+      "at": { "x": 62, "y": 70 },
+      "scale": 1.25,
+      "sway": { "angle": 3, "squash": 0.03 }
+    },
+    {
+      "id": "crownLeft",
+      "part": "crown",
+      "parent": "trunk",
+      "at": { "x": 30, "y": 110 },
+      "scale": 0.8,
+      "sway": { "angle": 5, "squash": 0.04 }
+    },
+    {
+      "id": "crownRight",
+      "part": "crown",
+      "parent": "trunk",
+      "at": { "x": 96, "y": 90 },
+      "scale": 0.75,
+      "sway": { "angle": 5, "squash": 0.04 }
+    }
+  ],
+  "drawOrder": [
+    "crownBack",
+    "trunk",
+    "crownLeft",
+    "crownLeft.leaves",
+    "crownRight",
+    "crownRight.leaves"
+  ],
+  "shadow": { "rx": 110, "ry": 16 }
+}

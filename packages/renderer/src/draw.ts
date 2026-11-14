@@ -19,13 +19,16 @@ import {
   curveMiddle,
   deg,
   hoseControl,
+  IDENTITY,
   mix,
+  multiply,
   pinned,
   rotate,
   scaling,
   sub,
 } from './math.ts';
 import { arrange, layered, type SlotDrawing } from './order.ts';
+import { drawProp } from './prop.ts';
 import { drawRabbit } from './rabbit.ts';
 
 /** A shape that clips a group. */
@@ -49,6 +52,12 @@ export type DrawNode =
       transform?: Matrix;
       /** Brightness of everything in the group, from 0 to 1. */
       shade?: number;
+      /**
+       * The actor that the parts in the group belong to, such as a
+       * character on a background. The parts of each actor have their own
+       * ids, so a drawing of several actors looks them up by actor.
+       */
+      actor?: string;
       clip?: ClipShape;
       children: DrawNode[];
     }
@@ -122,6 +131,9 @@ export function drawCharacter(
   if (rig.kind === 'rabbit' && frame.kind === 'rabbit') {
     return drawRabbit(rig, frame, options);
   }
+  if (rig.kind === 'prop' && frame.kind === 'prop') {
+    return drawProp(rig, frame, options);
+  }
   throw new Error(`A ${frame.kind} clip does not work on a ${rig.kind} rig`);
 }
 
@@ -143,25 +155,69 @@ export function skeleton(
 
 /** The ground shadow and the character, turned to face either way. */
 export function placed(
-  shadow: { rx: number; ry: number },
+  shadow: { rx: number; ry: number } | undefined,
   facing: 1 | -1,
   children: DrawNode[],
 ): DrawNode {
+  const under: DrawNode[] = shadow
+    ? [
+        {
+          type: 'ellipse',
+          cx: 0,
+          cy: 0,
+          rx: shadow.rx,
+          ry: shadow.ry,
+          fill: '#000',
+          opacity: 0.18,
+        },
+      ]
+    : [];
   return {
     type: 'group',
     children: [
-      {
-        type: 'ellipse',
-        cx: 0,
-        cy: 0,
-        rx: shadow.rx,
-        ry: shadow.ry,
-        fill: '#000',
-        opacity: 0.18,
-      },
+      ...under,
       { type: 'group', transform: scaling(facing, 1), children },
     ],
   };
+}
+
+export interface Bounds {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * The box around the parts of a drawing, or null if it has none. The drawn
+ * limbs and the shadow don't count, so this is a little smaller than what
+ * shows.
+ */
+export function partBounds(node: DrawNode): Bounds | null {
+  const xs: number[] = [];
+  const ys: number[] = [];
+  const visit = (n: DrawNode, m: Matrix) => {
+    if (n.type === 'group') {
+      const g = n.transform ? multiply(m, n.transform) : m;
+      n.children.forEach((c) => visit(c, g));
+    } else if (n.type === 'part') {
+      const t = multiply(m, n.transform);
+      for (const [x, y] of [
+        [0, 0],
+        [n.width, 0],
+        [0, n.height],
+        [n.width, n.height],
+      ] as const) {
+        xs.push(t[0] * x + t[2] * y + t[4]);
+        ys.push(t[1] * x + t[3] * y + t[5]);
+      }
+    }
+  };
+  visit(node, IDENTITY);
+  if (xs.length === 0) return null;
+  const x = Math.min(...xs);
+  const y = Math.min(...ys);
+  return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
 }
 
 function drawCutout(

@@ -18,6 +18,13 @@ export const layerKey = (part: PartId, layer?: string) =>
 export const partId = (prefix: string, part: PartId, layer?: string) =>
   `${prefix}-${layerKey(part, layer)}`;
 
+/**
+ * The prefix of the part symbols of an actor in a drawing of several actors,
+ * such as a scene. See the `actor` of a group node.
+ */
+export const actorPrefix = (prefix: string, actor: string) =>
+  `${prefix}-${actor}`;
+
 function clipShape(shape: ClipShape) {
   return shape.type === 'ellipse' ? (
     <ellipse cx={shape.cx} cy={shape.cy} rx={shape.rx} ry={shape.ry} />
@@ -30,8 +37,10 @@ function render(node: DrawNode, prefix: string, key: string): ReactNode {
   switch (node.type) {
     case 'group': {
       const clipId = node.clip ? `${prefix}-clip-${key}` : undefined;
+      const inner =
+        node.actor === undefined ? prefix : actorPrefix(prefix, node.actor);
       const children = node.children.map((c, i) =>
-        render(c, prefix, `${key}-${i}`),
+        render(c, inner, `${key}-${i}`),
       );
       return (
         <g
@@ -102,7 +111,8 @@ export interface DrawingProps {
   node: DrawNode;
   /**
    * The prefix of the part symbols, as given to `PartSymbols`. It also keeps
-   * the clip path ids apart when a page has several drawings.
+   * the clip path ids apart when a page has several drawings. The parts of
+   * an actor in the drawing use `actorPrefix`.
    */
   prefix: string;
 }

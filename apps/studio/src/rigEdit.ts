@@ -1,6 +1,7 @@
 // Reads and changes a rig for the rig editor. The editor moves two kinds of
 // points: the attachment points on a piece, where a child piece or a limb
-// joins it, and the pivot of each piece. It also changes the rest angles of
+// joins it, such as where a bone of a prop joins its parent, and the pivot of
+// each piece. It also changes the rest angles of
 // some pieces and the draw order.
 import type { ClipFrame, PartId, Pt, Rig, RigPart } from '@toonhouse/model';
 import {
@@ -18,7 +19,8 @@ export type RigTarget =
 export interface Attachment {
   /** The name of the joint in the skeleton of the drawing. */
   joint: string;
-  group: 'torso' | 'body' | 'ears';
+  group: 'torso' | 'body' | 'ears' | 'bones';
+  /** The key in the group, or the bone id for the bones of a prop. */
   key: string;
   /** The piece that the point is on, in its pixels. */
   piece: PartId;
@@ -33,6 +35,14 @@ const BODY_POINTS = [
 ] as const;
 
 export function attachments(rig: Rig): Attachment[] {
+  if (rig.kind === 'prop') {
+    return rig.bones.flatMap((b) => {
+      const parent = rig.bones.find((p) => p.id === b.parent);
+      return parent
+        ? [{ joint: b.id, group: 'bones', key: b.id, piece: parent.part }]
+        : [];
+    });
+  }
   const group = rig.kind === 'cutout' ? 'torso' : 'body';
   const list: Attachment[] = BODY_POINTS.map((key) => ({
     joint: key,
@@ -51,10 +61,22 @@ export function attachments(rig: Rig): Attachment[] {
 
 type PointGroups = Record<string, Record<string, Pt>>;
 
-export const attachmentAt = (rig: Rig, a: Attachment): Pt =>
-  (rig as unknown as PointGroups)[a.group]![a.key]!;
+export function attachmentAt(rig: Rig, a: Attachment): Pt {
+  if (rig.kind === 'prop') {
+    // A bone without a point of its own joins its parent at the pivot.
+    const bone = rig.bones.find((b) => b.id === a.key);
+    return bone?.at ?? rig.parts[a.piece]!.pivot;
+  }
+  return (rig as unknown as PointGroups)[a.group]![a.key]!;
+}
 
 export function withAttachment(rig: Rig, a: Attachment, p: Pt): Rig {
+  if (rig.kind === 'prop') {
+    return {
+      ...rig,
+      bones: rig.bones.map((b) => (b.id === a.key ? { ...b, at: p } : b)),
+    };
+  }
   const groups = rig as unknown as PointGroups;
   return { ...rig, [a.group]: { ...groups[a.group], [a.key]: p } } as Rig;
 }

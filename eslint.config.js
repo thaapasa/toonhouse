@@ -6,7 +6,8 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['**/dist/', '**/coverage/'] },
+  // assets/work/ is git-ignored scratch for the image scripts.
+  { ignores: ['**/dist/', '**/coverage/', 'assets/work/'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

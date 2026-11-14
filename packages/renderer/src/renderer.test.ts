@@ -2,6 +2,7 @@ import type {
   BirdRig,
   Clip,
   CutoutRig,
+  PropRig,
   RabbitRig,
   Rig,
 } from '@toonhouse/model';
@@ -11,6 +12,7 @@ import boy from '../../../assets/characters/boy/rig.json';
 import bunny from '../../../assets/characters/bunny/rig.json';
 import chicken from '../../../assets/characters/chicken/rig.json';
 import wizardRig from '../../../assets/characters/wizard/rig.json';
+import testTree from '../../../assets/fixtures/props/test-tree/rig.json';
 import { legJoint } from './bird.ts';
 import {
   BIRD_CLIPS,
@@ -18,6 +20,7 @@ import {
   clipById,
   clipsFor,
   CUTOUT_CLIPS,
+  PROP_CLIPS,
   RABBIT_CLIPS,
   RABBIT_HOP_SPEED,
   WALK_SPEED,
@@ -30,6 +33,7 @@ const rig = boy as CutoutRig;
 const bird = chicken as BirdRig;
 const rabbit = bunny as RabbitRig;
 const wizard = wizardRig as CutoutRig;
+const tree = testTree as PropRig;
 
 /** Every number in a value, in a fixed order. */
 function numbers(v: unknown): number[] {
@@ -58,6 +62,7 @@ const cases: [string, Clip, Rig][] = [
     c,
     rabbit,
   ]),
+  ...PROP_CLIPS.map((c): [string, Clip, Rig] => [`prop ${c.id}`, c, tree]),
 ];
 
 describe.each(cases)('clip %s', (_, clip, clipRig) => {
@@ -70,10 +75,11 @@ describe.each(cases)('clip %s', (_, clip, clipRig) => {
   it('ends where it starts when it loops', () => {
     const a = clip.frameAt(0);
     const b = clip.frameAt(clip.duration);
+    if (a.kind === 'background' || b.kind === 'background') return;
     const pa = numbers(a.pose);
     const pb = numbers(b.pose);
     pa.forEach((v, i) => expect(pb[i]).toBeCloseTo(v, 6));
-    expect(b.face).toEqual(a.face);
+    expect('face' in b && b.face).toEqual('face' in a && a.face);
   });
 
   it('draws finite numbers at every frame', () => {
@@ -351,7 +357,9 @@ describe('draw order', () => {
   });
 
   it('draws the same with the default order written out', () => {
-    for (const r of [rig, wizard, bird, rabbit]) {
+    const plainTree: PropRig = { ...tree };
+    delete plainTree.drawOrder;
+    for (const r of [rig, wizard, bird, rabbit, plainTree]) {
       const clip = clipsFor(r.kind)[0]!;
       const frame = clip.frameAt(0.4);
       const explicit = {

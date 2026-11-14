@@ -1,10 +1,21 @@
 import type { ClipId, Pt, Rig } from '@toonhouse/model';
-import { clipsFor, drawCharacter } from '@toonhouse/renderer';
+import {
+  BACKGROUND_CLIPS,
+  backgroundClips,
+  type Camera,
+  clipsFor,
+  drawCharacter,
+  partBounds,
+  wholeBackground,
+} from '@toonhouse/renderer';
 import { usePlayback } from '@toonhouse/stage';
 import { useEffect, useState } from 'react';
 
-import { CHARACTERS } from './characters.ts';
-import { AssetList } from './components/AssetList.tsx';
+import { BACKGROUNDS } from './backgrounds.ts';
+import { CHARACTERS, PROPS, RIGS } from './characters.ts';
+import { AssetList, type Selection } from './components/AssetList.tsx';
+import { BackgroundInspector } from './components/BackgroundInspector.tsx';
+import { BackgroundView, type Guest } from './components/BackgroundView.tsx';
 import { ClipBar } from './components/ClipBar.tsx';
 import type { Box } from './components/DragHandles.tsx';
 import { DragHandles } from './components/DragHandles.tsx';
@@ -12,6 +23,7 @@ import { Header } from './components/Header.tsx';
 import { Inspector, type SaveStatus } from './components/Inspector.tsx';
 import { PieceView } from './components/PieceView.tsx';
 import { type ViewOptions, Viewport } from './components/Viewport.tsx';
+import { isTextKey, useI18n } from './i18n/index.tsx';
 import {
   type AngleField,
   angleFields,
@@ -39,8 +51,16 @@ function without<T>(record: Record<string, T>, key: string) {
 
 export function App() {
   const names = useRigNames();
+  const { tr } = useI18n();
+  // The character or prop that the rig views show. It stays the same while
+  // a background is selected.
   const [characterId, setCharacterId] = useState(CHARACTERS[0]!.id);
+  const [backgroundId, setBackgroundId] = useState<string | null>(null);
   const [clipId, setClipId] = useState<ClipId>('walk');
+  const [backgroundClipId, setBackgroundClipId] = useState<ClipId>('day');
+  const [camera, setCamera] = useState<Camera | null>(null);
+  const [groundLine, setGroundLine] = useState(true);
+  const [guestId, setGuestId] = useState<string | null>(null);
   const [loop, setLoop] = useState(true);
   const [speed, setSpeed] = useState(1);
   const [view, setView] = useState<ViewOptions>({
@@ -58,22 +78,30 @@ export function App() {
   const [angleId, setAngleId] = useState<string | null>(null);
   const [status, setStatus] = useState<SaveStatus>({ state: 'idle' });
 
-  const character = CHARACTERS.find((c) => c.id === characterId)!;
+  const character = RIGS.find((c) => c.id === characterId)!;
+  const rigOf = (id: string) => {
+    const c = RIGS.find((x) => x.id === id);
+    return c && (drafts[id] ?? saved[id] ?? c.rig);
+  };
   const fileRig = saved[characterId] ?? character.rig;
   const rig = drafts[characterId] ?? fileRig;
   const isDirty = (id: string) => {
-    const c = CHARACTERS.find((x) => x.id === id);
+    const c = RIGS.find((x) => x.id === id);
     const draft = drafts[id];
     return !!c && !!draft && !sameRig(draft, saved[id] ?? c.rig);
   };
   const dirty = isDirty(characterId);
   const selected = findTarget(rig, target);
 
+  const background = BACKGROUNDS.find((b) => b.id === backgroundId) ?? null;
   const clips = clipsFor(rig.kind);
   // Another kind of character may not have the clip; then play its first.
   const clip = clips.find((c) => c.id === clipId) ?? clips[0]!;
+  const bgClips = background ? backgroundClips(background.background) : [];
+  const bgClip = bgClips.find((c) => c.id === backgroundClipId) ?? bgClips[0];
+  const activeClip = background && bgClip ? bgClip : clip;
   const playback = usePlayback({
-    duration: clip.duration,
+    duration: activeClip.duration,
     fps: FPS,
     loop,
     speed,
@@ -82,13 +110,43 @@ export function App() {
   const drawing = drawCharacter(rig, frame, { facing: view.facing });
 
   const pickClip = (id: ClipId) => {
-    setClipId(id);
+    if (background) setBackgroundClipId(id);
+    else setClipId(id);
     playback.seek(0);
     playback.setPlaying(true);
   };
-  const pickCharacter = (id: string) => {
-    setCharacterId(id);
-    setStatus({ state: 'idle' });
+  const pick = (s: Selection) => {
+    if (s.type === 'background') {
+      if (s.id !== backgroundId) setCamera(null);
+      setBackgroundId(s.id);
+    } else {
+      setBackgroundId(null);
+      setCharacterId(s.id);
+      setStatus({ state: 'idle' });
+    }
+  };
+
+  // A character or a prop on the background plays the clip picked for the
+  // rigs, if it has one, and loops it in the time of the background clip.
+  let guest: Guest | null = null;
+  const guestAsset = RIGS.find((c) => c.id === guestId);
+  const guestRig = guestId === null ? undefined : rigOf(guestId);
+  if (background && guestAsset && guestRig) {
+    const gClips = clipsFor(guestRig.kind);
+    const gClip = gClips.find((c) => c.id === clipId) ?? gClips[0]!;
+    const gFrame = gClip.frameAt(playback.t % gClip.duration);
+    guest = {
+      actor: {
+        id: guestAsset.id,
+        node: drawCharacter(guestRig, gFrame, { facing: view.facing }).node,
+        x: background.background.width / 2,
+      },
+      parts: guestAsset.parts,
+    };
+  }
+  const rigName = (c: (typeof RIGS)[number]) => {
+    const key = `${c.rig.kind === 'prop' ? 'prop' : 'character'}.${c.id}`;
+    return isTextKey(key) ? tr(key) : c.id;
   };
 
   const setRig = (next: Rig) => {
@@ -196,15 +254,68 @@ export function App() {
   }, [anyDirty]);
 
   const prefix = `part-${character.id}`;
+  // A prop is drawn to fit its own height instead of that of a character.
+  const propBounds =
+    rig.kind === 'prop'
+      ? partBounds(drawCharacter(rig, clips[0]!.frameAt(0), { facing: 1 }).node)
+      : null;
+  const clipBar = (
+    <ClipBar
+      clips={background ? bgClips : clips}
+      clip={activeClip}
+      fps={FPS}
+      playback={playback}
+      loop={loop}
+      speed={speed}
+      onClip={pickClip}
+      onLoop={setLoop}
+      onSpeed={setSpeed}
+    />
+  );
+  if (background) {
+    const cam = camera ?? wholeBackground(background.background);
+    return (
+      <div className="studio">
+        <Header file={background.file} />
+        <div className="body">
+          <AssetList
+            characters={CHARACTERS}
+            props={PROPS}
+            backgrounds={BACKGROUNDS}
+            selected={{ type: 'background', id: background.id }}
+            unsaved={RIGS.filter((c) => isDirty(c.id)).map((c) => c.id)}
+            onSelect={pick}
+          />
+          <main className="main">
+            <BackgroundView
+              asset={background}
+              frame={(bgClip ?? BACKGROUND_CLIPS[0]!).frameAt(playback.t)}
+              camera={cam}
+              onCamera={setCamera}
+              groundLine={groundLine}
+              onGroundLine={setGroundLine}
+              guests={RIGS.map((c) => ({ id: c.id, label: rigName(c) }))}
+              guest={guest}
+              onGuest={setGuestId}
+            />
+            {clipBar}
+          </main>
+          <BackgroundInspector asset={background} camera={cam} />
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="studio">
       <Header file={character.file} />
       <div className="body">
         <AssetList
           characters={CHARACTERS}
-          selected={characterId}
-          unsaved={CHARACTERS.filter((c) => isDirty(c.id)).map((c) => c.id)}
-          onSelect={pickCharacter}
+          props={PROPS}
+          backgrounds={BACKGROUNDS}
+          selected={{ type: 'rig', id: characterId }}
+          unsaved={RIGS.filter((c) => isDirty(c.id)).map((c) => c.id)}
+          onSelect={pick}
         />
         <main className="main">
           {selected?.type === 'piece' ? (
@@ -228,25 +339,16 @@ export function App() {
               prefix={prefix}
               parts={character.parts}
               drawing={drawing}
-              travel={frame.travel}
+              travel={'travel' in frame ? frame.travel : 0}
               view={view}
               onView={setView}
+              fitHeight={propBounds ? -propBounds.y : undefined}
               overlay={
                 selected?.type === 'attachment' ? attachmentOverlay : undefined
               }
             />
           )}
-          <ClipBar
-            clips={clips}
-            clip={clip}
-            fps={FPS}
-            playback={playback}
-            loop={loop}
-            speed={speed}
-            onClip={pickClip}
-            onLoop={setLoop}
-            onSpeed={setSpeed}
-          />
+          {clipBar}
         </main>
         <Inspector
           rig={rig}

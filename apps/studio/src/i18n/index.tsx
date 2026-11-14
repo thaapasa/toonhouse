@@ -10,6 +10,7 @@ import {
 import { en, type TextKey, type Texts } from './en.ts';
 import { fi } from './fi.ts';
 
+export type { TextKey } from './en.ts';
 export type Lang = 'fi' | 'en';
 export const LANGS: readonly Lang[] = ['fi', 'en'];
 const TEXTS: Record<Lang, Texts> = { fi, en };

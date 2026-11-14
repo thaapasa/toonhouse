@@ -6,6 +6,7 @@ import bunny from '../../../assets/characters/bunny/rig.json';
 import chicken from '../../../assets/characters/chicken/rig.json';
 import emo from '../../../assets/characters/emo/rig.json';
 import wizard from '../../../assets/characters/wizard/rig.json';
+import testTree from '../../../assets/fixtures/props/test-tree/rig.json';
 import {
   angleFields,
   angleOf,
@@ -20,7 +21,10 @@ import {
   withPivot,
 } from './rigEdit.ts';
 
-const rigs = { emo, chicken, bunny } as unknown as Record<string, Rig>;
+const rigs = { emo, chicken, bunny, testTree } as unknown as Record<
+  string,
+  Rig
+>;
 
 describe('attachmentMover', () => {
   for (const [name, rig] of Object.entries(rigs)) {

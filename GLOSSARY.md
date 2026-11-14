@@ -15,12 +15,18 @@ for something else or too vague.
   edits each scene on its own. Each scene belongs to one cartoon.
 - **Background**: the actor behind the other actors in a scene. It has one or
   more layers at different depths, and it can have clips, such as the sun moving
-  across the sky. The user picks it from the library.
-- **Depth**: how far a layer of the background is from the camera. When the
-  camera moves, the far layers move less than the near ones.
+  across the sky. The user picks it from the library. A background is not a rig.
+- **Depth**: how far a layer of the background is from the camera, from 0 for a
+  layer infinitely far away, such as the sky, to 1 for the ground layer. When
+  the camera moves, the far layers move less than the near ones.
+- **Parallax**: the far layers of a background moving less than the near ones
+  when the camera moves.
 - **Ground layer**: the layer of the background that the other actors stand on.
+- **Ground line**: the line on the ground layer where the ground points of the
+  actors are. Not: standing line, horizon.
 - **Camera**: the view of the scene that the cartoon shows. By default it shows
-  the whole background, and it can zoom and pan inside it.
+  the whole background, and it can zoom and pan inside it. It is the view of the
+  ground layer.
 - **Camera move**: a zoom or a pan of the camera on the timeline. Not: camera
   action.
 - **Actor**: a character, a prop or a background that the user has placed in a
@@ -56,11 +62,13 @@ for something else or too vague.
 - **Character**: a figure that can move, such as the boy or the hen. Not:
   figure, toon.
 - **Prop**: an object that an actor can use or that stands in a scene, such as a
-  ball or a chair. A prop is a rig with one bone.
+  ball, a chair or a tree. A prop has a rig of the kind `prop`: a small tree of
+  bones, each with a part, such as a trunk and the clumps of leaves of the
+  crown.
 - **Rig**: the structure of a character or a prop. It is a tree of bones joined
   at pivot points, with a part on each bone. Not: skeleton.
-- **Rig kind**: the type of a rig: `cutout`, `bird` or `rabbit`. A clip works on
-  the rigs of one kind only.
+- **Rig kind**: the type of a rig: `cutout`, `bird`, `rabbit` or `prop`. A clip
+  works on the rigs of one kind only.
 - **Bone**: one link in the tree of a rig. It turns at its pivot point.
 - **Pivot point**: the point where a bone joins its parent and turns. Not:
   joint, anchor.
@@ -68,23 +76,31 @@ for something else or too vague.
   ground, usually under the feet. If the size of an actor changes, its ground
   point stays in place. Not: pivot point, which belongs to a bone.
 - **Part**: a drawing on a bone, such as the head or a wing. A part has one or
-  more layers. Not: sprite.
+  more layers. A background has parts too: drawings on its layers that clips
+  move, such as the sun. Not: sprite.
 - **Layer**: one SVG drawing of a part or a background, such as the front hair
   of the head or the sky of a background. The layers of a part move together,
   but each has its own place in the draw order.
 - **Draw order**: the order in which the layers of a rig and the drawn limbs are
   drawn, from the back to the front. Each rig has a default draw order, and a
   clip can change it while it plays. Not: z-order, z-index.
+- **Slot**: a place in a rig kind that the renderer draws, such as the near hand
+  or the head: either a limb that the renderer draws or a part on a bone. A prop
+  has a slot for each bone.
+- **Draw entry**: one item in the draw order: a drawn limb, the main layer of
+  the part of a slot, or one of its other layers, with the id `slot.layer`.
 - **Piece**: an image that the asset scripts cut from a generated parts sheet
   and trace to SVG. A piece becomes a layer of a part when it goes on a rig. The
   word belongs to the asset scripts in `assets/` and `prototypes/`.
 - **Rubber hose**: an arm or a leg that the renderer draws as a bending line
   between two parts, instead of a traced part.
-- **Clip**: a short motion that a character can play, such as a walk cycle or a
-  wave. A clip works on every rig of the same kind. Use "clip" everywhere, in
+- **Clip**: a short motion that a character, a prop or a background can play,
+  such as a walk cycle, a wave or the sun moving across the sky. A clip works on
+  every rig of the same kind, or on every background. Use "clip" everywhere, in
   the code, the docs and the UI. Not: animation, move.
 - **Code clip**: a clip that is written as a TypeScript function from the time
-  to a pose and a face. All clips are code clips for now.
+  to a pose and a face, or to where the parts of a background are. All clips are
+  code clips for now.
 - **Keyframe clip**: a clip that is stored as JSON keyframes and edited in the
   character studio. Planned.
 - **Pose**: the angles and positions of the bones of a rig at one moment.
@@ -101,9 +117,9 @@ for something else or too vague.
   doesn't render video.
 - **Export client**: a program on the user's own computer that downloads a
   cartoon and saves it as a video or as images.
-- **Character studio**: a development tool for making the characters, props and
-  clips in the library. It runs only on the developer's computer. Short form:
-  the studio. Not: dev studio, editor.
+- **Character studio**: a development tool for making the characters, props,
+  backgrounds and clips in the library. It runs only on the developer's
+  computer. Short form: the studio. Not: dev studio, editor.
 - **Motion prototypes**: the experiments in `prototypes/` that tried out the
   motion before the renderer existed.
 - **Renderer**: the package that computes what a scene looks like at a given

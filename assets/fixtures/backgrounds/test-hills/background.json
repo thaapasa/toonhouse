@@ -1,0 +1,47 @@
+{
+  "width": 1920,
+  "height": 1080,
+  "layers": [
+    { "id": "sky", "svg": "sky.svg", "depth": 0 },
+    { "id": "hills", "svg": "hills.svg", "depth": 0.3 },
+    { "id": "meadow", "svg": "meadow.svg", "depth": 0.65 },
+    { "id": "ground", "svg": "ground.svg", "depth": 1 },
+    { "id": "grass", "svg": "grass.svg", "depth": 1 }
+  ],
+  "ground": { "layer": "ground", "y": 900, "actorScale": 0.32 },
+  "parts": {
+    "sun": {
+      "svg": "sun.svg",
+      "width": 200,
+      "height": 200,
+      "pivot": { "x": 100, "y": 100 },
+      "layer": "sky",
+      "at": { "x": 1450, "y": 220 },
+      "arc": {
+        "from": { "x": 240, "y": 780 },
+        "top": { "x": 960, "y": 150 },
+        "to": { "x": 1680, "y": 780 }
+      }
+    },
+    "cloudBig": {
+      "svg": "cloud.svg",
+      "width": 320,
+      "height": 160,
+      "pivot": { "x": 160, "y": 140 },
+      "layer": "sky",
+      "at": { "x": 420, "y": 260 },
+      "scale": 0.9,
+      "drift": { "speed": 18 }
+    },
+    "cloudSmall": {
+      "svg": "cloud.svg",
+      "width": 320,
+      "height": 160,
+      "pivot": { "x": 160, "y": 140 },
+      "layer": "sky",
+      "at": { "x": 1250, "y": 380 },
+      "scale": 0.55,
+      "drift": { "speed": 10 }
+    }
+  }
+}

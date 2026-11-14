@@ -37,6 +37,11 @@ interface Props {
   view: ViewOptions;
   onView(view: ViewOptions): void;
   /**
+   * The height of the drawing above the ground, to fit it in the view. The
+   * default fits a character.
+   */
+  fitHeight?: number | undefined;
+  /**
    * Drawn over the character, such as handles for editing the rig. Gets the
    * size of a screen pixel and the visible area.
    */
@@ -68,18 +73,19 @@ export function Viewport({
   travel,
   view,
   onView,
+  fitHeight = CHARACTER_HEIGHT,
   overlay,
 }: Props) {
   const { tr } = useI18n();
   const [ref, { width, height }] = useSize();
   // Fit the character into 70 % of the height at 100 %.
-  const scale = (view.zoom * height * 0.7) / CHARACTER_HEIGHT || 1;
+  const scale = (view.zoom * height * 0.7) / fitHeight || 1;
   const vw = width / scale;
   const vh = height / scale;
   // Zoom around the middle of the character.
   const box = {
     x: -vw / 2,
-    y: -CHARACTER_HEIGHT / 2 - vh * MIDDLE_AT,
+    y: -fitHeight / 2 - vh * MIDDLE_AT,
     width: vw,
     height: vh,
   };

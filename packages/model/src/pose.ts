@@ -131,14 +131,66 @@ export interface RabbitFrame extends FrameBase {
   face: RabbitFace;
 }
 
-export type ClipFrame = CutoutFrame | BirdFrame | RabbitFrame;
+/**
+ * The wind on a prop at one moment. The rig sets how far each bone sways in
+ * full wind, so the same clip works on every prop.
+ */
+export interface PropPose {
+  /** 0 is still air, 1 the full wind that the sway of the bones is set for. */
+  wind: number;
+  /**
+   * Where the gusts are in their cycle, from 0 to 1. A looping clip goes
+   * round a whole number of times.
+   */
+  cycle: number;
+}
 
-export type ClipId =
-  'idle' | 'walk' | 'wave' | 'talk' | 'peck' | 'flap' | 'hop' | 'lookout';
+/** What a clip of a prop gives for one moment. */
+export interface PropFrame extends FrameBase {
+  kind: 'prop';
+  pose: PropPose;
+}
 
 /**
- * A motion for the rigs of one kind. The frame at `t` depends only on
- * `t`.
+ * What a clip of a background gives for one moment. The background sets the
+ * path of each part, so the same clip works on every background.
+ */
+export interface BackgroundFrame {
+  kind: 'background';
+  /**
+   * How far the parts with an arc, such as the sun, are along it, from 0 at
+   * the start to 1 at the end. Null leaves them where they rest.
+   */
+  arc: number | null;
+  /**
+   * How long the parts that drift, such as clouds, have moved, in seconds,
+   * and the time after which they are back where they started. Null leaves
+   * them where they rest.
+   */
+  drift: { t: number; loop: number } | null;
+}
+
+export type ClipFrame =
+  CutoutFrame | BirdFrame | RabbitFrame | PropFrame | BackgroundFrame;
+/** The kinds of things that clips work on: the rig kinds and backgrounds. */
+export type ClipKind = ClipFrame['kind'];
+
+export type ClipId =
+  | 'idle'
+  | 'walk'
+  | 'wave'
+  | 'talk'
+  | 'peck'
+  | 'flap'
+  | 'hop'
+  | 'lookout'
+  | 'rustle'
+  | 'day'
+  | 'drift';
+
+/**
+ * A motion for the rigs of one kind, or for backgrounds. The frame at `t`
+ * depends only on `t`.
  */
 export interface Clip<F extends ClipFrame = ClipFrame> {
   id: ClipId;

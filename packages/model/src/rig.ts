@@ -317,7 +317,57 @@ export interface RabbitHead extends EyeFace {
   };
 }
 
-export type Rig = CutoutRig | BirdRig | RabbitRig;
+/**
+ * A prop that stands in a scene, such as a tree or a bush: a small tree of
+ * bones, each with a part. The pivot of the part of the root bone is the
+ * ground point of the prop. All lengths are in the pixels of the parts, which
+ * are also the unit of the drawing.
+ */
+export interface PropRig extends RigBase {
+  kind: 'prop';
+  /** The parts by id. Several bones can carry the same part. */
+  parts: Record<string, RigPart>;
+  /**
+   * The bones, each after its parent. The first one is the root. The default
+   * draw order draws the bones in this order, from the back to the front.
+   */
+  bones: PropBone[];
+  shadow?: { rx: number; ry: number };
+}
+
+/** A bone of a prop, with the part that it carries. */
+export interface PropBone {
+  /** A camelCase name, unique within the rig. It is also the slot id. */
+  id: string;
+  part: string;
+  /** The parent bone. The root bone has none. */
+  parent?: string;
+  /**
+   * Where the pivot of the part is, in the pixels of the part of the parent
+   * bone. The root bone has its pivot at the ground point.
+   */
+  at?: Pt;
+  /** The size of the part against the parent part. 1 if not set. */
+  scale?: number;
+  /** How much the bone moves in the wind of the `rustle` clip. */
+  sway?: PropSway;
+}
+
+/** The motion of a bone in full wind. */
+export interface PropSway {
+  /** How far the bone turns each way, in degrees. */
+  angle: number;
+  /**
+   * How much the part squashes along the bone, as a share of its height,
+   * such as 0.03. The part widens as much as it gets shorter.
+   */
+  squash?: number;
+}
+
+export type Rig = CutoutRig | BirdRig | RabbitRig | PropRig;
 export type RigKind = Rig['kind'];
-/** A piece of any rig. */
-export type PartId = RigPartId | BirdPartId | RabbitPartId;
+/**
+ * A part of any rig. The parts of a prop have the names that its rig gives
+ * them, so this is any string.
+ */
+export type PartId = RigPartId | BirdPartId | RabbitPartId | (string & {});

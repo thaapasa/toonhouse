@@ -11,6 +11,7 @@ import {
 } from './icons.tsx';
 
 export const SPEEDS = [0.25, 0.5, 1, 2] as const;
+const TICK_STEPS = [10, 30, 60, 150, 300, 900] as const;
 
 interface Props {
   clips: readonly Clip[];
@@ -29,7 +30,11 @@ export function ClipBar(props: Props) {
   const { tr } = useI18n();
   const frames = Math.round(clip.duration * fps);
   const frame = Math.round(playback.t * fps);
-  const tickStep = frames > 60 ? 10 : 5;
+  // At most 20 ticks, so that the numbers don't overlap in a long clip.
+  const tickStep =
+    frames <= 60
+      ? 5
+      : (TICK_STEPS.find((s) => frames / s <= 20) ?? TICK_STEPS.at(-1)!);
   const ticks: number[] = [];
   for (let f = 0; f <= frames; f += tickStep) ticks.push(f);
 

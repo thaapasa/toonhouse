@@ -1,0 +1,32 @@
+{
+  "kind": "prop",
+  "parts": {
+    "clump": {
+      "svg": "clump.svg",
+      "width": 260,
+      "height": 180,
+      "pivot": { "x": 130, "y": 172 }
+    }
+  },
+  "bones": [
+    { "id": "middle", "part": "clump", "sway": { "angle": 2, "squash": 0.03 } },
+    {
+      "id": "left",
+      "part": "clump",
+      "parent": "middle",
+      "at": { "x": 40, "y": 168 },
+      "scale": 0.7,
+      "sway": { "angle": 4, "squash": 0.04 }
+    },
+    {
+      "id": "right",
+      "part": "clump",
+      "parent": "middle",
+      "at": { "x": 225, "y": 170 },
+      "scale": 0.6,
+      "sway": { "angle": 4, "squash": 0.04 }
+    }
+  ],
+  "drawOrder": ["left", "right", "middle"],
+  "shadow": { "rx": 150, "ry": 14 }
+}

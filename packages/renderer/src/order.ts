@@ -1,8 +1,9 @@
 // The draw order of a rig. Each rig kind draws a fixed set of slots: the
-// limbs that the renderer draws and the parts on the bones. A slot that draws
-// a part has an entry for the main layer and one for each other layer of the
-// part. The draw order is a flat list of these entries, so a layer can go in
-// front of or behind anything else, whatever bone it moves with.
+// limbs that the renderer draws and the parts on the bones. A prop has a slot
+// for each of its bones instead. A slot that draws a part has an entry for the
+// main layer and one for each other layer of the part. The draw order is a
+// flat list of these entries, so a layer can go in front of or behind
+// anything else, whatever bone it moves with.
 import type { PartId, Rig, RigPart } from '@toonhouse/model';
 
 import type { DrawNode } from './draw.ts';
@@ -92,6 +93,8 @@ function slots(rig: Rig): Slot[] {
         { id: 'frontLegNear', parts: [] },
         { id: 'pawNear', parts: ['paw'] },
       ];
+    case 'prop':
+      return rig.bones.map((b) => ({ id: b.id, parts: [b.part] }));
   }
 }
 
@@ -192,7 +195,11 @@ export function arrange(
       shaded.nodes.push(...nodes);
     } else {
       shaded = { far: e.far, nodes: [...nodes] };
-      out.push({ type: 'group', shade: rig.farShade, children: shaded.nodes });
+      out.push({
+        type: 'group',
+        shade: 'farShade' in rig ? rig.farShade : 1,
+        children: shaded.nodes,
+      });
     }
   }
   return out;

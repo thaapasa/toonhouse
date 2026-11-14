@@ -1,5 +1,5 @@
 import type { PartId, Pt, Rig } from '@toonhouse/model';
-import type { CharacterDrawing } from '@toonhouse/renderer';
+import { type CharacterDrawing, partBounds } from '@toonhouse/renderer';
 import {
   Drawing,
   partId,
@@ -85,6 +85,11 @@ export function PieceView(props: Props) {
     height: height / scale,
   };
   const points = attachments(rig).filter((a) => a.piece === part);
+  // A prop can be any size, so the preview fits around it.
+  const bounds = rig.kind === 'prop' ? partBounds(props.drawing.node) : null;
+  const previewBox = bounds
+    ? `${bounds.x - 20} ${bounds.y - 20} ${bounds.width + 40} ${bounds.height + 40}`
+    : PREVIEW_BOX;
 
   const pieceNodes = (
     <>
@@ -213,9 +218,13 @@ export function PieceView(props: Props) {
   return (
     <div className="viewport" ref={ref}>
       <div className="toolbar toolbar-left">
-        <button type="button" title={tr('backHint')} onClick={props.onBack}>
+        <button
+          type="button"
+          title={tr(rig.kind === 'prop' ? 'backPropHint' : 'backHint')}
+          onClick={props.onBack}
+        >
           <BackIcon />
-          {tr('back')}
+          {tr(rig.kind === 'prop' ? 'backProp' : 'back')}
         </button>
         <span className="toolbar-title">{names.part(part)}</span>
         {props.angles.length > 0 && (
@@ -276,7 +285,7 @@ export function PieceView(props: Props) {
       )}
 
       <div className="preview" aria-label={tr('preview')}>
-        <svg viewBox={PREVIEW_BOX} aria-hidden="true">
+        <svg viewBox={previewBox} aria-hidden="true">
           <PartSymbols prefix={`${prefix}-preview`} sources={parts} />
           <Drawing node={props.drawing.node} prefix={`${prefix}-preview`} />
         </svg>
