@@ -41,11 +41,12 @@ their own, `toonhouse_test`, on the same server.
 
 Run `mise start` to start the local development tasks in
 [dekit](https://dekit.run), a process manager with a terminal UI. `dekit.yaml`
-lists its tasks. dekit starts the database, the server on http://localhost:10700
-and the character studio on http://localhost:10711. The other tasks start only
-when you ask for them: the motion prototypes on http://localhost:10790, the
-checks (lint with `--fix`, format, typecheck, tests and tests in watch mode),
-the database migrations and the build.
+lists its tasks. dekit starts the database, the server on
+http://localhost:10700, the web app on http://localhost:10710 and the character
+studio on http://localhost:10711. The other tasks start only when you ask for
+them: the motion prototypes on http://localhost:10790, the checks (lint with
+`--fix`, format, typecheck, tests and tests in watch mode), the database
+migrations and the build.
 
 In the UI, select a task and press `s` to start it, `r` to restart it or `x` to
 stop it. Press `q` to quit, and then `d` to leave the tasks running in the
@@ -62,6 +63,7 @@ pnpm format        # format all files, including Markdown
 pnpm typecheck
 pnpm test
 pnpm build
+pnpm web           # the web app on http://localhost:10710, with the API from the server
 pnpm studio        # the character studio on http://localhost:10711
 pnpm prototypes    # the motion prototypes on http://localhost:10790
 docker compose up -d   # the database on port 10732

@@ -9,14 +9,14 @@ with them, and the public cartoons can be watched without logging in. See
 - [x] Users are added directly to the database, with a command on the server.
       The app cannot add users.
 - [x] Each user has a username and a display name.
-- [ ] Users edit their own name and reset their password on the
+- [x] Users edit their own name and reset their password on the
       [profile page](profile.md).
 - [x] Passwords are stored as Argon2id hashes (Node's built-in `crypto.argon2`)
       in PHC string format.
 
 ## Login
 
-- [ ] Users log in with a username and a password.
+- [x] Users log in with a username and a password.
 - [x] A login lasts 90 days from the last use. Logging out ends the session.
 - [x] After 10 failed logins with one username, or 30 from one address, the
       server refuses further logins from them for up to 15 minutes. Successful
@@ -24,15 +24,15 @@ with them, and the public cartoons can be watched without logging in. See
 - [x] If the username or the password is wrong, the error doesn't tell which
       one, and the response takes as long for an unknown username as for a known
       one.
-- [ ] After logging in, the user returns to the page they were on.
+- [x] After logging in, the user returns to the page they were on.
 - [x] The app has no personal tokens or API keys. The web app authenticates with
       the session cookie only.
 
 ## Access
 
 - [ ] A user who is not logged in can watch the public cartoons.
-- [ ] Only a logged-in user can open the editor, make a cartoon or change one.
-- [ ] A user can edit only their own cartoons.
+- [x] Only a logged-in user can open the editor, make a cartoon or change one.
+- [x] A user can edit only their own cartoons.
 
 ## Groups
 
@@ -42,7 +42,7 @@ cartoon with a group that they belong to.
 - [x] Groups and their members are added directly to the database, with a
       command on the server, like users.
 - [x] A user can belong to many groups.
-- [ ] A user can see the names of the groups they belong to.
+- [x] A user can see the names of the groups they belong to.
 
 ## Open questions
 

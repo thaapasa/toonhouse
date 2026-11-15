@@ -1,8 +1,9 @@
 # Architecture
 
 Toonhouse is a TypeScript monorepo with pnpm workspaces. This page describes the
-planned structure. So far, the character studio, the packages it uses and the
-first parts of the server exist. The web app and the export client don't.
+planned structure. So far, the character studio, the packages it uses, the first
+parts of the server and the first screens of the web app exist. The export
+client doesn't.
 
 The requirements are in [specs/](specs/README.md), and the UI design is in
 [design/](design/CLAUDE.md).
@@ -227,6 +228,27 @@ changes to a cartoon match the owner in their `WHERE` clause too.
 If a user asks for a cartoon that they can't watch, the server answers 404, the
 same as for a cartoon that doesn't exist. If they can watch it but try to change
 it, the answer is 403.
+
+## Web app
+
+The web app is a React app built with Vite, like the
+[cookbook](https://github.com/thaapasa/cookbook) client. It uses
+[TanStack Router](https://tanstack.com/router) for the pages and
+[TanStack Query](https://tanstack.com/query) for the data from the server, and
+checks the responses with the schemas in `packages/api`. The styles are plain
+CSS with the colors of the design boards. The translations follow the studio:
+one file of texts per language, with keys that TypeScript checks.
+
+In development, the Vite dev server passes `/api/` on to the server, so the web
+app and the API share one origin, as in production.
+
+The pages so far are the home page with the cartoons, the login page, the
+profile page and the editor. The editor shows its layout, but its tools don't
+work yet.
+
+The build writes `version.json` next to `index.html`. When the web app comes
+back to the foreground, it compares the build ID in that file to its own and
+loads the page again if they differ.
 
 ## Hosting
 

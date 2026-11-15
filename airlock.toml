@@ -29,6 +29,7 @@ paths = [
   "node_modules",
   "apps/server/node_modules",
   "apps/studio/node_modules",
+  "apps/web/node_modules",
   "packages/api/node_modules",
   "packages/model/node_modules",
   "packages/renderer/node_modules",

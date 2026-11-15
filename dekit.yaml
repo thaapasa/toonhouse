@@ -6,6 +6,10 @@ tasks:
     deps: [db/postgres]
     ready: { tcp: 10700 }
     autostart: true
+  dev/web:
+    cmd: pnpm web
+    ready: { tcp: 10710 }
+    autostart: true
   dev/studio:
     cmd: pnpm studio
     ready: { tcp: 10711 }

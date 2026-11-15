@@ -16,6 +16,7 @@
     "generate-image": "node scripts/generate-image.ts",
     "trace-image": "node scripts/trace-image.ts",
     "render-svg": "node scripts/render-svg.ts",
+    "web": "pnpm --filter @toonhouse/web dev",
     "studio": "pnpm --filter @toonhouse/studio dev",
     "prototypes": "pnpm --filter @toonhouse/prototypes dev",
     "server": "pnpm --filter @toonhouse/server dev",
