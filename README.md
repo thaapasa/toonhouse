@@ -9,9 +9,9 @@ The app is made for touch screens and iPads first. The UI is in Finnish and
 English.
 
 The project is at an early stage. The character studio, a development tool that
-plays the clips of a character, is the first part that runs. The server has the
-login, the profile and the sharing of cartoons, but the web app doesn't exist
-yet.
+plays the clips of a character, runs. The web app has the login, the list of
+cartoons and a first version of the scene editor. The player and putting shots
+together into a cartoon don't exist yet.
 
 ## Art style
 

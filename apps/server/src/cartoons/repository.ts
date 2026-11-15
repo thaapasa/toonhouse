@@ -1,4 +1,9 @@
-import type { Cartoon, Sharing, Visibility } from '@toonhouse/api';
+import type {
+  Cartoon,
+  CartoonContent,
+  Sharing,
+  Visibility,
+} from '@toonhouse/api';
 
 import { sql } from '../db.ts';
 
@@ -115,5 +120,28 @@ export async function deleteCartoon(
 ): Promise<boolean> {
   const rows =
     await sql`DELETE FROM cartoons WHERE id = ${id} AND owner_id = ${ownerId}`;
+  return rows.count > 0;
+}
+
+/** The scenes of a cartoon, or `null` if it doesn't exist or the user can't watch it. */
+export async function getContent(
+  id: string,
+  userId: string | null,
+): Promise<CartoonContent | null> {
+  const [row] = await sql<{ content: CartoonContent }[]>`
+    SELECT c.content FROM cartoons c WHERE c.id = ${id} AND ${canWatch(userId)}
+  `;
+  return row?.content ?? null;
+}
+
+export async function setContent(
+  id: string,
+  ownerId: string,
+  content: CartoonContent,
+): Promise<boolean> {
+  const rows = await sql`
+    UPDATE cartoons SET content = ${sql.json(content)}, updated_at = now()
+    WHERE id = ${id} AND owner_id = ${ownerId}
+  `;
   return rows.count > 0;
 }

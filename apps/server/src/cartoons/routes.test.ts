@@ -229,6 +229,67 @@ describe('editing', () => {
   });
 });
 
+describe('content', () => {
+  const content = {
+    version: 1,
+    scenes: [
+      {
+        id: 's1',
+        background: 'meadow',
+        backgroundActions: [{ id: 'b1', t: 0, clip: 'day' }],
+        actors: [
+          {
+            id: 'a1',
+            asset: { kind: 'character', id: 'boy' },
+            at: { x: 100, y: 900 },
+            facing: 1,
+            scale: 1,
+            actions: [
+              { id: 'x1', t: 1.5, clip: 'walk', path: [{ x: 600, y: 950 }] },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+
+  const save = (id: string, json: unknown, cookie = owner) =>
+    request(`/api/app/cartoons/${id}/content`, { method: 'PUT', json, cookie });
+  const load = (id: string, cookie = owner) =>
+    request(`/api/app/cartoons/${id}/content`, { cookie });
+
+  it('starts with no scenes', async () => {
+    const { id } = await create();
+    expect(await (await load(id)).json()).toEqual({ version: 1, scenes: [] });
+  });
+
+  it('saves the scenes and gives them back', async () => {
+    const { id } = await create();
+    expect((await save(id, content)).status).toBe(204);
+    expect(await (await load(id)).json()).toEqual(content);
+  });
+
+  it('refuses a save in an old format with 409', async () => {
+    const { id } = await create();
+    expect((await save(id, { version: 0, scenes: [] })).status).toBe(409);
+  });
+
+  it('refuses content that is not valid', async () => {
+    const { id } = await create();
+    const bad = { ...content, scenes: [{ ...content.scenes[0], actors: 'x' }] };
+    expect((await save(id, bad)).status).toBe(400);
+  });
+
+  it('lets only the owner save, and hides private content', async () => {
+    const { id } = await create();
+    expect((await load(id, member)).status).toBe(404);
+    expect((await save(id, content, member)).status).toBe(404);
+    await share(id, { visibility: 'group', groupId });
+    expect((await load(id, member)).status).toBe(200);
+    expect((await save(id, content, member)).status).toBe(403);
+  });
+});
+
 describe('cross-site requests', () => {
   it('refuses a form post from another site', async () => {
     // A form on another site can post text/plain without a CORS preflight.

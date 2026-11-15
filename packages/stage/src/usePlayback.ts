@@ -8,6 +8,8 @@ export interface PlaybackOptions {
   loop: boolean;
   /** 1 is normal speed. */
   speed: number;
+  /** Start playing at once. True if not set. */
+  autoplay?: boolean;
 }
 
 export interface Playback {
@@ -30,9 +32,10 @@ export function usePlayback({
   fps,
   loop,
   speed,
+  autoplay = true,
 }: PlaybackOptions): Playback {
   const [t, setT] = useState(0);
-  const [playing, setPlaying] = useState(true);
+  const [playing, setPlaying] = useState(autoplay);
   const tRef = useRef(0);
 
   const seek = useCallback(

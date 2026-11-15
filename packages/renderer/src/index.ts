@@ -37,3 +37,16 @@ export { drawCharacter, partBounds } from './draw.ts';
 export { IDENTITY, multiply } from './math.ts';
 export type { DrawEntry, FarGroup } from './order.ts';
 export { defaultDrawOrder, drawOrder } from './order.ts';
+export type { ActorState } from './scene.ts';
+export {
+  actorEnd,
+  actorStateAt,
+  backgroundStateAt,
+  clipOf,
+  clipSpeed,
+  isMoving,
+  MIN_SCENE_LENGTH,
+  sceneLength,
+  sortedActions,
+  walkTime,
+} from './scene.ts';

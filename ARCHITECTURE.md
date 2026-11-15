@@ -2,7 +2,7 @@
 
 Toonhouse is a TypeScript monorepo with pnpm workspaces. This page describes the
 planned structure. So far, the character studio, the packages it uses, the first
-parts of the server and the first screens of the web app exist. The export
+parts of the server and the first version of the scene editor exist. The export
 client doesn't.
 
 The requirements are in [specs/](specs/README.md), and the UI design is in
@@ -207,6 +207,10 @@ way.
 
 ### Cartoon format versions
 
+The server stores the content of a cartoon, its scenes with their actors and
+actions, as JSON in the `content` column of the cartoon. `packages/model` has
+its types, and `packages/api` the schema that checks a save.
+
 Each saved cartoon has the version number of its data format. When the format
 changes, the version goes up by one, and `packages/model` gets a converter from
 the previous version to the new one. The converters are pure functions, and they
@@ -278,8 +282,27 @@ In development, the Vite dev server passes `/api/` on to the server, so the web
 app and the API share one origin, as in production.
 
 The pages so far are the home page with the cartoons, the login page, the
-profile page and the editor. The editor shows its layout, but its tools don't
-work yet.
+profile page and the editor.
+
+### Editor
+
+The editor edits the scenes of one cartoon. It keeps the whole content of the
+cartoon in memory, with a history of the edits for undo and redo, and saves the
+content to the server a moment after each edit, and at once when the page goes
+to the background. A drag on the stage or on the timeline is one step in the
+history: each move of the drag redoes that step from where the drag started.
+
+The library assets come from `assets/` through `import.meta.glob`, so the build
+bundles them into the web app, as in the studio.
+
+The stage asks the renderer where each actor is at the current time. The
+renderer goes through the actions of the actor in the order of their times: an
+action plays its clip until the next action starts, and a walk moves the actor
+along its path at the speed of the walk clip, so that the feet don't slide. With
+a perspective, each line of the path uses the mean of the actor sizes at its
+ends, so the feet can slide a little when an actor walks toward the camera. A
+scene lasts a few seconds past the end of its last action, and at least 10
+seconds.
 
 The build writes `version.json` next to `index.html`. When the web app comes
 back to the foreground, it compares the build ID in that file to its own and

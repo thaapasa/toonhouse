@@ -28,7 +28,7 @@ the cartoons that users have already made must keep working.
 - [ ] If the server can't upgrade a cartoon to the latest format, the cartoon
       list shows it as broken, and the user can't open it. The other cartoons
       work as before.
-- [ ] If an old version of the web app tries to save a cartoon, the server
+- [x] If an old version of the web app tries to save a cartoon, the server
       refuses the save, and the web app loads the new version. The edits that
       were not saved can be lost.
 - [ ] If an old version of the export client downloads a cartoon, it tells the

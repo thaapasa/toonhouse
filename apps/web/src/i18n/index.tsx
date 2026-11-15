@@ -16,6 +16,9 @@ export const LANGS: readonly Lang[] = ['fi', 'en'];
 const TEXTS: Record<Lang, Texts> = { fi, en };
 const STORAGE_KEY = 'toonhouse-lang';
 
+/** Whether a key made at run time, such as from an asset id, has a text. */
+export const isTextKey = (key: string): key is TextKey => key in en;
+
 function initialLang(): Lang {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved === 'fi' || saved === 'en') return saved;

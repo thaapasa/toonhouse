@@ -1,9 +1,12 @@
 import { zValidator } from '@hono/zod-validator';
 import {
+  CartoonContent,
   CreateCartoonRequest,
+  SaveContentRequest,
   Sharing,
   UpdateCartoonRequest,
 } from '@toonhouse/api';
+import { CARTOON_VERSION } from '@toonhouse/model';
 import { type Context, Hono } from 'hono';
 import { z } from 'zod';
 
@@ -13,7 +16,9 @@ import {
   createCartoon,
   deleteCartoon,
   getCartoon,
+  getContent,
   listCartoons,
+  setContent,
   setSharing,
   setTitle,
 } from './repository.ts';
@@ -91,6 +96,42 @@ export const cartoonRoutes = new Hono<AuthEnv>()
       if (!(await setSharing(id, userId, sharing)))
         return refuse(c, id, userId);
       return c.json(await getCartoon(id, userId));
+    },
+  )
+  .get(
+    '/:id/content',
+    zValidator('param', IdParam, (r, c) =>
+      r.success ? undefined : notFound(c),
+    ),
+    async (c) => {
+      const content = await getContent(
+        c.req.valid('param').id,
+        c.var.user?.id ?? null,
+      );
+      return content ? c.json(content) : notFound(c);
+    },
+  )
+  // A web app that knows an older format gets 409, and it then loads the new
+  // version of the web app.
+  .put(
+    '/:id/content',
+    requireUser,
+    zValidator('param', IdParam),
+    zValidator('json', SaveContentRequest),
+    async (c) => {
+      const { id } = c.req.valid('param');
+      const userId = c.var.user.id;
+      const body = c.req.valid('json');
+      if (body.version !== CARTOON_VERSION) {
+        return c.json({ error: 'Old version of the cartoon format' }, 409);
+      }
+      const content = CartoonContent.safeParse(body);
+      if (!content.success) {
+        return c.json({ error: 'Invalid content' }, 400);
+      }
+      if (!(await setContent(id, userId, content.data)))
+        return refuse(c, id, userId);
+      return c.body(null, 204);
     },
   )
   .delete('/:id', requireUser, zValidator('param', IdParam), async (c) => {

@@ -16,6 +16,7 @@
     "@hono/node-server": "^2.1.8",
     "@hono/zod-validator": "^0.9.1",
     "@toonhouse/api": "workspace:*",
+    "@toonhouse/model": "workspace:*",
     "hono": "^4.13.18",
     "postgres": "^4.1.1",
     "zod": "^4.6.7"

@@ -20,7 +20,7 @@ the cartoon can show it again or cut back to it.
 - [ ] If the user changes a scene, every shot that uses it shows the change.
 - [ ] If a scene gets shorter than the part that a shot plays, the shot plays
       only up to the new end of the scene, and the cartoon gets shorter.
-- [ ] Each scene belongs to one cartoon.
+- [x] Each scene belongs to one cartoon.
 - [ ] User can copy a scene. The copy is a new scene in the same cartoon, and
       the shots keep using the original.
 

@@ -149,3 +149,144 @@ export const CheckIcon = () => (
     <path d="M5 12.5l4.5 4.5L19 7" strokeWidth={2.2} />
   </Icon>
 );
+
+export const PauseIcon = ({ size = 18 }: { size?: number }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden>
+    <path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor" />
+  </svg>
+);
+
+export const TurnIcon = () => (
+  <Icon>
+    <path d="M12 3v18" />
+    <path d="M8 7L3 17h5z" />
+    <path d="M16 7l5 10h-5z" />
+  </Icon>
+);
+
+export const DeleteIcon = () => (
+  <Icon>
+    <path d="M4 7h16" />
+    <path d="M9 7V4h6v3" />
+    <path d="M6 7l1 13h10l1-13" />
+  </Icon>
+);
+
+/** Removes an action from the timeline. */
+export const RemoveActionIcon = () => (
+  <Icon>
+    <rect x="3" y="8" width="18" height="8" rx="2" />
+    <path d="M9.5 10.5l5 3M14.5 10.5l-5 3" />
+  </Icon>
+);
+
+export const SmallerIcon = () => (
+  <Icon>
+    <circle cx="12" cy="8" r="2.5" />
+    <path d="M8.5 19v-1a3.5 3.5 0 0 1 7 0v1" />
+    <path d="M3 4l3 3M21 4l-3 3M3 20l3-3M21 20l-3-3" />
+  </Icon>
+);
+
+export const BiggerIcon = () => (
+  <Icon>
+    <circle cx="12" cy="8" r="2.5" />
+    <path d="M8.5 19v-1a3.5 3.5 0 0 1 7 0v1" />
+    <path d="M6 7L3 4M3 4v3M3 4h3M18 7l3-3M21 4v3M21 4h-3" />
+    <path d="M6 17l-3 3M3 20v-3M3 20h3M18 17l3 3M21 20v-3M21 20h-3" />
+  </Icon>
+);
+
+export const DoneIcon = ({ size = 18 }: { size?: number }) => (
+  <Icon size={size}>
+    <path d="M5 12.5l4.5 4.5L19 7.5" strokeWidth={2.2} />
+  </Icon>
+);
+
+// The clips. Clips without an icon of their own use the stand icon.
+
+export const StandIcon = () => (
+  <Icon>
+    <circle cx="12" cy="4" r="2" />
+    <path d="M12 7v7" />
+    <path d="M8 9.5h8" />
+    <path d="M12 14l-3 7M12 14l3 7" />
+  </Icon>
+);
+
+export const WalkIcon = () => (
+  <Icon>
+    <circle cx="13" cy="4" r="2" />
+    <path d="M7 21l3-6 3 2v4" />
+    <path d="M10 15l1.5-6 4 3 3 1" />
+    <path d="M11.5 9L8 10.5 6.5 13" />
+  </Icon>
+);
+
+export const WaveIcon = () => (
+  <Icon>
+    <path d="M8 13V6.5a1.5 1.5 0 0 1 3 0V11" />
+    <path d="M11 10.5V4.5a1.5 1.5 0 0 1 3 0V11" />
+    <path d="M14 11V6a1.5 1.5 0 0 1 3 0v6" />
+    <path d="M17 10a1.5 1.5 0 0 1 3 0v4a7 7 0 0 1-7 7h-1a6 6 0 0 1-5-3l-2.5-4.5a1.5 1.5 0 0 1 2.6-1.5L8 14" />
+  </Icon>
+);
+
+export const TalkIcon = () => (
+  <Icon>
+    <path d="M4 5h16v11H11l-5 4v-4H4z" />
+  </Icon>
+);
+
+export const HopIcon = () => (
+  <Icon>
+    <path d="M3 18c2-7 5-7 7 0M10 18c2-7 5-7 7 0" />
+    <path d="M17 18c1-3 2.5-4 4-4" />
+    <path d="M3 21h18" />
+  </Icon>
+);
+
+export const PeckIcon = () => (
+  <Icon>
+    <circle cx="9" cy="9" r="4" />
+    <path d="M13 9l5 3-5 1" />
+    <path d="M4 21h16" />
+    <path d="M18 18v1" />
+  </Icon>
+);
+
+export const FlapIcon = () => (
+  <Icon>
+    <path d="M12 14c-3-6-7-7-10-6 2 4 5 6 10 6z" />
+    <path d="M12 14c3-6 7-7 10-6-2 4-5 6-10 6z" />
+    <path d="M12 14v5" />
+  </Icon>
+);
+
+export const LookoutIcon = () => (
+  <Icon>
+    <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z" />
+    <circle cx="12" cy="12" r="2.5" />
+  </Icon>
+);
+
+export const RustleIcon = () => (
+  <Icon>
+    <path d="M3 8h10a3 3 0 1 0-3-3" />
+    <path d="M3 12h15a3 3 0 1 1-3 3" />
+    <path d="M3 16h6" />
+  </Icon>
+);
+
+export const SunIcon = () => (
+  <Icon>
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+  </Icon>
+);
+
+export const CloudIcon = () => (
+  <Icon>
+    <path d="M7 18h10a4 4 0 0 0 .5-8 6 6 0 0 0-11.3 1.5A3.3 3.3 0 0 0 7 18z" />
+  </Icon>
+);

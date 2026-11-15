@@ -56,6 +56,9 @@ importers:
       '@toonhouse/api':
         specifier: workspace:*
         version: link:../../packages/api
+      '@toonhouse/model':
+        specifier: workspace:*
+        version: link:../../packages/model
       hono:
         specifier: ^4.13.18
         version: 4.13.18
@@ -124,6 +127,15 @@ importers:
       '@toonhouse/api':
         specifier: workspace:*
         version: link:../../packages/api
+      '@toonhouse/model':
+        specifier: workspace:*
+        version: link:../../packages/model
+      '@toonhouse/renderer':
+        specifier: workspace:*
+        version: link:../../packages/renderer
+      '@toonhouse/stage':
+        specifier: workspace:*
+        version: link:../../packages/stage
       react:
         specifier: ^19.3.1
         version: 19.3.1
@@ -152,9 +164,15 @@ importers:
       vite:
         specifier: ^8.3.8
         version: 8.3.8(@types/node@26.6.6)
+      vitest:
+        specifier: ^5.1.0
+        version: 5.1.0(@types/node@26.6.6)(vite@8.3.8(@types/node@26.6.6))
 
   packages/api:
     dependencies:
+      '@toonhouse/model':
+        specifier: workspace:*
+        version: link:../model
       zod:
         specifier: ^4.6.7
         version: 4.6.7

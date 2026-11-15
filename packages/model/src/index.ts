@@ -6,6 +6,14 @@ export type {
   BackgroundLayer,
   BackgroundPart,
 } from './background.ts';
+export type {
+  Action,
+  Actor,
+  ActorAsset,
+  CartoonContent,
+  Scene,
+} from './cartoon.ts';
+export { CARTOON_VERSION } from './cartoon.ts';
 export type { Matrix, Pt } from './geometry.ts';
 export type {
   BackgroundFrame,

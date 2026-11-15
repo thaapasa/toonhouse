@@ -9,6 +9,7 @@
     "typecheck": "tsc -p ."
   },
   "dependencies": {
+    "@toonhouse/model": "workspace:*",
     "zod": "^4.6.7"
   },
   "devDependencies": {

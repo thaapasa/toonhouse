@@ -1,6 +1,7 @@
 import { queryOptions } from '@tanstack/react-query';
 import {
   Cartoon,
+  CartoonContent,
   Group,
   type LoginRequest,
   MeResponse,
@@ -23,10 +24,11 @@ export class ApiError extends Error {
 async function request<T>(
   schema: z.ZodType<T>,
   path: string,
-  init?: { method: string; body?: unknown },
+  init?: { method: string; body?: unknown; keepalive?: boolean },
 ): Promise<T> {
   const res = await fetch(`/api/app${path}`, {
     method: init?.method ?? 'GET',
+    keepalive: init?.keepalive ?? false,
     ...(init?.body !== undefined && {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(init.body),
@@ -87,3 +89,27 @@ export const createCartoon = (title: string) =>
 
 export const renameCartoon = (id: string, title: string) =>
   request(Cartoon, `/cartoons/${id}`, { method: 'PATCH', body: { title } });
+
+export const contentQuery = (id: string) =>
+  queryOptions({
+    queryKey: ['cartoons', id, 'content'],
+    queryFn: () => request(CartoonContent, `/cartoons/${id}/content`),
+    // The editor keeps its own copy while the user edits.
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
+  });
+
+/**
+ * Saves the scenes of a cartoon. With `keepalive`, the save finishes even if
+ * the page closes.
+ */
+export const saveContent = (
+  id: string,
+  content: CartoonContent,
+  keepalive = false,
+) =>
+  request(NoContent, `/cartoons/${id}/content`, {
+    method: 'PUT',
+    body: content,
+    keepalive,
+  });
