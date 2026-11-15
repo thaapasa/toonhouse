@@ -302,7 +302,49 @@ button:disabled {
   border-top: 2px solid var(--ink);
 }
 
+.thumbnail {
+  position: relative;
+}
+
+/* The play button of the player board, on the picture of the card. */
+.play-badge {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 56px;
+  height: 56px;
+  box-sizing: border-box;
+  margin: -28px 0 0 -28px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 3px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+@media (hover: hover) {
+  .thumbnail:hover .play-badge {
+    filter: brightness(1.1);
+  }
+}
+
+.card-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.card-row .icon-button {
+  color: var(--muted);
+}
+
 .card-info {
+  flex: 1;
+  min-width: 0;
   min-height: 40px;
 }
 
@@ -903,4 +945,163 @@ button:disabled {
 
 .tracks-empty {
   padding: 12px 12px 12px 144px;
+}
+
+/* Player */
+
+.player {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #1b1d24;
+  color: var(--text);
+}
+
+.player-header,
+.player-controls {
+  flex: none;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+}
+
+.player-header {
+  height: 80px;
+  gap: 16px;
+}
+
+/* Full screen is for watching, so only the controls stay. */
+.player:fullscreen .player-header {
+  display: none;
+}
+
+.player-header-side {
+  width: 52px;
+}
+
+.player-title {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-weight: 600;
+  font-size: 17px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-button {
+  min-width: 52px;
+  height: 52px;
+  flex: none;
+  box-sizing: border-box;
+  border: 3px solid #fff4dd;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #fff4dd;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.player-button.labeled {
+  padding: 0 18px 0 14px;
+  color: var(--text);
+}
+
+.player-button.small {
+  min-width: 48px;
+  height: 48px;
+  border-radius: 14px;
+}
+
+.player-stage-area {
+  flex: 1;
+  min-height: 0;
+  container-type: size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+}
+
+.player-stage {
+  width: min(100cqw, 100cqh * 16 / 9);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.player-stage .stage-svg {
+  cursor: pointer;
+}
+
+.player-controls {
+  height: 88px;
+  gap: 20px;
+}
+
+.player-play {
+  width: 60px;
+  height: 60px;
+  flex: none;
+  box-sizing: border-box;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* The whole height takes a finger, though the track is thin. */
+.scrubber {
+  flex: 1;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.scrubber-track {
+  position: relative;
+  width: 100%;
+  height: 16px;
+  border-radius: 8px;
+  background: #3a3e4b;
+}
+
+.scrubber-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 8px;
+  background: var(--accent);
+}
+
+.scrubber-thumb {
+  position: absolute;
+  top: 50%;
+  width: 30px;
+  height: 30px;
+  box-sizing: border-box;
+  margin: -15px 0 0 -15px;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: #fff4dd;
+}
+
+.player-time {
+  font-weight: 500;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }

@@ -290,3 +290,30 @@ export const CloudIcon = () => (
     <path d="M7 18h10a4 4 0 0 0 .5-8 6 6 0 0 0-11.3 1.5A3.3 3.3 0 0 0 7 18z" />
   </Icon>
 );
+
+// The player.
+
+export const EditIcon = ({ size = 20 }: { size?: number }) => (
+  <Icon size={size}>
+    <path d="M4 20l1-5L16 4l4 4L9 19z" strokeWidth={2.2} />
+    <path d="M14 6l4 4" strokeWidth={2.2} />
+  </Icon>
+);
+
+export const BigCloseIcon = () => (
+  <Icon size={22}>
+    <path d="M6 6l12 12M18 6L6 18" strokeWidth={3} />
+  </Icon>
+);
+
+export const FullscreenIcon = () => (
+  <Icon size={22}>
+    <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" strokeWidth={2.6} />
+  </Icon>
+);
+
+export const ExitFullscreenIcon = () => (
+  <Icon size={22}>
+    <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" strokeWidth={2.6} />
+  </Icon>
+);

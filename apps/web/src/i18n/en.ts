@@ -14,6 +14,7 @@ export const en = {
   'home.newCartoon': 'New cartoon',
   'home.newCartoonTitle': 'New cartoon',
   'home.edit': 'Edit: {title}',
+  'home.watch': 'Watch: {title}',
   'home.byOwner': 'By {name}',
   'home.editedToday': 'Edited today',
   'home.editedYesterday': 'Edited yesterday',
@@ -127,6 +128,15 @@ export const en = {
   'background.farm': 'Farm',
   'background.meadow': 'Meadow',
   'background.village': 'Village',
+
+  'player.edit': 'Edit',
+  'player.play': 'Play',
+  'player.pause': 'Pause',
+  'player.position': 'Position',
+  'player.fullscreen': 'Full screen',
+  'player.exitFullscreen': 'Exit full screen',
+  'player.stage': 'The cartoon. Tap to pause or play.',
+  'player.empty': 'The cartoon has no scenes yet.',
 
   'notFound.title': 'Not found',
   'notFound.text': 'There is no such page or cartoon.',

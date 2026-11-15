@@ -1,14 +1,13 @@
-// The scene at the current time, as the camera of the whole background sees
-// it. Tap an actor to select it and drag it to move it. While the user picks
+// The scene at the current time, where the user edits it. Tap an actor to select it and drag it to move it. While the user picks
 // the points of a walk, a tap adds a point and a drag moves the box of one.
 import type { Pt, Scene } from '@toonhouse/model';
-import { actorStateAt, drawScene, wholeBackground } from '@toonhouse/renderer';
-import { actorPrefix, Drawing, PartSymbols } from '@toonhouse/stage';
+import { actorStateAt } from '@toonhouse/renderer';
 import { type PointerEvent, type ReactNode, useRef } from 'react';
 
+import { SceneDrawing } from '../components/SceneDrawing.tsx';
 import { useI18n } from '../i18n/index.tsx';
 import type { BackgroundAsset } from './library.ts';
-import { backgroundFrame, placeActors } from './placement.ts';
+import { placeActors } from './placement.ts';
 import { roundPoint } from './sceneEdit.ts';
 import type { EditMode } from './useCartoonContent.ts';
 import { useSize } from './useSize.ts';
@@ -59,12 +58,6 @@ export function EditorStage(props: Props) {
   const gesture = useRef<{ pointer: number; g: Gesture } | null>(null);
 
   const placed = placeActors(scene, bg, t);
-  const node = drawScene(
-    bg,
-    backgroundFrame(scene, t),
-    wholeBackground(bg),
-    placed.map((p) => p.drawing),
-  );
   // Frame pixels for one CSS pixel.
   const unit = size.width > 0 ? bg.width / size.width : 1;
   const selected = placed.find((p) => p.actor.id === props.selectedActor);
@@ -180,20 +173,13 @@ export function EditorStage(props: Props) {
           onPointerUp={up}
           onPointerCancel={up}
         >
-          <PartSymbols prefix={PREFIX} sources={asset.sources} />
-          {placed.map((p) => (
-            <PartSymbols
-              key={p.actor.id}
-              prefix={actorPrefix(PREFIX, p.actor.id)}
-              sources={p.asset.parts}
-            />
-          ))}
-          <clipPath id={`${PREFIX}-frame`}>
-            <rect width={bg.width} height={bg.height} />
-          </clipPath>
-          <g clipPath={`url(#${PREFIX}-frame)`}>
-            <Drawing node={node} prefix={PREFIX} />
-          </g>
+          <SceneDrawing
+            scene={scene}
+            bg={asset}
+            t={t}
+            placed={placed}
+            prefix={PREFIX}
+          />
           {box && (
             <rect
               className="selection-box"

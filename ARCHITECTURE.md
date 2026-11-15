@@ -2,8 +2,8 @@
 
 Toonhouse is a TypeScript monorepo with pnpm workspaces. This page describes the
 planned structure. So far, the character studio, the packages it uses, the first
-parts of the server and the first version of the scene editor exist. The export
-client doesn't.
+parts of the server, the first version of the scene editor and the player exist.
+The export client doesn't.
 
 The requirements are in [specs/](specs/README.md), and the UI design is in
 [design/](design/CLAUDE.md).
@@ -282,7 +282,12 @@ In development, the Vite dev server passes `/api/` on to the server, so the web
 app and the API share one origin, as in production.
 
 The pages so far are the home page with the cartoons, the login page, the
-profile page and the editor.
+profile page, the player and the editor. A tap on a cartoon on the home page
+opens it in the player, and the owner gets a separate button to edit it.
+
+The player draws the scenes with the same renderer as the editor. Until the
+cartoon has shots, it plays each scene with a background from the start to the
+end, one after another.
 
 ### Editor
 

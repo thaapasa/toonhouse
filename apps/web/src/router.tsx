@@ -10,6 +10,7 @@ import { EditorPage } from './pages/EditorPage.tsx';
 import { HomePage } from './pages/HomePage.tsx';
 import { LoginPage } from './pages/LoginPage.tsx';
 import { NotFoundPage } from './pages/NotFoundPage.tsx';
+import { PlayerPage } from './pages/PlayerPage.tsx';
 import { ProfilePage } from './pages/ProfilePage.tsx';
 
 const rootRoute = createRootRoute({
@@ -46,6 +47,12 @@ const profileRoute = createRoute({
   component: ProfilePage,
 });
 
+const playerRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/cartoons/$cartoonId',
+  component: PlayerPage,
+});
+
 const editorRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/cartoons/$cartoonId/edit',
@@ -57,6 +64,7 @@ export const router = createRouter({
     homeRoute,
     loginRoute,
     profileRoute,
+    playerRoute,
     editorRoute,
   ]),
 });

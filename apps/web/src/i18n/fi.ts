@@ -17,6 +17,7 @@ export const fi: Texts = {
   'home.newCartoon': 'Uusi piirretty',
   'home.newCartoonTitle': 'Uusi piirretty',
   'home.edit': 'Muokkaa: {title}',
+  'home.watch': 'Katso: {title}',
   'home.byOwner': 'Tekijä: {name}',
   'home.editedToday': 'Muokattu tänään',
   'home.editedYesterday': 'Muokattu eilen',
@@ -132,6 +133,15 @@ export const fi: Texts = {
   'background.farm': 'Maatila',
   'background.meadow': 'Niitty',
   'background.village': 'Kylä',
+
+  'player.edit': 'Muokkaa',
+  'player.play': 'Toista',
+  'player.pause': 'Tauko',
+  'player.position': 'Kohta',
+  'player.fullscreen': 'Koko näyttö',
+  'player.exitFullscreen': 'Poistu koko näytöstä',
+  'player.stage': 'Piirretty. Napauta pysäyttääksesi tai jatkaaksesi.',
+  'player.empty': 'Piirretyssä ei ole vielä kohtauksia.',
 
   'notFound.title': 'Ei löytynyt',
   'notFound.text': 'Tällaista sivua tai piirrettyä ei ole.',

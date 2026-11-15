@@ -19,7 +19,7 @@ The visibility of a cartoon tells who can watch it. It is one of these:
 - [ ] The owner can always watch and edit their own cartoon, whatever its
       visibility.
 - [x] A user sees a cartoon in the lists of the app only if they can watch it.
-- [ ] If a user opens a cartoon that they can't watch, the app tells them that
+- [x] If a user opens a cartoon that they can't watch, the app tells them that
       there is no such cartoon, so that they don't learn that it exists.
 
 ## Editing

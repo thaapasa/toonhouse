@@ -2,6 +2,7 @@
 // actors from the library, moves to a time on the timeline and starts an
 // action for the selected actor there. The action goes on until the next
 // action of the same actor.
+import { useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
 import type { Cartoon } from '@toonhouse/api';
 import type {
@@ -23,6 +24,7 @@ import {
 import { usePlayback } from '@toonhouse/stage';
 import { type ReactNode, useEffect, useEffectEvent, useState } from 'react';
 
+import { contentQuery } from '../api.ts';
 import {
   BackgroundIcon,
   BackIcon,
@@ -90,6 +92,7 @@ function freeSpot(bg: BackgroundAsset, actors: readonly Actor[]): Pt {
 export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
   const { cartoon } = props;
   const { tr } = useI18n();
+  const queryClient = useQueryClient();
   const [initial] = useState(() => withScene(props.initial));
   const doc = useCartoonContent(cartoon.id, initial);
   const scenes = doc.content.scenes;
@@ -343,10 +346,22 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
           <RedoIcon />
         </ToolButton>
         <div className="divider" />
-        <button type="button" className="button primary small" disabled>
+        <Link
+          to="/cartoons/$cartoonId"
+          params={{ cartoonId: cartoon.id }}
+          className="button primary small"
+          // The player shows the edits that are not saved yet. Leaving the
+          // editor saves them.
+          onClick={() =>
+            queryClient.setQueryData(
+              contentQuery(cartoon.id).queryKey,
+              doc.content,
+            )
+          }
+        >
           <PlayIcon size={16} />
           {tr('editor.watch')}
-        </button>
+        </Link>
       </header>
 
       <div className="editor-body">

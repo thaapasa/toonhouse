@@ -10,8 +10,9 @@ English.
 
 The project is at an early stage. The character studio, a development tool that
 plays the clips of a character, runs. The web app has the login, the list of
-cartoons and a first version of the scene editor. The player and putting shots
-together into a cartoon don't exist yet.
+cartoons, a first version of the scene editor and the player. Putting shots
+together into a cartoon doesn't exist yet, so the player plays the scenes one
+after another.
 
 ## Art style
 

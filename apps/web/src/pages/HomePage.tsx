@@ -4,7 +4,7 @@ import type { Cartoon } from '@toonhouse/api';
 
 import { cartoonQuery, cartoonsQuery, createCartoon, meQuery } from '../api.ts';
 import { AppHeader } from '../components/AppHeader.tsx';
-import { PlusIcon } from '../components/icons.tsx';
+import { EditIcon, PlayIcon, PlusIcon } from '../components/icons.tsx';
 import { PageMessage } from '../components/RequireUser.tsx';
 import { Thumbnail } from '../components/Thumbnail.tsx';
 import { useI18n } from '../i18n/index.tsx';
@@ -106,32 +106,43 @@ function CartoonList(props: {
   );
 }
 
+/** A tap on the picture plays the cartoon. The owner gets a button to edit it. */
 function CartoonCard({ cartoon }: { cartoon: Cartoon }) {
   const { tr } = useI18n();
   const edited = useEditedText(cartoon.updatedAt);
   return (
     <article className="cartoon-card">
-      {cartoon.canEdit ? (
-        <Link
-          to="/cartoons/$cartoonId/edit"
-          params={{ cartoonId: cartoon.id }}
-          aria-label={tr('home.edit', { title: cartoon.title })}
-          className="thumbnail"
-        >
-          <Thumbnail id={cartoon.id} />
-        </Link>
-      ) : (
-        <div className="thumbnail">
-          <Thumbnail id={cartoon.id} />
+      <Link
+        to="/cartoons/$cartoonId"
+        params={{ cartoonId: cartoon.id }}
+        aria-label={tr('home.watch', { title: cartoon.title })}
+        className="thumbnail"
+      >
+        <Thumbnail id={cartoon.id} />
+        <span className="play-badge">
+          <PlayIcon size={26} />
+        </span>
+      </Link>
+      <div className="card-row">
+        <div className="card-info">
+          <div className="card-title">{cartoon.title}</div>
+          <div className="card-meta">
+            {cartoon.canEdit
+              ? edited
+              : tr('home.byOwner', { name: cartoon.owner.displayName })}
+          </div>
         </div>
-      )}
-      <div className="card-info">
-        <div className="card-title">{cartoon.title}</div>
-        <div className="card-meta">
-          {cartoon.canEdit
-            ? edited
-            : tr('home.byOwner', { name: cartoon.owner.displayName })}
-        </div>
+        {cartoon.canEdit && (
+          <Link
+            to="/cartoons/$cartoonId/edit"
+            params={{ cartoonId: cartoon.id }}
+            className="icon-button"
+            aria-label={tr('home.edit', { title: cartoon.title })}
+            title={tr('home.edit', { title: cartoon.title })}
+          >
+            <EditIcon />
+          </Link>
+        )}
       </div>
     </article>
   );
