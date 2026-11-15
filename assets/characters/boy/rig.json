@@ -5,56 +5,101 @@
       "svg": "head.svg",
       "width": 347,
       "height": 386,
-      "pivot": { "x": 158.2, "y": 360 }
+      "pivot": {
+        "x": 158.2,
+        "y": 360
+      }
     },
     "mouthPatch": {
       "svg": "mouth-patch.svg",
       "width": 347,
       "height": 386,
-      "pivot": { "x": 158.2, "y": 360 }
+      "pivot": {
+        "x": 158.2,
+        "y": 360
+      }
     },
     "torso": {
       "svg": "torso.svg",
       "width": 149,
       "height": 357,
-      "pivot": { "x": 73.4, "y": 301.1 }
+      "pivot": {
+        "x": 67,
+        "y": 290
+      }
     },
     "hand": {
       "svg": "hand.svg",
       "width": 112,
       "height": 145,
-      "pivot": { "x": 49.4, "y": 13 }
+      "pivot": {
+        "x": 47,
+        "y": 13
+      }
     },
     "handOpen": {
       "svg": "hand-open.svg",
       "width": 158,
       "height": 151,
-      "pivot": { "x": 73, "y": 137 }
+      "pivot": {
+        "x": 75,
+        "y": 136
+      }
     },
     "foot": {
       "svg": "foot.svg",
       "width": 255,
       "height": 147,
-      "pivot": { "x": 76.5, "y": 54 }
+      "pivot": {
+        "x": 54,
+        "y": 45
+      }
     }
   },
   "torso": {
-    "neck": { "x": 68.2, "y": 17 },
-    "shoulderNear": { "x": 65.2, "y": 68.6 },
-    "shoulderFar": { "x": 51.2, "y": 72.6 },
-    "hipNear": { "x": 81.4, "y": 301.1 },
-    "hipFar": { "x": 59.4, "y": 301.1 }
+    "neck": {
+      "x": 75,
+      "y": 16
+    },
+    "shoulderNear": {
+      "x": 55,
+      "y": 58
+    },
+    "shoulderFar": {
+      "x": 63,
+      "y": 61
+    },
+    "hipNear": {
+      "x": 65,
+      "y": 265
+    },
+    "hipFar": {
+      "x": 60,
+      "y": 270
+    }
   },
-  "scales": { "head": 0.82, "hand": 0.62, "foot": 0.62 },
-  "hands": { "relaxedAngle": -90, "openAngle": 90 },
+  "scales": {
+    "head": 0.74,
+    "hand": 0.6,
+    "foot": 0.57,
+    "torso": 1
+  },
+  "hands": {
+    "relaxedAngle": -90,
+    "openAngle": 90
+  },
   "ankleHeight": 85,
   "limbs": {
-    "armLength": 175,
-    "legLength": 205,
-    "armWidth": 26,
+    "armLength": 162,
+    "legLength": 196.91,
+    "armWidth": 28,
     "legWidth": 30,
-    "outlineWidth": 8,
-    "sleeve": { "color": "#e80000", "length": 0.2, "extraWidth": 8 }
+    "outlineWidth": 6,
+    "sleeve": {
+      "color": "#e80000",
+      "length": 0.2,
+      "extraWidth": 8
+    }
   },
   "colors": {
     "outline": "#422517",
@@ -65,14 +110,31 @@
     "tongue": "#e74f5a"
   },
   "farShade": 0.82,
-  "shadow": { "rx": 120, "ry": 22 },
+  "shadow": {
+    "rx": 120,
+    "ry": 22
+  },
   "face": {
-    "eye": { "cx": 254, "cy": 221, "rx": 20, "ry": 28 },
+    "eye": {
+      "cx": 254,
+      "cy": 221,
+      "rx": 20,
+      "ry": 28
+    },
     "shutY": 229,
     "mouth": {
-      "back": { "x": 254, "y": 290 },
-      "front": { "x": 291, "y": 293 },
-      "control": { "x": 272, "y": 299 },
+      "back": {
+        "x": 254,
+        "y": 290
+      },
+      "front": {
+        "x": 291,
+        "y": 293
+      },
+      "control": {
+        "x": 272,
+        "y": 299
+      },
       "openDepth": 46,
       "corner": "M249 284Q251 290 257 291",
       "tongue": {
@@ -84,5 +146,10 @@
         "grow": 6
       }
     }
+  },
+  "motion": {
+    "groundOffset": 4,
+    "hipHeight": 215,
+    "feetOffset": -20
   }
 }
