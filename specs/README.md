@@ -25,6 +25,7 @@ After editing a spec, format it with Prettier: `pnpm format`.
 - [Users and login](users.md): users, login and groups.
 - [Profile](profile.md): the user's own name and password.
 - [Sharing](sharing.md): who can watch and edit a cartoon.
+- [Library](library.md): the asset packs and their art styles.
 - [Characters](characters.md): characters, props and their clips.
 - [Scenes](scenes.md): backgrounds, placing actors and saving scenes.
 - [Timeline](timeline.md): giving actors actions over time.

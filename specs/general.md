@@ -4,6 +4,9 @@
 - [x] The UI is in Finnish and in English. The user can switch the language.
 - [ ] Users log in to make cartoons, and each user has their own cartoons. See
       [Users and login](users.md) and [Sharing](sharing.md).
+- [ ] The app doesn't limit what users make. Users can combine anything in the
+      library and place actors anywhere, such as a character walking in the sky.
+      The app limits something only for a technical reason.
 
 ## New versions
 
@@ -33,7 +36,3 @@ the cartoons that users have already made must keep working.
       were not saved can be lost.
 - [ ] If an old version of the export client downloads a cartoon, it tells the
       user to update the export client.
-
-## Open questions
-
-- Should the UI work for users who can't read yet? If so, it needs mostly icons.

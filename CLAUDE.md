@@ -49,6 +49,10 @@ port as the default.
 
 ## Rules
 
+- Don't limit what users can make. By default everything is allowed: mixing
+  asset packs, putting any actor in any scene, a character walking in the sky.
+  Add a limit only for a technical reason, and write the reason down. Don't ask
+  the user whether to allow something like this. Allow it.
 - The renderer packages stay pure: no DOM, no clocks and no randomness. The
   scene at time `t` must depend only on the scene data and `t`.
 - Every UI text goes through the translation files, in Finnish and English.

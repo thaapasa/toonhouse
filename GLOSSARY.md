@@ -64,7 +64,12 @@ for something else or too vague.
 ## Characters and props
 
 - **Library**: the ready-made characters, props and backgrounds that the user
-  can pick from.
+  can pick from. It is made of asset packs.
+- **Asset pack**: a set of characters, props and backgrounds in one art style,
+  such as Sunny. Users can mix assets from different packs. Not: style pack,
+  theme.
+- **Style prompt**: the part of an image prompt that describes the art style of
+  an asset pack. Every image for the pack uses the same style prompt.
 - **Character**: a figure that can move, such as the boy or the hen. Not:
   figure, toon.
 - **Prop**: an object that an actor can use or that stands in a scene, such as a

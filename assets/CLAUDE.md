@@ -5,10 +5,30 @@ generating images with AI, tracing them to SVG and checking the result.
 
 - `examples/`: style references for the art and the UI design. They are not used
   in the app.
+- `packs/`: the asset packs, one folder each. See "Asset packs" below.
 - `work/`: scratch files from generating and tracing. Git ignores it.
 
 To make an animated 2D character, follow [cutout-toons.md](cutout-toons.md). It
 builds on the steps below.
+
+## Asset packs
+
+Every character, prop and background belongs to one asset pack. The folder of a
+pack in `packs/` has two files:
+
+- `pack.json` lists the characters, props and backgrounds of the pack by their
+  folder names. The assets stay in `characters/`, `props/` and `backgrounds/`,
+  so that saved cartoons keep finding them.
+- `style.txt` is the style prompt of the pack. Put it in every prompt for an
+  image of the pack, so that the assets of the pack look alike.
+
+In every pack, keep the art simple: a few large shapes, flat fills and an
+outline. Simple art keeps the SVG files small, and fine detail looks wrong when
+a part bends or stretches in a clip.
+
+To make a new pack, write its style prompt first and try it on one character
+before you make the rest. The style lives only in the style prompt. The rest of
+the prompt describes the subject and what the tracing needs.
 
 ## Generating images
 
@@ -47,10 +67,12 @@ These rules come from testing with Qwen Image 2.1 Turbo.
   ground shadow, and both get traced as shapes.
 - For a side view, write "side profile view, facing right, only one eye
   visible". "Three-quarter view" gives a character that faces the front.
-- Ask for a flat style: solid color fills, no gradients, no texture, no shading,
-  and a bold, even dark brown outline around every shape.
-- Use bright colors for everything except the outline. When tracing reduces the
-  colors, it merges dark colors, such as dark green shorts, with the outline.
+- End the prompt with the style prompt of the pack. It should ask for solid
+  color fills with no gradients, no texture and no shading, and for an even
+  outline around every shape.
+- Keep every fill color clearly lighter than the outline. When tracing reduces
+  the colors, it merges dark colors, such as dark green shorts, with the
+  outline.
 - For a rig, ask for a "cutout puppet parts sheet" with every piece separate and
   nothing touching. This gives an exploded side view with the head, the torso,
   an arm, the shorts, a leg and a foot as separate pieces. The arm and the leg

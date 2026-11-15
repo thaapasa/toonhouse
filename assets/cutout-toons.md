@@ -2,8 +2,8 @@
 
 This guide describes how to make a 2D character that walks, waves, talks and
 blinks, in the same way as the boy in the 2D motion prototype. Follow it to make
-a new character in the same style. Read [CLAUDE.md](CLAUDE.md) first: it covers
-generating images, writing prompts and tracing.
+a new character in the style of an asset pack. Read [CLAUDE.md](CLAUDE.md)
+first: it covers generating images, writing prompts and tracing.
 
 The boy is the worked example. His files are in `prototypes/`:
 
@@ -49,7 +49,9 @@ picked and why.
 ### 1. Generate the parts sheet
 
 Write the prompt to `assets/work/<name>/parts.txt`. This is the prompt that made
-the boy. Change only the description of the character and the colors:
+the boy, with the style prompt of his pack replaced by `<style prompt>`. Change
+the description of the character and the colors, and put the `style.txt` of the
+pack in place of `<style prompt>`:
 
 ```text
 RGBA image with an alpha channel and a fully transparent background. A cutout
@@ -64,10 +66,8 @@ from the side, with no arms and no legs, rounded at the shoulder and the leg
 holes; 3) one small relaxed hand seen from the side, a simple mitten shape with
 a thumb; 4) one open hand with the palm facing the viewer and the fingers
 spread, as for waving; 5) one foot in a red sneaker with a white sole and white
-laces, side view, pointing right, with no leg. Flat vector illustration for a
-children's cartoon: solid bright color fills, no gradients, no texture, no
-shading. Bold, even dark brown outline around every piece. No text, no labels,
-no numbers, no ground shadow.
+laces, side view, pointing right, with no leg. <style prompt> No text, no
+labels, no numbers, no ground shadow.
 ```
 
 The boy's head came with an open grin, and step 5 covers it with a patch. Asking
@@ -252,18 +252,17 @@ clothes hide the hips.
 ### 7. Make a background
 
 Ask for a wide empty area where the characters walk. The boy's park came from
-this prompt at 1536×896, seed 21:
+this prompt at 1536×896, seed 21, with the style prompt of his pack in place of
+`<style prompt>`:
 
 ```text
-A simple background for a children's cartoon: a sunny park seen from the side
+A simple background for a 2D cartoon: a sunny park seen from the side
 at eye level. The lower half of the picture is a wide, flat, empty lawn of
 bright green grass with nothing on it, where characters can walk. Behind the
 lawn, a few round leafy trees with brown trunks, a couple of round bushes, and a
 low wooden fence far back. Above, a light blue sky with two or three simple
 white puffy clouds. No people, no animals, no path, no benches in the
-foreground. Flat vector illustration: solid bright color fills, no gradients,
-no texture, no shading. Bold, even dark brown outline around every shape. No
-text.
+foreground. <style prompt> No text.
 ```
 
 A background doesn't need the transparent background line. Trace it with the

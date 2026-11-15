@@ -16,10 +16,15 @@ after another.
 
 ## Art style
 
-[assets/examples/asset-examples.png](assets/examples/asset-examples.png) shows
-the look we're aiming for: bright, colorful cartoon characters, animals,
-fairytale creatures and props, with bold outlines and a shared palette. It is a
-reference for the style, not a final asset.
+The art is simple on purpose: a few large shapes with flat colors and outlines.
+Simple art keeps the assets small and makes them easy to animate. Fine detail
+looks wrong when a part bends or stretches in a clip.
+
+The library is made of asset packs, each with its own art style. The first pack,
+Sunny, has bright colors and bold dark outlines, and
+[assets/examples/asset-examples.png](assets/examples/asset-examples.png) was the
+reference for it. Later packs can look very different, as long as they stay
+simple.
 
 The graphics are generated with AI on a local Draw Things install, then traced
 to SVG. [assets/CLAUDE.md](assets/CLAUDE.md) describes how.
