@@ -30,8 +30,8 @@
       "width": 196,
       "height": 412,
       "pivot": {
-        "x": 84,
-        "y": 301
+        "x": 86,
+        "y": 344
       },
       "layers": [
         {
@@ -46,7 +46,7 @@
       "height": 204,
       "pivot": {
         "x": 62,
-        "y": 18
+        "y": 30
       }
     },
     "handOpen": {
@@ -64,7 +64,7 @@
       "height": 196,
       "pivot": {
         "x": 56,
-        "y": 38
+        "y": 43
       },
       "layers": [
         {
@@ -76,8 +76,8 @@
   },
   "torso": {
     "neck": {
-      "x": 86,
-      "y": 49
+      "x": 89,
+      "y": 45
     },
     "shoulderNear": {
       "x": 38,
@@ -88,17 +88,17 @@
       "y": 77
     },
     "hipNear": {
-      "x": 58,
-      "y": 321
+      "x": 72,
+      "y": 368
     },
     "hipFar": {
-      "x": 84,
-      "y": 313
+      "x": 97,
+      "y": 364
     }
   },
   "scales": {
-    "head": 0.64,
-    "hand": 0.56,
+    "head": 0.59,
+    "hand": 0.43,
     "foot": 0.52
   },
   "hands": {
@@ -107,11 +107,11 @@
   },
   "ankleHeight": 85,
   "limbs": {
-    "armLength": 200,
-    "legLength": 205,
-    "armWidth": 26,
-    "legWidth": 30,
-    "outlineWidth": 7,
+    "armLength": 165,
+    "legLength": 214.45,
+    "armWidth": 31,
+    "legWidth": 35,
+    "outlineWidth": 4,
     "sleeve": {
       "color": "#0b2a3c",
       "length": 0.85,
@@ -180,5 +180,10 @@
         "grow": 4
       }
     }
+  },
+  "motion": {
+    "feetOffset": -2,
+    "hipHeight": 270,
+    "groundOffset": 30
   }
 }
