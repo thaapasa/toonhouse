@@ -27,6 +27,8 @@ asset files in the repo. See [Characters](characters.md).
 - [ ] Developer can edit the keyframes of a clip and save it.
 - [ ] Developer can set the color presets of a character or a prop and save
       them.
+- [x] The URL names the picked character or prop and the picked background, so
+      that a reload shows them again.
 - [x] The studio isn't part of the production build.
 - [x] The studio works with a mouse on a computer. It doesn't need to work with
       touch.

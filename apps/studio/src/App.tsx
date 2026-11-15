@@ -24,6 +24,7 @@ import { Inspector, type SaveStatus } from './components/Inspector.tsx';
 import { PieceView } from './components/PieceView.tsx';
 import { type ViewOptions, Viewport } from './components/Viewport.tsx';
 import { isTextKey, useI18n } from './i18n/index.tsx';
+import { locationSearch, readLocation } from './location.ts';
 import {
   type AngleField,
   angleFields,
@@ -41,6 +42,12 @@ const FPS = 30;
 /** The dev server saves rigs here, see server/saveRig.ts. */
 const SAVE_RIG_URL = '/api/rig';
 
+const KNOWN = {
+  characters: CHARACTERS.map((c) => c.id),
+  props: PROPS.map((c) => c.id),
+  backgrounds: BACKGROUNDS.map((b) => b.id),
+};
+
 const sameRig = (a: Rig, b: Rig) => JSON.stringify(a) === JSON.stringify(b);
 
 function without<T>(record: Record<string, T>, key: string) {
@@ -54,8 +61,9 @@ export function App() {
   const { tr } = useI18n();
   // The character or prop that the rig views show. It stays the same while
   // a background is selected.
-  const [characterId, setCharacterId] = useState(CHARACTERS[0]!.id);
-  const [backgroundId, setBackgroundId] = useState<string | null>(null);
+  const [start] = useState(() => readLocation(window.location.search, KNOWN));
+  const [characterId, setCharacterId] = useState(start.rig);
+  const [backgroundId, setBackgroundId] = useState(start.background);
   const [clipId, setClipId] = useState<ClipId>('walk');
   const [backgroundClipId, setBackgroundClipId] = useState<ClipId>('day');
   const [camera, setCamera] = useState<Camera | null>(null);
@@ -233,6 +241,17 @@ export function App() {
       onDragStart={startAttachmentDrag}
     />
   );
+
+  // Keep the selection in the URL, so that a reload shows it again.
+  useEffect(() => {
+    const search = locationSearch(
+      { rig: characterId, background: backgroundId },
+      KNOWN,
+    );
+    if (search !== window.location.search) {
+      window.history.replaceState(null, '', search + window.location.hash);
+    }
+  }, [characterId, backgroundId]);
 
   const { step, setPlaying, playing } = playback;
   useEffect(() => {
