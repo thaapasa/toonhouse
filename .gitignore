@@ -16,3 +16,6 @@ coverage/
 
 # Image generation work files
 assets/work/
+
+# macOS folder metadata
+.DS_Store
