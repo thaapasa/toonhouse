@@ -2,13 +2,19 @@
   "kind": "cutout",
   "parts": {
     "head": {
-      "svg": "head.svg",
+      "svg": "head-front.svg",
       "width": 364,
       "height": 334,
       "pivot": {
         "x": 212,
         "y": 306
-      }
+      },
+      "layers": [
+        {
+          "id": "back",
+          "svg": "head-back.svg"
+        }
+      ]
     },
     "mouthPatch": {
       "svg": "mouth-patch.svg",
@@ -20,20 +26,26 @@
       }
     },
     "torso": {
-      "svg": "torso.svg",
+      "svg": "torso-front.svg",
       "width": 196,
       "height": 412,
       "pivot": {
         "x": 84,
         "y": 301
-      }
+      },
+      "layers": [
+        {
+          "id": "back",
+          "svg": "torso-back.svg"
+        }
+      ]
     },
     "hand": {
       "svg": "hand.svg",
-      "width": 117,
-      "height": 190,
+      "width": 127,
+      "height": 204,
       "pivot": {
-        "x": 50,
+        "x": 62,
         "y": 18
       }
     },
@@ -47,19 +59,25 @@
       }
     },
     "foot": {
-      "svg": "foot.svg",
+      "svg": "foot-back.svg",
       "width": 234,
       "height": 196,
       "pivot": {
-        "x": 58,
-        "y": 47
-      }
+        "x": 56,
+        "y": 38
+      },
+      "layers": [
+        {
+          "id": "front",
+          "svg": "foot-front.svg"
+        }
+      ]
     }
   },
   "torso": {
     "neck": {
-      "x": 87,
-      "y": 35
+      "x": 86,
+      "y": 49
     },
     "shoulderNear": {
       "x": 38,
@@ -70,18 +88,18 @@
       "y": 77
     },
     "hipNear": {
-      "x": 74,
-      "y": 322
+      "x": 58,
+      "y": 321
     },
     "hipFar": {
-      "x": 97,
-      "y": 318
+      "x": 84,
+      "y": 313
     }
   },
   "scales": {
-    "head": 0.75,
-    "hand": 0.62,
-    "foot": 0.6
+    "head": 0.64,
+    "hand": 0.56,
+    "foot": 0.52
   },
   "hands": {
     "relaxedAngle": -90,
@@ -112,12 +130,16 @@
   "drawOrder": [
     "armFar",
     "handFar",
-    "legFar",
     "footFar",
+    "legFar",
+    "footFar.front",
+    "footNear",
     "legNear",
+    "head.back",
+    "torso.back",
     "head",
     "torso",
-    "footNear",
+    "footNear.front",
     "armNear",
     "handNear"
   ],
