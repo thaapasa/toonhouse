@@ -1,0 +1,162 @@
+{
+  "kind": "cutout",
+  "parts": {
+    "head": {
+      "svg": "head.svg",
+      "width": 301,
+      "height": 421,
+      "pivot": {
+        "x": 138,
+        "y": 392
+      }
+    },
+    "mouthPatch": {
+      "svg": "mouth-patch.svg",
+      "width": 301,
+      "height": 421,
+      "pivot": {
+        "x": 138,
+        "y": 392
+      }
+    },
+    "torso": {
+      "svg": "torso.svg",
+      "width": 168,
+      "height": 407,
+      "pivot": {
+        "x": 81,
+        "y": 382
+      }
+    },
+    "hand": {
+      "svg": "hand.svg",
+      "width": 146,
+      "height": 282,
+      "pivot": {
+        "x": 44,
+        "y": 70
+      }
+    },
+    "handOpen": {
+      "svg": "hand-open.svg",
+      "width": 201,
+      "height": 291,
+      "pivot": {
+        "x": 104,
+        "y": 270
+      }
+    },
+    "foot": {
+      "svg": "foot.svg",
+      "width": 232,
+      "height": 167,
+      "pivot": {
+        "x": 55,
+        "y": 85
+      }
+    }
+  },
+  "torso": {
+    "neck": {
+      "x": 78,
+      "y": 18
+    },
+    "shoulderNear": {
+      "x": 42,
+      "y": 70
+    },
+    "shoulderFar": {
+      "x": 49,
+      "y": 67
+    },
+    "hipNear": {
+      "x": 90,
+      "y": 382
+    },
+    "hipFar": {
+      "x": 72,
+      "y": 384
+    }
+  },
+  "scales": {
+    "head": 0.72,
+    "hand": 0.45,
+    "foot": 0.62
+  },
+  "hands": {
+    "relaxedAngle": -90,
+    "openAngle": 90
+  },
+  "ankleHeight": 75,
+  "limbs": {
+    "armLength": 215,
+    "legLength": 205,
+    "armWidth": 22,
+    "legWidth": 26,
+    "outlineWidth": 7,
+    "sleeve": {
+      "color": "#e1cea1",
+      "length": 0.9,
+      "extraWidth": 10
+    },
+    "legColor": "#562439"
+  },
+  "colors": {
+    "outline": "#121817",
+    "skin": "#e29f60",
+    "line": "#121817",
+    "lid": "#e29f60",
+    "mouth": "#3e0902",
+    "tongue": "#c8504a"
+  },
+  "drawOrder": [
+    "armFar",
+    "handFar",
+    "legFar",
+    "footFar",
+    "legNear",
+    "head",
+    "torso",
+    "footNear",
+    "armNear",
+    "handNear"
+  ],
+  "farShade": 0.82,
+  "shadow": {
+    "rx": 110,
+    "ry": 20
+  },
+  "face": {
+    "eye": {
+      "cx": 195,
+      "cy": 132,
+      "rx": 25,
+      "ry": 15
+    },
+    "shutY": 135,
+    "mouth": {
+      "back": {
+        "x": 208,
+        "y": 244
+      },
+      "front": {
+        "x": 246,
+        "y": 229
+      },
+      "control": {
+        "x": 228,
+        "y": 231
+      },
+      "openDepth": 30,
+      "corner": "M208 244Q205 247 204 251",
+      "tongue": {
+        "cx": 228,
+        "cy": 241,
+        "rx": 8,
+        "ry": 3,
+        "drop": 12,
+        "grow": 4
+      }
+    }
+  }
+}

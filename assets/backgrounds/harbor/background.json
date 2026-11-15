@@ -1,0 +1,15 @@
+{
+  "width": 2048,
+  "height": 1152,
+  "layers": [
+    { "id": "sky", "svg": "sky.svg", "depth": 0 },
+    { "id": "far", "svg": "far.svg", "depth": 0.1 },
+    { "id": "middle", "svg": "middle.svg", "depth": 0.45 },
+    { "id": "ground", "svg": "ground.svg", "depth": 1 }
+  ],
+  "ground": {
+    "layer": "ground",
+    "start": { "x": 1024, "y": 1010 },
+    "actorScale": 0.4
+  }
+}

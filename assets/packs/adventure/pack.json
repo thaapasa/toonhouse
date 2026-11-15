@@ -1,0 +1,7 @@
+{
+  "id": "adventure",
+  "bubbleFont": "Patrick Hand",
+  "characters": ["captain", "quartermaster"],
+  "props": [],
+  "backgrounds": ["harbor"]
+}

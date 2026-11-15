@@ -1,0 +1,14 @@
+{
+  "model": "qwen_image_2.1_turbo_q8p.ckpt",
+  "sampler": "DDIM Trailing",
+  "guidance_scale": 1,
+  "shift": 6.5,
+  "resolution_dependent_shift": false,
+  "batch_size": 1,
+  "prompt": "RGBA image with an alpha channel and a fully transparent background. A cutout puppet parts sheet for a 2D cartoon character, with only five separate pieces laid out in a row with wide empty space between them, nothing touching or overlapping. The character is an original stout middle-aged woman, a female ship captain with a clearly feminine face, long eyelashes, full lips, a confident smirk, a weathered tanned complexion, big curly auburn hair tied back under a red bandana and one gold hoop earring, side profile view, facing right, only one eye visible. The five pieces are: 1) the head of the woman with the hair, side profile facing right, one eye with long lashes, a closed smirking mouth, a very short neck stub; 2) only the torso, from the collar down to the hips, with no legs: a fitted short double-breasted navy blue jacket for a woman with brass buttons over a white shirt, a wide leather belt with a big brass buckle, and below it only the very top of ochre trousers, cut off straight at the hips like short shorts, seen from the side, with no arms and no legs, rounded at the shoulder and the leg holes; 3) one relaxed hand seen from the side, a simple mitten shape with a thumb, with no wrist and no sleeve; 4) one open hand with the palm facing the viewer and the fingers spread, as for waving, with no sleeve; 5) one short oxblood red leather ankle boot with a turned-down cuff, side view, pointing right, with no leg. Flat vector illustration in the style of a 1990s hand-drawn cartoon adventure game for grown-ups: exaggerated, slightly angular proportions, long limbs, expressive faces, solid color fills in rich, slightly muted colors such as deep teal, ochre, brick red, plum and sea green, no gradients, no texture, no shading. Bold, even near-black outline around every shape. No text, no labels, no numbers, no ground shadow.",
+  "negative_prompt": "gradient, texture, crosshatching, sketch lines, shading, realistic, 3D render, photo, background, scenery, ground shadow, text, vignette, film grain",
+  "width": 1280,
+  "height": 1024,
+  "steps": 8,
+  "seed": 22
+}

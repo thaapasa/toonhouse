@@ -27,6 +27,10 @@ another action for that character.
       actor and a box at each point, with a line from the actor through the
       points. The user moves a point by dragging its box.
 - [ ] User can add a speech bubble to a character for a time.
+- [ ] Speech bubbles use a comic font that the app serves itself, so that a
+      bubble looks the same in the editor, the player and the exported video.
+- [ ] User can change the font of a speech bubble. The default font comes from
+      the asset pack of the character.
 - [ ] User can add a sound at the current point.
 - [x] User can play the cartoon from the current point and stop it to add the
       next action.

@@ -119,6 +119,8 @@ export const fi: Texts = {
   'character.chicken': 'Kana',
   'character.boy': 'Poika',
   'character.emo': 'Emotyttö',
+  'character.quartermaster': 'Muonamestari',
+  'character.captain': 'Kapteeni',
   'character.wizard': 'Velho',
   'character.grandma': 'Mummo',
   'character.raincoat': 'Sadetakkityttö',
@@ -133,6 +135,7 @@ export const fi: Texts = {
   'background.farm': 'Maatila',
   'background.meadow': 'Niitty',
   'background.village': 'Kylä',
+  'background.harbor': 'Satama',
 
   'player.edit': 'Muokkaa',
   'player.play': 'Toista',

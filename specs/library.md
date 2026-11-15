@@ -13,3 +13,5 @@ packs can have very different styles.
 - [x] Each asset pack has a style prompt, which the developer uses to generate
       new assets in the style of the pack. See
       [assets/CLAUDE.md](../assets/CLAUDE.md).
+- [ ] Each asset pack has a default font for speech bubbles. The fonts are free
+      fonts that the app serves itself.

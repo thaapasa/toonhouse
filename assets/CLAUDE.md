@@ -19,6 +19,9 @@ pack in `packs/` has two files:
 - `pack.json` lists the characters, props and backgrounds of the pack by their
   folder names. The assets stay in `characters/`, `props/` and `backgrounds/`,
   so that saved cartoons keep finding them.
+- `bubbleFont` in `pack.json` is the default font of the speech bubbles. Pick a
+  free font, such as one under the SIL Open Font License, because the app serves
+  the font itself.
 - `style.txt` is the style prompt of the pack. Put it in every prompt for an
   image of the pack, so that the assets of the pack look alike.
 
@@ -90,6 +93,9 @@ the meadow, the farm and the village.
   for a side-scrolling 2D cartoon" that "runs across the whole width of the
   image, touches the left, right and bottom edges", and say that the image above
   it is fully transparent, with no sky, no sun and no clouds.
+- End the prompt with "Empty scene, no figures, no humans, no animals", and
+  don't write that characters walk there. Otherwise the image model can draw a
+  person in the layer, especially with a style prompt that names a kind of game.
 - Add "with no border" for the ground. Without it, the image model often draws
   an outline around the whole strip.
 - The content of a strip comes out shorter than the share you ask for. To make

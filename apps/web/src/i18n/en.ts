@@ -114,6 +114,8 @@ export const en = {
   'character.chicken': 'Hen',
   'character.boy': 'Boy',
   'character.emo': 'Emo girl',
+  'character.quartermaster': 'Quartermaster',
+  'character.captain': 'Captain',
   'character.wizard': 'Wizard',
   'character.grandma': 'Grandma',
   'character.raincoat': 'Raincoat girl',
@@ -128,6 +130,7 @@ export const en = {
   'background.farm': 'Farm',
   'background.meadow': 'Meadow',
   'background.village': 'Village',
+  'background.harbor': 'Harbor',
 
   'player.edit': 'Edit',
   'player.play': 'Play',
