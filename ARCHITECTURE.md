@@ -204,8 +204,9 @@ web app from `apps/web/dist`, and every other path gets its `index.html`.
 
 Users and groups are added on the server with the commands in
 `apps/server/src/cli`, and the app can't add them. A user can't choose their
-password: the command and the password reset on the profile page both generate
-one. The server stores an Argon2id hash of it.
+password: the password reset on the profile page generates one. The command
+generates one too, unless the developer types a password for the user. The
+server stores an Argon2id hash of it.
 
 A login makes a session. The browser keeps the session token in an HTTP-only
 cookie, and the database stores only a SHA-256 hash of the token, so a copy of

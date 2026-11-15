@@ -40,6 +40,10 @@ tasks:
   db/postgres:
     type: job
     cmd: docker compose up --detach --wait db
+  db/set-user:
+    type: job
+    cmd: pnpm set-user --prompt
+    deps: [db/postgres]
   db/migrate:
     type: job
     cmd: pnpm migrate

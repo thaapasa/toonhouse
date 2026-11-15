@@ -46,7 +46,7 @@ http://localhost:10700, the web app on http://localhost:10710 and the character
 studio on http://localhost:10711. The other tasks start only when you ask for
 them: the motion prototypes on http://localhost:10790, the checks (lint with
 `--fix`, format, typecheck, tests and tests in watch mode), the database
-migrations and the build.
+migrations, adding a user and the build.
 
 In the UI, select a task and press `s` to start it, `r` to restart it or `x` to
 stop it. Press `q` to quit, and then `d` to leave the tasks running in the
@@ -81,6 +81,7 @@ The app can't add users or groups. Add them with these commands:
 
 ```sh
 pnpm set-user <username> <display name>   # add a user, or give a new password
+pnpm set-user --prompt                    # the same, but ask for the details and the password
 pnpm group create <group>
 pnpm group add <group> <username>
 pnpm group remove <group> <username>
@@ -90,6 +91,11 @@ pnpm group list
 `pnpm set-user` generates the password and prints it once. If the user exists,
 it gets a new display name and password, and its logins end. With `--sql`, the
 command prints an SQL statement to run in the database instead of writing to it.
+
+With `--prompt`, the command asks for the username, the display name and the
+password, and shows the password as stars. If you leave the password empty, it
+generates one. The `db/set-user` task in dekit runs `pnpm set-user --prompt`. To
+type into it in dekit, press `Ctrl-A` to move the focus to its terminal.
 
 ### Ports
 
