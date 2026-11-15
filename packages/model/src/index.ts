@@ -38,6 +38,7 @@ export type {
   BirdPartId,
   BirdRig,
   CutoutFace,
+  CutoutMotion,
   CutoutRig,
   EyeFace,
   PartId,

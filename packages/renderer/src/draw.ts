@@ -6,13 +6,14 @@ import type {
   CutoutRig,
   Matrix,
   PartId,
+  Pose,
   Pt,
   Rig,
   RigPartId,
 } from '@toonhouse/model';
 
 import { drawBird } from './bird.ts';
-import { hang, NEAR_ARM_REST } from './clips/body.ts';
+import { hang, HIP_HEIGHT, NEAR_ARM_REST } from './clips/body.ts';
 import { eyeLids, mouthShape, tongue, upperLip } from './face.ts';
 import {
   add,
@@ -220,12 +221,33 @@ export function partBounds(node: DrawNode): Bounds | null {
   return { x, y, width: Math.max(...xs) - x, height: Math.max(...ys) - y };
 }
 
+/**
+ * A pose of a shared clip, fitted to the body of the character with the
+ * motion settings of the rig.
+ */
+export function fittedPose(rig: CutoutRig, pose: Pose): Pose {
+  const m = rig.motion;
+  if (!m) return pose;
+  const up = m.groundOffset ?? 0;
+  const forward = m.feetOffset ?? 0;
+  const foot = (p: Pt): Pt => ({ x: p.x + forward, y: p.y - up });
+  return {
+    ...pose,
+    hip: {
+      x: pose.hip.x,
+      y: pose.hip.y + HIP_HEIGHT - (m.hipHeight ?? HIP_HEIGHT) - up,
+    },
+    footNear: foot(pose.footNear),
+    footFar: foot(pose.footFar),
+  };
+}
+
 function drawCutout(
   rig: CutoutRig,
   frame: CutoutFrame,
   { facing }: DrawOptions,
 ): CharacterDrawing {
-  const { pose } = frame;
+  const pose = fittedPose(rig, frame.pose);
   const { parts, limbs, colors } = rig;
   const part = (id: RigPartId, transform: Matrix, layer?: string): DrawNode => {
     const p = parts[id]!;
@@ -291,16 +313,35 @@ function drawCutout(
 
   // Points on the torso, moved with it.
   const t0 = parts.torso;
+  const torsoScale = rig.scales.torso ?? 1;
   const onTorso = (p: Pt) =>
-    add(pose.hip, rotate(sub(p, t0.pivot), pose.torsoAngle));
+    add(
+      pose.hip,
+      rotate(
+        {
+          x: (p.x - t0.pivot.x) * torsoScale,
+          y: (p.y - t0.pivot.y) * torsoScale,
+        },
+        pose.torsoAngle,
+      ),
+    );
   const neck = onTorso(rig.torso.neck);
 
   // Legs bend at the knee towards the front.
   const ankleHeight = rig.ankleHeight * rig.scales.foot;
-  const leg = (hipOnTorso: Pt, footAt: Pt, angle: number) => {
+  const leg = (
+    hipOnTorso: Pt,
+    footAt: Pt,
+    footAngle: number,
+    follow: number,
+  ) => {
     const hip = onTorso(hipOnTorso);
     const ankle = { x: footAt.x, y: footAt.y - ankleHeight };
     const c = hoseControl(hip, ankle, limbs.legLength, -1);
+    // How far the shin leans from straight down, positive with the ankle
+    // behind the knee.
+    const shin = endAngle(c, ankle) - Math.PI / 2;
+    const angle = footAngle + (shin - footAngle) * follow;
     return {
       hip,
       knee: curveMiddle(hip, c, ankle),
@@ -312,8 +353,18 @@ function drawCutout(
       ),
     };
   };
-  const nearLeg = leg(rig.torso.hipNear, pose.footNear, pose.footNearAngle);
-  const farLeg = leg(rig.torso.hipFar, pose.footFar, pose.footFarAngle);
+  const nearLeg = leg(
+    rig.torso.hipNear,
+    pose.footNear,
+    pose.footNearAngle,
+    pose.footNearFollow,
+  );
+  const farLeg = leg(
+    rig.torso.hipFar,
+    pose.footFar,
+    pose.footFarAngle,
+    pose.footFarFollow,
+  );
 
   // Arms bend at the elbow towards the back.
   const arm = (shoulderOnTorso: Pt, hand: Pt) => {
@@ -357,7 +408,7 @@ function drawCutout(
       pinned(
         a.wrist,
         a.tangent + offset + angle,
-        rig.scales.hand,
+        open ? (rig.scales.handOpen ?? rig.scales.hand) : rig.scales.hand,
         parts[id].pivot,
       ),
     );
@@ -401,7 +452,10 @@ function drawCutout(
     footFar: farLeg.foot,
     legNear: { nodes: nearLeg.limb },
     footNear: nearLeg.foot,
-    torso: piece('torso', pinned(pose.hip, pose.torsoAngle, 1, t0.pivot)),
+    torso: piece(
+      'torso',
+      pinned(pose.hip, pose.torsoAngle, torsoScale, t0.pivot),
+    ),
     head: layered(parts.head, (layer) => [
       {
         type: 'group',
@@ -468,7 +522,7 @@ function headNodes(
 
   nodes.push(...eyeLids(f, face.blink, colors));
 
-  if (!face.grin && rig.parts.mouthPatch) {
+  if (face.talking && rig.parts.mouthPatch) {
     // A closed mouth is the smile line alone; an open one is a filled shape
     // with the tongue inside and the outline around it.
     const open = face.open > 0.02;

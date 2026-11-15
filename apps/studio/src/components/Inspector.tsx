@@ -15,6 +15,7 @@ import {
 import { useRigNames } from '../rigNames.ts';
 import { DrawOrderPanel } from './DrawOrderPanel.tsx';
 import { ArrowIcon, TurnIcon } from './icons.tsx';
+import { TuningPanel } from './TuningPanel.tsx';
 
 export type SaveStatus =
   | { state: 'idle' }
@@ -50,7 +51,7 @@ export function Inspector(props: Props) {
   const { tr } = useI18n();
   const names = useRigNames();
   const [step, setStep] = useState<number>(1);
-  const [tab, setTab] = useState<'rig' | 'drawOrder'>('rig');
+  const [tab, setTab] = useState<'rig' | 'tuning' | 'drawOrder'>('rig');
   const found = findTarget(rig, target);
   const list = attachments(rig);
   const groups = [...new Set(list.map((a) => a.group))];
@@ -95,7 +96,7 @@ export function Inspector(props: Props) {
   return (
     <aside className="inspector" aria-label={tr('inspector')}>
       <div className="tabs" role="tablist">
-        {(['rig', 'drawOrder'] as const).map((id) => (
+        {(['rig', 'tuning', 'drawOrder'] as const).map((id) => (
           <button
             key={id}
             type="button"
@@ -108,6 +109,11 @@ export function Inspector(props: Props) {
         ))}
       </div>
 
+      {tab === 'tuning' && (
+        <div className="inspector-body">
+          <TuningPanel rig={rig} onRig={props.onRig} />
+        </div>
+      )}
       {tab === 'drawOrder' && (
         <div className="inspector-body">
           <DrawOrderPanel rig={rig} onRig={props.onRig} />

@@ -9,7 +9,7 @@ import {
   mix,
   smoothstep,
 } from '../math.ts';
-import { breath, standing } from './body.ts';
+import { breath, restingFace, standing } from './body.ts';
 
 const DURATION = 3.2;
 const START = 0.5;
@@ -18,8 +18,8 @@ const BLINKS = [2.85];
 
 /**
  * The wave: a small dip back, then the arm shoots up with an overshoot, the
- * hand opens and waves, and the arm comes down again. He grins as the arm goes
- * up and says hello while waving.
+ * hand opens and waves, and the arm comes down again. He says hello while
+ * waving.
  */
 export const wave: Clip<CutoutFrame> = {
   id: 'wave',
@@ -62,17 +62,15 @@ export const wave: Clip<CutoutFrame> = {
 };
 
 function faceAt(t: number): Face {
-  const grinStart = START + 0.15;
   const talkStart = START + 0.7;
   const talkEnd = END - 0.3;
   const blink = blinkAt(t, BLINKS);
-  if (t >= grinStart && t < talkStart) return { grin: true, open: 0, blink };
   if (t >= talkStart && t < talkEnd) {
     // Ease the talking in and out so the first and last frames are closed.
     const fade =
       smoothstep(talkStart, talkStart + 0.08, t) *
       (1 - smoothstep(talkEnd - 0.08, talkEnd, t));
-    return { grin: false, open: clamp01(talking(t) * fade), blink };
+    return { talking: true, open: clamp01(talking(t) * fade), blink };
   }
-  return { grin: false, open: 0, blink };
+  return restingFace(blink);
 }

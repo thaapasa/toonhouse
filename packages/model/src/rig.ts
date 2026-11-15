@@ -67,8 +67,18 @@ export interface CutoutRig extends RigBase {
     hipNear: Pt;
     hipFar: Pt;
   };
-  /** The pieces come from the sheet at different scales; these even them. */
-  scales: { head: number; hand: number; foot: number };
+  /**
+   * The pieces come from the sheet at different scales; these even them. The
+   * torso is 1 if not set, and its joints scale with it. `hand` is the relaxed
+   * hand, and the open hand has the same scale if `handOpen` is not set.
+   */
+  scales: {
+    head: number;
+    hand: number;
+    foot: number;
+    torso?: number;
+    handOpen?: number;
+  };
   /** Rotation of each hand piece against the end of the arm, in degrees. */
   hands: { relaxedAngle: number; openAngle: number };
   /** Height of the ankle above the sole, in foot pixels. */
@@ -106,6 +116,28 @@ export interface CutoutRig extends RigBase {
   farShade: number;
   shadow: { rx: number; ry: number };
   face: CutoutFace;
+  /** Fits the shared clips to the body of the character. */
+  motion?: CutoutMotion;
+}
+
+/**
+ * Changes that the renderer makes to every pose of the shared clips, which are
+ * made for the proportions of the boy. All lengths are in sheet pixels.
+ */
+export interface CutoutMotion {
+  /**
+   * How high the hips are above the ground when the character stands. The
+   * clips raise and lower the hips from this. If not set, the height that the
+   * clips are made for.
+   */
+  hipHeight?: number;
+  /** Moves the feet forward against the hips, or back if negative. */
+  feetOffset?: number;
+  /**
+   * Moves the whole character up, or down if negative, so that the soles touch
+   * the ground. The shadow stays on the ground.
+   */
+  groundOffset?: number;
 }
 
 /**

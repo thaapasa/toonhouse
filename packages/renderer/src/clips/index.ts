@@ -20,6 +20,7 @@ import { wave } from './wave.ts';
 
 export { backgroundClips } from './background/index.ts';
 export { BIRD_WALK_SPEED } from './bird/index.ts';
+export { HIP_HEIGHT } from './body.ts';
 export { RABBIT_HOP_SPEED } from './rabbit/index.ts';
 export { WALK_SPEED } from './walk.ts';
 

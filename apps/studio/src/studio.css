@@ -943,3 +943,51 @@ button:disabled {
   font-size: 10px;
   font-weight: 600;
 }
+
+.tune-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 64px 28px;
+  grid-template-areas:
+    'label label label'
+    'slider number reset';
+  align-items: center;
+  gap: 4px 6px;
+  padding: 8px 6px 0;
+}
+
+.tune-label {
+  grid-area: label;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.tune-row input[type='range'] {
+  grid-area: slider;
+  min-width: 0;
+  accent-color: var(--accent);
+}
+
+.tune-number {
+  grid-area: number;
+  height: 32px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 7px;
+  background: var(--field);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  padding: 0 6px;
+  min-width: 0;
+}
+
+.tune-reset {
+  grid-area: reset;
+  height: 32px;
+  border-radius: 7px;
+  background: var(--field);
+}
+
+.tune-reset:disabled {
+  opacity: 0.35;
+}

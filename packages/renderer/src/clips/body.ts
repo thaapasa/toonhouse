@@ -11,10 +11,12 @@ export interface FootPose {
   x: number;
   y: number;
   angle: number;
+  /** How much the foot turns with the shin, see `Pose.footNearFollow`. */
+  follow: number;
 }
 
-export const STAND_NEAR: FootPose = { x: 26, y: 0, angle: 0 };
-export const STAND_FAR: FootPose = { x: -22, y: 0, angle: 0 };
+export const STAND_NEAR: FootPose = { x: 26, y: 0, angle: 0, follow: 0 };
+export const STAND_FAR: FootPose = { x: -22, y: 0, angle: 0, follow: 0 };
 
 /** A hand hanging from the shoulder, swung forward by `a`. */
 export function hang(a: number, rest: number): Pt {
@@ -50,14 +52,20 @@ export function standing(lift = 0): Pose {
     footFar: { x: STAND_FAR.x, y: STAND_FAR.y },
     footNearAngle: STAND_NEAR.angle,
     footFarAngle: STAND_FAR.angle,
+    footNearFollow: STAND_NEAR.follow,
+    footFarFollow: STAND_FAR.follow,
   };
 }
 
+/** The face with the mouth that the head was traced with. */
 export const restingFace = (blink: number): Face => ({
-  grin: false,
+  talking: false,
   open: 0,
   blink,
 });
+
+/** How much a swinging foot turns with the shin at most, see `FootPose`. */
+const SWING_FOLLOW = 0.6;
 
 /**
  * One foot through a walk cycle with the given reach in front of and behind
@@ -75,7 +83,12 @@ export function footCycle(q: number, reach: number, lift: number): FootPose {
     const toeOff = deg(22) * smoothstep(0.72, 1, s);
     // Rolling onto the toes lifts the ankle.
     const roll = Math.sin(toeOff) * 70;
-    return { x: lerp(reach, -reach, s), y: -roll, angle: heelStrike + toeOff };
+    return {
+      x: lerp(reach, -reach, s),
+      y: -roll,
+      angle: heelStrike + toeOff,
+      follow: 0,
+    };
   }
   const s = (u - 0.5) / 0.5;
   return {
@@ -84,5 +97,10 @@ export function footCycle(q: number, reach: number, lift: number): FootPose {
       -Math.sin(Math.PI * s) * lift -
       Math.sin(deg(22)) * 70 * (1 - smoothstep(0, 0.25, s)),
     angle: lerp(deg(22), deg(-14), smoothstep(0.1, 0.9, s)),
+    // In the air the foot hangs from the shin and tips forward with it, but
+    // only partly, and only as fast as it rises, so that the toes stay off the
+    // ground. It turns back to its own angle before the heel strikes.
+    follow:
+      SWING_FOLLOW * smoothstep(0, 0.5, s) * (1 - smoothstep(0.5, 0.9, s)),
   };
 }

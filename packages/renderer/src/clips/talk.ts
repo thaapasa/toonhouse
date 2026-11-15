@@ -33,12 +33,14 @@ export const talk: Clip<CutoutFrame> = {
     const fade =
       smoothstep(TALK_START, TALK_START + 0.08, t) *
       (1 - smoothstep(TALK_END - 0.08, TALK_END, t));
+    // Before and after the words, the face rests.
+    const speaking = t >= TALK_START && t < TALK_END;
     return {
       kind: 'cutout',
       pose,
       face: {
-        grin: false,
-        open: clamp01(talking(t) * fade),
+        talking: speaking,
+        open: speaking ? clamp01(talking(t) * fade) : 0,
         blink: blinkAt(t, BLINKS),
       },
       travel: 0,

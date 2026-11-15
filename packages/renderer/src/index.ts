@@ -19,6 +19,7 @@ export {
   clipById,
   clipsFor,
   CUTOUT_CLIPS,
+  HIP_HEIGHT,
   PROP_CLIPS,
   RABBIT_CLIPS,
   RABBIT_HOP_SPEED,
@@ -33,7 +34,7 @@ export type {
   PathStyle,
   Skeleton,
 } from './draw.ts';
-export { drawCharacter, partBounds } from './draw.ts';
+export { drawCharacter, fittedPose, partBounds } from './draw.ts';
 export { IDENTITY, multiply } from './math.ts';
 export type { DrawEntry, FarGroup } from './order.ts';
 export { defaultDrawOrder, drawOrder } from './order.ts';

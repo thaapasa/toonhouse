@@ -118,6 +118,22 @@ describe.each([
 });
 
 describe('drawCharacter', () => {
+  it('draws the mouth patch only while the character talks', () => {
+    const talk = clipById('cutout', 'talk');
+    const drawn = (t: number) =>
+      parts(drawCharacter(rig, talk.frameAt(t), { facing: 1 }).node);
+    // Before the words, and between them with the mouth closed.
+    expect(drawn(0)).not.toContain('mouthPatch');
+    expect(drawn(1)).toContain('mouthPatch');
+    expect(drawn(2.9)).not.toContain('mouthPatch');
+    for (const clip of ['idle', 'walk'] as const) {
+      const frame = clipById('cutout', clip).frameAt(0.5);
+      expect(
+        parts(drawCharacter(rig, frame, { facing: 1 }).node),
+      ).not.toContain('mouthPatch');
+    }
+  });
+
   it('opens the hand for the wave', () => {
     const wave = clipById('cutout', 'wave');
     expect(
@@ -158,6 +174,80 @@ describe('drawCharacter', () => {
       expect(left[i]!.at.x).toBeCloseTo(-j.at.x, 6);
       expect(left[i]!.at.y).toBeCloseTo(j.at.y, 6);
     });
+  });
+});
+
+describe('motion settings', () => {
+  // The boy without the motion settings of his rig file.
+  const plain: CutoutRig = { ...rig };
+  delete plain.motion;
+  const frame = clipById('cutout', 'walk').frameAt(0.2);
+  const jointsOf = (r: CutoutRig) =>
+    Object.fromEntries(
+      drawCharacter(r, frame, { facing: 1 }).skeleton.joints.map((j) => [
+        j.name,
+        j.at,
+      ]),
+    );
+  const base = jointsOf(plain);
+
+  it('changes nothing with the defaults', () => {
+    expect(jointsOf({ ...plain, motion: {} })).toEqual(base);
+    expect(
+      jointsOf({ ...plain, scales: { ...plain.scales, torso: 1 } }),
+    ).toEqual(base);
+  });
+
+  it('lowers the hips but keeps the feet', () => {
+    const j = jointsOf({ ...plain, motion: { hipHeight: 236 } });
+    expect(j.hip!.y).toBeCloseTo(base.hip!.y + 10, 6);
+    expect(j.ankleNear).toEqual(base.ankleNear);
+  });
+
+  it('moves the feet against the hips', () => {
+    const j = jointsOf({ ...plain, motion: { feetOffset: -12 } });
+    expect(j.ankleNear!.x).toBeCloseTo(base.ankleNear!.x - 12, 6);
+    expect(j.hip).toEqual(base.hip);
+  });
+
+  it('moves the whole character up', () => {
+    const j = jointsOf({ ...plain, motion: { groundOffset: 5 } });
+    for (const [name, at] of Object.entries(base)) {
+      expect(j[name]!.x).toBeCloseTo(at.x, 6);
+      expect(j[name]!.y).toBeCloseTo(at.y - 5, 6);
+    }
+  });
+
+  it('scales the open hand on its own', () => {
+    const wave = clipById('cutout', 'wave').frameAt(1.5);
+    const handScale = (r: CutoutRig) => {
+      const find = (n: DrawNode): DrawNode | undefined =>
+        n.type === 'part' && n.part === 'handOpen'
+          ? n
+          : n.type === 'group'
+            ? n.children.map(find).find(Boolean)
+            : undefined;
+      const hand = find(drawCharacter(r, wave, { facing: 1 }).node);
+      if (hand?.type !== 'part') throw new Error('no open hand');
+      return Math.hypot(hand.transform[0], hand.transform[1]);
+    };
+    expect(handScale(plain)).toBeCloseTo(plain.scales.hand, 6);
+    expect(
+      handScale({ ...plain, scales: { ...plain.scales, handOpen: 0.4 } }),
+    ).toBeCloseTo(0.4, 6);
+  });
+
+  it('scales the torso and its joints around the hips', () => {
+    const j = jointsOf({ ...plain, scales: { ...plain.scales, torso: 0.5 } });
+    expect(j.hip).toEqual(base.hip);
+    expect(j.neck!.x - j.hip!.x).toBeCloseTo(
+      (base.neck!.x - base.hip!.x) / 2,
+      6,
+    );
+    expect(j.neck!.y - j.hip!.y).toBeCloseTo(
+      (base.neck!.y - base.hip!.y) / 2,
+      6,
+    );
   });
 });
 
@@ -382,7 +472,6 @@ describe('draw order', () => {
       'torso',
       'foot',
       'head',
-      'mouthPatch',
       'hand',
     ]);
   });
@@ -412,7 +501,6 @@ describe('draw order', () => {
         'torso',
         'foot',
         'head',
-        'mouthPatch',
         'head.backHair',
         'head.frontHair',
         'hand',

@@ -66,6 +66,8 @@ export const walk: Clip<CutoutFrame> = {
         footFar: { x: far.x, y: far.y },
         footNearAngle: near.angle,
         footFarAngle: far.angle,
+        footNearFollow: near.follow,
+        footFarFollow: far.follow,
       },
       face: restingFace(blinkAt(t, BLINKS)),
       travel: WALK_SPEED * t,

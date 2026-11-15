@@ -161,6 +161,14 @@ character:
 - `armWidth`, `legWidth` and `outlineWidth`: match the outline width of the
   traced pieces.
 
+When the character is in the library, tune it in the Fit tab of the character
+studio while a clip plays. The tab sets the size of each part, with
+`scales.torso` for the torso and `scales.handOpen` for the open hand, the
+length, the width and the outline of the limbs, and the `motion` settings of the
+rig: the hip height, the feet offset against the hips, and the ground offset
+that moves the whole character up or down. Set the ground offset last, so that
+the soles touch the ground.
+
 ### 5. Prepare the face
 
 The face code is in `prototypes/src/2d/face.ts`. Its coordinates are in the

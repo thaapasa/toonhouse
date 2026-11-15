@@ -22,13 +22,25 @@ export interface Pose {
   footFar: Pt;
   footNearAngle: number;
   footFarAngle: number;
+  /**
+   * How much each foot turns with the shin, from 0 to 1. At 0 the foot keeps
+   * its angle, as a planted foot does. At 1 the foot turns as much as the shin
+   * leans from straight down, so that the ankle doesn't twist when the leg
+   * swings.
+   */
+  footNearFollow: number;
+  footFarFollow: number;
 }
 
 /** The expression at one moment. */
 export interface Face {
-  /** Show the mouth that the head was traced with, instead of a drawn one. */
-  grin: boolean;
-  /** 0 is a closed smile, 1 a wide open mouth. */
+  /**
+   * Draw the mouth that moves, over the mouth patch, for the time that the
+   * character speaks, also when the mouth is closed between words. Otherwise
+   * the face shows the mouth that the head was traced with.
+   */
+  talking: boolean;
+  /** While talking, 0 is a closed smile and 1 a wide open mouth. */
   open: number;
   /** 0 is an open eye, 1 a closed one. */
   blink: number;

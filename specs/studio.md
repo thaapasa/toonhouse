@@ -12,6 +12,21 @@ asset files in the repo. See [Characters](characters.md).
       and the front hair of the head. The layers move with the part.
 - [x] Developer can change the draw order of a rig: the order of all its layers
       and its drawn limbs, from the back to the front.
+- [ ] Developer can tune how the shared clips fit a character, see the effect
+      while a clip plays, and save it to the rig:
+  - [x] The size of each part, such as the head, the torso or the feet. The
+        relaxed hand and the open hand have their own sizes.
+  - [x] The leg length and the arm length, which set how much the knees and the
+        elbows bend.
+  - [x] The width of the rubber-hose limbs and of their outline, to match the
+        style of the traced parts.
+  - [x] The hip height: how high the clips hold the hips above the feet. It
+        scales the leg length with it, so that the knees keep their bend.
+  - [x] An offset that moves the feet forward or back against the hips.
+  - [x] An offset that moves the whole character up or down, so that the soles
+        touch the ground.
+  - [ ] The stride and the step lift. A longer stride also makes the character
+        walk faster in a scene, so that the feet don't slide.
 - [ ] Developer can make a background from layers, set the depth of each layer
       and pick the ground layer.
 - [ ] Developer can set the start point, the perspective and the walking area of
