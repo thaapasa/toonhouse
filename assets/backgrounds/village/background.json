@@ -7,7 +7,11 @@
     { "id": "houses", "svg": "houses.svg", "depth": 0.45 },
     { "id": "ground", "svg": "ground.svg", "depth": 1 }
   ],
-  "ground": { "layer": "ground", "y": 920, "actorScale": 0.4 },
+  "ground": {
+    "layer": "ground",
+    "start": { "x": 1024, "y": 920 },
+    "actorScale": 0.4
+  },
   "parts": {
     "sun": {
       "svg": "../shared/sun.svg",

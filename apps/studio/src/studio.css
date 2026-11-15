@@ -873,7 +873,7 @@ button:disabled {
   cursor: grabbing;
 }
 
-.background-ground-line {
+.background-horizon {
   stroke: var(--accent);
   pointer-events: none;
 }

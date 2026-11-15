@@ -8,7 +8,11 @@
     { "id": "ground", "svg": "ground.svg", "depth": 1 },
     { "id": "grass", "svg": "grass.svg", "depth": 1 }
   ],
-  "ground": { "layer": "ground", "y": 900, "actorScale": 0.32 },
+  "ground": {
+    "layer": "ground",
+    "start": { "x": 960, "y": 900 },
+    "actorScale": 0.32
+  },
   "parts": {
     "sun": {
       "svg": "sun.svg",

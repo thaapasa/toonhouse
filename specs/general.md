@@ -18,6 +18,22 @@ deploy.
 - [x] If the check fails, for example when the device is offline, the app keeps
       running and checks again the next time.
 
+## Saved data
+
+The format of the saved cartoons changes while the app is being developed, and
+the cartoons that users have already made must keep working.
+
+- [ ] Cartoons saved with an older version of the app open in the latest
+      version.
+- [ ] If the server can't upgrade a cartoon to the latest format, the cartoon
+      list shows it as broken, and the user can't open it. The other cartoons
+      work as before.
+- [ ] If an old version of the web app tries to save a cartoon, the server
+      refuses the save, and the web app loads the new version. The edits that
+      were not saved can be lost.
+- [ ] If an old version of the export client downloads a cartoon, it tells the
+      user to update the export client.
+
 ## Open questions
 
 - Should the UI work for users who can't read yet? If so, it needs mostly icons.

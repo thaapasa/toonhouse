@@ -22,8 +22,14 @@ for something else or too vague.
 - **Parallax**: the far layers of a background moving less than the near ones
   when the camera moves.
 - **Ground layer**: the layer of the background that the other actors stand on.
-- **Ground line**: the line on the ground layer where the ground points of the
-  actors are. Not: standing line, horizon.
+  Each actor has its own place on it.
+- **Start point**: the place on the ground layer where an actor goes when the
+  user adds it without picking a place.
+- **Perspective**: a setting of a background that makes the actors smaller as
+  they go up the ground layer, toward the horizon. A background without it has
+  actors of the same size everywhere.
+- **Horizon**: the height on the ground layer where an actor would have no size
+  at all, in a background with a perspective.
 - **Camera**: the view of the scene that the cartoon shows. By default it shows
   the whole background, and it can zoom and pan inside it. It is the view of the
   ground layer.

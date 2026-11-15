@@ -1,4 +1,4 @@
-import type { BackgroundFrame } from '@toonhouse/model';
+import type { BackgroundFrame, Pt } from '@toonhouse/model';
 import {
   type Camera,
   clampCamera,
@@ -48,11 +48,13 @@ interface Props {
   frame: BackgroundFrame;
   camera: Camera;
   onCamera(camera: Camera): void;
-  groundLine: boolean;
-  onGroundLine(on: boolean): void;
+  horizon: boolean;
+  onHorizon(on: boolean): void;
   guests: readonly GuestOption[];
   guest: Guest | null;
   onGuest(id: string | null): void;
+  /** Moves the ground point of the guest, in the pixels of the background. */
+  onGuestMove(at: Pt): void;
 }
 
 interface Pointer {
@@ -62,10 +64,11 @@ interface Pointer {
 
 /**
  * The background as the camera sees it, filling the stage. Drag to pan and
- * pinch to zoom, or use the buttons and the slider.
+ * pinch to zoom, or use the buttons and the slider. Drag the guest to move
+ * it on the ground layer.
  */
 export function BackgroundView(props: Props) {
-  const { asset, frame, groundLine, guest } = props;
+  const { asset, frame, horizon, guest } = props;
   const bg = asset.background;
   const { tr } = useI18n();
   const [ref, { width, height }] = useSize();
@@ -77,6 +80,9 @@ export function BackgroundView(props: Props) {
     cameraRef.current = camera;
   });
   const pointers = useRef(new Map<number, Pointer>());
+  // The pointer that drags the guest, and where the guest is now, which can
+  // be ahead of the latest render.
+  const dragging = useRef<{ pointer: number; at: Pt } | null>(null);
 
   // Screen pixels for one pixel of the picture, which has the frame size.
   const k = Math.min(width / bg.width, height / bg.height) || 1;
@@ -119,10 +125,34 @@ export function BackgroundView(props: Props) {
 
   const down = (e: PointerEvent<SVGSVGElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId);
+    const onGuest =
+      e.target instanceof Element && e.target.closest('[data-actor]');
+    if (guest && onGuest && pointers.current.size === 0 && !dragging.current) {
+      dragging.current = {
+        pointer: e.pointerId,
+        at: { x: guest.actor.x, y: guest.actor.y },
+      };
+    }
     pointers.current.set(e.pointerId, local(e));
   };
   const move = (e: PointerEvent<SVGSVGElement>) => {
     const map = pointers.current;
+    const drag = dragging.current;
+    if (drag?.pointer === e.pointerId) {
+      const before = map.get(e.pointerId);
+      if (!before) return;
+      const now = local(e);
+      // Screen pixels for one pixel of the ground layer.
+      const s = k * layerTransform(bg, cameraRef.current, groundDepth(bg))[0];
+      drag.at = {
+        x: drag.at.x + (now.x - before.x) / s,
+        y: drag.at.y + (now.y - before.y) / s,
+      };
+      props.onGuestMove(drag.at);
+      map.set(e.pointerId, now);
+      return;
+    }
+    if (drag) return;
     const before = map.get(e.pointerId);
     if (!before) return;
     const now = local(e);
@@ -154,6 +184,7 @@ export function BackgroundView(props: Props) {
   };
   const up = (e: PointerEvent<SVGSVGElement>) => {
     pointers.current.delete(e.pointerId);
+    if (dragging.current?.pointer === e.pointerId) dragging.current = null;
   };
 
   // A wheel or a trackpad pinch zooms around the pointer. React adds wheel
@@ -170,9 +201,10 @@ export function BackgroundView(props: Props) {
     return () => el.removeEventListener('wheel', onWheel);
   }, [width]);
 
-  // The ground line as it shows on the ground layer.
+  // The horizon of the perspective as it shows on the ground layer.
+  const { perspective } = bg.ground;
   const g = layerTransform(bg, camera, groundDepth(bg));
-  const lineY = g[3] * bg.ground.y + g[5];
+  const lineY = perspective ? g[3] * perspective.horizon + g[5] : 0;
   const px = 1 / k;
 
   return (
@@ -182,15 +214,17 @@ export function BackgroundView(props: Props) {
         role="toolbar"
         aria-label={tr('viewport')}
       >
-        <button
-          type="button"
-          aria-pressed={groundLine}
-          title={tr('groundLineHint')}
-          onClick={() => props.onGroundLine(!groundLine)}
-        >
-          <GroundIcon />
-          {tr('groundLine')}
-        </button>
+        {perspective && (
+          <button
+            type="button"
+            aria-pressed={horizon}
+            title={tr('horizonHint')}
+            onClick={() => props.onHorizon(!horizon)}
+          >
+            <GroundIcon />
+            {tr('horizon')}
+          </button>
+        )}
         <label className="toolbar-select" title={tr('guestHint')}>
           <span>{tr('guest')}</span>
           <select
@@ -275,9 +309,9 @@ export function BackgroundView(props: Props) {
           </clipPath>
           <g clipPath={`url(#${prefix}-frame)`}>
             <Drawing node={node} prefix={prefix} />
-            {groundLine && (
+            {perspective && horizon && (
               <line
-                className="background-ground-line"
+                className="background-horizon"
                 x1={0}
                 x2={bg.width}
                 y1={lineY}

@@ -42,13 +42,33 @@ export interface BackgroundGround {
    * since the camera is the view of the ground layer.
    */
   layer: string;
-  /** The ground line: the y of the ground points of the actors. */
-  y: number;
+  /**
+   * Where the ground point of an actor goes when the user adds it without
+   * picking a place. The actors can stand anywhere on the ground layer.
+   */
+  start: Pt;
   /**
    * The size of the actors on this background: the frame pixels for one
-   * pixel of a rig, for an actor of the default size.
+   * pixel of a rig, for an actor of the default size. With a perspective,
+   * this is the size at the y of the perspective.
    */
   actorScale: number;
+  /**
+   * Makes the actors smaller as they go further from the camera, toward the
+   * horizon. Without it, the actors have the same size everywhere.
+   */
+  perspective?: GroundPerspective;
+}
+
+/**
+ * The size of an actor grows evenly with the distance of its ground point
+ * below the horizon, as on flat ground.
+ */
+export interface GroundPerspective {
+  /** The y of the horizon, where an actor would have no size at all. */
+  horizon: number;
+  /** The y where an actor has the size `actorScale`. Below the horizon. */
+  y: number;
 }
 
 /** A drawing on a layer of a background that clips can move. */

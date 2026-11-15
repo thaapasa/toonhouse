@@ -9,8 +9,23 @@ another action for that character.
 - [ ] User can start an action for a character at the current point, such as
       walking somewhere, waving or jumping.
 - [ ] An action goes on until the next action of the same character.
-- [ ] User can make a character walk to a point or along a path. The feet don't
-      slide on the ground.
+- [ ] User can make a character walk to a point, or along a path through several
+      points. When it gets to the last point, it stands still until its next
+      action. If the next action starts before it gets there, it stops walking
+      at that time.
+- [ ] User can make a character walk in a direction. It walks until its next
+      action. If it walks past the edge of the background, it stops when it is a
+      bit outside the edge, so that the camera can't see it.
+- [ ] A character can walk in any direction on the ground layer, also toward the
+      camera and away from it.
+- [ ] User can pick the clip of a walk, such as a walk or a run, and set the
+      speed of the walk to any number. The clip plays faster or slower to match
+      the speed, so the feet don't slide on the ground.
+- [ ] If the user changes the speed of a walk, only the walk gets faster or
+      slower. The other actions stay where they are on the timeline.
+- [ ] When the user picks the points of a walk, the stage shows a box around the
+      actor and a box at each point, with a line from the actor through the
+      points. The user moves a point by dragging its box.
 - [ ] User can add a speech bubble to a character for a time.
 - [ ] User can add a sound at the current point.
 - [ ] User can play the cartoon from the current point and stop it to add the

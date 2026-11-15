@@ -45,6 +45,7 @@ function render(node: DrawNode, prefix: string, key: string): ReactNode {
       return (
         <g
           key={key}
+          data-actor={node.actor}
           transform={matrix(node.transform)}
           style={
             node.shade === undefined

@@ -59,7 +59,9 @@ export function App() {
   const [clipId, setClipId] = useState<ClipId>('walk');
   const [backgroundClipId, setBackgroundClipId] = useState<ClipId>('day');
   const [camera, setCamera] = useState<Camera | null>(null);
-  const [groundLine, setGroundLine] = useState(true);
+  const [horizon, setHorizon] = useState(true);
+  // Where the developer has dragged the guest on the background.
+  const [guestAt, setGuestAt] = useState<Pt | null>(null);
   const [guestId, setGuestId] = useState<string | null>(null);
   const [loop, setLoop] = useState(true);
   const [speed, setSpeed] = useState(1);
@@ -117,7 +119,10 @@ export function App() {
   };
   const pick = (s: Selection) => {
     if (s.type === 'background') {
-      if (s.id !== backgroundId) setCamera(null);
+      if (s.id !== backgroundId) {
+        setCamera(null);
+        setGuestAt(null);
+      }
       setBackgroundId(s.id);
     } else {
       setBackgroundId(null);
@@ -139,7 +144,7 @@ export function App() {
       actor: {
         id: guestAsset.id,
         node: drawCharacter(guestRig, gFrame, { facing: view.facing }).node,
-        x: background.background.width / 2,
+        ...(guestAt ?? background.background.ground.start),
       },
       parts: guestAsset.parts,
     };
@@ -292,8 +297,9 @@ export function App() {
               frame={(bgClip ?? BACKGROUND_CLIPS[0]!).frameAt(playback.t)}
               camera={cam}
               onCamera={setCamera}
-              groundLine={groundLine}
-              onGroundLine={setGroundLine}
+              horizon={horizon}
+              onHorizon={setHorizon}
+              onGuestMove={setGuestAt}
               guests={RIGS.map((c) => ({ id: c.id, label: rigName(c) }))}
               guest={guest}
               onGuest={setGuestId}

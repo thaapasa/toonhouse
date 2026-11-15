@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import testHills from '../../../assets/fixtures/backgrounds/test-hills/background.json';
 import {
+  actorScaleAt,
   arcPoint,
   clampCamera,
   drawScene,
@@ -184,7 +185,7 @@ describe('drawScene', () => {
 
   it('draws the layers from far to near with the parts and actors on them', () => {
     const node = drawScene(bg, frame, wholeBackground(bg), [
-      { id: 'boy', node: actor, x: 500 },
+      { id: 'boy', node: actor, x: 500, y: 900 },
     ]);
     expect(order(node)).toEqual([
       'sky',
@@ -199,14 +200,58 @@ describe('drawScene', () => {
     ]);
   });
 
-  it('stands the actors on the ground line, at the size of the background', () => {
+  /** The actors on the ground layer, in the order that they are drawn. */
+  function placed(node: DrawNode, b = bg) {
+    const i = b.layers.findIndex((l) => l.id === b.ground.layer);
+    const ground = node.type === 'group' ? node.children[i] : undefined;
+    if (ground?.type !== 'group') return [];
+    return ground.children.flatMap((c) =>
+      c.type === 'group' && c.actor ? [{ id: c.actor, m: c.transform }] : [],
+    );
+  }
+
+  it('stands each actor at its own point, at the size of the background', () => {
     const node = drawScene(bg, frame, wholeBackground(bg), [
-      { id: 'boy', node: actor, x: 500, scale: 2 },
+      { id: 'boy', node: actor, x: 500, y: 700, scale: 2 },
     ]);
-    const ground = node.type === 'group' ? node.children[3] : undefined;
-    const placed = ground?.type === 'group' ? ground.children[1] : undefined;
-    expect(placed?.type === 'group' && placed.transform).toEqual([
-      0.64, 0, 0, 0.64, 500, 900,
+    expect(placed(node)[0]?.m).toEqual([0.64, 0, 0, 0.64, 500, 700]);
+  });
+
+  it('draws the actors nearer to the bottom in front', () => {
+    const node = drawScene(bg, frame, wholeBackground(bg), [
+      { id: 'near', node: actor, x: 500, y: 1000 },
+      { id: 'far', node: actor, x: 500, y: 600 },
+      { id: 'alsoNear', node: actor, x: 800, y: 1000 },
     ]);
+    expect(placed(node).map((a) => a.id)).toEqual(['far', 'near', 'alsoNear']);
+  });
+
+  describe('perspective', () => {
+    const deep: Background = {
+      ...bg,
+      ground: { ...bg.ground, perspective: { horizon: 500, y: 900 } },
+    };
+
+    it('makes the actors smaller toward the horizon', () => {
+      expect(actorScaleAt(deep, 900)).toBeCloseTo(0.32);
+      expect(actorScaleAt(deep, 700)).toBeCloseTo(0.16);
+      expect(actorScaleAt(deep, 1100)).toBeCloseTo(0.48);
+    });
+
+    it('keeps a tenth of the size above the horizon', () => {
+      expect(actorScaleAt(deep, 300)).toBeCloseTo(0.032);
+    });
+
+    it('keeps the size of an actor with a fixed size', () => {
+      expect(actorScaleAt(deep, 700, true)).toBe(0.32);
+      const node = drawScene(deep, frame, wholeBackground(deep), [
+        { id: 'boy', node: actor, x: 500, y: 700, fixedSize: true },
+      ]);
+      expect(placed(node, deep)[0]?.m).toEqual([0.32, 0, 0, 0.32, 500, 700]);
+    });
+
+    it('has the same size everywhere without a perspective', () => {
+      expect(actorScaleAt(bg, 100)).toBe(0.32);
+    });
   });
 });

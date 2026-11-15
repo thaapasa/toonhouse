@@ -26,12 +26,18 @@ three levels, and each level starts from the one above it:
 - [ ] User can add a character or a prop from the library straight to a scene,
       without a cast member. Then the actor starts from the defaults of the
       library and has only its scene overrides.
-- [ ] User can remove a cast member.
+- [ ] User can remove a cast member. If actors use it, the app first shows how
+      many actors use it and asks the user to confirm.
+- [ ] If the user removes a cast member that actors use, the actors stay in
+      their scenes as actors without a cast member, and they look the same as
+      before. The settings of the cast member become overrides of each actor,
+      together with the overrides that the actor already had.
+- [ ] User can make a cast member from an actor without a cast member and give
+      it a name. The settings of the actor become the settings of the new cast
+      member, and the actor uses the new cast member with no overrides. The
+      other actors of the same character or prop don't change.
 
 ## Open questions
 
 - Which settings beyond colors and size, such as the size of the head?
 - Besides the color presets, can the user pick any color with a color picker?
-- If the user removes a cast member that actors still use, are those actors
-  removed, or do they become actors without a cast member?
-- Can the user turn an actor without a cast member into a cast member later?

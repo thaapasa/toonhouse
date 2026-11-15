@@ -1,7 +1,9 @@
 # Characters
 
 Characters and props come from a ready-made library. A character is made of
-parts, such as the head, the torso and the arms, joined at pivot points.
+parts, such as the head, the torso and the arms, joined at pivot points. Users
+can't make their own characters or props. Developers add them to the library
+with the [character studio](studio.md).
 
 - [ ] User can pick a character or a prop from the library.
 - [ ] A character has clips, such as standing, walking, waving and jumping.
@@ -15,7 +17,3 @@ parts, such as the head, the torso and the arms, joined at pivot points.
       reaches behind the back.
 - [ ] A character can face left or right.
 - [ ] A character's mouth moves while it talks.
-
-## Open questions
-
-- Can users turn their own drawings into characters?

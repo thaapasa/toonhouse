@@ -129,11 +129,20 @@ and its SVG files. The frame of a background is 16:9, in its own pixels.
   layer is an SVG of the whole frame with a depth from 0 to 1. A layer at depth
   0, such as the sky, is infinitely far away, and the ground layer is at
   depth 1.
-- The **ground layer** is the layer that the actors stand on. The background
-  sets the ground line, the y of the ground points of the actors, and the size
-  of the actors, as frame pixels for one pixel of a rig. The renderer draws the
-  actors right after the ground layer, so the layers after it, such as grass at
-  the bottom edge, are in front of them.
+- The **ground layer** is the layer that the actors stand on. Each actor has its
+  own place on it, so actors can stand nearer to the camera or further from it.
+  The background sets the size of the actors, as frame pixels for one pixel of a
+  rig. The renderer draws the actors right after the ground layer, so the layers
+  after it, such as grass at the bottom edge, are in front of them. The renderer
+  draws the actors from the top of the frame to the bottom, so that the nearer
+  actors are in front. The background also sets the start point, where an actor
+  goes if the user doesn't pick a place.
+- A background can have a **perspective**: the y of the horizon, and the y where
+  an actor has the size of the background. The size of an actor grows evenly
+  with its distance below the horizon, as on flat ground. Above the horizon, an
+  actor keeps a tenth of its size, so that the user can still see and select it.
+  An actor with a fixed size ignores the perspective. The user gives an actor a
+  fixed size by turning off "follow the background".
 - The **parts** of a background are drawings on a layer that clips move, such as
   the sun and the clouds. A part moves with its layer when the camera moves.
   Parts that several backgrounds use, such as the sun, can come from
@@ -184,8 +193,7 @@ The graphics are generated with AI and traced to SVG, as described in
 built-in characters, props, clips and backgrounds live in `assets/` and are
 committed to the repo. The test art in `assets/fixtures/`, a background and two
 props made of simple shapes, is not part of the library. Only the tests use it.
-The server stores the cartoons that users make. The server cleans uploaded SVG
-files of scripts and external links before it stores them.
+The server stores the cartoons that users make.
 
 ## Server
 
@@ -196,6 +204,32 @@ The migrations are numbered `.sql` files in `apps/server/migrations`, and the
 server applies the new ones at startup. The server follows the server of the
 [cookbook](https://github.com/thaapasa/cookbook), so that the two work the same
 way.
+
+### Cartoon format versions
+
+Each saved cartoon has the version number of its data format. When the format
+changes, the version goes up by one, and `packages/model` gets a converter from
+the previous version to the new one. The converters are pure functions, and they
+run in a chain, so a cartoon at version 1 goes through every converter up to the
+latest version. The tests keep a saved cartoon of each old version and check
+that it upgrades to the latest one.
+
+A change to the library can also need a new version. If a character, a prop, a
+clip or a background is renamed, removed or changes its structure, such as the
+bones of a rig, the converter updates the cartoons that refer to it.
+
+At startup, the server upgrades every cartoon that has an older version and
+saves the result. If a converter fails on a cartoon, the server marks that
+cartoon as broken and goes on with the startup. The web app can't open a broken
+cartoon, so that the developer can fix it by hand. Because of this, the server
+reads and sends only cartoons in the latest format.
+
+Every save from the web app includes the version that the web app knows. If the
+version is older than the latest, the server refuses the save, and the web app
+loads the new version. The unsaved edits can be lost, which is rare enough to
+accept: the web app checks for a new version each time it comes back to the
+foreground. The export client sends its version too, and the server tells an old
+export client to update.
 
 The web app calls the API under `/api/app`. The server serves the build of the
 web app from `apps/web/dist`, and every other path gets its `index.html`.

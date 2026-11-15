@@ -160,17 +160,46 @@ export interface SceneActor {
   id: string;
   /** The drawing of the actor, with its ground point at the origin. */
   node: DrawNode;
-  /** Where the ground point is on the ground line, in frame pixels. */
+  /** Where the ground point is on the ground layer, in frame pixels. */
   x: number;
+  y: number;
   /** The size of the actor against the default size. 1 if not set. */
   scale?: number;
+  /**
+   * If true, the actor keeps its size at any height, even if the background
+   * has a perspective.
+   */
+  fixedSize?: boolean;
+}
+
+/**
+ * An actor above the horizon would have no size, so that the user could
+ * no longer see or select it. It keeps this part of its size instead.
+ */
+const MIN_PERSPECTIVE = 0.1;
+
+/**
+ * The frame pixels for one pixel of a rig, for an actor of the default size
+ * whose ground point is at `y`.
+ */
+export function actorScaleAt(
+  bg: Background,
+  y: number,
+  fixedSize = false,
+): number {
+  const { actorScale, perspective } = bg.ground;
+  if (!perspective || fixedSize) return actorScale;
+  const f = (y - perspective.horizon) / (perspective.y - perspective.horizon);
+  return actorScale * Math.max(f, MIN_PERSPECTIVE);
 }
 
 /**
  * The background and the actors as the camera sees them, in the pixels of
  * the picture, which has the size of the frame. The actors stand on the
- * ground line of the ground layer and are drawn right after it, so the
- * layers after the ground layer are in front of them.
+ * ground layer and are drawn right after it, so the layers after the ground
+ * layer are in front of them. The actors are drawn from the top of the frame
+ * to the bottom, so that an actor nearer to the camera is in front of one
+ * further away. Actors at the same y keep their order.
  */
 export function drawScene(
   bg: Background,
@@ -205,13 +234,14 @@ export function drawScene(
       });
     }
     if (layer.id === ground.layer) {
-      for (const a of actors) {
+      const byDepth = [...actors].sort((a, b) => a.y - b.y);
+      for (const a of byDepth) {
         nodes.push({
           type: 'group',
           actor: a.id,
           transform: multiply(
-            translation(a.x, ground.y),
-            scaling(ground.actorScale * (a.scale ?? 1)),
+            translation(a.x, a.y),
+            scaling(actorScaleAt(bg, a.y, a.fixedSize) * (a.scale ?? 1)),
           ),
           children: [a.node],
         });

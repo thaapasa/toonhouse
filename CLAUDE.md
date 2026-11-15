@@ -53,7 +53,14 @@ port as the default.
   scene at time `t` must depend only on the scene data and `t`.
 - Every UI text goes through the translation files, in Finnish and English.
   Don't write UI text in the components.
-- Design for touch first. Every control must work with a finger on an iPad.
+- Design the editor and the player for touch first. Every control in them must
+  work with a finger on an iPad. The character studio needs to work only with a
+  mouse.
+- Keep the library assets stable, because saved cartoons refer to them. If you
+  must rename, remove or restructure a character, a prop, a clip or a
+  background, add a new version of the cartoon format and a converter that
+  updates the saved cartoons to match. See "Cartoon format versions" in
+  [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Specs
 

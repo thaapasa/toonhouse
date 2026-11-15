@@ -42,10 +42,18 @@ export function BackgroundInspector({ asset, camera }: Props) {
             </dd>
             <dt>{tr('groundLayer')}</dt>
             <dd>{names.layer(bg.ground.layer)}</dd>
-            <dt>{tr('groundLine')}</dt>
-            <dd>y = {bg.ground.y}</dd>
+            <dt>{tr('startPoint')}</dt>
+            <dd>
+              x = {bg.ground.start.x}, y = {bg.ground.start.y}
+            </dd>
             <dt>{tr('actorScale')}</dt>
             <dd>{bg.ground.actorScale}</dd>
+            <dt>{tr('perspective')}</dt>
+            <dd>
+              {bg.ground.perspective
+                ? tr('perspectiveOf', { ...bg.ground.perspective })
+                : tr('perspectiveNone')}
+            </dd>
           </dl>
         </section>
 

@@ -1,5 +1,6 @@
 export type { Camera, SceneActor } from './background.ts';
 export {
+  actorScaleAt,
   arcPoint,
   clampCamera,
   drawScene,
