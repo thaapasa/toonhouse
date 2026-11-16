@@ -193,6 +193,13 @@ button:disabled {
   padding-left: 14px;
 }
 
+/* The button that removes something, such as in a dialog that asks the user
+   to confirm a removal. */
+.button.danger {
+  background: var(--danger);
+  color: var(--on-accent);
+}
+
 .button.large {
   min-height: 48px;
   font-size: 15px;
@@ -619,6 +626,10 @@ button:disabled {
   flex-direction: column;
   background: var(--panel);
   border-top: 1px solid var(--line);
+  /* A drag on the timeline must not select the texts, such as the times on
+     the ruler. */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .transport {

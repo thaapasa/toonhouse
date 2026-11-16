@@ -6,6 +6,7 @@ import { type PointerEvent, useRef } from 'react';
 
 import { CLIP_COLORS } from './clipIcons.tsx';
 import { useNames } from './names.ts';
+import { released } from './pointer.ts';
 import {
   progressPoints,
   snapTenth,
@@ -53,6 +54,7 @@ export function ActionBlocks(props: {
   const move = (e: PointerEvent<HTMLButtonElement>) => {
     const d = drag.current;
     if (d?.pointer !== e.pointerId) return;
+    if (released(e)) return up(e);
     const dx = e.clientX - d.x;
     if (!d.moved && Math.abs(dx) < TAP_SLOP) return;
     const t = snapTenth(d.t + dx / props.pps);
@@ -98,6 +100,7 @@ export function ActionBlocks(props: {
         onPointerMove={move}
         onPointerUp={up}
         onPointerCancel={up}
+        onLostPointerCapture={up}
         onClick={(e) => e.stopPropagation()}
       >
         {names.clip(props.row.kind, a.clip)}

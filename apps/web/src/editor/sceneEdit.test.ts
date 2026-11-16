@@ -1,4 +1,9 @@
-import type { Action, Actor, Scene } from '@toonhouse/model';
+import {
+  type Action,
+  type Actor,
+  CARTOON_VERSION,
+  type Scene,
+} from '@toonhouse/model';
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -6,6 +11,8 @@ import {
   moveActor,
   moveBlock,
   moveStart,
+  newScene,
+  removeScene,
   setLength,
   startAction,
   stepSize,
@@ -109,5 +116,27 @@ describe('actors', () => {
     expect(stepSize(1, -1)).toBe(0.7);
     expect(stepSize(0.8, -1)).toBe(0.7);
     expect(stepSize(4, 1)).toBe(4);
+  });
+});
+
+describe('scenes', () => {
+  it('removes a scene and keeps the others in order', () => {
+    const [a, b, c] = [newScene(), newScene(), newScene()];
+    const content = removeScene(
+      { version: CARTOON_VERSION, scenes: [a, b, c] },
+      b.id,
+    );
+    expect(content.scenes).toEqual([a, c]);
+  });
+
+  it('leaves a new empty scene when the last one goes', () => {
+    const a = newScene();
+    const content = removeScene(
+      { version: CARTOON_VERSION, scenes: [a] },
+      a.id,
+    );
+    expect(content.scenes).toHaveLength(1);
+    expect(content.scenes[0]!.id).not.toBe(a.id);
+    expect(content.scenes[0]!.actors).toEqual([]);
   });
 });

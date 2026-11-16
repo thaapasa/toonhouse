@@ -15,6 +15,8 @@ parts of its scenes in a row.
       as from the timeline or a list of the actors.
 - [x] Scenes are saved on the server, and the user can open them later.
 - [x] User can undo and redo the edits of a scene.
+- [x] User can remove a scene, after confirming it. The removal can be undone.
+      If the user removes the last scene, the cartoon gets a new empty scene.
 - [ ] User can edit a scene in the web app, also on an iPad.
 
 ## Backgrounds

@@ -8,6 +8,7 @@ import { SceneDrawing } from '../components/SceneDrawing.tsx';
 import { useI18n } from '../i18n/index.tsx';
 import type { BackgroundAsset } from './library.ts';
 import { placeActors } from './placement.ts';
+import { released } from './pointer.ts';
 import { roundPoint } from './sceneEdit.ts';
 import type { EditMode } from './useCartoonContent.ts';
 import { useSize } from './useSize.ts';
@@ -120,6 +121,7 @@ export function EditorStage(props: Props) {
   const move = (e: PointerEvent<SVGSVGElement>) => {
     const current = gesture.current;
     if (current?.pointer !== e.pointerId) return;
+    if (released(e)) return up(e);
     const g = current.g;
     if (g.type === 'tap') return;
     if (!g.moved && !far(g.start, client(e))) return;
@@ -172,6 +174,7 @@ export function EditorStage(props: Props) {
           onPointerMove={move}
           onPointerUp={up}
           onPointerCancel={up}
+          onLostPointerCapture={up}
         >
           <SceneDrawing
             scene={scene}

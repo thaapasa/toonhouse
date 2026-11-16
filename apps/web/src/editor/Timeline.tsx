@@ -14,6 +14,7 @@ import { type PointerEvent, type ReactNode, useRef, useState } from 'react';
 
 import {
   BackgroundIcon,
+  DeleteIcon,
   PauseIcon,
   PlayIcon,
   PlusIcon,
@@ -27,6 +28,7 @@ import { type TextKey, useI18n } from '../i18n/index.tsx';
 import { ActionBlocks } from './ActionBlocks.tsx';
 import { kindOf } from './library.ts';
 import { useNames } from './names.ts';
+import { released } from './pointer.ts';
 import {
   formatTime,
   midPoints,
@@ -64,6 +66,8 @@ interface Props {
   sceneCount: number;
   onScene(index: number): void;
   onAddScene(): void;
+  /** Removes the open scene. */
+  onRemoveScene(): void;
   duration: number;
   t: number;
   fps: number;
@@ -134,7 +138,9 @@ export function Timeline(props: Props) {
     props.onSeek(timeAt(e, e.currentTarget));
   };
   const rulerMove = (e: PointerEvent<HTMLDivElement>) => {
-    if (scrub.current === e.pointerId) props.onSeek(timeAt(e, e.currentTarget));
+    if (scrub.current !== e.pointerId) return;
+    if (released(e)) rulerUp(e);
+    else props.onSeek(timeAt(e, e.currentTarget));
   };
   const rulerUp = (e: PointerEvent<HTMLDivElement>) => {
     if (scrub.current === e.pointerId) scrub.current = null;
@@ -188,6 +194,7 @@ export function Timeline(props: Props) {
       <div className="transport">
         <TransportButton
           label="editor.stepBack"
+          shortcut="editor.keyLeft"
           onClick={() => props.onStep(-1)}
         >
           <StepBackIcon />
@@ -195,6 +202,7 @@ export function Timeline(props: Props) {
         {props.playing ? (
           <TransportButton
             label="editor.pause"
+            shortcut="editor.keySpace"
             onClick={() => props.onPlay(false)}
           >
             <PauseIcon />
@@ -202,6 +210,7 @@ export function Timeline(props: Props) {
         ) : (
           <TransportButton
             label="editor.playFromHere"
+            shortcut="editor.keySpace"
             onClick={() => props.onPlay(true)}
           >
             <PlayIcon />
@@ -209,6 +218,7 @@ export function Timeline(props: Props) {
         )}
         <TransportButton
           label="editor.stepForward"
+          shortcut="editor.keyRight"
           onClick={() => props.onStep(1)}
         >
           <StepForwardIcon />
@@ -245,6 +255,15 @@ export function Timeline(props: Props) {
           >
             <PlusIcon />
           </button>
+          <button
+            type="button"
+            className="scene-tab"
+            aria-label={tr('editor.removeScene')}
+            title={tr('editor.removeScene')}
+            onClick={props.onRemoveScene}
+          >
+            <DeleteIcon />
+          </button>
         </div>
         <div className="divider" />
         <TransportButton label="editor.zoomOut" onClick={zoom.zoomOut}>
@@ -272,6 +291,7 @@ export function Timeline(props: Props) {
               onPointerMove={rulerMove}
               onPointerUp={rulerUp}
               onPointerCancel={rulerUp}
+              onLostPointerCapture={rulerUp}
             >
               {rulerTicks(length, pps).map((tick) => (
                 <span
@@ -379,16 +399,23 @@ export function Timeline(props: Props) {
 
 function TransportButton(props: {
   label: TextKey;
+  /** The key that does the same, shown in the tooltip. */
+  shortcut?: TextKey;
   onClick?: (() => void) | undefined;
   children: ReactNode;
 }) {
   const { tr } = useI18n();
+  const label = tr(props.label);
   return (
     <button
       type="button"
       className="icon-button small"
-      aria-label={tr(props.label)}
-      title={tr(props.label)}
+      aria-label={label}
+      title={
+        props.shortcut
+          ? tr('editor.withKey', { label, key: tr(props.shortcut) })
+          : label
+      }
       disabled={!props.onClick}
       onClick={props.onClick}
     >

@@ -71,9 +71,17 @@ another action for that character.
       sight.
 - [x] User can play the cartoon from the current point and stop it to add the
       next action.
+- [x] On a keyboard, the space bar plays and stops the cartoon anywhere in the
+      editor. The left and right arrow keys step one frame back and forward, and
+      the up and down arrow keys go to the start and the end of the scene. The
+      keys do this except while the user types a text.
 - [x] User can change or remove an action.
 
 ## Open questions
 
 - How does the user see and edit actions that are already on the timeline?
 - What happens to the later actions when the user changes an earlier one?
+- How does the user add the points of a walk? Now the stage goes into a mode
+  that adds a point on every tap when the user selects a walk. It might be
+  better if the user has to do something to add a point, and a tap on the stage
+  selects as usual.

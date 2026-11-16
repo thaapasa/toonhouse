@@ -30,6 +30,18 @@ export const updateScene = (
   scenes: content.scenes.map((s) => (s.id === sceneId ? fn(s) : s)),
 });
 
+/**
+ * Removes a scene. A cartoon in the editor always has a scene, so removing
+ * the last one leaves a new empty scene.
+ */
+export function removeScene(
+  content: CartoonContent,
+  sceneId: string,
+): CartoonContent {
+  const scenes = content.scenes.filter((s) => s.id !== sceneId);
+  return { ...content, scenes: scenes.length > 0 ? scenes : [newScene()] };
+}
+
 export const updateActor = (
   scene: Scene,
   actorId: string,

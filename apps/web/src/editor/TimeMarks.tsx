@@ -8,6 +8,7 @@ import { sortedActions } from '@toonhouse/renderer';
 import { type PointerEvent, useRef } from 'react';
 
 import { useI18n } from '../i18n/index.tsx';
+import { released } from './pointer.ts';
 import {
   formatTime,
   midPoints,
@@ -83,6 +84,7 @@ export function TimeMarks(props: {
   const move = (e: PointerEvent<HTMLButtonElement>) => {
     const d = drag.current;
     if (d?.pointer !== e.pointerId) return;
+    if (released(e)) return up(e);
     const dx = e.clientX - d.x;
     if (!d.moved && Math.abs(dx) < TAP_SLOP) return;
     const t = snapToTargets(d.mark.t + dx / pps, targets(d.mark), pps, fps);
@@ -127,6 +129,7 @@ export function TimeMarks(props: {
       onPointerMove={move}
       onPointerUp={up}
       onPointerCancel={up}
+      onLostPointerCapture={up}
     />
   ));
 }

@@ -25,6 +25,7 @@ import { usePlayback } from '@toonhouse/stage';
 import { type ReactNode, useEffect, useEffectEvent, useState } from 'react';
 
 import { contentQuery } from '../api.ts';
+import { Dialog } from '../components/Dialog.tsx';
 import {
   BackgroundIcon,
   BackIcon,
@@ -40,6 +41,7 @@ import { type TextKey, useI18n } from '../i18n/index.tsx';
 import { ActionBar, WalkBar } from './ActionBar.tsx';
 import { CartoonTitle } from './CartoonTitle.tsx';
 import { EditorStage, type WalkEdit } from './EditorStage.tsx';
+import { editorCommand, isTyping } from './keys.ts';
 import {
   type BackgroundAsset,
   backgroundAsset,
@@ -56,6 +58,7 @@ import {
   newScene,
   removeAction,
   removeActor,
+  removeScene,
   setLength,
   startAction,
   stepSize,
@@ -108,6 +111,7 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
   );
   const [selected, setSelected] = useState<TimelineSelection | null>(null);
   const [walking, setWalking] = useState<WalkEdit | null>(null);
+  const [removing, setRemoving] = useState(false);
 
   const lengthOf = (s: Scene) =>
     sceneLength(s, bg?.background ?? null, (a) => kindOf(a.asset));
@@ -149,17 +153,25 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
   /** The current time, on a whole frame. */
   const now = () => Math.round(t * FPS) / FPS;
 
-  const openScene = (i: number) => {
+  /** Opens scene `i` of `list`, which is the scenes after the edit, if any. */
+  const openScene = (i: number, list: readonly Scene[] = scenes) => {
     setSceneIndex(i);
     setSelected(null);
     setWalking(null);
     playback.seek(0);
-    setLibrary(scenes[i]?.background ? null : 'background');
+    setLibrary(list[i]?.background ? null : 'background');
   };
   const addScene = () => {
     doc.edit((c) => ({ ...c, scenes: [...c.scenes, newScene()] }));
     openScene(scenes.length);
     setLibrary('background');
+  };
+  /** Removes the open scene and opens the scene before it. */
+  const removeOpenScene = () => {
+    const next = removeScene(doc.content, scene.id);
+    doc.edit(() => next);
+    openScene(Math.max(index - 1, 0), next.scenes);
+    setRemoving(false);
   };
 
   const addActor = (asset: RigAsset) => {
@@ -244,13 +256,26 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
     );
   };
 
+  const play = (on: boolean) => {
+    if (on) setWalking(null);
+    playback.setPlaying(on);
+  };
+
   const onKey = useEffectEvent((e: KeyboardEvent) => {
-    if (e.target instanceof HTMLInputElement) return;
-    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'z') {
-      e.preventDefault();
-      if (e.shiftKey) doc.redo();
-      else doc.undo();
-    }
+    if (removing || isTyping(e.target)) return;
+    const command = editorCommand(e);
+    if (!command) return;
+    // Also keeps the keys from pressing the focused button or scrolling.
+    e.preventDefault();
+    // Holding an arrow key down steps on, one frame at a time.
+    if (command === 'play') {
+      if (!e.repeat) play(!playback.playing);
+    } else if (command === 'back') playback.step(-1);
+    else if (command === 'forward') playback.step(1);
+    else if (command === 'start') playback.seek(0);
+    else if (command === 'end') playback.seek(duration);
+    else if (command === 'undo') doc.undo();
+    else doc.redo();
   });
   useEffect(() => {
     window.addEventListener('keydown', onKey);
@@ -448,14 +473,12 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
         sceneCount={scenes.length}
         onScene={openScene}
         onAddScene={addScene}
+        onRemoveScene={() => setRemoving(true)}
         duration={duration}
         t={t}
         fps={FPS}
         playing={playback.playing}
-        onPlay={(on) => {
-          if (on) setWalking(null);
-          playback.setPlaying(on);
-        }}
+        onPlay={play}
         onSeek={playback.seek}
         onStep={playback.step}
         selection={selection}
@@ -478,6 +501,30 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
         }}
         onLength={(v, mode) => editScene((s) => setLength(s, v), mode)}
       />
+      {removing && (
+        <Dialog
+          title={tr('editor.removeSceneTitle', { n: index + 1 })}
+          onClose={() => setRemoving(false)}
+        >
+          <p className="muted">{tr('editor.removeSceneInfo')}</p>
+          <div className="row end">
+            <button
+              type="button"
+              className="button"
+              onClick={() => setRemoving(false)}
+            >
+              {tr('cancel')}
+            </button>
+            <button
+              type="button"
+              className="button danger"
+              onClick={removeOpenScene}
+            >
+              {tr('editor.removeSceneConfirm')}
+            </button>
+          </div>
+        </Dialog>
+      )}
     </div>
   );
 }
