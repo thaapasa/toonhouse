@@ -19,6 +19,32 @@ parts of its scenes in a row.
       If the user removes the last scene, the cartoon gets a new empty scene.
 - [ ] User can edit a scene in the web app, also on an iPad.
 
+## Stage
+
+The stage in the editor shows the frame of the scene and a band around it. The
+user zooms and pans the stage to see what they work on. This view is only for
+editing. What the cartoon shows is up to the [camera](camera.md).
+
+- [ ] The editor shows a band around the frame of the scene. Actors outside the
+      frame show dimmer there, and the user can select and move them, so that an
+      actor can wait outside before it comes in. The player shows only the
+      frame.
+- [ ] The band is wide enough that the largest actor fits in it whole, at the
+      size of the background, outside the frame.
+- [ ] An actor can't go past the outer edge of the band, when the user drags it
+      or picks the points of a walk. The reason: past the band, the user can't
+      see the actor or select it to bring it back.
+- [ ] User can zoom the stage with the mouse wheel and pan it by dragging with
+      the wheel button pressed. On a trackpad, a pinch zooms and a swipe with
+      two fingers pans. The zoom keeps the point under the pointer in place.
+- [ ] On a touch screen, the user zooms the stage with a pinch and pans it with
+      two fingers. One finger still selects and moves the actors.
+- [ ] The stage can't zoom out past the band, or pan so far that the band leaves
+      the view.
+- [ ] User can show the whole stage again with one button.
+- [ ] Zooming and panning the stage doesn't change the scene, the camera or the
+      cartoon, and undo doesn't step through it.
+
 ## Backgrounds
 
 A background is an actor too. It can have layers at different depths, such as

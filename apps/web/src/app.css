@@ -582,11 +582,13 @@ button:disabled {
   justify-content: center;
 }
 
-/* The largest 16:9 box that fits the area, with a margin. */
+/* The largest box that fits the area, with a margin. The frame is 16:9, and
+   the editor stage also shows a band around the frame. */
 .stage {
+  --aspect: 16 / 9;
   position: relative;
-  width: min(100cqw - 32px, (100cqh - 32px) * 16 / 9);
-  aspect-ratio: 16 / 9;
+  width: min(100cqw - 32px, (100cqh - 32px) * var(--aspect));
+  aspect-ratio: var(--aspect);
   border-radius: 8px;
   overflow: hidden;
   background: #bfe6ff;
@@ -661,6 +663,17 @@ button:disabled {
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
+}
+
+/* The band around the frame, where the actors wait before they come in. */
+.stage.offstage {
+  background: var(--field);
+}
+
+.frame-edge {
+  fill: none;
+  stroke: var(--faint);
+  pointer-events: none;
 }
 
 .selection-box {

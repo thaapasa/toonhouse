@@ -11,9 +11,6 @@ the background, and the camera can move on the [timeline](timeline.md).
 - [ ] User can zoom the camera in and out, and pan it.
 - [ ] The camera stays inside the background. It can't zoom out further than the
       whole background, or pan past its edges.
-- [ ] In the editor, the user can zoom the stage out a bit past the edges of the
-      background, to see and move the actors that are outside it. The cartoon
-      still shows only what the camera sees.
 - [ ] User can start a camera move at the current point on the timeline. The
       camera zooms and pans to the new view over a time that the user picks.
 - [ ] User can make the camera jump to a new view at the current point.

@@ -2,7 +2,12 @@
 // the points of a walk, a tap adds a point and a drag moves the box of one.
 import type { Pt, Scene } from '@toonhouse/model';
 import { actorStateAt } from '@toonhouse/renderer';
-import { type PointerEvent, type ReactNode, useRef } from 'react';
+import {
+  type CSSProperties,
+  type PointerEvent,
+  type ReactNode,
+  useRef,
+} from 'react';
 
 import { SceneDrawing } from '../components/SceneDrawing.tsx';
 import { useI18n } from '../i18n/index.tsx';
@@ -18,6 +23,11 @@ const PREFIX = 'stage';
 const POINT_BOX = 26;
 /** A pointer that moves less than this, in CSS pixels, taps. */
 const TAP_SLOP = 8;
+/**
+ * How far the stage shows past each edge of the frame, as parts of the width
+ * and the height of the frame.
+ */
+const OFFSTAGE = { x: 0.12, y: 0.08 };
 
 /** The walk whose points the user is picking. */
 export interface WalkEdit {
@@ -59,8 +69,15 @@ export function EditorStage(props: Props) {
   const gesture = useRef<{ pointer: number; g: Gesture } | null>(null);
 
   const placed = placeActors(scene, bg, t);
+  // The part of the frame coordinates that the stage shows.
+  const view = {
+    x: -bg.width * OFFSTAGE.x,
+    y: -bg.height * OFFSTAGE.y,
+    width: bg.width * (1 + 2 * OFFSTAGE.x),
+    height: bg.height * (1 + 2 * OFFSTAGE.y),
+  };
   // Frame pixels for one CSS pixel.
-  const unit = size.width > 0 ? bg.width / size.width : 1;
+  const unit = size.width > 0 ? view.width / size.width : 1;
   const selected = placed.find((p) => p.actor.id === props.selectedActor);
 
   // The walk being picked starts where the actor is when the walk starts.
@@ -147,29 +164,34 @@ export function EditorStage(props: Props) {
 
   // The toolbar goes above the selected actor, or below it if there is no
   // room above, and stays inside the stage.
-  const k = size.width / bg.width;
+  const k = size.width / view.width;
   const box = selected?.box;
   let barStyle: { left: number; top: number } | null = null;
   if (box && bar.width > 0) {
     const gap = 10;
     const left = Math.min(
-      Math.max((box.x + box.width / 2) * k - bar.width / 2, 8),
+      Math.max((box.x - view.x + box.width / 2) * k - bar.width / 2, 8),
       size.width - bar.width - 8,
     );
-    const above = box.y * k - bar.height - gap;
-    const below = (box.y + box.height) * k + gap;
+    const above = (box.y - view.y) * k - bar.height - gap;
+    const below = (box.y - view.y + box.height) * k + gap;
     const top =
       above >= 8 ? above : below + bar.height <= size.height - 8 ? below : 8;
     barStyle = { left, top };
   }
 
   return (
-    <div className="stage" ref={ref} aria-label={tr('editor.stage')}>
+    <div
+      className="stage offstage"
+      ref={ref}
+      aria-label={tr('editor.stage')}
+      style={{ '--aspect': view.width / view.height } as CSSProperties}
+    >
       {size.width > 0 && (
         <svg
           ref={svgRef}
           className="stage-svg"
-          viewBox={`0 0 ${bg.width} ${bg.height}`}
+          viewBox={`${view.x} ${view.y} ${view.width} ${view.height}`}
           onPointerDown={down}
           onPointerMove={move}
           onPointerUp={up}
@@ -182,6 +204,13 @@ export function EditorStage(props: Props) {
             t={t}
             placed={placed}
             prefix={PREFIX}
+            offstage
+          />
+          <rect
+            className="frame-edge"
+            width={bg.width}
+            height={bg.height}
+            strokeWidth={1.5 * unit}
           />
           {box && (
             <rect

@@ -1,11 +1,16 @@
 // The scene at time `t`, as the camera of the whole background sees it. It
-// goes inside an `<svg>` with the viewBox of the background frame.
+// goes inside an `<svg>` with the viewBox of the background frame. In the
+// editor, the viewBox can be larger than the frame, and then what is outside
+// the frame shows dimmer.
 import type { Scene } from '@toonhouse/model';
 import { drawScene, wholeBackground } from '@toonhouse/renderer';
 import { actorPrefix, Drawing, PartSymbols } from '@toonhouse/stage';
 
 import type { BackgroundAsset } from '../editor/library.ts';
 import { backgroundFrame, type PlacedActor } from '../editor/placement.ts';
+
+/** How much of what is outside the frame shows through the mask. */
+const OFFSTAGE_SHADE = '#666';
 
 export function SceneDrawing(props: {
   scene: Scene;
@@ -15,6 +20,11 @@ export function SceneDrawing(props: {
   placed: readonly PlacedActor[];
   /** Makes the ids of the symbols unique on the page. */
   prefix: string;
+  /**
+   * Draws what is outside the frame too, dimmer, so that the user can place
+   * actors there before they come in. The player leaves it out.
+   */
+  offstage?: boolean;
 }) {
   const { bg: asset, prefix } = props;
   const bg = asset.background;
@@ -34,10 +44,34 @@ export function SceneDrawing(props: {
           sources={p.asset.parts}
         />
       ))}
-      <clipPath id={`${prefix}-frame`}>
-        <rect width={bg.width} height={bg.height} />
-      </clipPath>
-      <g clipPath={`url(#${prefix}-frame)`}>
+      {props.offstage ? (
+        // A mask, unlike a clip path, keeps the dim actors selectable.
+        <mask
+          id={`${prefix}-frame`}
+          maskUnits="userSpaceOnUse"
+          x={-bg.width}
+          y={-bg.height}
+          width={bg.width * 3}
+          height={bg.height * 3}
+        >
+          <rect
+            x={-bg.width}
+            y={-bg.height}
+            width={bg.width * 3}
+            height={bg.height * 3}
+            fill={OFFSTAGE_SHADE}
+          />
+          <rect width={bg.width} height={bg.height} fill="white" />
+        </mask>
+      ) : (
+        <clipPath id={`${prefix}-frame`}>
+          <rect width={bg.width} height={bg.height} />
+        </clipPath>
+      )}
+      <g
+        clipPath={props.offstage ? undefined : `url(#${prefix}-frame)`}
+        mask={props.offstage ? `url(#${prefix}-frame)` : undefined}
+      >
         <Drawing node={node} prefix={prefix} />
       </g>
     </>
