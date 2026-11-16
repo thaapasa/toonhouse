@@ -19,8 +19,8 @@ const WHEEL_ZOOM = 0.003;
 interface Options {
   /** The element that scrolls, with the labels of the rows at its left. */
   ref: RefObject<HTMLElement | null>;
-  /** The width of the labels, where the lanes start. */
-  labelWidth: number;
+  /** Where time 0 is, from the left edge of the element that scrolls. */
+  laneStart: number;
   /** Pixels a second at zoom 1, where the whole timeline fits. */
   fit: number;
   maxZoom: number;
@@ -28,7 +28,7 @@ interface Options {
   t: number;
 }
 
-export function useTimelineZoom({ ref, labelWidth, fit, maxZoom, t }: Options) {
+export function useTimelineZoom({ ref, laneStart, fit, maxZoom, t }: Options) {
   const [zoom, setZoom] = useState(1);
   const z = Math.min(zoom, maxZoom);
   const pps = fit * z;
@@ -50,7 +50,7 @@ export function useTimelineZoom({ ref, labelWidth, fit, maxZoom, t }: Options) {
     const cur = view.current;
     if (Math.abs(next - cur.zoom) < 1e-9) return;
     const scroll = cur.scroll ?? el.scrollLeft;
-    const visible = el.clientWidth - labelWidth;
+    const visible = el.clientWidth - laneStart;
     if (x === undefined) {
       // The playhead stays in place if it shows, or else the middle.
       const head = t * fit * cur.zoom - scroll;
@@ -70,7 +70,7 @@ export function useTimelineZoom({ ref, labelWidth, fit, maxZoom, t }: Options) {
 
   /** How far `clientX` is into the lanes. */
   const laneX = (clientX: number) =>
-    clientX - (ref.current?.getBoundingClientRect().left ?? 0) - labelWidth;
+    clientX - (ref.current?.getBoundingClientRect().left ?? 0) - laneStart;
   const pinch = useRef<{ d: number; zoom: number } | null>(null);
   const span = (e: TouchEvent) => {
     const [a, b] = [e.touches[0]!, e.touches[1]!];
@@ -130,7 +130,7 @@ export function useTimelineZoom({ ref, labelWidth, fit, maxZoom, t }: Options) {
   const follow = useEffectEvent(() => {
     const el = ref.current;
     if (!el || view.current.scroll !== null) return;
-    const visible = el.clientWidth - labelWidth;
+    const visible = el.clientWidth - laneStart;
     const head = t * pps - el.scrollLeft;
     if (head < 0 || head > visible - 12)
       el.scrollLeft = Math.max(0, t * pps - visible * 0.1);

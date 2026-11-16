@@ -858,13 +858,24 @@ button:disabled {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 3px;
 }
 
+/* The rows touch, so that the labels make a solid column that hides the
+   playhead and the end of the scene when the lanes scroll under it. */
 .track {
   display: flex;
   align-items: center;
+  min-height: 33px;
+}
+
+.ruler-track {
   min-height: 30px;
+}
+
+/* Fills the column of labels below the last row. */
+.tracks-fill {
+  flex: 1;
+  align-items: stretch;
 }
 
 .track[aria-selected='true'] {
@@ -876,7 +887,7 @@ button:disabled {
   left: 0;
   z-index: 2;
   width: 132px;
-  height: 30px;
+  align-self: stretch;
   flex: none;
   box-sizing: border-box;
   display: flex;
@@ -902,6 +913,7 @@ button:disabled {
 
 .ruler {
   position: relative;
+  margin-left: 12px;
   height: 22px;
   flex: none;
   touch-action: none;
@@ -923,6 +935,7 @@ button:disabled {
 
 .lane {
   position: relative;
+  margin-left: 12px;
   height: 26px;
   flex: none;
   border-radius: 5px;

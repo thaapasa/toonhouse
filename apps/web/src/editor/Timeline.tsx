@@ -41,6 +41,13 @@ import { useTimelineZoom } from './useTimelineZoom.ts';
 
 /** The width of the names of the rows, in CSS pixels. */
 const LABEL_WIDTH = 132;
+/**
+ * The room before time 0, in CSS pixels, so that the knob of the playhead and
+ * the time marks at the start show whole. The lanes have it as a margin.
+ */
+const LANE_PAD = 12;
+/** Where time 0 is, from the left edge of the tracks. */
+const LANE_START = LABEL_WIDTH + LANE_PAD;
 /** At the deepest zoom, a frame is this wide in CSS pixels. */
 const MAX_FRAME_WIDTH = 24;
 
@@ -103,10 +110,10 @@ export function Timeline(props: Props) {
   const length = Math.max(frozen?.length ?? 0, timelineLength(duration));
   // At zoom 1, the whole timeline fits the width.
   const fit =
-    frozen?.fit ?? Math.max(size.width - LABEL_WIDTH - 16, 100) / length;
+    frozen?.fit ?? Math.max(size.width - LANE_START - 16, 100) / length;
   const zoom = useTimelineZoom({
     ref,
-    labelWidth: LABEL_WIDTH,
+    laneStart: LANE_START,
     fit,
     maxZoom: Math.max(1, (props.fps * MAX_FRAME_WIDTH) / fit),
     t,
@@ -254,7 +261,7 @@ export function Timeline(props: Props) {
       <div className="tracks" ref={ref}>
         <div
           className="tracks-inner"
-          style={{ width: LABEL_WIDTH + width + 16 }}
+          style={{ width: LANE_START + width + 16 }}
         >
           <div className="track ruler-track">
             <div className="track-label" />
@@ -348,17 +355,20 @@ export function Timeline(props: Props) {
               </div>
             );
           })}
+          <div className="track tracks-fill" aria-hidden>
+            <div className="track-label" />
+          </div>
           <div
             className="scene-tail"
             style={{
-              left: LABEL_WIDTH + duration * pps,
+              left: LANE_START + duration * pps,
               width: (length - duration) * pps,
             }}
             aria-hidden
           />
           <div
             className="playhead"
-            style={{ left: LABEL_WIDTH + t * pps }}
+            style={{ left: LANE_START + t * pps }}
             aria-hidden
           />
         </div>
