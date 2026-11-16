@@ -10,6 +10,7 @@ import {
   clipSpeed,
   isMoving,
   MIN_SCENE_LENGTH,
+  minSceneLength,
   sceneLength,
 } from './scene.ts';
 
@@ -174,5 +175,21 @@ describe('scene length', () => {
       { id: '1', t: 8, clip: 'walk', path: [{ x: WALK_SPEED * 5, y: 700 }] },
     ]);
     expect(sceneLength(scene([a]), flat, () => 'cutout')).toBe(17);
+  });
+
+  it('is the length that the user has set, shorter or longer', () => {
+    const a = actor([{ id: '1', t: 2, clip: 'wave' }]);
+    const short = { ...scene([a]), length: 3.5 };
+    const long = { ...scene([a]), length: 40 };
+    expect(sceneLength(short, flat, () => 'cutout')).toBe(3.5);
+    expect(sceneLength(long, flat, () => 'cutout')).toBe(40);
+  });
+
+  it('does not end before the last action starts', () => {
+    const a = actor([{ id: '1', t: 6, clip: 'wave' }]);
+    const s = { ...scene([a]), length: 2 };
+    expect(minSceneLength(s)).toBeCloseTo(6.1);
+    expect(sceneLength(s, flat, () => 'cutout')).toBeCloseTo(6.1);
+    expect(minSceneLength(scene([]))).toBe(1);
   });
 });

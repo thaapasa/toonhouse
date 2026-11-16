@@ -131,6 +131,13 @@ export const ZoomInIcon = () => (
   </Icon>
 );
 
+export const ZoomFitIcon = () => (
+  <Icon size={18}>
+    <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" />
+    <path d="M8 12h8" />
+  </Icon>
+);
+
 export const CloseIcon = () => (
   <Icon size={18}>
     <path d="M6 6l12 12M18 6L6 18" strokeWidth={2} />

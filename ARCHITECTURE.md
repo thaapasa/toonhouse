@@ -213,11 +213,14 @@ actions, as JSON in the `content` column of the cartoon. `packages/model` has
 its types, and `packages/api` the schema that checks a save.
 
 Each saved cartoon has the version number of its data format. When the format
-changes, the version goes up by one, and `packages/model` gets a converter from
-the previous version to the new one. The converters are pure functions, and they
-run in a chain, so a cartoon at version 1 goes through every converter up to the
-latest version. The tests keep a saved cartoon of each old version and check
-that it upgrades to the latest one.
+changes so that old cartoons no longer fit it, the version goes up by one, and
+`packages/model` gets a converter from the previous version to the new one. The
+converters are pure functions, and they run in a chain, so a cartoon at version
+1 goes through every converter up to the latest version. The tests keep a saved
+cartoon of each old version and check that it upgrades to the latest one.
+
+A change that keeps the old cartoons valid, such as a new optional field, keeps
+the version as it is.
 
 A change to the library can also need a new version. If a character, a prop, a
 clip or a background is renamed, removed or changes its structure, such as the
@@ -306,9 +309,17 @@ renderer goes through the actions of the actor in the order of their times: an
 action plays its clip until the next action starts, and a walk moves the actor
 along its path at the speed of the walk clip, so that the feet don't slide. With
 a perspective, each line of the path uses the mean of the actor sizes at its
-ends, so the feet can slide a little when an actor walks toward the camera. A
-scene lasts a few seconds past the end of its last action, and at least 10
-seconds.
+ends, so the feet can slide a little when an actor walks toward the camera.
+
+If the user has set the length of a scene, the scene lasts that long, but it
+never ends before its last action starts. Otherwise it lasts a few seconds past
+the end of its last action, and at least 10 seconds.
+
+The timeline goes on a few seconds past the end of the scene, so that the user
+sees where the scene ends and can start actions after it. The playhead can move
+there too, and playing from there starts the scene from the beginning. While the
+user drags an action or a time mark, the timeline keeps its scale, so that the
+dragged thing stays under the finger when the scene gets longer or shorter.
 
 The build writes `version.json` next to `index.html`. When the web app comes
 back to the foreground, it compares the build ID in that file to its own and

@@ -1,8 +1,14 @@
 // The timeline of a scene: a row for the background and one for each actor,
 // with the actions as blocks from their start until the next action. Tap or
-// drag the ruler to move in time, tap a row to move there, tap an action to
-// select it and drag it to change when it starts.
-import type { Action, Background, ClipKind, Scene } from '@toonhouse/model';
+// drag the ruler to move the playhead, and tap a row to move it there. Tap an
+// action to select it, and drag it to move it. The time marks on each row
+// move the playhead and change where actions start and the scene ends.
+//
+// The wheel scrolls the rows, and Shift + wheel or a sideways swipe scrolls in
+// time. `useTimelineZoom` has the zoom. The timeline goes on a bit past the end
+// of the scene, so that the end shows and the user can start new actions
+// after it.
+import type { Background, Scene } from '@toonhouse/model';
 import { sortedActions, walkTime } from '@toonhouse/renderer';
 import { type PointerEvent, type ReactNode, useRef, useState } from 'react';
 
@@ -13,23 +19,30 @@ import {
   PlusIcon,
   StepBackIcon,
   StepForwardIcon,
+  ZoomFitIcon,
   ZoomInIcon,
   ZoomOutIcon,
 } from '../components/icons.tsx';
 import { type TextKey, useI18n } from '../i18n/index.tsx';
-import { CLIP_COLORS } from './clipIcons.tsx';
+import { ActionBlocks } from './ActionBlocks.tsx';
 import { kindOf } from './library.ts';
 import { useNames } from './names.ts';
+import {
+  formatTime,
+  midPoints,
+  rulerTicks,
+  timelineLength,
+  type TimelineRow,
+} from './timelineMath.ts';
+import { TimeMarks } from './TimeMarks.tsx';
 import type { EditMode } from './useCartoonContent.ts';
 import { useSize } from './useSize.ts';
+import { useTimelineZoom } from './useTimelineZoom.ts';
 
 /** The width of the names of the rows, in CSS pixels. */
 const LABEL_WIDTH = 132;
-const MAX_ZOOM = 8;
-/** An action moves in steps of a tenth of a second. */
-const snap = (t: number) => Math.round(t * 10) / 10;
-/** A pointer that moves less than this, in CSS pixels, taps. */
-const TAP_SLOP = 6;
+/** At the deepest zoom, a frame is this wide in CSS pixels. */
+const MAX_FRAME_WIDTH = 24;
 
 /** An actor on the timeline, or the background with `actorId` null. */
 export interface TimelineSelection {
@@ -53,20 +66,22 @@ interface Props {
   onStep(frames: number): void;
   selection: TimelineSelection | null;
   onSelect(selection: TimelineSelection): void;
-  onMoveAction(
+  /** Moves a whole action, its start and its end, to start at `t`. */
+  onMoveBlock(
     actorId: string | null,
     actionId: string,
     t: number,
     mode: EditMode,
   ): void;
-}
-
-/** A time as m:ss.s. */
-function formatTime(t: number) {
-  const tenths = Math.floor(t * 10 + 1e-6);
-  const m = Math.floor(tenths / 600);
-  const s = Math.floor((tenths % 600) / 10);
-  return `${m}:${String(s).padStart(2, '0')}.${tenths % 10}`;
+  /** Moves only the start of an action, which is the end of the one before. */
+  onMoveStart(
+    actorId: string | null,
+    actionId: string,
+    t: number,
+    mode: EditMode,
+  ): void;
+  /** Sets the length of the scene. */
+  onLength(length: number, mode: EditMode): void;
 }
 
 export function Timeline(props: Props) {
@@ -74,23 +89,35 @@ export function Timeline(props: Props) {
   const { tr } = useI18n();
   const names = useNames();
   const [ref, size] = useSize<HTMLDivElement>();
-  const [zoom, setZoom] = useState(1);
+  // While the user drags an action, a time mark or the end of the scene, the
+  // scale of the timeline stays as it was, so that the dragged thing stays
+  // under the finger when the scene gets longer or shorter.
+  const [frozen, setFrozen] = useState<{ fit: number; length: number } | null>(
+    null,
+  );
+  const freeze = (mode: EditMode) => {
+    if (mode === 'push') setFrozen({ fit, length });
+  };
+  const unfreeze = () => setFrozen(null);
 
-  // At zoom 1, the whole scene fits the width.
-  const fit = Math.max(size.width - LABEL_WIDTH - 16, 100) / duration;
-  const pps = fit * zoom;
-  const width = duration * pps;
-  const tick = pps >= 40 ? 1 : pps >= 16 ? 2 : 5;
-  const ticks: number[] = [];
-  for (let s = 0; s <= duration; s += tick) ticks.push(s);
+  const length = Math.max(frozen?.length ?? 0, timelineLength(duration));
+  // At zoom 1, the whole timeline fits the width.
+  const fit =
+    frozen?.fit ?? Math.max(size.width - LABEL_WIDTH - 16, 100) / length;
+  const zoom = useTimelineZoom({
+    ref,
+    labelWidth: LABEL_WIDTH,
+    fit,
+    maxZoom: Math.max(1, (props.fps * MAX_FRAME_WIDTH) / fit),
+    t,
+  });
+  const { pps } = zoom;
+  const width = length * pps;
 
   const timeAt = (e: { clientX: number }, lane: Element) => {
     const r = lane.getBoundingClientRect();
     const v = (e.clientX - r.left) / pps;
-    return Math.min(
-      Math.max(Math.round(v * props.fps) / props.fps, 0),
-      duration,
-    );
+    return Math.min(Math.max(Math.round(v * props.fps) / props.fps, 0), length);
   };
 
   const scrub = useRef<number | null>(null);
@@ -106,7 +133,8 @@ export function Timeline(props: Props) {
     if (scrub.current === e.pointerId) scrub.current = null;
   };
 
-  const rows: (Row & { actorId: string | null; label: ReactNode })[] = [];
+  const rows: (TimelineRow & { actorId: string | null; label: ReactNode })[] =
+    [];
   if (scene.background) {
     rows.push({
       actorId: null,
@@ -139,6 +167,14 @@ export function Timeline(props: Props) {
       ),
     });
   }
+
+  // The end of the scene snaps to the middle points of the last actions, which
+  // end with the scene. Their loops go on past the end, so that the scene can
+  // get longer up to the next loop.
+  const endTargets = rows.flatMap((row) => {
+    const last = sortedActions(row.actions).at(-1);
+    return last ? midPoints(last, row, length, pps) : [];
+  });
 
   return (
     <section className="timeline" aria-label={tr('editor.timeline')}>
@@ -204,23 +240,14 @@ export function Timeline(props: Props) {
           </button>
         </div>
         <div className="divider" />
-        <TransportButton
-          label="editor.zoomOut"
-          onClick={
-            zoom > 1 ? () => setZoom((z) => Math.max(1, z / 1.5)) : undefined
-          }
-        >
+        <TransportButton label="editor.zoomOut" onClick={zoom.zoomOut}>
           <ZoomOutIcon />
         </TransportButton>
-        <TransportButton
-          label="editor.zoomIn"
-          onClick={
-            zoom < MAX_ZOOM
-              ? () => setZoom((z) => Math.min(MAX_ZOOM, z * 1.5))
-              : undefined
-          }
-        >
+        <TransportButton label="editor.zoomIn" onClick={zoom.zoomIn}>
           <ZoomInIcon />
+        </TransportButton>
+        <TransportButton label="editor.zoomFit" onClick={zoom.zoomFit}>
+          <ZoomFitIcon />
         </TransportButton>
       </div>
 
@@ -229,7 +256,7 @@ export function Timeline(props: Props) {
           className="tracks-inner"
           style={{ width: LABEL_WIDTH + width + 16 }}
         >
-          <div className="track">
+          <div className="track ruler-track">
             <div className="track-label" />
             <div
               className="ruler"
@@ -239,11 +266,22 @@ export function Timeline(props: Props) {
               onPointerUp={rulerUp}
               onPointerCancel={rulerUp}
             >
-              {ticks.map((s) => (
-                <span key={s} className="tick" style={{ left: s * pps }}>
-                  {`${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`}
+              {rulerTicks(length, pps).map((tick) => (
+                <span
+                  key={tick.t}
+                  className="tick"
+                  style={{ left: tick.t * pps }}
+                >
+                  {tick.label}
                 </span>
               ))}
+              <span
+                className="scene-tail"
+                style={{ left: duration * pps, right: 0 }}
+              />
+              <span className="playhead" style={{ left: t * pps }}>
+                <span className="playhead-knob" />
+              </span>
             </div>
           </div>
           {rows.length === 0 && (
@@ -276,20 +314,48 @@ export function Timeline(props: Props) {
                   <ActionBlocks
                     row={row}
                     duration={duration}
+                    length={length}
                     pps={pps}
                     selected={rowSelected ? props.selection!.actionId : null}
                     onSelect={(actionId, at) => {
                       props.onSelect({ actorId: row.actorId, actionId });
                       props.onSeek(at);
                     }}
-                    onMove={(actionId, at, mode) =>
-                      props.onMoveAction(row.actorId, actionId, at, mode)
-                    }
+                    onMove={(actionId, at, mode) => {
+                      freeze(mode);
+                      props.onMoveBlock(row.actorId, actionId, at, mode);
+                    }}
+                    onMoveDone={unfreeze}
+                  />
+                  <TimeMarks
+                    row={row}
+                    endTargets={endTargets}
+                    duration={duration}
+                    fps={props.fps}
+                    pps={pps}
+                    onSeek={props.onSeek}
+                    onLength={(v, mode) => {
+                      freeze(mode);
+                      props.onLength(v, mode);
+                    }}
+                    onMoveStart={(actionId, at, mode) => {
+                      freeze(mode);
+                      props.onMoveStart(row.actorId, actionId, at, mode);
+                    }}
+                    onDragDone={unfreeze}
                   />
                 </div>
               </div>
             );
           })}
+          <div
+            className="scene-tail"
+            style={{
+              left: LABEL_WIDTH + duration * pps,
+              width: (length - duration) * pps,
+            }}
+            aria-hidden
+          />
           <div
             className="playhead"
             style={{ left: LABEL_WIDTH + t * pps }}
@@ -299,98 +365,6 @@ export function Timeline(props: Props) {
       </div>
     </section>
   );
-}
-
-interface Row {
-  kind: ClipKind;
-  actions: Action[];
-  /** How long each walk walks before it gets to its last point. */
-  walkTimes: Map<string, number>;
-}
-
-function ActionBlocks(props: {
-  row: Row;
-  duration: number;
-  pps: number;
-  selected: string | null;
-  onSelect(actionId: string, t: number): void;
-  onMove(actionId: string, t: number, mode: EditMode): void;
-}) {
-  const names = useNames();
-  const drag = useRef<{
-    pointer: number;
-    id: string;
-    x: number;
-    t: number;
-    moved: boolean;
-  } | null>(null);
-  const actions = sortedActions(props.row.actions);
-
-  const down = (e: PointerEvent<HTMLButtonElement>, a: Action) => {
-    e.stopPropagation();
-    if (drag.current) return;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    drag.current = {
-      pointer: e.pointerId,
-      id: a.id,
-      x: e.clientX,
-      t: a.t,
-      moved: false,
-    };
-  };
-  const move = (e: PointerEvent<HTMLButtonElement>) => {
-    const d = drag.current;
-    if (d?.pointer !== e.pointerId) return;
-    const dx = e.clientX - d.x;
-    if (!d.moved && Math.abs(dx) < TAP_SLOP) return;
-    const t = snap(d.t + dx / props.pps);
-    props.onMove(
-      d.id,
-      Math.min(Math.max(t, 0), props.duration),
-      d.moved ? 'replace' : 'push',
-    );
-    d.moved = true;
-  };
-  const up = (e: PointerEvent<HTMLButtonElement>) => {
-    const d = drag.current;
-    if (d?.pointer !== e.pointerId) return;
-    drag.current = null;
-    if (!d.moved && e.type === 'pointerup') props.onSelect(d.id, d.t);
-  };
-
-  return actions.map((a, i) => {
-    const end = Math.min(actions[i + 1]?.t ?? props.duration, props.duration);
-    const color = CLIP_COLORS[a.clip];
-    // A walk that gets to its last point stands still for the rest of the
-    // block, which shows paler.
-    const walk = props.row.walkTimes.get(a.id);
-    const background =
-      walk !== undefined && a.t + walk < end
-        ? `linear-gradient(to right, ${color} ${walk * props.pps}px, ` +
-          `color-mix(in srgb, ${color} 40%, var(--panel)) 0)`
-        : color;
-    return (
-      <button
-        key={a.id}
-        type="button"
-        className="action-block"
-        aria-pressed={props.selected === a.id}
-        style={{
-          left: a.t * props.pps,
-          width: Math.max((end - a.t) * props.pps - 2, 6),
-          background,
-          color: a.clip === 'idle' ? 'var(--text)' : 'var(--on-accent)',
-        }}
-        onPointerDown={(e) => down(e, a)}
-        onPointerMove={move}
-        onPointerUp={up}
-        onPointerCancel={up}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {names.clip(props.row.kind, a.clip)}
-      </button>
-    );
-  });
 }
 
 function TransportButton(props: {

@@ -7,6 +7,7 @@ import type {
   Pt,
   Scene,
 } from '@toonhouse/model';
+import { minSceneLength, sortedActions } from '@toonhouse/renderer';
 
 /** Two actions closer than this in seconds start at the same time. */
 const SAME_TIME = 1e-6;
@@ -66,23 +67,6 @@ export const removeAction = (
   actionId: string,
 ): Action[] => actions.filter((a) => a.id !== actionId);
 
-/**
- * Moves an action to start at `t`. If another action already starts then,
- * the moved action takes its place.
- */
-export function moveAction(
-  actions: readonly Action[],
-  actionId: string,
-  t: number,
-): Action[] {
-  const action = actions.find((a) => a.id === actionId);
-  if (!action) return [...actions];
-  return startAction(removeAction(actions, actionId), {
-    ...action,
-    t: Math.max(0, t),
-  });
-}
-
 /** The action of an actor, or of the background if `actorId` is null. */
 export function actionsOf(scene: Scene, actorId: string | null): Action[] {
   if (actorId === null) return scene.backgroundActions;
@@ -99,6 +83,75 @@ export function updateActions(
     return { ...scene, backgroundActions: fn(scene.backgroundActions) };
   return updateActor(scene, actorId, (a) => ({ ...a, actions: fn(a.actions) }));
 }
+
+/** The shortest time between two actions that the user moves. */
+const MIN_GAP = 0.1;
+/** A time to a ten-thousandth of a second, which keeps the saved data short. */
+const short = (t: number) => Math.round(t * 1e4) / 1e4;
+
+/**
+ * Moves the start of an action to `t`, between the actions before and after
+ * it, so that the actions keep their order. The action before it gets longer
+ * or shorter.
+ */
+export function moveStart(
+  actions: readonly Action[],
+  actionId: string,
+  t: number,
+): Action[] {
+  const sorted = sortedActions(actions);
+  const i = sorted.findIndex((a) => a.id === actionId);
+  if (i < 0) return [...actions];
+  const lo = i > 0 ? sorted[i - 1]!.t + MIN_GAP : 0;
+  const hi = sorted[i + 1] ? sorted[i + 1]!.t - MIN_GAP : Infinity;
+  const at = short(Math.min(Math.max(t, lo), hi));
+  return updateAction(actions, actionId, (a) => ({ ...a, t: at }));
+}
+
+/**
+ * Moves a whole action of an actor, or of the background if `actorId` is
+ * null, so that it starts at `t` and stays as long: its start and the start of
+ * the next action move together. It stays between the action before it and
+ * the action after the next one, so that the actions keep their order. The
+ * last action ends with the scene, which is `sceneEnd` seconds long, so the
+ * scene gets longer if needed. Gives the new scene and the new start.
+ */
+export function moveBlock(
+  scene: Scene,
+  actorId: string | null,
+  actionId: string,
+  t: number,
+  sceneEnd: number,
+): { scene: Scene; t: number } {
+  const sorted = sortedActions(actionsOf(scene, actorId));
+  const i = sorted.findIndex((a) => a.id === actionId);
+  const action = sorted[i];
+  if (!action) return { scene, t };
+  const next = sorted[i + 1];
+  const after = sorted[i + 2];
+  const lo = (i > 0 ? sorted[i - 1]!.t + MIN_GAP : 0) - action.t;
+  const hi = next && after ? after.t - MIN_GAP - next.t : Infinity;
+  const d = Math.min(Math.max(t - action.t, lo), hi);
+  const moved = updateActions(scene, actorId, (actions) =>
+    actions.map((a) =>
+      a.id === action.id || a.id === next?.id ? { ...a, t: short(a.t + d) } : a,
+    ),
+  );
+  const end = sceneEnd + d;
+  return {
+    scene: !next && end > sceneEnd ? { ...moved, length: short(end) } : moved,
+    t: short(action.t + d),
+  };
+}
+
+/**
+ * Sets the length of a scene, but not shorter than `minSceneLength`, so that
+ * every action shows on the timeline.
+ */
+export const setLength = (scene: Scene, length: number): Scene => ({
+  ...scene,
+  length: short(Math.max(length, minSceneLength(scene))),
+});
 
 /** A point to a tenth of a pixel, which keeps the saved data short. */
 export const roundPoint = (p: Pt): Pt => ({

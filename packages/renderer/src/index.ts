@@ -47,6 +47,7 @@ export {
   clipSpeed,
   isMoving,
   MIN_SCENE_LENGTH,
+  minSceneLength,
   sceneLength,
   sortedActions,
   walkTime,

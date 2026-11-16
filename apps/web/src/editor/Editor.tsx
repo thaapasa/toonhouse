@@ -49,12 +49,14 @@ import {
 import { LibraryPanel, type LibraryTab } from './LibraryPanel.tsx';
 import {
   actionsOf,
-  moveAction,
   moveActor,
+  moveBlock,
+  moveStart,
   newId,
   newScene,
   removeAction,
   removeActor,
+  setLength,
   startAction,
   stepSize,
   updateAction,
@@ -63,6 +65,7 @@ import {
   updateScene,
 } from './sceneEdit.ts';
 import { Timeline, type TimelineSelection } from './Timeline.tsx';
+import { timelineLength } from './timelineMath.ts';
 import { type EditMode, useCartoonContent } from './useCartoonContent.ts';
 
 const FPS = 30;
@@ -106,15 +109,16 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
   const [selected, setSelected] = useState<TimelineSelection | null>(null);
   const [walking, setWalking] = useState<WalkEdit | null>(null);
 
-  const duration = sceneLength(scene, bg?.background ?? null, (a) =>
-    kindOf(a.asset),
-  );
+  const lengthOf = (s: Scene) =>
+    sceneLength(s, bg?.background ?? null, (a) => kindOf(a.asset));
+  const duration = lengthOf(scene);
   const playback = usePlayback({
     duration,
     fps: FPS,
     loop: false,
     speed: 1,
     autoplay: false,
+    seekLimit: timelineLength(duration),
   });
   const t = playback.t;
 
@@ -456,14 +460,23 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
         onStep={playback.step}
         selection={selection}
         onSelect={selectOnTimeline}
-        onMoveAction={(actorId, actionId, at, mode) => {
+        onMoveBlock={(actorId, actionId, at, mode) => {
+          // Each move of a drag starts from the scene before the drag.
           editScene(
-            (s) =>
-              updateActions(s, actorId, (a) => moveAction(a, actionId, at)),
+            (s) => moveBlock(s, actorId, actionId, at, lengthOf(s)).scene,
             mode,
           );
-          playback.seek(at);
+          playback.seek(moveBlock(scene, actorId, actionId, at, duration).t);
         }}
+        onMoveStart={(actorId, actionId, at, mode) => {
+          editScene(
+            (s) => updateActions(s, actorId, (a) => moveStart(a, actionId, at)),
+            mode,
+          );
+          const moved = moveStart(actionsOf(scene, actorId), actionId, at);
+          playback.seek(moved.find((a) => a.id === actionId)?.t ?? at);
+        }}
+        onLength={(v, mode) => editScene((s) => setLength(s, v), mode)}
       />
     </div>
   );

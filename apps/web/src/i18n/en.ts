@@ -76,6 +76,10 @@ export const en = {
   'editor.stepForward': 'Forward one frame',
   'editor.zoomOut': 'Zoom out',
   'editor.zoomIn': 'Zoom in',
+  'editor.timeMark': 'Go to {time}',
+  'editor.sceneEnd': 'End of the scene at {time}. Drag to change.',
+  'editor.actionStart': 'Action starts at {time}. Drag to move the start.',
+  'editor.zoomFit': 'Show the whole scene',
   'editor.emptyTimeline': 'The actions of the actors show here.',
   'editor.notOwner': 'Only the owner of the cartoon can edit it.',
 

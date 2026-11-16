@@ -2,9 +2,9 @@ import type { Pt } from './geometry.ts';
 import type { ClipId } from './pose.ts';
 
 /**
- * The version of the cartoon format. It goes up by one whenever the format
- * changes, and the previous version gets a converter to the new one. See
- * "Cartoon format versions" in ARCHITECTURE.md.
+ * The version of the cartoon format. It goes up by one when the format changes
+ * so that old cartoons no longer fit it, and the previous version gets a
+ * converter to the new one. See "Cartoon format versions" in ARCHITECTURE.md.
  */
 export const CARTOON_VERSION = 1;
 
@@ -23,6 +23,11 @@ export interface Scene {
   /** The actions of the background, such as the sun moving across the sky. */
   backgroundActions: Action[];
   actors: Actor[];
+  /**
+   * The length of the scene in seconds, if the user has set it. Without it,
+   * the scene ends a few seconds after its last action.
+   */
+  length?: number;
 }
 
 /** The library character or prop that an actor uses. */

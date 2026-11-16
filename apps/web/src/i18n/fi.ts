@@ -80,6 +80,11 @@ export const fi: Texts = {
   'editor.stepForward': 'Kuva eteenpäin',
   'editor.zoomOut': 'Loitonna',
   'editor.zoomIn': 'Lähennä',
+  'editor.timeMark': 'Siirry kohtaan {time}',
+  'editor.sceneEnd': 'Kohtaus loppuu kohdassa {time}. Vedä muuttaaksesi.',
+  'editor.actionStart':
+    'Toiminto alkaa kohdassa {time}. Vedä siirtääksesi alkua.',
+  'editor.zoomFit': 'Näytä koko kohtaus',
   'editor.emptyTimeline': 'Hahmojen toiminnot näkyvät tässä.',
   'editor.notOwner': 'Vain piirretyn tekijä voi muokata sitä.',
 

@@ -52,6 +52,15 @@ for something else or too vague.
   from its cast member.
 - **Timeline**: the time axis of one scene. The cartoon has no timeline of its
   own, only shots in a row.
+- **Ruler**: the strip of times at the top of the timeline. A tap or a drag on
+  it moves the playhead.
+- **Playhead**: the line across the timeline at the current time, with a knob on
+  the ruler. The stage shows the scene at this time, and a new action starts
+  here. Not: cursor, scrubber.
+- **Time mark**: a dot on a row of the timeline where an action starts or ends,
+  where its clip starts a new loop or where a walk gets to its last point. A tap
+  moves the playhead there, and a dragged end snaps to the marks of loops and
+  walks. Not: keyframe, which belongs to keyframe clips.
 - **Action**: something that an actor does on the timeline, from a point in time
   until its next action, such as walking to a point or waving. An action plays
   one or more clips.

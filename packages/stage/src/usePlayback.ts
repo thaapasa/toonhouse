@@ -10,6 +10,11 @@ export interface PlaybackOptions {
   speed: number;
   /** Start playing at once. True if not set. */
   autoplay?: boolean;
+  /**
+   * How far the user can seek, if past `duration`. Playing from there starts
+   * from the beginning.
+   */
+  seekLimit?: number;
 }
 
 export interface Playback {
@@ -33,6 +38,7 @@ export function usePlayback({
   loop,
   speed,
   autoplay = true,
+  seekLimit = duration,
 }: PlaybackOptions): Playback {
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(autoplay);
@@ -41,10 +47,10 @@ export function usePlayback({
   const seek = useCallback(
     (v: number) => {
       setPlaying(false);
-      tRef.current = Math.min(Math.max(v, 0), duration);
+      tRef.current = Math.min(Math.max(v, 0), Math.max(duration, seekLimit));
       setT(tRef.current);
     },
-    [duration],
+    [duration, seekLimit],
   );
 
   const step = useCallback(

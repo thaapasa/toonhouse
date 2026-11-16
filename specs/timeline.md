@@ -32,6 +32,43 @@ another action for that character.
 - [ ] User can change the font of a speech bubble. The default font comes from
       the asset pack of the character.
 - [ ] User can add a sound at the current point.
+- [x] The timeline scrolls in time and up and down through the rows. The mouse
+      wheel scrolls the rows, and Shift with the wheel or a sideways swipe on a
+      trackpad scrolls in time. On a touch screen, a finger scrolls both ways.
+- [x] User can zoom the timeline with Ctrl or Cmd and the mouse wheel, with a
+      pinch on a trackpad or with two fingers on a touch screen. The zoom keeps
+      the time under the pointer or the fingers in place.
+- [x] User can zoom the timeline in steps with the zoom buttons, which keep the
+      playhead in place, and show the whole scene again with one button.
+- [x] User can zoom in so far that each frame shows on the timeline. The ruler
+      shows shorter steps of time, down to a tenth of a second, as the user
+      zooms in.
+- [x] The names of the rows and the ruler stay in sight when the timeline
+      scrolls.
+- [x] The timeline goes on past the end of the scene, and shows where the scene
+      ends. User can move to a point after the end and start an action there.
+- [x] The playhead has a knob on the ruler that the user can drag.
+- [x] Each row of the timeline has a time mark where each action starts and
+      ends. A tap on a time mark moves the playhead to that frame.
+- [x] User can drag an action on the timeline to move it. Its start and its end
+      move together, so the action stays as long, and the action before it gets
+      longer or shorter. If it is the last action, the scene gets longer when
+      needed. The actions keep their order.
+- [x] User can drag the time mark at the start of an action to move only the
+      start. The action before it gets longer or shorter.
+- [x] Each action on the timeline has a strip that fills up as its clip plays. A
+      looping clip fills up once for each loop, so the user sees where each loop
+      starts. A walk fills up once over its whole path, and the strip is empty
+      after the actor gets to the last point.
+- [x] An action has a smaller time mark where its clip starts a new loop, and a
+      walk has one where it gets to its last point. When the user drags the end
+      of an action, or the end of the scene, the end snaps to these marks.
+- [x] A scene ends a few seconds after its last action, unless the user sets its
+      length. User sets the length by dragging the time mark at the end of the
+      scene. The scene can't end before its last action starts, so that every
+      action shows on the timeline.
+- [x] While the cartoon plays, the timeline scrolls to keep the playhead in
+      sight.
 - [x] User can play the cartoon from the current point and stop it to add the
       next action.
 - [x] User can change or remove an action.

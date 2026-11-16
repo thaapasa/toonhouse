@@ -49,6 +49,7 @@ const Scene = z.object({
     .nullable(),
   backgroundActions: z.array(Action).max(1000),
   actors: z.array(Actor).max(100),
+  length: z.number().finite().min(0).max(3600).exactOptional(),
 });
 
 /** The scenes of a cartoon, in the latest format. See `CartoonContent` in the model. */

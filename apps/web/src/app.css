@@ -831,6 +831,26 @@ button:disabled {
   overflow: auto;
   margin: 0 0 10px;
   overscroll-behavior: contain;
+  /* The timeline zooms on a pinch, not the page. */
+  touch-action: pan-x pan-y;
+}
+
+.ruler-track {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background: var(--panel);
+}
+
+/* The part of the timeline after the end of the scene. */
+.scene-tail {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  border-left: 2px dashed #5a5d68;
+  background: rgba(0, 0, 0, 0.22);
+  pointer-events: none;
 }
 
 .tracks-inner {
@@ -927,6 +947,18 @@ button:disabled {
   cursor: grab;
 }
 
+.action-block {
+  padding-bottom: 8px;
+}
+
+.action-progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: block;
+  pointer-events: none;
+}
+
 .action-block[aria-pressed='true'] {
   box-shadow: inset 0 0 0 2px #ffffff;
   font-weight: 600;
@@ -941,6 +973,72 @@ button:disabled {
   margin-left: -1px;
   background: var(--accent);
   pointer-events: none;
+}
+
+.playhead-knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  box-sizing: border-box;
+  border: 2px solid var(--panel);
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translate(-50%, -50%);
+}
+
+/* A dot where an action starts or a walk ends. The button is bigger than the
+   dot, so that a finger hits it. */
+.time-mark {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  width: 22px;
+  height: 22px;
+  margin: -11px 0 0 -11px;
+  padding: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+.time-mark::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  box-sizing: border-box;
+  border: 2px solid var(--panel);
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.time-mark.start,
+.time-mark.end {
+  touch-action: none;
+  cursor: ew-resize;
+}
+
+/* A loop or the end of a walk inside an action. */
+.time-mark.mid::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  left: 50%;
+  width: 1px;
+  margin-left: -0.5px;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.time-mark.mid::after {
+  inset: 7.5px;
+  border-width: 1.5px;
+  background: #d8dae0;
+}
+
+.time-mark:hover::after {
+  background: var(--accent);
 }
 
 .tracks-empty {
