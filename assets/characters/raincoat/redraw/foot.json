@@ -1,0 +1,10 @@
+{
+  "src": "assets/work/raincoat/traced/foot.svg",
+  "out": "assets/characters/raincoat/foot.svg",
+  "layers": [
+    { "name": "outline", "color": "#2a1202" },
+    { "name": "boot", "color": "#fd0100", "also": ["#c00301"] },
+    { "name": "sole", "color": "#fffefe" }
+  ],
+  "lines": {}
+}

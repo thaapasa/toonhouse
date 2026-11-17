@@ -1,0 +1,18 @@
+{
+  "src": "assets/work/raincoat/traced/hand-open.svg",
+  "out": "assets/characters/raincoat/hand-open.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#2a1202"
+    },
+    {
+      "name": "skin",
+      "color": "#bc6b26"
+    }
+  ],
+  "lines": {},
+  "minLine": 0.5,
+  "scale": 8,
+  "smooth": 0.5
+}

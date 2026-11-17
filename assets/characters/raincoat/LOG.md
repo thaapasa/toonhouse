@@ -72,6 +72,59 @@ I read the points from the alpha masks, row by row, and from `inspect-piece.ts`:
 - **Mouth:** the drawn smile follows the traced one and ends at the profile. An
   open depth of 30 was too small to see at the size of the head, so it is 50.
 
+## Redrawn parts
+
+The traced parts had rough edges, stacked shapes and stray shades. The parts
+were redrawn with `redraw-image`, and the configs are in `redraw/`.
+
+- The head, the hands and the boot come from the traced SVGs of commit
+  `738affe`, so the hair split, the pupil fix and the mirrored open hand stay as
+  they were. Their source is `assets/work/raincoat/traced/<part>.svg`.
+- The torso comes from the torso piece of the parts sheet, which has the same
+  frame as the part. The traced torso had lost the blue rims of the buttons and
+  had green halos around them. To make the piece again, generate seed 11 with
+  `parts.prompt.json` and split the sheet as described in "Splitting and
+  tracing".
+
+To get the sources back and redraw the parts:
+
+```sh
+mkdir -p assets/work/raincoat/traced
+for p in head hand hand-open foot; do
+  git show 738affe:assets/characters/raincoat/$p.svg > assets/work/raincoat/traced/$p.svg
+done
+MISE_ENV=art mise exec -- uv run --script assets/characters/raincoat/redraw/prep-torso.py \
+  assets/work/raincoat/pieces/torso.png assets/work/raincoat/pieces/torso-prep.png
+for p in head torso hand hand-open foot; do
+  MISE_ENV=art mise run redraw-image -- assets/characters/raincoat/redraw/$p.json
+done
+```
+
+`redraw/prep-torso.py` prepares the torso piece. Where the yellow coat blends
+into the blue rim of a button, the pixels come out close to the color of the
+collar lining, so the buttons got a ring of lining. The script paints those
+pixels in the rim color. It also paints every pixel darker than the seams in the
+outline color, as `tools/clean.ts` did for the first trace, because the thin
+outline along the front edge of the coat otherwise went to the seams.
+
+The parts have these colors and color roles:
+
+- The outline of every part is `#2a1202` and the skin is `#bc6b26`, the same as
+  `colors.outline` and `colors.skin` of the rig. The coat is `#fddc01`, the same
+  as the sleeve.
+- Head: `hair`, `skin` and `eye`. The pupil is in the outline color. The curl of
+  the ear and the smile had the hair color in the trace, so `recolor` in the
+  config gives them the outline color, and they are lines. The mouth patch
+  covers the smile as before.
+- Torso: `coat`, `coat-seam` for the darker yellow lines of the sleeve mark, the
+  collar and the front edge, `coat-lining` for the inside of the collar,
+  `button-rim` and `button`.
+- Hands: `skin`. The finger gaps and the crease of the palm are lines. The
+  crease is thin, so the open hand uses `scale` 8, `minLine` 0.5 and `smooth`
+  0.5. The crease still has a small gap where it is thinnest.
+- Boot: `boot` and `sole`. The darker red band above the sole and under the cuff
+  was a shade, so it is part of `boot`.
+
 ## Checks
 
 I rendered frames of each clip to SVG with `tools/frames.ts` in the work folder
