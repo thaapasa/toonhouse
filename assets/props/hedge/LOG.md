@@ -23,3 +23,30 @@ A long low hedge made of three sections. Work files are in `assets/work/props/`.
 - The long section sways only 0.5° with a squash of 0.025, because it is so wide
   that a larger angle lifts its ends off the ground. The end sections sway 1.5°
   with a squash of 0.04.
+
+## Redrawn parts
+
+The traced sections had rough edges and darker green specks along the top. The
+sections were redrawn with `redraw-image` from the traced SVGs of commit
+`c2e0330`, so their frames and the pivots in `rig.json` stay as they were. The
+configs are in `redraw/`.
+
+To get the sources back and redraw the sections:
+
+```sh
+mkdir -p assets/work/hedge/traced
+for p in sectionLong sectionMiddle sectionShort; do
+  git show c2e0330:assets/props/hedge/$p.svg > assets/work/hedge/traced/$p.svg
+  MISE_ENV=art mise run redraw-image -- assets/props/hedge/redraw/$p.json
+done
+```
+
+The sections have these colors and color roles:
+
+- The outline of every section is `#453614`. The leaf marks inside the sections
+  are lines in the outline color. They are wider than the default
+  `lines.maxWidth` of 8 px, so the configs set it to 14.
+- The long section has `leaves-dark`, and the medium and the short section have
+  `leaves`, so that a color preset can keep the long section darker.
+- The dot in the medium section was dark green in the trace. `recolor` gives it
+  the outline color, as in the other sections.

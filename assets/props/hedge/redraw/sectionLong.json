@@ -1,0 +1,26 @@
+{
+  "src": "assets/work/hedge/traced/sectionLong.svg",
+  "out": "assets/props/hedge/sectionLong.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#453614",
+      "also": [
+        "#463814",
+        "#463813",
+        "#373107",
+        "#363108",
+        "#393208",
+        "#2e3609",
+        "#393906",
+        "#3b3807",
+        "#383905",
+        "#393a05",
+        "#383605",
+        "#354905"
+      ]
+    },
+    { "name": "leaves-dark", "color": "#0e590f" }
+  ],
+  "lines": { "maxWidth": 14 }
+}
