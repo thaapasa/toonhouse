@@ -36,3 +36,29 @@ settings. I added a `viewBox` to each SVG.
   branch would hold it.
 - The trunk sways 0.5°. The big clump sways 1.5°, the side clumps 2.5° and the
   small top clump 3.5°, with a squash of 0.03 to 0.04.
+
+## Redrawn parts
+
+The traced clumps had an outline made of a dozen olive and gray shades, with
+light streaks along the edge. The parts were redrawn with `redraw-image` from
+the traced SVGs of commit `c2e0330`, so the frames and the pivots in `rig.json`
+stay the same. The configs are in `redraw/`.
+
+To get the sources back and redraw the parts:
+
+```sh
+mkdir -p assets/work/trees-redraw/oak/traced
+for p in trunk clumpBig clumpDark clumpLight clumpSmall; do
+  git show c2e0330:assets/props/oak/$p.svg > assets/work/trees-redraw/oak/traced/$p.svg
+  MISE_ENV=art mise run redraw-image -- assets/props/oak/redraw/$p.json
+done
+```
+
+The parts have these colors and color roles:
+
+- The outline of every part is `#453126`, the outline color of the trunk. The
+  clumps had an olive outline, and all its shades now go to this color.
+- Trunk: `bark`.
+- Clumps: the big clump and the dark clump have the same green, `leaves`. The
+  light clump is `leaves-light` and the small clump `leaves-pale`.
+- The curved marks inside each clump are lines, so each one is its own path.

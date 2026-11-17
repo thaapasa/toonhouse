@@ -33,3 +33,29 @@ with red apples. Work files are in `assets/work/props/`.
 - The pivot of each clump is in its middle, at 75 % of its height.
 - The trunk sways 0.7°, the back clump 2° and the front clumps 3°, with a squash
   of 0.03 to 0.04.
+
+## Redrawn parts
+
+The traced parts had rough edges and two or three shades of each color. The
+parts were redrawn with `redraw-image` from the traced SVGs of commit `c2e0330`,
+so the frames and the pivots in `rig.json` stay the same. The configs are in
+`redraw/`.
+
+To get the sources back and redraw the parts:
+
+```sh
+mkdir -p assets/work/trees-redraw/apple-tree/traced
+for p in trunk clumpDark clumpLight clumpBright; do
+  git show c2e0330:assets/props/apple-tree/$p.svg > assets/work/trees-redraw/apple-tree/traced/$p.svg
+  MISE_ENV=art mise run redraw-image -- assets/props/apple-tree/redraw/$p.json
+done
+```
+
+The parts have these colors and color roles:
+
+- The outline of every part is `#2a1004`, the outline color of the trunk. The
+  clumps had a slightly greener outline, which now goes to the same color.
+- Trunk: `bark`.
+- Clumps: `leaves-dark`, `leaves-light` or `leaves-bright`, after the clump, and
+  `apple`. Each clump has its own leaf role, so that a color preset can keep the
+  clumps in different greens.

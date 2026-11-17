@@ -1,0 +1,28 @@
+{
+  "src": "assets/work/trees-redraw/apple-tree/traced/clumpLight.svg",
+  "out": "assets/props/apple-tree/clumpLight.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#2a1004",
+      "also": [
+        "#251e0b",
+        "#261c0a",
+        "#2b1d0c",
+        "#2b1800",
+        "#2e1501",
+        "#311401",
+        "#580a01"
+      ]
+    },
+    {
+      "name": "leaves-light",
+      "color": "#84cf1b"
+    },
+    {
+      "name": "apple",
+      "color": "#f20a15",
+      "also": ["#eb0812", "#e0070f"]
+    }
+  ]
+}

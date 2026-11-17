@@ -40,3 +40,39 @@ wind. Work files are in `assets/work/props/`.
   top of the one below.
 - The trunk sways 0.5°. The tiers sway from 1.5° at the bottom to 3° at the top,
   with a squash of 0.03.
+
+## Redrawn parts
+
+The traced tiers had a few green specks on the outline and a ragged zigzag edge.
+The parts were redrawn with `redraw-image` from the traced SVGs of commit
+`c2e0330`, so the frames and the pivots in `rig.json` stay the same. The configs
+are in `redraw/`.
+
+To get the sources back and redraw the parts:
+
+```sh
+mkdir -p assets/work/trees-redraw/spruce/traced
+for p in trunk tierTop tierMiddle tierBottom; do
+  git show c2e0330:assets/props/spruce/$p.svg > assets/work/trees-redraw/spruce/traced/$p.svg
+  MISE_ENV=art mise run redraw-image -- assets/props/spruce/redraw/$p.json
+done
+```
+
+The parts have these colors and color roles:
+
+- The outline of every part is `#241004`, as in the trace.
+- Trunk: `bark`.
+- Tiers: `needles` for the top and the middle tier, and `needles-dark` for the
+  darker bottom tier.
+
+Some parts of the trace had green where the outline should be:
+
+- Top tier: in the middle of the zigzag edge, the trace had a green patch that
+  reached out under the outline. `recolor` gives it the outline color, so the
+  outline is thicker there than elsewhere. `speckle` 80 removes a small hole in
+  the outline next to it.
+- Middle tier: `recolor` gives the outline color to a green patch on the outline
+  near the tip and to a green sliver under the zigzag edge on the left.
+- Bottom tier: a thin green sliver still shows along one spike of the zigzag
+  edge, left of the middle, because it is part of the main green path of the
+  trace.

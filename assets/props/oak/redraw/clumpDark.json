@@ -1,0 +1,26 @@
+{
+  "src": "assets/work/trees-redraw/oak/traced/clumpDark.svg",
+  "out": "assets/props/oak/clumpDark.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#453126",
+      "also": [
+        "#49472b",
+        "#49472a",
+        "#4d4b2c",
+        "#4f4d2f",
+        "#3a3717",
+        "#3b3c18",
+        "#7c7c62",
+        "#9ea38e",
+        "#848872",
+        "#787860",
+        "#737760",
+        "#6c7450"
+      ]
+    },
+    { "name": "leaves", "color": "#4eaa1c", "also": ["#4eab1c", "#4a8a1f"] }
+  ],
+  "lines": {}
+}

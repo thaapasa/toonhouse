@@ -1,0 +1,14 @@
+{
+  "src": "assets/work/trees-redraw/apple-tree/traced/trunk.svg",
+  "out": "assets/props/apple-tree/trunk.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#2a1004"
+    },
+    {
+      "name": "bark",
+      "color": "#825228"
+    }
+  ]
+}

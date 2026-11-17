@@ -1,0 +1,14 @@
+{
+  "src": "assets/work/trees-redraw/oak/traced/trunk.svg",
+  "out": "assets/props/oak/trunk.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#453126"
+    },
+    {
+      "name": "bark",
+      "color": "#8a5e2e"
+    }
+  ]
+}
