@@ -37,7 +37,7 @@ The config:
   speckle     Potrace drops paths smaller than this, in px of the work
               image (20).
   alphamax    Potrace corner threshold: higher means rounder (1.1).
-  opttolerance  Potrace curve tolerance: higher means fewer nodes (0.8).
+  opttolerance  Potrace curve tolerance: higher means fewer nodes (1.5).
   lines       Make each line inside the outline its own path, such as a mouth,
               a crease or the border between the hair and the face. The line
               is drawn on top of the fills, which close under it. Off by
@@ -247,7 +247,7 @@ def redraw(cfg, debug=False):
             turdsize=cfg.get("speckle", 20),
             alphamax=cfg.get("alphamax", 1.1),
             opticurve=True,
-            opttolerance=cfg.get("opttolerance", 0.8),
+            opttolerance=cfg.get("opttolerance", 1.5),
         )
 
         def pt(p):
