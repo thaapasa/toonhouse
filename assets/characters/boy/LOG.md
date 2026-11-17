@@ -32,3 +32,7 @@ done
   SVG.
 - Each fill path has the class of its color role, such as `c-skin`. The white
   sole, toe cap and laces of the shoe are one role, `trim`.
+- The lines inside the outline are paths of their own (`lines` in the configs):
+  the mouth, the lid line, the ear and its curl on the head, the finger gaps and
+  the creases on the hands, the waistband and the split line of the torso, and
+  the lace outlines and the sole line of the shoe.

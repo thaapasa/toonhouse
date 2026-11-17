@@ -38,6 +38,14 @@ The config:
               image (20).
   alphamax    Potrace corner threshold: higher means rounder (1.1).
   opttolerance  Potrace curve tolerance: higher means fewer nodes (0.8).
+  lines       Make each line inside the outline its own path, such as a mouth,
+              a crease or the border between the hair and the face. The line
+              is drawn on top of the fills, which close under it. Off by
+              default. An object with:
+                maxWidth  wider dark areas stay part of the outline (8)
+                minArea   smaller lines stay part of the outline (10)
+                minFill   the share of the border of a line that must be
+                          fill, not outline (0.85)
 All sizes are in px of the output frame unless the line says otherwise.
 """
 
@@ -195,6 +203,45 @@ def redraw(cfg, debug=False):
         if not changed:
             break
 
+    # Lines inside the outline become paths of their own. The fills close
+    # under each line, so that a line can move or go away without a hole.
+    lines = []
+    opts = cfg.get("lines")
+    if opts is not None and n > 1:
+        outline = (label == 0).astype(np.uint8)
+        max_w = opts.get("maxWidth", 8) * S
+        # A line has a fill on both sides, so closing the fills covers it. The
+        # outline along the edge has the background on one side and stays.
+        closed = cv2.morphologyEx((label > 0).astype(np.uint8), cv2.MORPH_CLOSE, disk(max_w / 2)).astype(bool)
+        inner = (outline > 0) & closed
+        width = cv2.distanceTransform(outline, cv2.DIST_L2, 5)
+        min_area = opts.get("minArea", 10) * S * S
+        count, comp, stats, _ = cv2.connectedComponentsWithStats(inner.astype(np.uint8), connectivity=8)
+        for k in range(1, count):
+            x, y, w, h, area = stats[k]
+            m = comp[y : y + h, x : x + w] == k
+            if area < min_area or 2 * width[y : y + h, x : x + w][m].max() > max_w:
+                continue
+            # A line lies in the fills, so most of its border is fill. A sliver
+            # off the side of the outline borders the rest of the outline.
+            y0, x0 = max(0, y - 2), max(0, x - 2)
+            box = comp[y0 : y + h + 2, x0 : x + w + 2] == k
+            ring = cv2.dilate(box.astype(np.uint8), np.ones((3, 3), np.uint8)).astype(bool) & ~box
+            if (label[y0 : y + h + 2, x0 : x + w + 2][ring] > 0).mean() < opts.get("minFill", 0.85):
+                continue
+            mask = np.zeros_like(inner)
+            mask[y : y + h, x : x + w] = m
+            lines.append(mask)
+        if lines:
+            all_lines = np.any(lines, axis=0)
+            # Each line reaches a little into the outline around it, so that no
+            # seam shows where it meets the outline along the edge.
+            grow = disk(opts.get("overlap", 1) * S)
+            lines = [m | (cv2.dilate(m.astype(np.uint8), grow).astype(bool) & (outline > 0)) for m in lines]
+            fills = argmax_blurred(np.where(label > 0, label, -1), n, max_w, sil)
+            take = all_lines & (fills > 0)
+            label[take] = fills[take]
+
     def trace(mask):
         paths = potrace.Bitmap(~mask).trace(
             turdsize=cfg.get("speckle", 20),
@@ -245,6 +292,9 @@ def redraw(cfg, debug=False):
                 mask[y : y + h, x : x + w] |= hole
         out.append(path(layers[i], mask))
 
+    for mask in lines:
+        out.append(path(layers[0], mask))
+
     svg = (
         f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W:g} {H:g}" width="{W:g}" height="{H:g}">\n'
         + "\n".join(out)
@@ -260,6 +310,8 @@ def redraw(cfg, debug=False):
         m = re.search(r'fill="(#\w+)" d="([^"]*)"', line)
         if m:
             print(f"  {m.group(1)}: {m.group(2).count('M')} shapes, {len(re.findall('[CL]', m.group(2)))} segments")
+    if lines:
+        print(f"  the last {len(lines)} paths are lines")
 
 
 def init(src, config, count):

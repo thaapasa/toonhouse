@@ -160,13 +160,20 @@ The graphics tools are in two places:
 `redraw-image` turns a generated image into an SVG that is easy to edit:
 
 - one path for the silhouette, in the outline color
-- one path for each fill color, on top of the silhouette.
+- one path for each fill color, on top of the silhouette
+- with `lines` in the config, one path for each line inside the outline, on top
+  of the fills.
 
-The lines inside the outline, such as a mouth, a crease or the gap between two
-fingers, are gaps between the fills where the outline shows through. A fill also
-reaches a little under the fills above it, so that no seam shows between them.
-The script smooths the edges, removes specks and thin seams, and fits curves
-with [Potrace](https://potrace.sourceforge.net/).
+A line inside the outline is a mouth, a crease, the gap between two fingers or
+the border between two fills, such as around the ear. With `lines`, the fills
+close under each line, so that you can move or remove a line by editing one
+path. A line path keeps its exact shape, including where it gets thinner at the
+ends. Without `lines`, a line is a gap between the fills where the outline shows
+through.
+
+A fill also reaches a little under the fills above it, so that no seam shows
+between them. The script smooths the edges, removes specks and thin seams, and
+fits curves with [Potrace](https://potrace.sourceforge.net/).
 
 Use it for the pieces of characters and props. It also works on an old traced
 SVG: the boy's parts were redrawn from their traced SVGs, and his configs are in
@@ -199,6 +206,7 @@ Run the commands from the repo root.
      above it, such as a shirt under its stripes, list that layer in its
      `covers`.
    - Set `out` to the SVG to write.
+   - Add `"lines": {}` to make each line its own path.
 
 3. Redraw the image, and render the result on a colored background:
 
@@ -224,9 +232,9 @@ much to smooth the edges and how thin a seam is.
 ### Color roles
 
 The name of a layer is its color role, and the path of the layer gets the class
-`c-<name>`, such as `c-skin` or `c-shirt-logo`. The classes let the app recolor
-a character with the color presets of that character. See
-[specs/characters.md](../specs/characters.md).
+`c-<name>`, such as `c-skin` or `c-shirt-logo`. The line paths have the class of
+the outline. The classes let the app recolor a character with the color presets
+of that character. See [specs/characters.md](../specs/characters.md).
 
 - Write the names in kebab case.
 - Use the same name for the same color in every part of a character. The skin is
@@ -246,8 +254,12 @@ a character with the color presets of that character. See
   a clean result, so fix the prompt first.
 - A line that is thinner than `minLine` between two fills counts as a seam and
   disappears. Lower `minLine` for a part with fine lines.
-- A line is the edge of a fill, not a stroke. To move a line, edit the fills on
-  both sides of it.
+- A line path is a filled shape, not a stroke. To make a line thicker, edit its
+  outline.
+- Only a line that has fill around most of it becomes its own path. Where a line
+  runs into the outline along the edge, it is cut there, and the outline keeps
+  the rest. The wedges between the spikes of the boy's hair taper into the
+  outline, so they stay part of it.
 - The script has not been tried on backgrounds yet. Trace them with
   `trace-image`.
 
