@@ -26,8 +26,8 @@ Sunny, has bright colors and bold dark outlines, and
 reference for it. Later packs can look very different, as long as they stay
 simple.
 
-The graphics are generated with AI on a local Draw Things install, then traced
-to SVG. [assets/CLAUDE.md](assets/CLAUDE.md) describes how.
+The graphics are generated with AI on a local Draw Things install, then redrawn
+as SVG. [assets/CLAUDE.md](assets/CLAUDE.md) describes how.
 
 ## Documentation
 
@@ -39,7 +39,9 @@ to SVG. [assets/CLAUDE.md](assets/CLAUDE.md) describes how.
 ## Local development
 
 The project uses [mise](https://mise.jdx.dev) for its tools. `mise install`
-installs Node, pnpm, VTracer and dekit, and then the project dependencies.
+installs Node, pnpm, VTracer and dekit, and then the project dependencies. The
+tools for making graphics are in a separate mise environment:
+`MISE_ENV=art mise install` installs them.
 
 The server needs PostgreSQL, which runs in Docker. `docker compose up -d` starts
 the development database on port 10732. The server tests make a database of

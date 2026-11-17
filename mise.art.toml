@@ -1,0 +1,16 @@
+# Tools for making graphics. They are not needed to run the app.
+# Install them with `MISE_ENV=art mise install`, and run the tasks with
+# `MISE_ENV=art mise run <task>`. See assets/CLAUDE.md.
+
+[tools]
+python = "3.13"
+uv = "0.13"
+
+[env]
+# Use the Python from mise. uv keeps the packages of each script in its own
+# cache, outside the project folder.
+UV_PYTHON_PREFERENCE = "only-system"
+
+[tasks.redraw-image]
+description = "Redraw an image or a traced SVG as a clean SVG"
+run = "uv run --script scripts/redraw-image.py"

@@ -3,7 +3,7 @@
 This guide describes how to make a 2D character that walks, waves, talks and
 blinks, in the same way as the boy in the 2D motion prototype. Follow it to make
 a new character in the style of an asset pack. Read [CLAUDE.md](CLAUDE.md)
-first: it covers generating images, writing prompts and tracing.
+first: it covers generating images, writing prompts and redrawing.
 
 The boy is the worked example. His files are in `prototypes/`:
 
@@ -112,16 +112,20 @@ from the top left. It prints the box of each piece. Check that there are five,
 then rename them to `head.png`, `torso.png`, `hand.png`, `hand-open.png` and
 `foot.png`.
 
-### 3. Trace each piece
+### 3. Redraw each piece
+
+Redraw each piece as described in "Redrawing" in [CLAUDE.md](CLAUDE.md). Keep
+the config of each piece in `assets/work/<name>/pieces/`, next to the piece:
 
 ```sh
-pnpm trace-image assets/work/<name>/pieces/head.png assets/work/<name>/pieces/head.svg
+MISE_ENV=art mise run redraw-image -- init assets/work/<name>/pieces/head.png assets/work/<name>/pieces/head.json
+MISE_ENV=art mise run redraw-image -- assets/work/<name>/pieces/head.json
 pnpm render-svg assets/work/<name>/pieces/head.svg assets/work/<name>/check/head.png --background '#50a0dc'
 ```
 
-Run `trace-image` through `pnpm`, because it calls `svgo` from
-`node_modules/.bin`. Look at each check image for holes and stray edges. If two
-colors merge, trace again with `--palette`, as [CLAUDE.md](CLAUDE.md) describes.
+Use the same outline color in every piece, because the arms and the legs are
+drawn in that color too. The boy's pieces use `#422517`, which is
+`colors.outline` in his `rig.json`.
 
 ### 4. Build the rig
 
@@ -150,8 +154,8 @@ pieces, and change the fractions where they don't:
 These values are set by eye in the same script. Expect to change them for a new
 character:
 
-- `outline` and `skin`: take the most common colors in the traced SVGs, with
-  `grep -oE 'fill="#[0-9a-f]+"' <piece>.svg | sort | uniq -c | sort -rn`.
+- `outline` and `skin`: take the colors of the outline and the skin layers from
+  the configs of the pieces.
 - `headScale`, `handScale` and `footScale`: the pieces come off the sheet at
   different sizes. The boy's head is drawn at 0.82 and his hands and foot at
   0.62.
@@ -159,7 +163,7 @@ character:
   is drawn straight. Make the legs long enough that the knees bend at the hip
   height of the walk.
 - `armWidth`, `legWidth` and `outlineWidth`: match the outline width of the
-  traced pieces.
+  pieces.
 
 When the character is in the library, tune it in the Fit tab of the character
 studio while a clip plays. The tab sets the size of each part, with
@@ -304,8 +308,8 @@ Check these frames:
 ### 9. Commit
 
 Commit the SVGs, `rig.json`, the mouth patch, the `.prompt.json` of each
-generated image you used, the code and the log. Don't commit the generated PNG
-files.
+generated image you used, the `redraw-image` configs in a `redraw/` folder, the
+code and the log. Don't commit the generated PNG files.
 
 ## Known limits
 

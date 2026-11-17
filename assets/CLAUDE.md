@@ -1,7 +1,7 @@
 # Assets
 
 This directory holds the graphics of the app. Agents make new graphics by
-generating images with AI, tracing them to SVG and checking the result.
+generating images with AI, redrawing them as SVG and checking the result.
 
 - `examples/`: style references for the art and the UI design. They are not used
   in the app.
@@ -73,9 +73,9 @@ These rules come from testing with Qwen Image 2.1 Turbo.
 - End the prompt with the style prompt of the pack. It should ask for solid
   color fills with no gradients, no texture and no shading, and for an even
   outline around every shape.
-- Keep every fill color clearly lighter than the outline. When tracing reduces
-  the colors, it merges dark colors, such as dark green shorts, with the
-  outline.
+- Keep every fill color clearly lighter than the outline. Otherwise a dark fill,
+  such as dark green shorts, is hard to tell apart from the outline when the
+  image is redrawn.
 - For a rig, ask for a "cutout puppet parts sheet" with every piece separate and
   nothing touching. This gives an exploded side view with the head, the torso,
   an arm, the shorts, a leg and a foot as separate pieces. The arm and the leg
@@ -135,7 +135,7 @@ trees and the bushes.
 - For a bush, ask for clumps "with a flat bottom". Some seeds still draw a
   ground shadow or a darker band under a clump.
 - Dark green fills can trace with specks and thin lines along a jagged edge.
-  Trace them again with a fixed palette of the outline and the fill.
+  Redraw them with `redraw-image`, which removes both.
 
 In the rig, the clumps overlap each other by a good part of their size, so that
 no gap opens when they sway. A clump behind the trunk lets the branches show in
@@ -144,7 +144,96 @@ below the center. The pivot of a clump of a bush is in the middle of its bottom
 edge, and the root of a bush sways only about 1°, because a larger angle lifts
 the ends of a wide clump off the ground.
 
+## Tools
+
+The graphics tools are in two places:
+
+- `pnpm generate-image`, `pnpm render-svg` and `pnpm trace-image` come with the
+  normal `mise install`.
+- `redraw-image` is a Python script, and its tools are in the mise environment
+  `art`. Run `MISE_ENV=art mise install` once to install Python and uv. The
+  first run of the script then installs its Python packages into the uv cache,
+  outside the project folder.
+
+## Redrawing
+
+`redraw-image` turns a generated image into an SVG that is easy to edit:
+
+- one path for the silhouette, in the outline color
+- one path for each fill color, on top of the silhouette.
+
+The lines inside the outline, such as a mouth, a crease or the gap between two
+fingers, are gaps between the fills where the outline shows through. A fill also
+reaches a little under the fills above it, so that no seam shows between them.
+The script smooths the edges, removes specks and thin seams, and fits curves
+with [Potrace](https://potrace.sourceforge.net/).
+
+Use it for the pieces of characters and props. It also works on an old traced
+SVG: the boy's parts were redrawn from their traced SVGs, and his configs are in
+`characters/boy/redraw/`.
+
+### Steps
+
+Run the commands from the repo root.
+
+1. Write a starting config. `init` finds the main colors of the image, takes the
+   darkest one as the outline and lists the rest as fills, from the largest area
+   down:
+
+   ```sh
+   MISE_ENV=art mise run redraw-image -- init assets/work/fox/head.png assets/work/fox/head.json
+   ```
+
+2. Edit the layers in the config. This is the step that decides how the result
+   looks:
+   - Keep one layer for each color that the part should have, such as the skin,
+     the hair, the eye white and the shirt. Give each a `name`.
+   - Put the shades and the leftovers of a color in the `also` list of the layer
+     they belong to. The image model often shades a fill even when the prompt
+     asks for flat colors.
+   - Put dark colors that draw lines in the outline layer. A dark shade along
+     the edge of a shape is usually part of the outline.
+   - Order the layers from the bottom up. An eye goes above the skin, and
+     stripes go above the shirt. If a layer should lie completely under a layer
+     above it, such as a shirt under its stripes, list that layer in its
+     `covers`.
+   - Set `out` to the SVG to write.
+
+3. Redraw the image, and render the result on a colored background:
+
+   ```sh
+   MISE_ENV=art mise run redraw-image -- assets/work/fox/head.json
+   pnpm render-svg assets/work/fox/head.svg assets/work/fox/head-check.png --background '#50a0dc'
+   ```
+
+4. Compare the result with the image. `compare` renders two SVGs side by side,
+   and `--crop` zooms in on a detail:
+
+   ```sh
+   MISE_ENV=art mise run redraw-image -- compare a.svg b.svg assets/work/fox/cmp.png --width 1200 --crop 150,150,300,300
+   ```
+
+5. Change the config and run it again until the result matches. `--debug` writes
+   an image that shows the layer of every pixel, which helps when a color goes
+   to the wrong layer.
+
+Run `MISE_ENV=art mise run redraw-image -- --help` for the settings, such as how
+much to smooth the edges and how thin a seam is.
+
+### Limits
+
+- The script can't fix a shape that is wrong in the source. A clean source gives
+  a clean result, so fix the prompt first.
+- A line that is thinner than `minLine` between two fills counts as a seam and
+  disappears. Lower `minLine` for a part with fine lines.
+- A line is the edge of a fill, not a stroke. To move a line, edit the fills on
+  both sides of it.
+- The script has not been tried on backgrounds yet. Trace them with
+  `trace-image`.
+
 ## Tracing
+
+Backgrounds are still traced with VTracer:
 
 ```sh
 pnpm trace-image assets/work/fox.png assets/work/fox.svg
@@ -160,6 +249,6 @@ colors from the image, such as `--palette '#3a2410,#f8c48c,#e01010,#22b010'`.
 
 ## What to commit
 
-Commit the final SVG and the `.prompt.json` of the image it came from. Don't
-commit the generated PNG files, because they are large and can be made again
-from the prompt.
+Commit the final SVG, the `.prompt.json` of the image it came from and the
+`redraw-image` config. Don't commit the generated PNG files, because they are
+large and can be made again from the prompt.

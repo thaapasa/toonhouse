@@ -1,0 +1,27 @@
+{
+  "src": "assets/work/boy-traced/torso.svg",
+  "out": "assets/characters/boy/torso.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#422517",
+      "also": ["#461407", "#491910", "#55190a", "#322d0d", "#014e00"]
+    },
+    {
+      "name": "shorts",
+      "color": "#0eed00",
+      "also": ["#0ca902", "#0b7401"]
+    },
+    {
+      "name": "shirt",
+      "color": "#e80000",
+      "also": ["#ea0000", "#f50000", "#f90000", "#b00300"],
+      "covers": ["stripes"]
+    },
+    {
+      "name": "stripes",
+      "color": "#0a0505",
+      "also": ["#060100", "#000000"]
+    }
+  ]
+}
