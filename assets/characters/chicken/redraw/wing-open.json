@@ -1,0 +1,33 @@
+{
+  "src": "assets/work/chicken/traced/wing-open.svg",
+  "out": "assets/characters/chicken/wing-open.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#4f382e",
+      "also": [
+        "#452a1c",
+        "#462e22",
+        "#482b1d",
+        "#4d3022",
+        "#4e392f",
+        "#4f3629",
+        "#533a2e",
+        "#5b4235",
+        "#5d4437",
+        "#5e463c",
+        "#5e493e",
+        "#6c544a",
+        "#6f5d59",
+        "#705c52",
+        "#a89498"
+      ]
+    },
+    {
+      "name": "feathers",
+      "color": "#fbf9f4",
+      "also": ["#fbfaf5"]
+    }
+  ],
+  "lines": {}
+}

@@ -26,6 +26,36 @@ rig. Work files are in `assets/work/chicken/`.
 2. Traced each piece with the default settings and checked it on a blue
    background. No colors merged. Then I added a `viewBox` to each SVG.
 
+## Redrawn parts
+
+The traced parts had stacked shapes in many shades of brown along the outline
+and rough edges. All five parts were redrawn with `redraw-image` from the traced
+SVGs of commit `0d1f630`, so the frames and the pivots stay as they were. The
+configs are in `redraw/`. Their source is
+`assets/work/chicken/traced/<part>.svg`, which you get back with:
+
+```sh
+mkdir -p assets/work/chicken/traced
+for p in head body wing wing-open foot; do
+  git show 0d1f630:assets/characters/chicken/$p.svg > assets/work/chicken/traced/$p.svg
+done
+```
+
+- The outline of every part is `#4f382e`, the feathers are `#fbf9f4` and the
+  foot is `#fbaf00`, the same as `colors.outline`, `colors.feathers` and
+  `colors.leg` of the rig. The beak is `#f9af01`, as `colors.beak`.
+- The color roles are `feathers`, `comb`, `beak` and `eye` on the head,
+  `feathers` on the body and the wings, and `leg` on the foot. The comb and the
+  wattles are one red, so both are `comb`.
+- All the brown shades went to the outline. The darker orange of the lower half
+  of the beak and of the claws went to `beak` and `leg`. The two shades of white
+  on the body and the tail are both `feathers`.
+- The gray glint in the pupil is gone, and the pupil is a round dot in the
+  outline color. A path in the same gray also ran along the back of the neck,
+  and as the eye white it left a white sliver in the outline there.
+- The step on the top edge of the front toe and the short ticks on the toes are
+  in the traced foot, so they stay.
+
 ## Rig
 
 The pivots come from the alpha masks, read row by row:
