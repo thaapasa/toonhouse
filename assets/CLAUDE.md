@@ -187,12 +187,19 @@ backgrounds.
 A layer that runs off the frame, such as the ground, needs `openEdges` in its
 config, such as `"openEdges": ["left", "right", "bottom"]`. Otherwise the edge
 of the frame gets an outline. The paths reach a little past the frame on those
-edges, and the `viewBox` hides it. The village's `redraw/` has examples.
+edges, and the `viewBox` hides it. The village's `redraw/` has examples. The
+meadow was redrawn before `openEdges` existed, so its `redraw/` has scripts that
+do the same.
+
+A traced layer sometimes has a thin stripe along the edge of the frame, and
+`openEdges` keeps it as a line. Cover the stripe in a prep script with the
+pixels just inside it, as the farm's `prep-far.py` does.
 
 A traced background often has one large shape under everything else, such as the
 hill, with the other shapes stacked on it. `recolor` changes whole paths, so it
-can't split a region that is part of that shape. The meadow was redrawn before
-`openEdges` existed, so its `redraw/` has scripts that do the same.
+can't split a region that is part of that shape. Split such a path by position
+in a prep script instead: draw it twice, once in each color, and clip one copy
+to the region of its role, as the farm's prep scripts do.
 
 ### Redrawing an existing asset
 
@@ -233,7 +240,8 @@ back with `git show`. The boy is the example.
 
 A traced SVG sometimes uses one color for two roles, such as a hair color that
 also draws the mouth line. Find those paths with `paths`, which lists the paths
-of the SVG with their fills, and `--show`, which renders one of them in magenta:
+of the SVG with their fills, and `--show`, which renders one of them in magenta
+at twice the size of the frame:
 
 ```sh
 MISE_ENV=art mise run redraw-image -- paths assets/work/fox/traced/head.svg
