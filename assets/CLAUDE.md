@@ -195,6 +195,16 @@ A traced layer sometimes has a thin stripe along the edge of the frame, and
 `openEdges` keeps it as a line. Cover the stripe in a prep script with the
 pixels just inside it, as the farm's `prep-far.py` does.
 
+A far layer can have no outline at all, only soft shapes. Set `"edge": 0` and
+use the darkest fill as the first layer, so that no outline shows.
+
+A large, detailed layer can take minutes at the default `scale` of 4. Use
+`scale` 2 while you try settings.
+
+The redraw suits flat art. Art that is painted with texture, such as the
+harbor's houses, loses its detail or grows in size, and needs a new image with
+flat colors instead.
+
 A traced background often has one large shape under everything else, such as the
 hill, with the other shapes stacked on it. `recolor` changes whole paths, so it
 can't split a region that is part of that shape. Split such a path by position
@@ -357,9 +367,9 @@ of that character. See [specs/characters.md](../specs/characters.md).
 
 ## Tracing
 
-`trace-image` is the older way to turn an image into an SVG. The farm, the
-village and the harbor were traced with it, and their `LOG.md` files describe
-how:
+`trace-image` is the older way to turn an image into an SVG. The harbor is still
+traced, because its art is painted with texture and doesn't redraw well. Its
+`LOG.md` describes how:
 
 ```sh
 pnpm trace-image assets/work/fox.png assets/work/fox.svg
