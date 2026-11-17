@@ -88,3 +88,67 @@ I removed the foot from `body.svg`:
 
 The hip and the pivot of the body did not need to move. I checked the hop, the
 idle, the look out and the talk in the studio.
+
+## Redrawn parts
+
+The traced parts had stacked shapes in many shades and rough edges. All five
+parts were redrawn with `redraw-image`, and the configs are in `redraw/`.
+
+### Sources
+
+The head, the ear, the paw and the foot were redrawn from the pieces in
+`assets/work/bunny/pieces/`, which have the same frames as the parts. The pieces
+are smoother than the traced SVGs: the trace had broken the rim of the inner ear
+into many shades. To get the pieces back, generate `parts-13.png` from
+`parts.prompt.json` and split it as in "Splitting and tracing".
+
+The body was redrawn from the committed `body.svg` of commit `c70f59d`, because
+the piece still has the hind foot that was removed from the part (see "Body
+without the hind foot"). To get it back:
+
+```sh
+mkdir -p assets/work/bunny/traced
+git show c70f59d:assets/characters/bunny/body.svg > assets/work/bunny/traced/body.svg
+```
+
+### Prep scripts
+
+Two scripts change the sources before the redraw. Run them from the repo root:
+
+```sh
+mkdir -p assets/work/bunny/redraw
+MISE_ENV=art mise exec -- uv run --script assets/characters/bunny/redraw/prep-head.py \
+  assets/work/bunny/pieces/head.png assets/work/bunny/redraw/head-prep.png
+python3 assets/characters/bunny/redraw/prep-body.py \
+  assets/work/bunny/traced/body.svg assets/work/bunny/traced/body-prep.svg
+```
+
+- `prep-head.py`: in the head piece, the pupil, the ring around the eye and the
+  smile are all near black, while the outline of the head is dark brown. The
+  script paints the near-black pixels outside an ellipse around the pupil in the
+  outline color, so that only the pupil is black. On the right, the pupil
+  touches the ring, so a little of the ring stays black.
+- `prep-body.py`: in the traced body, the line of the haunch was three pieces of
+  different widths and came out wavy. The script replaces them with one stroke
+  in the outline color, covers a leftover wedge of the old line with fur, and
+  starts the stroke that closes the cut outline a little higher up, so that no
+  notch shows where it meets the traced outline.
+
+### Colors
+
+- The outline is `#442113`, the fur `#e7a862` and the belly `#fcf0da`, the same
+  as `colors.outline`, `colors.fur` and `colors.belly` of the rig. The traced
+  shades went to the color they belong to, such as the darker fur at the bottom
+  of the head and the paw, and the shaded belly.
+- `belly` is the role of all the light fur: the muzzle, the belly, the inner
+  side of the paw and the sole of the foot.
+- The other roles are `eye`, `pupil` and `nose` on the head, `inner-ear` and
+  `inner-ear-rim` on the ear, and `tail` on the body. The highlight of the eye
+  is part of `eye`, and the highlight of the nose is part of `nose`.
+- The line of the haunch was a lighter brown and is now in the outline color.
+- These lines are line paths (`lines` in the configs): the smile and the ring of
+  the iris on the head (in two pieces), the line of the haunch and the line
+  between the tail and the body, and the toe line on the foot.
+
+All five configs use a higher `smooth` than the default, because the pieces are
+small and their edges came out lumpy.

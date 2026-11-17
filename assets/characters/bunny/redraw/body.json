@@ -1,0 +1,28 @@
+{
+  "src": "assets/work/bunny/traced/body-prep.svg",
+  "out": "assets/characters/bunny/body.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#442113",
+      "also": ["#472618", "#6c3917", "#865a3a"]
+    },
+    {
+      "name": "fur",
+      "color": "#e7a862",
+      "also": ["#e4a762", "#b6804b"]
+    },
+    {
+      "name": "belly",
+      "color": "#fcf0da",
+      "also": ["#faefd9", "#ebd7be"]
+    },
+    {
+      "name": "tail",
+      "color": "#f5efeb",
+      "also": ["#cbbcb0", "#9b8577"]
+    }
+  ],
+  "smooth": 2.5,
+  "lines": {}
+}
