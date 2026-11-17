@@ -414,7 +414,7 @@ def list_paths(src, show, out):
     for i, tag in enumerate(tags):
         m = re.search(r'\sd="([^"]*)"', tag)
         d = m.group(1) if m else ""
-        start = re.match(r"\s*[Mm]\s*([-\d.]+)[\s,]*([-\d.]+)", d)
+        start = re.match(r"\s*[Mm]\s*(-?[\d.]+)[\s,]*(-?[\d.]+)", d)
         at = f"starts at {float(start.group(1)):.0f},{float(start.group(2)):.0f}" if start else ""
         print(f"{i:4}  {path_fill(tag):9}  {len(d):6} chars  {at}")
 
