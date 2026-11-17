@@ -187,8 +187,12 @@ backgrounds.
 A layer that runs off the frame, such as the ground, needs `openEdges` in its
 config, such as `"openEdges": ["left", "right", "bottom"]`. Otherwise the edge
 of the frame gets an outline. The paths reach a little past the frame on those
-edges, and the `viewBox` hides it. The meadow was redrawn before `openEdges`
-existed, so its `redraw/` has scripts that do the same.
+edges, and the `viewBox` hides it. The village's `redraw/` has examples.
+
+A traced background often has one large shape under everything else, such as the
+hill, with the other shapes stacked on it. `recolor` changes whole paths, so it
+can't split a region that is part of that shape. The meadow was redrawn before
+`openEdges` existed, so its `redraw/` has scripts that do the same.
 
 ### Redrawing an existing asset
 
