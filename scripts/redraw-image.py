@@ -14,6 +14,8 @@ Usage:
   redraw-image paths <source.svg> [--show N <out.png>]
       List the paths of an SVG with their fills, for "recolor". --show renders
       the SVG with path N in magenta.
+  redraw-image minify <svg>...
+      Minify SVGs as a redraw does, such as the output of a finish script.
   redraw-image compare <a> <b> <out.png> [--width PX] [--crop X0,Y0,X1,Y1]
       Show two images side by side on blue. Each one is an SVG or a PNG, such as
       the source image and its redraw. The crop is in the units of a.
@@ -42,6 +44,13 @@ The config:
               image (20).
   alphamax    Potrace corner threshold: higher means rounder (1.1).
   opttolerance  Potrace curve tolerance: higher means fewer nodes (1.5).
+  openEdges   The edges of the frame that the image runs off, such as
+              ["left", "right", "bottom"] for a background layer. Without it,
+              the edge of the frame gets an outline. The paths reach past the
+              frame there, and the viewBox hides it.
+  pad         How far past an open edge the paths reach (24).
+  minify      Minify the SVG with SVGO (true). The paths and their classes
+              stay as they are.
   recolor     For an SVG source: new fills for some of its paths, by the
               number that "paths" shows, such as {"12": "#422517"}. Use it when
               the source draws two roles in one color.
@@ -198,6 +207,17 @@ def redraw(cfg, debug=False):
             sys.exit(f"Layer names must be in kebab case, such as shirt-logo: {layer.get('name')!r}")
     n = len(layers)
     img, W, H = load_source(cfg["src"], S, cfg.get("recolor"))
+    # An open edge gets the pixels along it repeated outward, so that the
+    # shapes run on past it and no outline forms along the frame.
+    edges = cfg.get("openEdges", [])
+    unknown = set(edges) - {"top", "bottom", "left", "right"}
+    if unknown:
+        sys.exit(f"Unknown edges in openEdges: {sorted(unknown)}")
+    P = int(cfg.get("pad", 24) * S)
+    top, bottom, left, right = [P if e in edges else 0 for e in ("top", "bottom", "left", "right")]
+    if edges:
+        img = cv2.copyMakeBorder(img, top, bottom, left, right, cv2.BORDER_REPLICATE)
+    ox, oy = left / S, top / S
     smooth = cfg.get("smooth", 0.75) * S
 
     label = classify(img, layers)
@@ -290,7 +310,7 @@ def redraw(cfg, debug=False):
         )
 
         def pt(p):
-            return f"{p.x / S:.1f} {p.y / S:.1f}"
+            return f"{p.x / S - ox:.1f} {p.y / S - oy:.1f}"
 
         d = ""
         for curve in paths:
@@ -341,6 +361,8 @@ def redraw(cfg, debug=False):
     )
     with open(cfg["out"], "w") as f:
         f.write(svg)
+    if cfg.get("minify", True):
+        minify(cfg["out"])
     if debug:
         colors = np.array([hex_bgr(l["color"]) for l in layers] + [[255, 255, 255]], np.uint8)
         labels = colors[label]
@@ -348,13 +370,45 @@ def redraw(cfg, debug=False):
         for mask in lines:
             labels[mask] = (255, 0, 255)
         cv2.imwrite(cfg["out"] + ".labels.png", labels)
-    print(f'{cfg["out"]} ({len(svg)} bytes)')
+    print(f'{cfg["out"]} ({os.path.getsize(cfg["out"])} bytes)')
     for line in out:
         m = re.search(r'fill="(#\w+)" d="([^"]*)"', line)
         if m:
             print(f"  {m.group(1)}: {m.group(2).count('M')} shapes, {len(re.findall('[CL]', m.group(2)))} segments")
     if lines:
         print(f"  the last {len(lines)} paths are lines")
+
+
+SVGO_CONFIG = """export default {
+  multipass: true,
+  floatPrecision: 1,
+  plugins: [
+    {
+      name: 'preset-default',
+      params: {
+        overrides: {
+          // Each layer and each line is its own path, so don't merge them.
+          mergePaths: false,
+          // The app puts the parts on one page, so ids must stay as written.
+          cleanupIds: false,
+        },
+      },
+    },
+  ],
+};
+"""
+
+
+def minify(svg):
+    svgo = os.path.join(ROOT, "node_modules", ".bin", "svgo")
+    if not os.path.exists(svgo):
+        print("  SVGO is missing, so the SVG is not minified. Run pnpm install.")
+        return
+    with tempfile.TemporaryDirectory() as tmp:
+        config = os.path.join(tmp, "svgo.config.mjs")
+        with open(config, "w") as f:
+            f.write(SVGO_CONFIG)
+        subprocess.run([svgo, "--quiet", "--config", config, "-i", svg, "-o", svg], check=True)
 
 
 def init(src, config, count):
@@ -458,6 +512,13 @@ def main():
         if len(args) != 3:
             sys.exit("Usage: redraw-image init <source> <config.json> [--colors N]")
         init(args[1], args[2], count)
+    elif args[0] == "minify":
+        if len(args) < 2:
+            sys.exit("Usage: redraw-image minify <svg>...")
+        for svg in args[1:]:
+            before = os.path.getsize(svg)
+            minify(svg)
+            print(f"{svg}: {before} -> {os.path.getsize(svg)} bytes")
     elif args[0] == "paths":
         show = option(args, "--show")
         if show is not None and len(args) == 3:

@@ -27,5 +27,6 @@
       "also": ["#711ca7", "#9c5590", "#9211d5", "#831abf"]
     }
   ],
-  "lines": {}
+  "lines": {},
+  "minify": false
 }

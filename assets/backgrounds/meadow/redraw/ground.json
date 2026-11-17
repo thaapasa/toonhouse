@@ -38,5 +38,6 @@
     }
   ],
   "minArea": 12,
-  "smooth": 1.5
+  "smooth": 1.5,
+  "minify": false
 }

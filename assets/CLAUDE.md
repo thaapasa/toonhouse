@@ -175,10 +175,20 @@ ends. Without `lines`, a line is a gap between the fills where the outline shows
 through.
 
 A fill also reaches a little under the fills above it, so that no seam shows
-between them. The script smooths the edges, removes specks and thin seams, and
-fits curves with [Potrace](https://potrace.sourceforge.net/).
+between them. The script smooths the edges, removes specks and thin seams, fits
+curves with [Potrace](https://potrace.sourceforge.net/), and minifies the SVG
+with SVGO. The minifying keeps every path and its class.
 
-Use it for the pieces of characters and props.
+Use it for the pieces of characters and props, and for the layers of
+backgrounds.
+
+### Background layers
+
+A layer that runs off the frame, such as the ground, needs `openEdges` in its
+config, such as `"openEdges": ["left", "right", "bottom"]`. Otherwise the edge
+of the frame gets an outline. The paths reach a little past the frame on those
+edges, and the `viewBox` hides it. The meadow was redrawn before `openEdges`
+existed, so its `redraw/` has scripts that do the same.
 
 ### Redrawing an existing asset
 
@@ -211,7 +221,9 @@ the outline of its trunk.
 Some parts need more than `redraw-image` writes, such as a clip path around a
 hair layer, a mirrored hand, or a pattern drawn by hand. Write a script that
 makes the final SVG from the redrawn one, and keep it in `redraw/` with the
-configs, as the emo character's `finish.py`. Keep the configs in
+configs, as the emo character's `finish.py`. Set `"minify": false` in the
+configs whose output the finish script reads, and minify the final SVG with
+`MISE_ENV=art mise run redraw-image -- minify <svg>`. Keep the configs in
 `<asset>/redraw/`, and write in the `LOG.md` of the asset how to get the sources
 back with `git show`. The boy is the example.
 
@@ -330,12 +342,12 @@ of that character. See [specs/characters.md](../specs/characters.md).
   runs into the outline along the edge, it is cut there, and the outline keeps
   the rest. The wedges between the spikes of the boy's hair taper into the
   outline, so they stay part of it.
-- The script has not been tried on backgrounds yet. Trace them with
-  `trace-image`.
 
 ## Tracing
 
-Backgrounds are still traced with VTracer:
+`trace-image` is the older way to turn an image into an SVG. The farm, the
+village and the harbor were traced with it, and their `LOG.md` files describe
+how:
 
 ```sh
 pnpm trace-image assets/work/fox.png assets/work/fox.svg

@@ -28,5 +28,6 @@
     }
   ],
   "lines": {},
-  "minLine": 1
+  "minLine": 1,
+  "minify": false
 }

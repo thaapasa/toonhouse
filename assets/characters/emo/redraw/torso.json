@@ -68,5 +68,6 @@
     }
   ],
   "minArea": 40,
-  "lines": {}
+  "lines": {},
+  "minify": false
 }

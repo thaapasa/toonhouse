@@ -27,8 +27,13 @@
       "color": "#a6d4ae",
       "also": ["#a3d3ad", "#8dae91", "#8aa68d", "#8cb087"]
     },
-    { "name": "hill", "color": "#93c86f", "also": ["#92c76e"] }
+    {
+      "name": "hill",
+      "color": "#93c86f",
+      "also": ["#92c76e"]
+    }
   ],
   "lines": {},
-  "smooth": 2
+  "smooth": 2,
+  "minify": false
 }

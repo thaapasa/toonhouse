@@ -31,5 +31,6 @@
       ]
     }
   ],
-  "lines": {}
+  "lines": {},
+  "minify": false
 }

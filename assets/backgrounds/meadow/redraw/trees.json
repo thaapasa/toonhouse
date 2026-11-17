@@ -65,5 +65,6 @@
     "152": "#6ac066",
     "184": "#6ac066"
   },
-  "minLine": 0.8
+  "minLine": 0.8,
+  "minify": false
 }
