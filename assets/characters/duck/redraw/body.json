@@ -1,0 +1,40 @@
+{
+  "src": "assets/work/duck/traced/body.svg",
+  "out": "assets/characters/duck/body.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#392a20",
+      "also": [
+        "#554230",
+        "#4a3826",
+        "#2e2019",
+        "#1b110e",
+        "#271e18",
+        "#35271c",
+        "#5f4a33",
+        "#76624b",
+        "#8f7251"
+      ]
+    },
+    {
+      "name": "body",
+      "color": "#c9c9c4",
+      "also": ["#887d6f", "#9d9488", "#b9b2a7"]
+    },
+    {
+      "name": "breast",
+      "color": "#c19f71",
+      "also": ["#bb9a6f"]
+    }
+  ],
+  "lines": {},
+  "recolor": {
+    "4": "#c9c9c4",
+    "7": "#c9c9c4",
+    "8": "#c9c9c4",
+    "9": "#c9c9c4",
+    "20": "#c9c9c4",
+    "27": "#c9c9c4"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "src": "assets/work/duck/traced/head.svg",
+  "out": "assets/characters/duck/head.svg",
+  "recolor": { "9": "#101010" },
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#392a20",
+      "also": [
+        "#152112",
+        "#1b2719",
+        "#2e3808",
+        "#2e4b29",
+        "#133d23",
+        "#3e3403",
+        "#564735",
+        "#40382b",
+        "#543e00",
+        "#5e4b02"
+      ]
+    },
+    { "name": "feathers", "color": "#00ae47" },
+    { "name": "collar", "color": "#f6f5f2" },
+    { "name": "breast", "color": "#c19f71", "also": ["#a9986f", "#bfac7f"] },
+    { "name": "beak", "color": "#f8e600" },
+    { "name": "eye", "color": "#f6f5f4" },
+    { "name": "pupil", "color": "#101010" }
+  ],
+  "lines": {}
+}

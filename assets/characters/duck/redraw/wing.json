@@ -1,0 +1,37 @@
+{
+  "src": "assets/work/duck/traced/wing.svg",
+  "out": "assets/characters/duck/wing.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#392a20",
+      "also": [
+        "#32251a",
+        "#3b2b1f",
+        "#312823",
+        "#55412a",
+        "#463627",
+        "#543f29",
+        "#5e4b35"
+      ]
+    },
+    {
+      "name": "wing",
+      "color": "#968772",
+      "also": [
+        "#92826d",
+        "#877e72",
+        "#8e8170",
+        "#8c7c68",
+        "#8e7f6b",
+        "#6e5b44",
+        "#6e5e4a"
+      ]
+    },
+    {
+      "name": "speculum",
+      "color": "#0666c3"
+    }
+  ],
+  "lines": {}
+}

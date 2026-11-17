@@ -36,6 +36,45 @@ bird rig of the hen. Work files are in `assets/work/duck/`.
    flat side view of a webbed foot with a scalloped front edge and two toe
    lines, in the outline color and the orange of the traced foot.
 
+## Redrawn parts
+
+The traced parts had stacked shapes in many shades, rough edges and seams. All
+five parts were redrawn with `redraw-image` from the SVGs of commit `738affe`.
+The configs are in `redraw/`. Their source is
+`assets/work/duck/traced/<part>.svg`, which you get back with:
+
+```sh
+mkdir -p assets/work/duck/traced
+for p in head body wing wing-open foot; do
+  git show 738affe:assets/characters/duck/$p.svg > assets/work/duck/traced/$p.svg
+done
+```
+
+- The outline of every part is `#392a20`, the same as `colors.outline` of the
+  rig. The green of the head is `feathers`, the color that the rig uses for the
+  neck and the lids, and the grey of the body is `colors.thigh`.
+- The color roles are `feathers`, `collar`, `breast`, `beak`, `eye` and `pupil`
+  on the head, `body` and `breast` on the body, `wing` and `speculum` on both
+  wings, and `leg` on the foot. The tan strip under the collar is `breast`, so a
+  color preset sets it with the breast of the body.
+- **Head:** the pupil was in the same dark green as parts of the outline, and
+  the collar in almost the same white as the eye. `recolor` gives the pupil a
+  color of its own, so that it gets the `pupil` role. The brow and the line of
+  the bill are lines.
+- **Body:** the arcs of the old wing patch showed around the grey ellipse that
+  covers it. `recolor` paints them grey, so that they disappear. The pale
+  streaks on the tail are part of the body, because as lines in the outline
+  color they came out as heavy wedges.
+- **Folded wing:** the darkest browns are the outline and the lines between the
+  feathers. The medium browns of the old shading are part of the wing, except
+  `#5e4b35`, which draws the feather tips at the bottom.
+- **Open wing:** the traced SVG mirrored the wing with a transform. The redraw
+  works from the rendered SVG, so the paths are now mirrored themselves. The
+  blue shades of the feather tips are one `speculum` role.
+- **Foot:** the hand-drawn foot was redrawn too, at `scale` 8, so that it has
+  the same layers and classes as the other parts. The two toe lines were a
+  darker orange and are now lines in the outline color.
+
 ## Rig
 
 I read the points from zoomed crops of the pieces with a 20 px grid
