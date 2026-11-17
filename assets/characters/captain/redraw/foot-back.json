@@ -1,0 +1,22 @@
+{
+  "src": "assets/work/captain/traced/foot-back.svg",
+  "out": "assets/characters/captain/foot-back.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#080401",
+      "also": ["#000102"]
+    },
+    {
+      "name": "boot",
+      "color": "#611d20",
+      "also": ["#662023", "#52181b"]
+    },
+    {
+      "name": "boot-inside",
+      "color": "#390b0d",
+      "also": ["#32080a", "#350a0e", "#170505"]
+    }
+  ],
+  "lines": {}
+}

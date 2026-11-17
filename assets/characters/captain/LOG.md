@@ -50,6 +50,49 @@ like a glove. I made a new one from its own image:
    piece needs no flip, and its pivot is in the middle of the wrist, at (62,
    18).
 
+## Redrawn parts
+
+The traced parts had stacked shapes in many shades and rough edges. All eight
+SVGs were redrawn with `redraw-image` from the traced SVGs of commit `2ab94c5`,
+so the layers, the mirrored open hand and the scales stay as they were. The
+configs are in `redraw/`. Their source is
+`assets/work/captain/traced/<part>.svg`, which you get back with:
+
+```sh
+mkdir -p assets/work/captain/traced
+for p in head-back head-front torso-back torso-front hand hand-open foot-back foot-front; do
+  git show 2ab94c5:assets/characters/captain/$p.svg > assets/work/captain/traced/$p.svg
+done
+python3 assets/characters/captain/redraw/prep-head.py \
+  assets/work/captain/traced/head-front.svg assets/work/captain/traced/head-front-prep.svg
+```
+
+- `redraw/prep-head.py` recolors five paths of the traced head before the
+  redraw. The mouth line and the curl of the ear had the colors of the hair, and
+  the fold of the bandana knot the color of a hair shade, so a new hair color
+  would have changed them too. The mouth line and the ear curl are now lines,
+  and the fold is part of the bandana. The shadows under the eye and under the
+  lower lip went to the skin and the lips, because as lines they came out as
+  heavy black marks.
+- The outline of every part is `#080401` and the skin is `#da965a`, the same as
+  `colors.outline` and `colors.skin` of the rig. The hands were a little lighter
+  before.
+- The color roles are `skin`, `hair`, `bandana`, `lips`, `earring` and `eye` on
+  the head, `jacket`, `shirt`, `belt` and `trousers` on the torso, and `boot`,
+  `boot-inside` and `sole` on the boot. The two layers of a part use the same
+  colors.
+- The buttons and the belt buckle have the color of the trousers in the image,
+  so they are part of `trousers`.
+- The shades went to the color they belong to: the neck shadow, the eye shadow,
+  the shading on the open hand, the dark side of the jacket, the shading on the
+  shirt and the trousers, and the cuff of the boot.
+- The nose line, the pocket lines, the crease of the palm and the creases of the
+  boot are now in the outline color, as lines of their own.
+- The torso uses `minLine` 0.8 and `minArea` 8, so that the thin dark rims of
+  the buttons stay. The relaxed hand is its trace scaled to a quarter, so its
+  lines are thin. It works at 8 times its size with `minLine` 0.4 and `smooth`
+  0.4 to keep the lines between the fingers.
+
 ## Rig
 
 I wrote `rig.json` by hand from the row extents of the alpha masks and from

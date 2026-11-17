@@ -1,0 +1,43 @@
+{
+  "src": "assets/work/captain/traced/hand-open.svg",
+  "out": "assets/characters/captain/hand-open.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#080401",
+      "also": [
+        "#0e0602",
+        "#190f09",
+        "#150c07",
+        "#23180f",
+        "#8b5320",
+        "#3d2b19",
+        "#573d26",
+        "#302214",
+        "#4a3420",
+        "#5f4127",
+        "#9b632d",
+        "#65472b"
+      ]
+    },
+    {
+      "name": "skin",
+      "color": "#da965a",
+      "also": [
+        "#d8985d",
+        "#be834b",
+        "#b67c44",
+        "#cd9057",
+        "#c08750",
+        "#a67448",
+        "#8b623a",
+        "#725130",
+        "#b27d4c",
+        "#7f5a37",
+        "#986b40",
+        "#c88c54"
+      ]
+    }
+  ],
+  "lines": {}
+}
