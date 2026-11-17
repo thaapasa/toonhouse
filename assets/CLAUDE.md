@@ -182,13 +182,24 @@ Use it for the pieces of characters and props.
 
 ### Redrawing an existing asset
 
-To clean up an asset that was traced before, redraw it from its committed SVG,
-not from the generated image. The SVG already has the layers, the mirroring and
-the scale that the rig expects, so the pivots in `rig.json` stay right. Copy the
-SVGs to `assets/work/<name>/traced/` first, because the redraw writes over them,
-and point `src` at the copies. Keep the configs in `<asset>/redraw/`, and write
-in the `LOG.md` of the asset how to get the sources back with `git show`. The
-boy is the example.
+To clean up an asset that was traced before, redraw it from its committed SVG.
+The SVG already has the layers, the mirroring and the scale that the rig
+expects, so the pivots in `rig.json` stay right. Copy the SVGs to
+`assets/work/<name>/traced/` first, because the redraw writes over them, and
+point `src` at the copies. If the pieces of the parts sheet are still in
+`assets/work/` and have the same frames as the parts, you can redraw from them
+instead, as for the emo character.
+
+Use the colors of the rig for the layers it also draws: `colors.outline` for the
+outline, `colors.skin` for the skin, and the colors in `limbs`, such as the
+sleeve. Otherwise the limbs don't match the parts.
+
+Some parts need more than `redraw-image` writes, such as a clip path around a
+hair layer, a mirrored hand, or a pattern drawn by hand. Write a script that
+makes the final SVG from the redrawn one, and keep it in `redraw/` with the
+configs, as the emo character's `finish.py`. Keep the configs in
+`<asset>/redraw/`, and write in the `LOG.md` of the asset how to get the sources
+back with `git show`. The boy is the example.
 
 A traced SVG sometimes uses one color for two roles, such as a hair color that
 also draws the mouth line. The script can't split them, so change the color of
@@ -206,6 +217,9 @@ Run the commands from the repo root.
    ```sh
    MISE_ENV=art mise run redraw-image -- init assets/work/fox/head.png assets/work/fox/head.json
    ```
+
+   The config writes its SVG next to itself, such as `assets/work/fox/head.svg`.
+   Change `out` if the SVG should go somewhere else.
 
 2. Edit the layers in the config. This is the step that decides how the result
    looks:
@@ -231,16 +245,16 @@ Run the commands from the repo root.
    pnpm render-svg assets/work/fox/head.svg assets/work/fox/head-check.png --background '#50a0dc'
    ```
 
-4. Compare the result with the image. `compare` renders two SVGs side by side,
-   and `--crop` zooms in on a detail:
+4. Compare the result with the image. `compare` shows two images side by side,
+   each an SVG or a PNG, and `--crop` zooms in on a detail:
 
    ```sh
-   MISE_ENV=art mise run redraw-image -- compare a.svg b.svg assets/work/fox/cmp.png --width 1200 --crop 150,150,300,300
+   MISE_ENV=art mise run redraw-image -- compare assets/work/fox/head.png assets/work/fox/head.svg assets/work/fox/cmp.png --width 1200 --crop 150,150,300,300
    ```
 
 5. Change the config and run it again until the result matches. `--debug` writes
-   an image that shows the layer of every pixel, which helps when a color goes
-   to the wrong layer.
+   an image that shows the layer of every pixel, with the line paths in magenta.
+   It helps when a color goes to the wrong layer.
 
 Run `MISE_ENV=art mise run redraw-image -- --help` for the settings, such as how
 much to smooth the edges and how thin a seam is.
@@ -272,6 +286,9 @@ of that character. See [specs/characters.md](../specs/characters.md).
   disappears. Lower `minLine` for a part with fine lines.
 - A patch smaller than `minArea` takes the color around it. This also removes
   small details, such as the rim of a button. Lower `minArea` to keep them.
+- A fine pattern, such as plaid, comes out as blotches. Ask for a plainer
+  pattern in the prompt, or redraw the part plain and draw the pattern with a
+  finish script.
 - If a part is drawn at a small scale in the rig, its lines are thin in the
   pixels of the SVG. Raise `scale` and lower `minLine` and `smooth` for it.
 - A line path is a filled shape, not a stroke. To make a line thicker, edit its

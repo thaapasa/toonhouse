@@ -11,8 +11,9 @@ Usage:
   redraw-image <config.json> [--debug]
       Redraw the source as the config says. --debug also writes
       <out>.labels.png, which shows the layer of every pixel.
-  redraw-image compare <a.svg> <b.svg> <out.png> [--width PX] [--crop X0,Y0,X1,Y1]
-      Render two SVGs side by side on blue. The crop is in the units of a.svg.
+  redraw-image compare <a> <b> <out.png> [--width PX] [--crop X0,Y0,X1,Y1]
+      Show two images side by side on blue. Each one is an SVG or a PNG, such as
+      the source image and its redraw. The crop is in the units of a.
 
 Run it from the repo root. The paths in the config are relative to the root.
 
@@ -304,7 +305,11 @@ def redraw(cfg, debug=False):
         f.write(svg)
     if debug:
         colors = np.array([hex_bgr(l["color"]) for l in layers] + [[255, 255, 255]], np.uint8)
-        cv2.imwrite(cfg["out"] + ".labels.png", colors[label])
+        labels = colors[label]
+        # The lines show in magenta, because their pixels went to the fills.
+        for mask in lines:
+            labels[mask] = (255, 0, 255)
+        cv2.imwrite(cfg["out"] + ".labels.png", labels)
     print(f'{cfg["out"]} ({len(svg)} bytes)')
     for line in out:
         m = re.search(r'fill="(#\w+)" d="([^"]*)"', line)
@@ -340,15 +345,35 @@ def init(src, config, count):
         print(f"  {bgr_hex(bgr[i])} {shares[i] * 100:5.1f} %")
 
 
+def image_width(f):
+    if f.endswith(".svg"):
+        return svg_size(f)[0]
+    return cv2.imread(f, cv2.IMREAD_UNCHANGED).shape[1]
+
+
+def read_png_on_blue(f, width):
+    img = cv2.imread(f, cv2.IMREAD_UNCHANGED)
+    if img.shape[2] == 3:
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2BGRA)
+    h = round(img.shape[0] * width / img.shape[1])
+    img = cv2.resize(img, (width, h), interpolation=cv2.INTER_AREA).astype(np.float32)
+    a = img[:, :, 3:] / 255
+    blue = np.array(hex_bgr(BLUE), np.float32)
+    return (img[:, :, :3] * a + blue * (1 - a)).astype(np.uint8)
+
+
 def compare(a, b, out, width, crop):
     imgs = []
     with tempfile.TemporaryDirectory() as tmp:
         for i, f in enumerate([a, b]):
-            png = os.path.join(tmp, f"{i}.png")
-            render_svg(f, png, width, BLUE)
-            imgs.append(cv2.imread(png))
+            if f.endswith(".svg"):
+                png = os.path.join(tmp, f"{i}.png")
+                render_svg(f, png, width, BLUE)
+                imgs.append(cv2.imread(png))
+            else:
+                imgs.append(read_png_on_blue(f, width))
     if crop:
-        k = width / svg_size(a)[0]
+        k = width / image_width(a)
         x0, y0, x1, y1 = [int(float(v) * k) for v in crop.split(",")]
         imgs = [m[y0:y1, x0:x1] for m in imgs]
     h = max(m.shape[0] for m in imgs)
@@ -380,7 +405,7 @@ def main():
         width = int(option(args, "--width", "800"))
         crop = option(args, "--crop")
         if len(args) != 4:
-            sys.exit("Usage: redraw-image compare <a.svg> <b.svg> <out.png> [--width PX] [--crop X0,Y0,X1,Y1]")
+            sys.exit("Usage: redraw-image compare <a> <b> <out.png> [--width PX] [--crop X0,Y0,X1,Y1]")
         compare(args[1], args[2], args[3], width, crop)
     else:
         debug = "--debug" in args

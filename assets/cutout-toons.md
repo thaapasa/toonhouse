@@ -115,7 +115,9 @@ then rename them to `head.png`, `torso.png`, `hand.png`, `hand-open.png` and
 ### 3. Redraw each piece
 
 Redraw each piece as described in "Redrawing" in [CLAUDE.md](CLAUDE.md). Keep
-the config of each piece in `assets/work/<name>/pieces/`, next to the piece:
+the config of each piece in `assets/work/<name>/pieces/`, next to the piece,
+while you work. When you add the character to the app, move the configs to
+`assets/characters/<name>/redraw/`:
 
 ```sh
 MISE_ENV=art mise run redraw-image -- init assets/work/<name>/pieces/head.png assets/work/<name>/pieces/head.json
