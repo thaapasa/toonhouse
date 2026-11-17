@@ -75,7 +75,7 @@ say how the near hand holds it:
 ## Face
 
 - **Eye:** the white of the eye spans x 184–202 and y 259–285, with the pupil at
-  the front. The lids are the skin color of the head, `#f3b870`.
+  the front. The lids are the skin color of the head, `#f6bf7a`.
 - **Mouth patch:** the traced mouth is a short lower lip line under the front of
   the moustache. The patch is a beard-colored shape over it.
 - **Mouth:** the drawn mouth sits under the front of the moustache. An open
@@ -86,3 +86,65 @@ say how the near hand holds it:
 I rendered frames of each clip to SVG with `tools/frames.ts` in the work folder
 and checked them with `pnpm render-svg`: standing, eight frames of the walk, the
 wave, and the talk with a blink at 3×.
+
+## Redrawn parts
+
+The traced parts had stacked shapes in many shades and rough edges. All six
+parts were redrawn with `redraw-image` from the pieces of the parts sheet in
+`assets/work/wizard/pieces/`, which have the same frames as the parts. The staff
+comes from `staff-clean.png`, the piece without the glow. The configs are in
+`redraw/`. To make the pieces again, generate seed 11 with `parts.prompt.json`,
+split the sheet and clear the glow of the staff as described in "Splitting and
+tracing".
+
+1. Run `redraw/prep-head.py`, which writes
+   `assets/work/wizard/redraw/head-prep.png`:
+   `MISE_ENV=art mise exec -- uv run --script assets/characters/wizard/redraw/prep-head.py assets/work/wizard/pieces/head.png assets/work/wizard/redraw/head-prep.png`.
+2. Run the configs:
+   `for p in head torso hand hand-open foot staff; do MISE_ENV=art mise run redraw-image -- assets/characters/wizard/redraw/$p.json; done`.
+   The torso and the open hand go to `assets/work/wizard/redraw/`, and the rest
+   go straight to the parts.
+3. Run `python3 assets/characters/wizard/redraw/finish.py`. It scales the torso
+   to 0.9 and mirrors the open hand, as the traced parts were.
+
+### The hat and the beard
+
+The hat and the beard share some blue-grey shades in the image. The light
+streaks on the hat are almost the color of the beard, and the strands of the
+beard have the color of the shade under the brim. Without the prep step, the
+beard got blue-grey patches and the hat got beard-colored streaks.
+`prep-head.py` paints the greys above the lower edge of the brim in the hat
+color and the greys below it in the beard color. The edge is a polyline in the
+script, read from a grid over the piece.
+
+### Colors and color roles
+
+- The outline of every part is `#403228` and the skin is `#f6bf7a`, the same as
+  `colors.outline` and `colors.skin` of the rig. The robe is `#8fa1a9`, the same
+  as the sleeve and `legColor`. `colors.lid` is now the same skin, because the
+  skin of the head was `#f3b870` before.
+- Head: `skin`, `hair`, `hat` and `eye`. The pupil is in the outline color.
+  `hair` is the beard, the moustache, the eyebrows and the hair at the sides, in
+  `#dad9cc`, the color of the mouth patch. The shading of the hat, such as the
+  dark underside of the brim, went to the hat, and the strands in the beard went
+  to the hair. The line around the brim, the eyebrows, the ear and the moustache
+  are lines in the outline color.
+- Torso: `robe` and `rope`. The twists of the hanging rope are lines in the
+  outline color, kept with `minLine` 0.7. The shading of the robe went to the
+  robe.
+- Hands: `skin`. The finger gaps are lines in the outline color. The faint
+  crease of the palm went to the skin.
+- Foot: `boot`. The sole has the color of the boot in the image, so it is part
+  of `boot`, and the line between them is a line in the outline color. The
+  opening at the top is in the outline color.
+- Staff: `wood` and `crystal`. The grain of the wood went to the wood. The green
+  rim around the crystal and the olive glow along the top of the knot are in the
+  outline color, so the crystal has an outline all around.
+
+### Checks
+
+I rendered frames of the idle, the walk, the wave and the talk with
+`tools/frames.ts`, and a blink with a copy of it that sets `face.blink`. The
+pivots, the grip of the staff and the face points did not change, because the
+redrawn parts have the same frames as the traced ones. The closed lids cover the
+eye, and the mouth patch matches the beard.

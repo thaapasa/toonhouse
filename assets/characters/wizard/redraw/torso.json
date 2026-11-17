@@ -1,0 +1,31 @@
+{
+  "src": "assets/work/wizard/pieces/torso.png",
+  "out": "assets/work/wizard/redraw/torso.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#403228",
+      "also": [
+        "#321f15",
+        "#36241a",
+        "#46341c",
+        "#3a332d",
+        "#49453f",
+        "#5c4422",
+        "#74592d"
+      ]
+    },
+    {
+      "name": "robe",
+      "color": "#8fa1a9",
+      "also": ["#8ea2ab", "#748993", "#8397a0", "#697376", "#595b59"]
+    },
+    {
+      "name": "rope",
+      "color": "#bc9959",
+      "also": ["#b29051", "#a38145", "#8c6e3c"]
+    }
+  ],
+  "lines": {},
+  "minLine": 0.7
+}

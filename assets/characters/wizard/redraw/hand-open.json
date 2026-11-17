@@ -1,0 +1,35 @@
+{
+  "src": "assets/work/wizard/pieces/hand-open.png",
+  "out": "assets/work/wizard/redraw/hand-open.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#403228",
+      "also": [
+        "#341d0e",
+        "#3a2110",
+        "#40240d",
+        "#4d2e11",
+        "#5d3c1b",
+        "#6f4c28",
+        "#805a32"
+      ]
+    },
+    {
+      "name": "skin",
+      "color": "#f6bf7a",
+      "also": [
+        "#f8c27b",
+        "#f5bf7a",
+        "#ebb879",
+        "#dbac70",
+        "#e7ae65",
+        "#ca9d66",
+        "#bd8f5c",
+        "#aa7e4d",
+        "#946d40"
+      ]
+    }
+  ],
+  "lines": {}
+}
