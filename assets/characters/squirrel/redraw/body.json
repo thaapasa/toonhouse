@@ -1,0 +1,18 @@
+{
+  "src": "assets/work/squirrel/pieces/body.png",
+  "out": "assets/characters/squirrel/body.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#3b0603",
+      "also": ["#480802", "#550902", "#771102", "#a42206", "#754d3c"]
+    },
+    { "name": "fur", "color": "#f23c06", "also": ["#f23f0a", "#d1350c"] },
+    {
+      "name": "belly",
+      "color": "#fceac6",
+      "also": ["#fdedca", "#eecaa7", "#d79774"]
+    }
+  ],
+  "lines": {}
+}

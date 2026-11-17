@@ -1,0 +1,20 @@
+{
+  "src": "assets/work/squirrel/pieces/paw.png",
+  "out": "assets/characters/squirrel/paw.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#3b0603",
+      "also": ["#3d0602", "#4c0a02", "#781202", "#a62104", "#8a5840"]
+    },
+    { "name": "fur", "color": "#f23c06", "also": ["#f13d08", "#d3340a"] },
+    {
+      "name": "belly",
+      "color": "#fceac6",
+      "also": ["#fdedca", "#efbf9b", "#db8862"]
+    }
+  ],
+  "lines": {},
+  "scale": 8,
+  "smooth": 1.5
+}

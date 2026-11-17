@@ -31,6 +31,52 @@ rig of the [bunny](../bunny/LOG.md). Work files are in `assets/work/squirrel/`.
    removed, and a dark red streak along the outline of the tail, which I
    recolored to the outline color.
 
+## Redrawn parts
+
+The traced parts had stacked shapes in several shades of dark red along the
+outline, and the ear was a pile of overlapping red shapes. All five parts were
+redrawn with `redraw-image` from the pieces of the parts sheet, which have the
+same frames as the parts, so the pivots in `rig.json` stay right. The pieces
+give cleaner shapes than the traced SVGs, most of all for the ear. The configs
+are in `redraw/`.
+
+To make the pieces again, generate seed 13 with `parts.prompt.json`, save it as
+`assets/work/squirrel/parts-13.png`, and split it as described in "Splitting and
+tracing". Then redraw the parts:
+
+```sh
+for p in head ear body paw foot; do
+  MISE_ENV=art mise run redraw-image -- assets/characters/squirrel/redraw/$p.json
+done
+```
+
+The parts have these colors and color roles:
+
+- The outline of every part is `#3b0603`, the fur is `#f23c06` and the cream is
+  `#fceac6`, the same as `colors.outline`, `colors.fur` and `colors.belly` of
+  the rig.
+- Head: `fur`, `belly` for the cream cheek and chin, and `eye`. The pupil and
+  the nose are in the outline color. The smile is a line.
+- Ear: `fur` and `ear-inner` for the pink inside. The tufts are dark in the
+  sheet, so they are mostly outline, with fur at their roots. The ear is small,
+  so its config uses `scale` 8, `smooth` 1.5, `minArea` 120 and `edge` 2.5.
+  Without the last two, the bottom edge came out ragged where the source outline
+  is thin.
+- Body: `fur` and `belly` for the cream belly. The line of the haunch and the
+  curl of the tail are lines.
+- Paw: `fur` and `belly` for the cream top. The notch between the fingers runs
+  into the outline, so it stays part of the outline. The paw uses `scale` 8 and
+  `smooth` 1.5.
+- Foot: `fur` and `belly` for the cream sole. The crease at the heel is a line.
+
+The redrawn silhouettes are 1 to 3 px smaller than the traced ones, because the
+traced outline spread a little past the edge of the piece. The ground points
+stay as they were. Measured with `assets/work/fixes/lowest.ts`, the look out and
+the hop reach 7 px below the ground and the idle 4 px, against 9, 9 and 6 px
+with the traced parts. Near the tip of the tail, the first ground point is now
+about 7 px below the edge of the body. It only lifts the body a little earlier
+when the tail tips down.
+
 ## Rig
 
 The rabbit clips place the paws and the feet for the proportions of the bunny:
