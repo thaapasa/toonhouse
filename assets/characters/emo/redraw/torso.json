@@ -1,0 +1,72 @@
+{
+  "src": "assets/work/emo/pieces/torso.png",
+  "out": "assets/work/emo/redraw/torso.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#452332",
+      "also": [
+        "#300f19",
+        "#524b4e",
+        "#5f5552",
+        "#4c0f55",
+        "#402a21",
+        "#4a0654",
+        "#3f053c",
+        "#4a024a",
+        "#420438",
+        "#56165f"
+      ]
+    },
+    {
+      "name": "shirt",
+      "color": "#8b8aa0",
+      "also": ["#898ba1", "#8c8ca1", "#6b6a7b", "#8e6f9d"]
+    },
+    {
+      "name": "shirt-logo",
+      "color": "#f980e0",
+      "also": [
+        "#fd85e4",
+        "#ff81e5",
+        "#f873de",
+        "#d15dcb",
+        "#d669d0",
+        "#cf65c8",
+        "#e166d7",
+        "#d263ca",
+        "#e665dc"
+      ]
+    },
+    {
+      "name": "skirt",
+      "color": "#8a2db0",
+      "also": [
+        "#782b9f",
+        "#8e30b5",
+        "#681f89",
+        "#7b30a3",
+        "#7c27a7",
+        "#912fae",
+        "#982fbc",
+        "#9d30b8",
+        "#a038c2",
+        "#712c99",
+        "#cd4be2",
+        "#c233d6",
+        "#ca43dc",
+        "#cd37d9",
+        "#bd3cca",
+        "#d24de6",
+        "#f262f0",
+        "#ec4ff1",
+        "#f050f1",
+        "#f660f0",
+        "#f270fb",
+        "#eb53ee"
+      ]
+    }
+  ],
+  "minArea": 40,
+  "lines": {}
+}

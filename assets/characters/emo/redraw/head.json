@@ -1,0 +1,71 @@
+{
+  "src": "assets/work/emo/pieces/head.png",
+  "out": "assets/work/emo/redraw/head.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#452332",
+      "also": [
+        "#190606",
+        "#010000",
+        "#411b07",
+        "#3a0b42",
+        "#451b12",
+        "#562815",
+        "#74423c",
+        "#3f0055",
+        "#42006b",
+        "#360151",
+        "#420a61",
+        "#4c0084",
+        "#500c51"
+      ]
+    },
+    {
+      "name": "hair",
+      "color": "#7517b3",
+      "also": [
+        "#6f19b2",
+        "#9028d4",
+        "#9e26dc",
+        "#7116b4",
+        "#8320bb",
+        "#5d068d",
+        "#4c0777",
+        "#410369",
+        "#5c0d95",
+        "#5f0aa0"
+      ]
+    },
+    {
+      "name": "hair-streak",
+      "color": "#f610a8",
+      "also": ["#b914b8", "#b517d2"]
+    },
+    {
+      "name": "skin",
+      "color": "#f8bd93",
+      "also": [
+        "#f8bf95",
+        "#e29b7a",
+        "#ac6f5d",
+        "#d57d5d",
+        "#f0a380",
+        "#dd8b66",
+        "#e38c71"
+      ]
+    },
+    {
+      "name": "eye",
+      "color": "#fffffe",
+      "also": ["#f6fafb", "#c3c3c7", "#eaebee"]
+    },
+    {
+      "name": "earring",
+      "color": "#c8d6e2",
+      "also": ["#d6dfe7", "#cdd4db"]
+    }
+  ],
+  "lines": {},
+  "smooth": 1.5
+}

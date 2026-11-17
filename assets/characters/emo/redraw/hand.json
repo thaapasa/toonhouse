@@ -1,0 +1,31 @@
+{
+  "src": "assets/work/emo/pieces/hand.png",
+  "out": "assets/work/emo/redraw/hand.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#452332",
+      "also": [
+        "#280d03",
+        "#321304",
+        "#3c1906",
+        "#4a2112",
+        "#61361e",
+        "#7e4d31",
+        "#a25b3c",
+        "#c06b47"
+      ]
+    },
+    {
+      "name": "skin",
+      "color": "#f8bd93",
+      "also": ["#f9c096", "#e7ac84", "#cc8f6c", "#fac197", "#fbbe90"]
+    },
+    {
+      "name": "nails",
+      "color": "#8516d0",
+      "also": ["#711ca7", "#9c5590", "#9211d5", "#831abf"]
+    }
+  ],
+  "lines": {}
+}

@@ -97,11 +97,65 @@ them:
 
 The two layers under the line reach 8 px above it, so that no seam shows.
 
-The traced paths are big stacked shapes that cross the face and the hair, so
-sorting them by color did not give clean layers. The clip paths keep the look of
-the trace exactly. The ids of the clip paths start with `emo-`, because the
-layers of all parts are symbols in one SVG document.
+The traced paths were big stacked shapes that crossed the face and the hair, so
+sorting them by color did not give clean layers. The redrawn head has one path
+for the hair, but the clip paths still divide it, because the line runs across
+the hair. The ids of the clip paths start with `emo-`, because the layers of all
+parts are symbols in one SVG document.
 
 A first version put all the hanging hair behind the torso. Then the hair showed
 only behind the back, and the near side of the head looked as if it had little
 hair. I checked the idle, the walk, the wave and the talk in the studio.
+
+## Redrawn parts
+
+The traced parts had stacked shapes in many shades and rough edges. The head,
+the torso, the hands and the foot were redrawn with `redraw-image` from the
+pieces of the parts sheet in `assets/work/emo/pieces/`. The configs are in
+`redraw/`. To make the pieces again, generate seed 11 with `parts.prompt.json`
+and split the sheet as described in "Splitting and tracing".
+
+redraw-image can't add a clip path or a transform, so `redraw/finish.py` makes
+the parts from the redrawn SVGs of the head, the torso and the hands:
+
+1. Run the configs:
+   `for p in head torso hand hand-open foot; do MISE_ENV=art mise run redraw-image -- assets/characters/emo/redraw/$p.json; done`.
+   The foot goes straight to `foot.svg`, and the rest go to
+   `assets/work/emo/redraw/`.
+2. Run `python3 assets/characters/emo/redraw/finish.py`. It splits the head into
+   the three layers of "Hair layers", adds the plaid to the torso and mirrors
+   the hands.
+
+The parts have these colors and color roles:
+
+- The outline of every part is `#452332` and the skin is `#f8bd93`, the same as
+  `colors.outline` and `colors.skin` of the rig. The shirt is `#8b8aa0`, the
+  same as the sleeve.
+- The hair had its own dark purple outline in the image. It is now in the
+  outline color, as the rest of the outline.
+- Head: `hair`, `hair-streak`, `skin`, `eye` and `earring`. The pupil is in the
+  outline color. The shades of the skin, such as the ear, the nose and the
+  shadow under the eye, went to the skin. The mouth line went too, and the mouth
+  patch covers that spot as before.
+- Torso: `shirt`, `shirt-logo` for the skull, `skirt` and `skirt-plaid`. The
+  sleeve line and the pleat lines are lines in the outline color.
+- Hands: `skin`, and `nails` for the purple nail of the relaxed hand. The finger
+  gaps and the palm crease are lines in the outline color.
+- Foot: `boot`, `laces` and `sole`. The seam lines of the boot and the line
+  between the boot and the sole are lines in the outline color.
+
+### The plaid
+
+The plaid in the image has light and dark bands with soft edges and thin pale
+lines. Redrawn with one or two layers for it, it came out as blotches that did
+not look like plaid. The redraw now puts all the skirt colors in `skirt`, and
+`finish.py` draws the plaid on top: two bands that slant down to the right and
+five thin stripes that fan out with the pleats, clipped to the skirt. The
+positions of the bands and the stripes follow the plaid in the image.
+
+### Checks
+
+I rendered frames of the idle with a blink, the walk, the wave and the talk, and
+looked at the face at 4×. The lids cover the eye, and the mouth patch does not
+show. The pivots and the face coordinates of the rig did not change, because the
+redrawn parts have the same frames as the traced ones.

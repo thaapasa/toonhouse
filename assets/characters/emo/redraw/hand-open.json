@@ -1,0 +1,32 @@
+{
+  "src": "assets/work/emo/pieces/hand-open.png",
+  "out": "assets/work/emo/redraw/hand-open.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#452332",
+      "also": [
+        "#280d00",
+        "#331204",
+        "#3f1704",
+        "#502611",
+        "#63371e",
+        "#784b30",
+        "#8f5d3e",
+        "#a66f4e",
+        "#b88360",
+        "#d48d69",
+        "#d78661",
+        "#d7845f",
+        "#df8b67"
+      ]
+    },
+    {
+      "name": "skin",
+      "color": "#f8bd93",
+      "also": ["#f9c096", "#f9bd92", "#ecb08a", "#d99f7a", "#fbc196"]
+    }
+  ],
+  "lines": {},
+  "minLine": 1
+}
