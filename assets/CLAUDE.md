@@ -188,10 +188,13 @@ expects, so the pivots in `rig.json` stay right. Copy the SVGs to
 `assets/work/<name>/traced/` first, because the redraw writes over them, and
 point `src` at the copies. If the pieces of the parts sheet are still in
 `assets/work/` and have the same frames as the parts, you can redraw from them
-instead, as for the emo character. Choose for each part: the raincoat
-character's head is redrawn from its SVG, and her torso from its piece.
+instead, as for the emo character. Choose for each part. A piece is usually the
+cleaner source, but not if the part was edited after tracing, such as the
+bunny's body, which lost its hind foot. The raincoat character's head is redrawn
+from its SVG, and her torso from its piece.
 
-A PNG source can need cleaning before the redraw, such as a thin outline that
+A prep script can also fix a shape, such as a wavy line, before the redraw. A
+PNG source can need cleaning before the redraw, such as a thin outline that
 blends into a darker fill, or a halo where two colors meet. Write a prep script
 that fixes the pixels and writes a new PNG to `assets/work/`, as the raincoat
 character's `prep-torso.py`. Plain Python has no image libraries, so start the
