@@ -36,6 +36,55 @@ its style prompt. He was made with the steps in
 5. I removed two paths from `head.svg`: a speck left of the ponytail, and the
    frown line of the traced mouth under the mustache.
 
+## Redrawn parts
+
+The traced parts had stacked shapes in many shades and rough edges. The five
+parts were redrawn with `redraw-image` from the traced SVGs of commit `24de57f`,
+so the frames, the mirrored open hand and the scaled torso stay as they were.
+The redrawn SVGs have no `transform`: the paths are in the coordinates of the
+frame. The mouth patch was not redrawn. The configs are in `redraw/`. Their
+source is `assets/work/quartermaster/traced/<part>.svg`, which you get back
+with:
+
+```sh
+mkdir -p assets/work/quartermaster/traced
+for p in head torso hand hand-open foot; do
+  git show 24de57f:assets/characters/quartermaster/$p.svg > assets/work/quartermaster/traced/$p.svg
+done
+for p in head torso foot; do
+  python3 assets/characters/quartermaster/redraw/prep.py $p \
+    assets/work/quartermaster/traced/$p.svg assets/work/quartermaster/traced/$p-prep.svg
+done
+```
+
+- `redraw/prep.py` recolors paths of the head, the torso and the boot before the
+  redraw, so that no color has two roles. On the head, the line down the neck
+  goes to the skin, because as a line it came out as a heavy black mark. On the
+  torso, four folds of the sash had the color of the trousers and are now lines,
+  and the shadow under the collar had the color of the trouser crease and is now
+  part of the outline. On the boot, the line above the sole had the color of the
+  inside of the boot and is now part of the outline.
+- The outline of every part is `#121817` and the skin is `#e29f60`, the same as
+  `colors.outline` and `colors.skin` of the rig. The shirt is `#e1cea1`, the
+  color of the sleeve in `limbs`. The hands were a little lighter before.
+- The color roles are `skin`, `hair-tie` and `eye` on the head, `trousers`,
+  `waistcoat`, `shirt`, `sash` and `button` on the torso, and `boot`, `sole`,
+  `boot-inside`, `strap` and `buckle` on the boot.
+- The hair, the eyebrow and the mustache have no role of their own. In the image
+  they are near-black, the same as the outline, and the trace draws them and the
+  outline as one shape, so the script can't tell them apart. They are part of
+  the outline, and a color preset can't change the color of the hair. The grey
+  shine on the ponytail went to the outline too.
+- The shades went to the color they belong to: the shading of the face, the
+  neck, the ear and the eyelid, the shading on the open hand, the shading on the
+  shirt and the collar, and the dark wedge between the legs of the trousers.
+- The line under the eye, the nostril, the curl of the ear, the folds of the
+  sash, the lines between the fingers, the creases of the palm and the wrist,
+  and the crease on the boot are now in the outline color, as lines of their
+  own.
+- The torso uses `minLine` 0.8 and `minArea` 8, so that the thin dark rims of
+  the buttons stay.
+
 ## Rig
 
 I wrote `rig.json` by hand from the row extents of the alpha masks and from

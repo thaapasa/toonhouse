@@ -1,0 +1,23 @@
+{
+  "src": "assets/work/quartermaster/traced/torso-prep.svg",
+  "out": "assets/characters/quartermaster/torso.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#121817",
+      "also": ["#161214", "#1b0707", "#3e0902", "#4a442e"]
+    },
+    { "name": "trousers", "color": "#562439", "also": ["#2f1a1f"] },
+    { "name": "waistcoat", "color": "#00494c" },
+    {
+      "name": "shirt",
+      "color": "#e1cea1",
+      "also": ["#edddb4", "#d5c497", "#b09f6f", "#696349"]
+    },
+    { "name": "sash", "color": "#85180a" },
+    { "name": "button", "color": "#bf8e1c" }
+  ],
+  "lines": {},
+  "minLine": 0.8,
+  "minArea": 8
+}

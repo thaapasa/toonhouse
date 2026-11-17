@@ -1,0 +1,21 @@
+{
+  "src": "assets/work/quartermaster/traced/foot-prep.svg",
+  "out": "assets/characters/quartermaster/foot.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#121817",
+      "also": ["#181716", "#12110f", "#160b01", "#281403", "#3b210b"]
+    },
+    {
+      "name": "boot",
+      "color": "#5a310f",
+      "also": ["#5d3210", "#522c0c", "#472a11"]
+    },
+    { "name": "sole", "color": "#462912" },
+    { "name": "boot-inside", "color": "#261102" },
+    { "name": "strap", "color": "#412309", "also": ["#412305"] },
+    { "name": "buckle", "color": "#c69729", "also": ["#b1831b", "#ce9e2e"] }
+  ],
+  "lines": {}
+}
