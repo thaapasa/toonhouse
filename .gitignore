@@ -19,3 +19,6 @@ assets/work/
 
 # macOS folder metadata
 .DS_Store
+
+# Debug images of redraw-image
+*.labels.png
