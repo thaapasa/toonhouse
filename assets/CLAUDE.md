@@ -155,6 +155,9 @@ The graphics tools are in two places:
   first run of the script then installs its Python packages into the uv cache,
   outside the project folder.
 
+If `pnpm` isn't on the `PATH` in your shell, run it through mise:
+`mise exec -- pnpm render-svg …`.
+
 ## Redrawing
 
 `redraw-image` turns a generated image into an SVG that is easy to edit:
@@ -175,9 +178,22 @@ A fill also reaches a little under the fills above it, so that no seam shows
 between them. The script smooths the edges, removes specks and thin seams, and
 fits curves with [Potrace](https://potrace.sourceforge.net/).
 
-Use it for the pieces of characters and props. It also works on an old traced
-SVG: the boy's parts were redrawn from their traced SVGs, and his configs are in
-`characters/boy/redraw/`.
+Use it for the pieces of characters and props.
+
+### Redrawing an existing asset
+
+To clean up an asset that was traced before, redraw it from its committed SVG,
+not from the generated image. The SVG already has the layers, the mirroring and
+the scale that the rig expects, so the pivots in `rig.json` stay right. Copy the
+SVGs to `assets/work/<name>/traced/` first, because the redraw writes over them,
+and point `src` at the copies. Keep the configs in `<asset>/redraw/`, and write
+in the `LOG.md` of the asset how to get the sources back with `git show`. The
+boy is the example.
+
+A traced SVG sometimes uses one color for two roles, such as a hair color that
+also draws the mouth line. The script can't split them, so change the color of
+those paths in the source before the redraw. Keep the script that does it in
+`redraw/` with the configs, as the captain's `prep-head.py`.
 
 ### Steps
 
@@ -254,6 +270,10 @@ of that character. See [specs/characters.md](../specs/characters.md).
   a clean result, so fix the prompt first.
 - A line that is thinner than `minLine` between two fills counts as a seam and
   disappears. Lower `minLine` for a part with fine lines.
+- A patch smaller than `minArea` takes the color around it. This also removes
+  small details, such as the rim of a button. Lower `minArea` to keep them.
+- If a part is drawn at a small scale in the rig, its lines are thin in the
+  pixels of the SVG. Raise `scale` and lower `minLine` and `smooth` for it.
 - A line path is a filled shape, not a stroke. To make a line thicker, edit its
   outline.
 - Only a line that has fill around most of it becomes its own path. Where a line
