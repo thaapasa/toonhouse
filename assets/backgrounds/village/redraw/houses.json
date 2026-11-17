@@ -1,0 +1,57 @@
+{
+  "src": "assets/work/village/traced/houses.svg",
+  "out": "assets/backgrounds/village/houses.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#532518",
+      "also": ["#5d3e29", "#785442", "#87a77d"]
+    },
+    {
+      "name": "grass",
+      "color": "#9ed59b"
+    },
+    {
+      "name": "leaves",
+      "color": "#90c893"
+    },
+    {
+      "name": "wall",
+      "color": "#eef0d7"
+    },
+    {
+      "name": "wall-side",
+      "color": "#f2d6b9"
+    },
+    {
+      "name": "wall-gray",
+      "color": "#c6c8c8",
+      "also": ["#b0b4c0"]
+    },
+    {
+      "name": "roof-side",
+      "color": "#e38789"
+    },
+    {
+      "name": "roof",
+      "color": "#fa9894",
+      "also": ["#f29c94", "#fa9a93", "#fc9f90", "#fc9f97"]
+    },
+    {
+      "name": "trim",
+      "color": "#c8a98a"
+    },
+    {
+      "name": "window",
+      "color": "#c5c7c7"
+    }
+  ],
+  "recolor": {
+    "7": "#b0b4c0",
+    "37": "#b0b4c0",
+    "58": "#b0b4c0"
+  },
+  "lines": {},
+  "smooth": 1.5,
+  "openEdges": ["left", "right", "bottom"]
+}

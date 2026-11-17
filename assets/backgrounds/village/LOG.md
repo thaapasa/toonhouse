@@ -57,3 +57,57 @@ became the houses layer instead, and the trees went behind them.
 
 - The road is a large plain beige area with only a few pebbles.
 - The houses are pastel and a little faded next to the bright road and grass.
+
+## Redrawn layers
+
+The trees, the houses and the ground were redrawn with `redraw-image`, with
+`openEdges` on the left, right and bottom edges. The configs and a prep script
+are in `redraw/`. The sources are the traced layers of commit `c4cb810`. To get
+them back and redraw a layer, such as the trees:
+
+```sh
+mkdir -p assets/work/village/traced
+git show c4cb810:assets/backgrounds/village/trees.svg > assets/work/village/traced/trees.svg
+python3 assets/backgrounds/village/redraw/prep-trees.py \
+  assets/work/village/traced/trees.svg assets/work/village/traced/trees-prep.svg
+MISE_ENV=art mise run redraw-image -- assets/backgrounds/village/redraw/trees.json
+```
+
+The houses and the ground need no prep script. Their configs read
+`assets/work/village/traced/houses.svg` and `ground.svg`.
+
+### Colors and roles
+
+The colors are the ones of the traced layers, so the trees stay mixed with the
+sky color.
+
+- Trees: `grass` for the strip at the bottom, `hedge` for the low hedges behind
+  the fence, `leaves` for the crowns and the poplars, and `fence`. The trunks
+  were a gray close to the outline and went to the outline. A `trunk` layer was
+  tried, but most of the trunk pixels still went to the outline.
+- Houses: `grass` for the hill and the poplar on the left, `leaves` for the
+  trees between the houses, `wall` for the cream walls, `wall-side` for the
+  peach walls and the church tower, `wall-gray` for the gray walls, `roof`,
+  `roof-side` for the darker roof slopes, `trim` for the tan window frames and
+  doors, and `window` for the gray windows. The pink windows have the color of
+  the roofs and are part of `roof`.
+- Ground: `grass`, `grass-dark` for the band under the grass, `road`,
+  `road-dark` for the ruts and the shade under the grass, and `pebble`.
+
+### Changes from the traced layers
+
+- The trace drew the outlines with brown, olive or gray streaks along them. The
+  streaks went to the outline, so the outlines are even, and a little thicker in
+  places.
+- The traced grass of the trees layer starts 2 px from the left edge of the
+  frame. `prep-trees.py` fills the gap, so that the redraw doesn't draw an
+  outline there.
+- The traced houses layer draws the gray walls and the gray windows in one
+  color. The config gives the paths of the gray walls another color with
+  `recolor`, so that they get their own role.
+- The olive edge along the top of the grass is part of the outline now. The
+  largest grass tuft, near the left edge, had olive blades on its right side,
+  and they became a dark wedge in the outline color. A `grass-shade` layer for
+  the olive kept the blades but also kept the uneven double edge along the
+  grass.
+- The pebbles have an outline-colored rim instead of the darker olive one.
