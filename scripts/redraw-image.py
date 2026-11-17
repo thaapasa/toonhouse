@@ -11,6 +11,9 @@ Usage:
   redraw-image <config.json> [--debug]
       Redraw the source as the config says. --debug also writes
       <out>.labels.png, which shows the layer of every pixel.
+  redraw-image paths <source.svg> [--show N <out.png>]
+      List the paths of an SVG with their fills, for "recolor". --show renders
+      the SVG with path N in magenta.
   redraw-image compare <a> <b> <out.png> [--width PX] [--crop X0,Y0,X1,Y1]
       Show two images side by side on blue. Each one is an SVG or a PNG, such as
       the source image and its redraw. The crop is in the units of a.
@@ -39,6 +42,9 @@ The config:
               image (20).
   alphamax    Potrace corner threshold: higher means rounder (1.1).
   opttolerance  Potrace curve tolerance: higher means fewer nodes (1.5).
+  recolor     For an SVG source: new fills for some of its paths, by the
+              number that "paths" shows, such as {"12": "#422517"}. Use it when
+              the source draws two roles in one color.
   lines       Make each line inside the outline its own path, such as a mouth,
               a crease or the border between the hair and the face. The line
               is drawn on top of the fills, which close under it. Off by
@@ -79,12 +85,44 @@ def svg_size(svg):
     return float(m.group(1)), float(m.group(2))
 
 
-def load_source(src, scale):
+PATH_TAG = re.compile(r"<path\b[^>]*>")
+
+
+def path_fill(tag):
+    m = re.search(r'fill="([^"]*)"', tag) or re.search(r"fill:\s*([^;\"]+)", tag)
+    return m.group(1).strip() if m else "#000000"
+
+
+def set_fill(tag, color):
+    tag = re.sub(r'\sfill="[^"]*"', "", tag)
+    tag = re.sub(r"fill:\s*[^;\"]+;?", "", tag)
+    return tag.replace("<path", f'<path fill="{color}"', 1)
+
+
+def recolor_svg(text, colors):
+    """Gives new fills to the paths of an SVG, by their numbers."""
+    index = -1
+
+    def change(m):
+        nonlocal index
+        index += 1
+        color = colors.get(str(index))
+        return set_fill(m.group(0), color) if color else m.group(0)
+
+    return PATH_TAG.sub(change, text)
+
+
+def load_source(src, scale, recolor=None):
     """Returns the BGRA work image and the size of the output frame."""
     if src.endswith(".svg"):
         w, h = svg_size(src)
         with tempfile.TemporaryDirectory() as tmp:
             png = os.path.join(tmp, "src.png")
+            if recolor:
+                fixed = os.path.join(tmp, "src.svg")
+                with open(fixed, "w") as f:
+                    f.write(recolor_svg(open(src).read(), recolor))
+                src = fixed
             render_svg(src, png, round(w * scale))
             img = cv2.imread(png, cv2.IMREAD_UNCHANGED)
         return img, w, h
@@ -159,7 +197,7 @@ def redraw(cfg, debug=False):
         if not re.fullmatch(r"[a-z][a-z0-9]*(-[a-z0-9]+)*", layer.get("name", "")):
             sys.exit(f"Layer names must be in kebab case, such as shirt-logo: {layer.get('name')!r}")
     n = len(layers)
-    img, W, H = load_source(cfg["src"], S)
+    img, W, H = load_source(cfg["src"], S, cfg.get("recolor"))
     smooth = cfg.get("smooth", 0.75) * S
 
     label = classify(img, layers)
@@ -362,6 +400,25 @@ def read_png_on_blue(f, width):
     return (img[:, :, :3] * a + blue * (1 - a)).astype(np.uint8)
 
 
+def list_paths(src, show, out):
+    text = open(src).read()
+    tags = PATH_TAG.findall(text)
+    if show is not None:
+        with tempfile.TemporaryDirectory() as tmp:
+            fixed = os.path.join(tmp, "show.svg")
+            with open(fixed, "w") as f:
+                f.write(recolor_svg(text, {str(show): "#ff00ff"}))
+            render_svg(fixed, out, round(svg_size(src)[0] * 2), BLUE)
+        print(out)
+        return
+    for i, tag in enumerate(tags):
+        m = re.search(r'\sd="([^"]*)"', tag)
+        d = m.group(1) if m else ""
+        start = re.match(r"\s*[Mm]\s*([-\d.]+)[\s,]*([-\d.]+)", d)
+        at = f"starts at {float(start.group(1)):.0f},{float(start.group(2)):.0f}" if start else ""
+        print(f"{i:4}  {path_fill(tag):9}  {len(d):6} chars  {at}")
+
+
 def compare(a, b, out, width, crop):
     imgs = []
     with tempfile.TemporaryDirectory() as tmp:
@@ -401,6 +458,14 @@ def main():
         if len(args) != 3:
             sys.exit("Usage: redraw-image init <source> <config.json> [--colors N]")
         init(args[1], args[2], count)
+    elif args[0] == "paths":
+        show = option(args, "--show")
+        if show is not None and len(args) == 3:
+            list_paths(args[1], int(show), args[2])
+        elif show is None and len(args) == 2:
+            list_paths(args[1], None, None)
+        else:
+            sys.exit("Usage: redraw-image paths <source.svg> [--show N <out.png>]")
     elif args[0] == "compare":
         width = int(option(args, "--width", "800"))
         crop = option(args, "--crop")

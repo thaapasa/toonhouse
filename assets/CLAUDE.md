@@ -202,9 +202,18 @@ configs, as the emo character's `finish.py`. Keep the configs in
 back with `git show`. The boy is the example.
 
 A traced SVG sometimes uses one color for two roles, such as a hair color that
-also draws the mouth line. The script can't split them, so change the color of
-those paths in the source before the redraw. Keep the script that does it in
-`redraw/` with the configs, as the captain's `prep-head.py`.
+also draws the mouth line. Find those paths with `paths`, which lists the paths
+of the SVG with their fills, and `--show`, which renders one of them in magenta:
+
+```sh
+MISE_ENV=art mise run redraw-image -- paths assets/work/fox/traced/head.svg
+MISE_ENV=art mise run redraw-image -- paths assets/work/fox/traced/head.svg --show 12 assets/work/fox/path-12.png
+```
+
+Then give them the color of their role with `recolor` in the config, such as
+`"recolor": {"12": "#422517"}`. The captain, the grandma and the quartermaster
+were redrawn before `recolor` existed, so they do this with prep scripts in
+`redraw/`.
 
 ### Steps
 
@@ -286,6 +295,9 @@ of that character. See [specs/characters.md](../specs/characters.md).
   disappears. Lower `minLine` for a part with fine lines.
 - A patch smaller than `minArea` takes the color around it. This also removes
   small details, such as the rim of a button. Lower `minArea` to keep them.
+- A fill that is as dark as the outline, such as black hair, merges with the
+  outline and gets no role of its own, so a color preset can't change it. Ask
+  for a lighter color in the prompt, or accept it and write it in the `LOG.md`.
 - A fine pattern, such as plaid, comes out as blotches. Ask for a plainer
   pattern in the prompt, or redraw the part plain and draw the pattern with a
   finish script.
