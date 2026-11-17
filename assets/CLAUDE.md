@@ -155,7 +155,7 @@ The graphics tools are in two places:
   first run of the script then installs its Python packages into the uv cache,
   outside the project folder.
 
-If `pnpm` isn't on the `PATH` in your shell, run it through mise:
+If `pnpm` or `node` isn't on the `PATH` in your shell, run it through mise:
 `mise exec -- pnpm render-svg …`.
 
 ## Redrawing
@@ -188,7 +188,15 @@ expects, so the pivots in `rig.json` stay right. Copy the SVGs to
 `assets/work/<name>/traced/` first, because the redraw writes over them, and
 point `src` at the copies. If the pieces of the parts sheet are still in
 `assets/work/` and have the same frames as the parts, you can redraw from them
-instead, as for the emo character.
+instead, as for the emo character. Choose for each part: the raincoat
+character's head is redrawn from its SVG, and her torso from its piece.
+
+A PNG source can need cleaning before the redraw, such as a thin outline that
+blends into a darker fill, or a halo where two colors meet. Write a prep script
+that fixes the pixels and writes a new PNG to `assets/work/`, as the raincoat
+character's `prep-torso.py`. Plain Python has no image libraries, so start the
+script with an inline list of its packages and run it with
+`MISE_ENV=art mise exec -- uv run --script`.
 
 Use the colors of the rig for the layers it also draws: `colors.outline` for the
 outline, `colors.skin` for the skin, and the colors in `limbs`, such as the
