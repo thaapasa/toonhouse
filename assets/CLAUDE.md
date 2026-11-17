@@ -294,6 +294,9 @@ of that character. See [specs/characters.md](../specs/characters.md).
   color.
 - Name the role, not the color: `trim` for the white sole, toe cap and laces of
   a shoe, not `white`.
+- If a prop has two shades of the same thing, such as a darker hedge section or
+  pink and white flowers, add a suffix to the name: `leaves`, `leaves-dark`,
+  `flower`, `flower-alt`.
 - If two things in a part need different colors in some color preset, give them
   different colors in the image and separate layers, such as a shirt and the
   logo on it. The script can't split one color into two roles.
@@ -316,6 +319,8 @@ of that character. See [specs/characters.md](../specs/characters.md).
   finish script.
 - If a part is drawn at a small scale in the rig, its lines are thin in the
   pixels of the SVG. Raise `scale` and lower `minLine` and `smooth` for it.
+- A line wider than `lines.maxWidth` (8 px) stays part of the outline. Raise it
+  for thick lines, such as the leaf marks of the hedge.
 - A line path is a filled shape, not a stroke. To make a line thicker, edit its
   outline.
 - Only a line that has fill around most of it becomes its own path. Where a line
