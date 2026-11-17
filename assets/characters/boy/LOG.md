@@ -30,3 +30,5 @@ done
   part of the shorts. The shirt is one shape under its stripes.
 - The outline around the shorts is thicker on the right side, as in the traced
   SVG.
+- Each fill path has the class of its color role, such as `c-skin`. The white
+  sole, toe cap and laces of the shoe are one role, `trim`.

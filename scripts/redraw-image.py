@@ -21,7 +21,8 @@ The config:
   out         The SVG to write.
   layers      The colors from the bottom up. The first layer is the outline.
               Each layer has:
-                name    shown in a comment before its path
+                name    the role of the color, in kebab case. The path gets
+                        the class c-<name>, so that the app can recolor it.
                 color   the fill of the layer in the output
                 also    other source colors that belong to this layer
                 covers  names of layers above this one that it lies under
@@ -145,6 +146,9 @@ def classify(img, layers):
 def redraw(cfg, debug=False):
     S = int(cfg.get("scale", 4))
     layers = cfg["layers"]
+    for layer in layers:
+        if not re.fullmatch(r"[a-z][a-z0-9]*(-[a-z0-9]+)*", layer.get("name", "")):
+            sys.exit(f"Layer names must be in kebab case, such as shirt-logo: {layer.get('name')!r}")
     n = len(layers)
     img, W, H = load_source(cfg["src"], S)
     smooth = cfg.get("smooth", 0.75) * S
@@ -214,7 +218,7 @@ def redraw(cfg, debug=False):
         return d.replace(".0 ", " ").replace(".0C", "C").replace(".0L", "L").replace(".0Z", "Z")
 
     def path(layer, mask):
-        return f'<!-- {layer.get("name", "")} -->\n<path fill="{layer["color"]}" d="{trace(mask)}"/>'
+        return f'<path class="c-{layer["name"]}" fill="{layer["color"]}" d="{trace(mask)}"/>'
 
     out = [path(layers[0], sil)]
     under = disk(cfg.get("under", 3) * S)

@@ -42,6 +42,10 @@ asset files in the repo. See [Characters](characters.md).
 - [ ] Developer can edit the keyframes of a clip and save it.
 - [ ] Developer can set the color presets of a character or a prop and save
       them.
+  - [ ] Developer can see the color roles of a character or a prop and which
+        parts of it each role colors.
+  - [ ] Developer can make a color preset by picking a color for each role, and
+        see the character in it while a clip plays.
 - [x] The URL names the picked character or prop and the picked background, so
       that a reload shows them again.
 - [x] The studio isn't part of the production build.

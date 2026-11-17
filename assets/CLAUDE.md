@@ -187,7 +187,8 @@ Run the commands from the repo root.
 2. Edit the layers in the config. This is the step that decides how the result
    looks:
    - Keep one layer for each color that the part should have, such as the skin,
-     the hair, the eye white and the shirt. Give each a `name`.
+     the hair, the eye white and the shirt. Give each a `name`, as described in
+     "Color roles" below.
    - Put the shades and the leftovers of a color in the `also` list of the layer
      they belong to. The image model often shades a fill even when the prompt
      asks for flat colors.
@@ -219,6 +220,25 @@ Run the commands from the repo root.
 
 Run `MISE_ENV=art mise run redraw-image -- --help` for the settings, such as how
 much to smooth the edges and how thin a seam is.
+
+### Color roles
+
+The name of a layer is its color role, and the path of the layer gets the class
+`c-<name>`, such as `c-skin` or `c-shirt-logo`. The classes let the app recolor
+a character with the color presets of that character. See
+[specs/characters.md](../specs/characters.md).
+
+- Write the names in kebab case.
+- Use the same name for the same color in every part of a character. The skin is
+  `skin` in the head and in the hands, so a color preset sets both with one
+  color.
+- Name the role, not the color: `trim` for the white sole, toe cap and laces of
+  a shoe, not `white`.
+- If two things in a part need different colors in some color preset, give them
+  different colors in the image and separate layers, such as a shirt and the
+  logo on it. The script can't split one color into two roles.
+- Treat the names as part of the asset, like the names of the parts. Saved
+  cartoons will refer to them once the app has color presets.
 
 ### Limits
 

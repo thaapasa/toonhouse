@@ -47,7 +47,12 @@ for something else or too vague.
   such as a color or the size. A setting gets its value from the library, then
   the cast member, then the actor. Not: option, config.
 - **Color preset**: a named set of colors for a character or a prop, such as the
-  colors of all its clothes at once.
+  colors of all its clothes at once. A preset gives a color to color roles.
+- **Color role**: one color of a character or a prop that a color preset can
+  change, such as the skin, the shirt or the logo on the shirt. The role is the
+  same in every part, so `skin` colors the head, the hands and the drawn limbs.
+  Each role belongs to one character or prop, and isn't shared with others. Not:
+  palette, color slot.
 - **Override**: a setting that an actor sets for one scene, instead of taking it
   from its cast member.
 - **Timeline**: the time axis of one scene. The cartoon has no timeline of its
@@ -110,8 +115,8 @@ for something else or too vague.
 - **Draw entry**: one item in the draw order: a drawn limb, the main layer of
   the part of a slot, or one of its other layers, with the id `slot.layer`.
 - **Piece**: an image that the asset scripts cut from a generated parts sheet
-  and trace to SVG. A piece becomes a layer of a part when it goes on a rig. The
-  word belongs to the asset scripts in `assets/` and `prototypes/`.
+  and redraw as SVG. A piece becomes a layer of a part when it goes on a rig.
+  The word belongs to the asset scripts in `assets/` and `prototypes/`.
 - **Rubber hose**: an arm or a leg that the renderer draws as a bending line
   between two parts, instead of a traced part.
 - **Clip**: a short motion that a character, a prop or a background can play,

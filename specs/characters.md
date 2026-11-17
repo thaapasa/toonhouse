@@ -10,6 +10,16 @@ with the [character studio](studio.md).
 - [ ] The same clip works on every character that has the same rig kind.
 - [ ] A character or a prop has settings with defaults, such as color presets
       for its clothes and its size. See [Cast](cast.md).
+- [ ] The colors of a character or a prop are split into color roles, such as
+      the skin, the hair, the shirt and the logo on the shirt. Each color in its
+      parts and its drawn limbs belongs to one role.
+- [ ] The color roles and the color presets are made by hand for each character
+      or prop, so that every preset is a set of colors that suits that
+      character.
+- [ ] A color preset can set any of the color roles. A role that the preset
+      doesn't set keeps the color that the character has in the library.
+- [ ] If a character gets new parts, a saved cartoon still shows its actors in
+      the colors that the user picked.
 - [x] Each layer of a character has its own place in the draw order, so the
       front hair can be in front of the arms while the back hair is behind the
       torso.
@@ -17,3 +27,10 @@ with the [character studio](studio.md).
       reaches behind the back.
 - [x] A character can face left or right.
 - [ ] A character's mouth moves while it talks.
+
+## Open questions
+
+- Is a color preset one set of all the colors, or can the user pick the skin,
+  the hair and the clothes from separate presets?
+- Can a color preset change the outline color, such as a lighter outline for a
+  dark character?
