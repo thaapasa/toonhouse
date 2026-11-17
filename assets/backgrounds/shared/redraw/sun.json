@@ -1,0 +1,22 @@
+{
+  "src": "assets/work/bg-redraw/traced/sun.svg",
+  "out": "assets/backgrounds/shared/sun.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#592304",
+      "also": ["#501e06", "#582305", "#844a06"]
+    },
+    {
+      "name": "rays",
+      "color": "#fbb200",
+      "also": ["#f8b107", "#c07f02"]
+    },
+    {
+      "name": "core",
+      "color": "#f9e101",
+      "also": ["#fae110"]
+    }
+  ],
+  "smooth": 6
+}

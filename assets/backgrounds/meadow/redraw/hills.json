@@ -1,0 +1,34 @@
+{
+  "src": "assets/work/bg-redraw/traced/hills-pad.svg",
+  "out": "assets/work/bg-redraw/out/hills-pad.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#5a5b53",
+      "also": [
+        "#55524d",
+        "#60665b",
+        "#57564d",
+        "#5d5e53",
+        "#606358",
+        "#5d5e51",
+        "#595a51",
+        "#656e60",
+        "#6b7666",
+        "#5a5d53",
+        "#6a7661",
+        "#7a8c79",
+        "#6c8257",
+        "#7a9273"
+      ]
+    },
+    {
+      "name": "hill-far",
+      "color": "#a6d4ae",
+      "also": ["#a3d3ad", "#8dae91", "#8aa68d", "#8cb087"]
+    },
+    { "name": "hill", "color": "#93c86f", "also": ["#92c76e"] }
+  ],
+  "lines": {},
+  "smooth": 2
+}

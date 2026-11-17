@@ -28,3 +28,26 @@ clip can move them. Each cloud has its own size and speed. The speeds are 20, 40
 and 60 px/s, because the renderer rounds a speed so that the cloud crosses the
 frame a whole number of times in the 120 s loop of the clip, and slower speeds
 all round to one crossing.
+
+## Redrawn pieces
+
+The traced sun and clouds were redrawn with `redraw-image`, and the configs are
+in `redraw/`. The sources are the traced SVGs of commit `8ec6416`. To get them
+back:
+
+```sh
+mkdir -p assets/work/bg-redraw/traced
+for f in sun cloud-1 cloud-2 cloud-3 cloud-4; do
+  git show 8ec6416:assets/backgrounds/shared/$f.svg > assets/work/bg-redraw/traced/$f.svg
+done
+```
+
+The redraw keeps the colors and the `viewBox` of each piece, so the sizes and
+the pivots in the `background.json` files stay right.
+
+- The sun has the roles `rays`, for the orange rays and the ring around the
+  disc, and `core`, for the yellow disc. Its config uses `smooth` 6, because the
+  edge of the disc had small steps from the trace that a lower value kept.
+- The clouds have the roles `cloud` and `cloud-dark`, for the light blue-gray
+  underside. The outline has an even width now, and the specks and notches of
+  the trace are gone.

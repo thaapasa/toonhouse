@@ -62,3 +62,59 @@ opaque, and traced the frame with the default settings.
 - The ground is a large plain green area. It is good for standing on, but it has
   few details below the flowers.
 - The hill outlines turn gray-blue when mixed with the sky color.
+
+## Redrawn layers
+
+The hills, the trees and the ground were redrawn with `redraw-image`. This was
+the first try of the script on a background. The configs and two scripts are in
+`redraw/`. The sources are the traced layers of commit `8ec6416`. To get them
+back and redraw a layer, such as the hills:
+
+```sh
+mkdir -p assets/work/bg-redraw/traced assets/work/bg-redraw/out
+git show 8ec6416:assets/backgrounds/meadow/hills.svg > assets/work/bg-redraw/traced/hills.svg
+python3 assets/backgrounds/meadow/redraw/pad.py \
+  assets/work/bg-redraw/traced/hills.svg assets/work/bg-redraw/traced/hills-pad.svg
+MISE_ENV=art mise run redraw-image -- assets/backgrounds/meadow/redraw/hills.json
+python3 assets/backgrounds/meadow/redraw/finish.py \
+  assets/work/bg-redraw/out/hills-pad.svg assets/backgrounds/meadow/hills.svg
+```
+
+### Padding the frame
+
+`redraw-image` keeps the fills a little inside the silhouette, and it takes the
+edge of the frame for the edge of the silhouette. A layer that runs off the
+left, right or bottom edge then gets an outline along the frame. `pad.py`
+repeats the outermost pixels of the layer 24 px out from the frame before the
+redraw, and `finish.py` moves the redrawn paths back into the frame. The paths
+reach 24 px past the frame, and the `viewBox` hides that part.
+
+### Colors and roles
+
+The colors are the ones of the traced layers, so the hills and the trees stay
+mixed with the sky color.
+
+- Hills: `hill-far` for the back row and `hill` for the front row. The borders
+  between the hills are line paths.
+- Trees: `grass` for the strip under the trees, `trunk`, `trunk-dark` for the
+  darker trunks of the back trees, `leaves` and `leaves-light`. The two lighter
+  trunk browns went to `trunk`. The borders between the crowns are line paths.
+- Ground: `grass`, `grass-dark` for the dark green inside the grass tufts,
+  `flower` for the yellow flowers, `flower-light` for the white ones,
+  `flower-warm` for the pink ones and `flower-center`.
+
+### Changes from the traced layers
+
+- Six crowns of the trees had a small curved mark that looked like a smile. The
+  trace drew them in a dark green, and the redraw would have drawn them in the
+  outline color. The config gives them the color of their crown with `recolor`,
+  so they are gone.
+- Where the trace drew a border between two crowns of the same color as a faint
+  green line, the redraw keeps the line only where it is wide enough. A few of
+  these borders are shorter now.
+- The ground flowers were blocky in the trace and are round blobs now. The
+  darker middle of some yellow flowers went to `flower`.
+- The hills and the trees use `smooth` 2. A higher value smoothed away parts of
+  the thin borders between the hills.
+- The redrawn layers are larger files than the traced ones, because the traced
+  files were minified with SVGO and the redrawn ones are not.

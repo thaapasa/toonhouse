@@ -1,0 +1,42 @@
+{
+  "src": "assets/work/bg-redraw/traced/ground-pad.svg",
+  "out": "assets/work/bg-redraw/out/ground-pad.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#3f3e19",
+      "also": ["#44421b", "#484d1c", "#434b15"]
+    },
+    {
+      "name": "grass",
+      "color": "#3bb000",
+      "also": ["#40a003", "#459005", "#3ea802"]
+    },
+    {
+      "name": "grass-dark",
+      "color": "#4f7009",
+      "also": ["#3f5508", "#4a8007", "#4e7409"]
+    },
+    {
+      "name": "flower",
+      "color": "#e6e500",
+      "also": ["#e5d403", "#cbd600", "#b9ca01", "#c1c84e"]
+    },
+    {
+      "name": "flower-light",
+      "color": "#e0ebb5",
+      "also": ["#d8e29c"]
+    },
+    {
+      "name": "flower-warm",
+      "color": "#ea8f76",
+      "also": ["#c9875b"]
+    },
+    {
+      "name": "flower-center",
+      "color": "#f7d13b"
+    }
+  ],
+  "minArea": 12,
+  "smooth": 1.5
+}
