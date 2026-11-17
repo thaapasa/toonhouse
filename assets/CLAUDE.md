@@ -186,12 +186,13 @@ To clean up an asset that was traced before, redraw it from its committed SVG.
 The SVG already has the layers, the mirroring and the scale that the rig
 expects, so the pivots in `rig.json` stay right. Copy the SVGs to
 `assets/work/<name>/traced/` first, because the redraw writes over them, and
-point `src` at the copies. If the pieces of the parts sheet are still in
-`assets/work/` and have the same frames as the parts, you can redraw from them
-instead, as for the emo character. Choose for each part. A piece is usually the
-cleaner source, but not if the part was edited after tracing, such as the
-bunny's body, which lost its hind foot. The raincoat character's head is redrawn
-from its SVG, and her torso from its piece.
+point `src` at the copies. Name the scratch folder after the asset, so that
+agents working at the same time don't share one. If the pieces of the parts
+sheet are still in `assets/work/` and have the same frames as the parts, you can
+redraw from them instead, as for the emo character. Choose for each part. A
+piece is usually the cleaner source, but not if the part was edited after
+tracing, such as the bunny's body, which lost its hind foot. The raincoat
+character's head is redrawn from its SVG, and her torso from its piece.
 
 A prep script can also fix a shape, such as a wavy line, before the redraw. A
 PNG source can need cleaning before the redraw, such as a thin outline that
@@ -201,9 +202,11 @@ character's `prep-torso.py`. Plain Python has no image libraries, so start the
 script with an inline list of its packages and run it with
 `MISE_ENV=art mise exec -- uv run --script`.
 
-Use the colors of the rig for the layers it also draws: `colors.outline` for the
-outline, `colors.skin` for the skin, and the colors in `limbs`, such as the
-sleeve. Otherwise the limbs don't match the parts.
+For a character, use the colors of the rig for the layers it also draws:
+`colors.outline` for the outline, `colors.skin` for the skin, and the colors in
+`limbs`, such as the sleeve. Otherwise the limbs don't match the parts. A prop
+rig has no colors, so give every piece of a prop the same outline color, such as
+the outline of its trunk.
 
 Some parts need more than `redraw-image` writes, such as a clip path around a
 hair layer, a mirrored hand, or a pattern drawn by hand. Write a script that
