@@ -218,10 +218,12 @@ MISE_ENV=art mise run redraw-image -- paths assets/work/fox/traced/head.svg
 MISE_ENV=art mise run redraw-image -- paths assets/work/fox/traced/head.svg --show 12 assets/work/fox/path-12.png
 ```
 
-Then give them the color of their role with `recolor` in the config, such as
-`"recolor": {"12": "#422517"}`. The captain, the grandma and the quartermaster
-were redrawn before `recolor` existed, so they do this with prep scripts in
-`redraw/`.
+Use `recolor` also when two roles have almost the same color, such as the eye
+white and a white collar: give one of them a clearly different color, so that
+the pixels don't mix. Then give the paths the color of their role with `recolor`
+in the config, such as `"recolor": {"12": "#422517"}`. The captain, the grandma
+and the quartermaster were redrawn before `recolor` existed, so they do this
+with prep scripts in `redraw/`.
 
 ### Steps
 
