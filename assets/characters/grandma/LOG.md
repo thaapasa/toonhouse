@@ -38,6 +38,51 @@ coral flowered dress and purple slippers, made with the steps in
 5. The blush on the cheek traced with a square notch on its right edge. I
    replaced its path in `head.svg` with an ellipse of the same color.
 
+## Redrawn parts
+
+The traced parts had stacked shapes in many shades and rough edges. The head,
+the torso, the hands and the slipper were redrawn with `redraw-image` from the
+traced SVGs of commit `deaaa49`, so the scaled torso, the mirrored open hand and
+the pivots stay as they were. The configs are in `redraw/`. Their source is
+`assets/work/grandma/traced/<part>.svg`, which you get back with:
+
+```sh
+mkdir -p assets/work/grandma/traced
+for p in head torso hand hand-open foot; do
+  git show deaaa49:assets/characters/grandma/$p.svg > assets/work/grandma/traced/$p.svg
+done
+python3 assets/characters/grandma/redraw/prep-head.py \
+  assets/work/grandma/traced/head.svg assets/work/grandma/traced/head-prep.svg
+python3 assets/characters/grandma/redraw/prep-torso.py \
+  assets/work/grandma/traced/torso.svg assets/work/grandma/traced/torso-prep.svg
+```
+
+- `redraw/prep-head.py` recolors the pearl of the earring. It had the white of
+  the eye and, on its shade, the light lilac of the hair strands, so the eye
+  color or the hair color of a color preset would have changed it too.
+- `redraw/prep-torso.py` recolors the far edge of the cardigan, which had the
+  dark teal of the lines on the cardigan. In the outline color, it made a thick
+  dark band along the back of the dress.
+- The outline of every part is `#533121`, the skin is `#fbc08c` and the cardigan
+  is `#00b9b6`, the same as `colors.outline`, `colors.skin` and
+  `limbs.sleeve.color` of the rig. The hands were a little lighter before.
+- The color roles are `skin`, `hair`, `blush`, `earring` and `eye` on the head,
+  `dress`, `cardigan`, `dress-pattern` and `flower-center` on the torso, and
+  `slipper`, `slipper-inside` and `sole` on the slipper. The pink of the nose
+  tip is `blush`, as the cheek.
+- The shades went to the color they belong to: the strands of the hair, the
+  darker red of the dress, the lighter teal of the cuff, the shades of the sole,
+  and the dark purple band above the sole, which is now `slipper`. The ribs of
+  the cuff were light teal on teal, so they are gone.
+- The pupil, the brow, the curl of the ear, the pocket and the front edge of the
+  cardigan, the finger gaps and the creases of the palm and the wrist are in the
+  outline color, as lines of their own. The curl of the ear and the creases were
+  light orange before.
+- The slipper uses `minArea` 250. It removes a thin light sliver of the sole
+  above the purple band.
+- The mouth patch was not redrawn. It still covers the smile line of the redrawn
+  head.
+
 ## Rig
 
 I read the points from the zoomed crops of `inspect-piece.ts` instead of running

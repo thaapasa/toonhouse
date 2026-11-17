@@ -1,0 +1,25 @@
+{
+  "src": "assets/work/grandma/traced/torso-prep.svg",
+  "out": "assets/characters/grandma/torso.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#533121",
+      "also": ["#543020", "#6b6159", "#475147", "#5e3c30", "#086864"]
+    },
+    {
+      "name": "dress",
+      "color": "#fc4b4c",
+      "also": ["#f74548", "#d74b4c", "#bb3138"],
+      "covers": ["dress-pattern", "flower-center"]
+    },
+    { "name": "cardigan", "color": "#00b9b6", "also": ["#00b2af"] },
+    {
+      "name": "dress-pattern",
+      "color": "#fd847c",
+      "also": ["#f9917c", "#f5977e"]
+    },
+    { "name": "flower-center", "color": "#fabd90", "also": ["#f4c69a"] }
+  ],
+  "lines": {}
+}

@@ -1,0 +1,21 @@
+{
+  "src": "assets/work/grandma/traced/hand-open.svg",
+  "out": "assets/characters/grandma/hand-open.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#533121",
+      "also": [
+        "#745546",
+        "#63402f",
+        "#604335",
+        "#593725",
+        "#472717",
+        "#eca46a",
+        "#f2a76d"
+      ]
+    },
+    { "name": "skin", "color": "#fbc08c", "also": ["#fabf8b"] }
+  ],
+  "lines": {}
+}
