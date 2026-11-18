@@ -184,6 +184,14 @@ backgrounds.
 
 ### Background layers
 
+For a background, make each layer both ways: redraw it, and trace it with
+`trace-image` as described in "Tracing" below. Compare the two and keep the
+better one. Clean layers and color roles matter less for a background than for a
+character, because a background rarely needs color options, and one that does
+would be built by hand. So keep the trace when the redraw loses detail, grows a
+lot or doesn't look clearly better. Write in the `LOG.md` which way you chose
+for each layer, and why.
+
 A layer that runs off the frame, such as the ground, needs `openEdges` in its
 config, such as `"openEdges": ["left", "right", "bottom"]`. Otherwise the edge
 of the frame gets an outline. The paths reach a little past the frame on those
@@ -202,8 +210,8 @@ A large, detailed layer can take minutes at the default `scale` of 4. Use
 `scale` 2 while you try settings.
 
 The redraw suits flat art. Art that is painted with texture, such as the
-harbor's houses, loses its detail or grows in size, and needs a new image with
-flat colors instead.
+harbor's houses, loses its detail or grows in size, so the trace is better for
+it.
 
 A traced background often has one large shape under everything else, such as the
 hill, with the other shapes stacked on it. `recolor` changes whole paths, so it
@@ -377,9 +385,9 @@ of that character. See [specs/characters.md](../specs/characters.md).
 
 ## Tracing
 
-`trace-image` is the older way to turn an image into an SVG. The harbor is still
-traced, because its art is painted with texture and doesn't redraw well. Its
-`LOG.md` describes how:
+`trace-image` traces an image with VTracer. Use it to try each background layer
+both ways, as "Background layers" above describes. The harbor is traced, because
+its art is painted with texture and doesn't redraw well:
 
 ```sh
 pnpm trace-image assets/work/fox.png assets/work/fox.svg
