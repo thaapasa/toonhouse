@@ -27,6 +27,8 @@ const Action = z.object({
   t: z.number().finite().min(0).max(3600),
   clip: ClipId,
   path: z.array(Point).max(200).exactOptional(),
+  speed: z.number().finite().min(0.05).max(20).exactOptional(),
+  clipStart: z.number().finite().min(0).max(1).exactOptional(),
 });
 
 const Actor = z.object({

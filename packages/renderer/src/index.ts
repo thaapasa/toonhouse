@@ -40,11 +40,13 @@ export type { DrawEntry, FarGroup } from './order.ts';
 export { defaultDrawOrder, drawOrder } from './order.ts';
 export type { ActorState } from './scene.ts';
 export {
+  actionSpeed,
   actorEnd,
   actorStateAt,
   backgroundStateAt,
   clipOf,
   clipSpeed,
+  clipStartOf,
   isMoving,
   MIN_SCENE_LENGTH,
   minSceneLength,

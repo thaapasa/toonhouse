@@ -82,6 +82,28 @@ describe('actor state', () => {
     expect(s.at.y).toBeCloseTo(700);
   });
 
+  it('walks and plays the clip faster at a higher speed', () => {
+    const far = { x: WALK_SPEED * 10, y: 700 };
+    const a = actor([{ id: '1', t: 1, clip: 'walk', path: [far], speed: 2 }]);
+    const s = actorStateAt(a, 'cutout', flat, 3);
+    expect(s.at.x).toBeCloseTo(WALK_SPEED * 4);
+    expect(s.clipT).toBeCloseTo(4);
+    expect(actorEnd(a, 'cutout', flat)).toBeCloseTo(6);
+  });
+
+  it('plays a clip in place slower at a lower speed', () => {
+    const a = actor([{ id: '1', t: 1, clip: 'wave', speed: 0.5 }]);
+    expect(actorStateAt(a, 'cutout', flat, 3).clipT).toBeCloseTo(1);
+  });
+
+  it('starts the clip from the middle', () => {
+    const a = actor([{ id: '1', t: 1, clip: 'wave', clipStart: 0.5 }]);
+    const { duration } = clipById('cutout', 'wave');
+    expect(actorStateAt(a, 'cutout', flat, 2).clipT).toBeCloseTo(
+      duration / 2 + 1,
+    );
+  });
+
   it('stands still after the last point', () => {
     const a = actor([
       { id: '1', t: 0, clip: 'walk', path: [{ x: WALK_SPEED, y: 700 }] },
@@ -155,6 +177,12 @@ describe('background state', () => {
       clip: 'day',
       clipT: 1,
     });
+  });
+
+  it('starts a day with the sun in the middle of the sky', () => {
+    const actions = [{ id: '1', t: 2, clip: 'day' as const, clipStart: 0.5 }];
+    const { duration } = clipById('background', 'day');
+    expect(backgroundStateAt(actions, 2).clipT).toBeCloseTo(duration / 2);
   });
 });
 

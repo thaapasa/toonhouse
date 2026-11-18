@@ -42,6 +42,8 @@ interface Props {
   /** The selected actor, if any. */
   selectedActor: string | null;
   walk: WalkEdit | null;
+  /** The walk point to show as picked, such as while the user edits it in the properties pane. */
+  focusPoint: number | null;
   /** Selects an actor, or clears the selection with null. */
   onSelect(actorId: string | null): void;
   /** Moves an actor by `d` from where it was when the drag started. */
@@ -235,7 +237,9 @@ export function EditorStage(props: Props) {
                 <rect
                   key={i}
                   data-point={i}
-                  className="walk-point"
+                  className={
+                    i === props.focusPoint ? 'walk-point focused' : 'walk-point'
+                  }
                   x={p.x - (POINT_BOX / 2) * unit}
                   y={p.y - (POINT_BOX / 2) * unit}
                   width={POINT_BOX * unit}

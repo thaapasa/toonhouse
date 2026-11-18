@@ -8,12 +8,19 @@ import { describe, expect, it } from 'vitest';
 
 import {
   actionsOf,
+  insertPoint,
   moveActor,
   moveBlock,
   moveStart,
   newScene,
+  removePoint,
   removeScene,
+  savedPoint,
+  SCALE_LIMITS,
+  setClip,
   setLength,
+  setScale,
+  setSpeed,
   startAction,
   stepSize,
 } from './sceneEdit.ts';
@@ -138,5 +145,48 @@ describe('scenes', () => {
     expect(content.scenes).toHaveLength(1);
     expect(content.scenes[0]!.id).not.toBe(a.id);
     expect(content.scenes[0]!.actors).toEqual([]);
+  });
+});
+
+describe('properties', () => {
+  const action: Action = { id: 'a', t: 1, clip: 'walk', path: [] };
+
+  it('keeps the size inside the limits of the server', () => {
+    const actor = { scale: 1 } as Actor;
+    expect(setScale(actor, 0).scale).toBe(SCALE_LIMITS.min);
+    expect(setScale(actor, 99).scale).toBe(SCALE_LIMITS.max);
+    expect(setScale(actor, 1.23456).scale).toBe(1.2346);
+  });
+
+  it('leaves the speed out when it is the normal speed', () => {
+    expect(setSpeed(action, 1.5).speed).toBe(1.5);
+    expect('speed' in setSpeed({ ...action, speed: 2 }, 1)).toBe(false);
+  });
+
+  it('gives a path to an action whose new clip moves', () => {
+    const wave: Action = { id: 'w', t: 0, clip: 'wave' };
+    expect(setClip(wave, 'walk', true).path).toEqual([]);
+    expect(setClip(wave, 'talk', false).path).toBeUndefined();
+    const walk = { ...action, path: [{ x: 1, y: 2 }] };
+    expect(setClip(walk, 'walk', true).path).toEqual([{ x: 1, y: 2 }]);
+  });
+
+  it('adds a point halfway to the point before', () => {
+    const start = { x: 0, y: 0 };
+    const path = [
+      { x: 10, y: 0 },
+      { x: 10, y: 20 },
+    ];
+    expect(insertPoint(path, 0, start)[0]).toEqual({ x: 5, y: 0 });
+    expect(insertPoint(path, 1, start)).toEqual([
+      { x: 10, y: 0 },
+      { x: 10, y: 10 },
+      { x: 10, y: 20 },
+    ]);
+    expect(removePoint(path, 0)).toEqual([{ x: 10, y: 20 }]);
+  });
+
+  it('keeps a point inside the limits of the server', () => {
+    expect(savedPoint({ x: -1e9, y: 3.14159 })).toEqual({ x: -100000, y: 3.1 });
   });
 });

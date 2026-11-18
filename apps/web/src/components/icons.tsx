@@ -298,6 +298,45 @@ export const CloudIcon = () => (
   </Icon>
 );
 
+/** The properties pane: three sliders. */
+export const PropertiesIcon = () => (
+  <Icon>
+    <path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1" />
+    <circle cx="15" cy="6" r="2" />
+    <circle cx="9" cy="12" r="2" />
+    <circle cx="17" cy="18" r="2" />
+  </Icon>
+);
+
+/**
+ * Attaches the properties pane to the side of the editor. The filled pin
+ * shows that the pane is attached.
+ */
+export const PinIcon = ({ filled = false }: { filled?: boolean }) => (
+  <Icon>
+    <path
+      d="M9 4h6M10 4h4v6l3 4H7l3-4z"
+      fill={filled ? 'currentColor' : 'none'}
+    />
+    <path d="M12 14v6" />
+  </Icon>
+);
+
+export const MinusIcon = ({ size = 16 }: { size?: number }) => (
+  <Icon size={size}>
+    <path d="M5 12h14" strokeWidth={2.2} />
+  </Icon>
+);
+
+/** Adds a point to a walk before this one. */
+export const InsertPointIcon = () => (
+  <Icon size={18}>
+    <path d="M4 20L20 4" strokeDasharray="2 3" />
+    <rect x="8" y="8" width="8" height="8" rx="1.5" />
+    <path d="M12 10.5v3M10.5 12h3" />
+  </Icon>
+);
+
 // The player.
 
 export const EditIcon = ({ size = 20 }: { size?: number }) => (

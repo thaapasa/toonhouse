@@ -71,4 +71,15 @@ export interface Action {
    * of the background frame. Only the clips that move use it.
    */
   path?: Pt[];
+  /**
+   * How fast the clip plays against its normal speed, 1 if not set. A walk
+   * also moves faster, so that the feet don't slide.
+   */
+  speed?: number;
+  /**
+   * Where in its clip the action starts, as a part of one loop of the clip
+   * from 0 to 1, 0 if not set. With 0.5, the sun of a day starts high on
+   * the sky.
+   */
+  clipStart?: number;
 }

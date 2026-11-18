@@ -29,6 +29,8 @@ After editing a spec, format it with Prettier: `pnpm format`.
 - [Characters](characters.md): characters, props and their clips.
 - [Scenes](scenes.md): backgrounds, placing actors and saving scenes.
 - [Timeline](timeline.md): giving actors actions over time.
+- [Properties pane](properties.md): seeing and changing all the data of the
+  selection.
 - [Camera](camera.md): zooming and panning across the background.
 - [Cartoon](cartoon.md): putting scenes together into a cartoon.
 - [Cast](cast.md): the characters and props of one cartoon, and their settings.

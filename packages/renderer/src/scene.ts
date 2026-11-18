@@ -41,6 +41,16 @@ export function clipOf(kind: ClipKind, id: ClipId): Clip {
 export const isMoving = (kind: ClipKind, id: ClipId) =>
   clipSpeed(clipOf(kind, id)) > 0;
 
+/** How fast an action plays its clip against the normal speed. */
+export const actionSpeed = (action: Action) => action.speed ?? 1;
+
+/** Where in one loop of its clip an action starts, from 0 to 1. */
+export const clipStartOf = (action: Action) => action.clipStart ?? 0;
+
+/** The time in the clip of an action, `elapsed` seconds after it starts. */
+const clipTime = (action: Action, duration: number, elapsed: number) =>
+  clipStartOf(action) * duration + elapsed * actionSpeed(action);
+
 /** The actions in the order of their times. Actions at the same time keep their order. */
 export const sortedActions = (actions: readonly Action[]) =>
   [...actions].sort((a, b) => a.t - b.t);
@@ -101,13 +111,17 @@ function walkAlong(
   return { at, facing, arrived: spent };
 }
 
-/** Frame pixels a second for an actor walking with the clip at the height `y`. */
+/**
+ * Frame pixels a second for an actor walking with the clip of the action at
+ * the height `y`.
+ */
 function speedOf(
   bg: Background,
   actor: Actor,
   clip: Clip,
+  action: Action,
 ): (y: number) => number {
-  const speed = clipSpeed(clip);
+  const speed = clipSpeed(clip) * actionSpeed(action);
   return (y) => speed * actorScaleAt(bg, y) * actor.scale;
 }
 
@@ -138,7 +152,7 @@ export function actorStateAt(
         at,
         action.path,
         facing,
-        speedOf(bg, actor, clip),
+        speedOf(bg, actor, clip, action),
         elapsed,
       );
       at = walk.at;
@@ -146,7 +160,13 @@ export function actorStateAt(
       if (current) {
         // After the last point, the actor stands still until its next action.
         return walk.arrived === null
-          ? { at, facing, clip: clip.id, clipT: elapsed, action }
+          ? {
+              at,
+              facing,
+              clip: clip.id,
+              clipT: clipTime(action, clip.duration, elapsed),
+              action,
+            }
           : {
               at,
               facing,
@@ -156,7 +176,8 @@ export function actorStateAt(
             };
       }
     } else if (current) {
-      return { at, facing, clip: clip.id, clipT: elapsed, action };
+      const clipT = clipTime(action, clip.duration, elapsed);
+      return { at, facing, clip: clip.id, clipT, action };
     }
   }
   return { at, facing, clip: clipsFor(kind)[0]!.id, clipT: t, action: null };
@@ -179,7 +200,7 @@ export function walkTime(
     from.at,
     action.path,
     from.facing,
-    speedOf(bg, actor, clip),
+    speedOf(bg, actor, clip, action),
     Infinity,
   ).arrived;
 }
@@ -201,9 +222,13 @@ export function backgroundStateAt(
   t: number,
 ): { clip: ClipId; clipT: number; action: Action | null } {
   const action = sortedActions(actions).findLast((a) => a.t <= t) ?? null;
-  return action
-    ? { clip: action.clip, clipT: t - action.t, action }
-    : { clip: 'idle', clipT: t, action: null };
+  if (!action) return { clip: 'idle', clipT: t, action: null };
+  const { duration } = clipOf('background', action.clip);
+  return {
+    clip: action.clip,
+    clipT: clipTime(action, duration, t - action.t),
+    action,
+  };
 }
 
 /**

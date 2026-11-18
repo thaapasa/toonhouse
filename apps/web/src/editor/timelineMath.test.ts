@@ -77,6 +77,14 @@ describe('middle points', () => {
     ]);
   });
 
+  it('come sooner when the clip starts in the middle', () => {
+    const a = { ...wave('a', 1), clipStart: 0.5 };
+    expect(midPoints(a, row([a]), 1 + loop * 2, 100)).toEqual([
+      1 + loop * 0.5,
+      1 + loop * 1.5,
+    ]);
+  });
+
   it('are none when the loops are too close', () => {
     const a = wave('a', 1);
     expect(midPoints(a, row([a]), 100, 1)).toEqual([]);
@@ -113,6 +121,18 @@ describe('progress strip', () => {
       [25, 4],
       [25, 8],
       [25, 8],
+    ]);
+  });
+
+  it('starts part of the way up when the clip starts in the middle', () => {
+    expect(progressPoints({ ...opts, length: 1.5, phase: 0.5 })).toEqual([
+      [0, 8],
+      [0, 4],
+      [5, 0],
+      [5, 8],
+      [15, 0],
+      [15, 8],
+      [15, 8],
     ]);
   });
 

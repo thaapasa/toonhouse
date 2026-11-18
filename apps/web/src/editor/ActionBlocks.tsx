@@ -1,7 +1,12 @@
 // The actions of one row of the timeline, as blocks from their start until
 // the next action. A tap selects an action, and a drag moves the whole action.
 import type { Action } from '@toonhouse/model';
-import { clipOf, sortedActions } from '@toonhouse/renderer';
+import {
+  actionSpeed,
+  clipOf,
+  clipStartOf,
+  sortedActions,
+} from '@toonhouse/renderer';
 import { type PointerEvent, useRef } from 'react';
 
 import { CLIP_COLORS } from './clipIcons.tsx';
@@ -82,7 +87,8 @@ export function ActionBlocks(props: {
       pps: props.pps,
       height: STRIP,
       walk: props.row.walkTimes.get(a.id),
-      loop: clipOf(props.row.kind, a.clip).duration,
+      loop: clipOf(props.row.kind, a.clip).duration / actionSpeed(a),
+      phase: clipStartOf(a),
     });
     return (
       <button

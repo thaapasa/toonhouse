@@ -193,3 +193,74 @@ export function stepSize(scale: number, step: 1 | -1): number {
   if (step > 0) return SIZES.find((s) => s > scale + 1e-6) ?? scale;
   return SIZES.findLast((s) => s < scale - 1e-6) ?? scale;
 }
+
+/**
+ * The limits of the size of an actor and the speed of an action. The server
+ * doesn't save values outside them.
+ */
+export const SCALE_LIMITS = { min: 0.05, max: 20 } as const;
+export const SPEED_LIMITS = { min: 0.05, max: 20 } as const;
+/** The server doesn't save a point further away than this from the frame. */
+const COORDINATE_LIMIT = 100_000;
+
+const clamp = (v: number, lo: number, hi: number) =>
+  Math.min(Math.max(v, lo), hi);
+
+/** A point inside the limits that the server saves, to a tenth of a pixel. */
+export const savedPoint = (p: Pt): Pt =>
+  roundPoint({
+    x: clamp(p.x, -COORDINATE_LIMIT, COORDINATE_LIMIT),
+    y: clamp(p.y, -COORDINATE_LIMIT, COORDINATE_LIMIT),
+  });
+
+export const setScale = (actor: Actor, scale: number): Actor => ({
+  ...actor,
+  scale:
+    Math.round(clamp(scale, SCALE_LIMITS.min, SCALE_LIMITS.max) * 1e4) / 1e4,
+});
+
+/** Sets the speed of an action. The normal speed 1 leaves the field out. */
+export function setSpeed(action: Action, speed: number): Action {
+  const v =
+    Math.round(clamp(speed, SPEED_LIMITS.min, SPEED_LIMITS.max) * 1e4) / 1e4;
+  const rest = { ...action };
+  delete rest.speed;
+  return v === 1 ? rest : { ...rest, speed: v };
+}
+
+/** Changes the clip of an action. A clip that moves gets a path if it has none. */
+export const setClip = (
+  action: Action,
+  clip: Action['clip'],
+  moves: boolean,
+): Action => ({
+  ...action,
+  clip,
+  ...(moves && !action.path && { path: [] }),
+});
+
+/**
+ * Adds a point to a path halfway between point `i` and the point before it,
+ * which is `start` for the first point.
+ */
+export function insertPoint(path: readonly Pt[], i: number, start: Pt): Pt[] {
+  const to = path[i];
+  if (!to) return [...path];
+  const from = i > 0 ? path[i - 1]! : start;
+  const mid = roundPoint({ x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 });
+  return [...path.slice(0, i), mid, ...path.slice(i)];
+}
+
+export const removePoint = (path: readonly Pt[], i: number): Pt[] =>
+  path.filter((_, j) => j !== i);
+
+/**
+ * Sets where in one loop of its clip an action starts, from 0 to 1. The start
+ * of the clip 0 leaves the field out.
+ */
+export function setClipStart(action: Action, start: number): Action {
+  const v = Math.round(clamp(start, 0, 1) * 1e4) / 1e4;
+  const rest = { ...action };
+  delete rest.clipStart;
+  return v === 0 ? rest : { ...rest, clipStart: v };
+}

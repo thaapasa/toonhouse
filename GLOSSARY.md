@@ -149,6 +149,10 @@ for something else or too vague.
   motion before the renderer existed.
 - **Renderer**: the package that computes what a scene looks like at a given
   time. It has no UI.
+- **Properties pane**: the pane on the right of the editor that shows all the
+  data of the selection, such as the points of a walk, and where the user can
+  change it. It floats over the stage, or the user attaches it to the side. Not:
+  inspector, panel.
 - **Stage**: the area where a scene is drawn, in the web app and in the studio.
 
 ## Users

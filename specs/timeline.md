@@ -18,10 +18,10 @@ another action for that character.
       bit outside the edge, so that the camera can't see it.
 - [x] A character can walk in any direction on the ground layer, also toward the
       camera and away from it.
-- [ ] User can pick the clip of a walk, such as a walk or a run, and set the
+- [x] User can pick the clip of a walk, such as a walk or a run, and set the
       speed of the walk to any number. The clip plays faster or slower to match
       the speed, so the feet don't slide on the ground.
-- [ ] If the user changes the speed of a walk, only the walk gets faster or
+- [x] If the user changes the speed of a walk, only the walk gets faster or
       slower. The other actions stay where they are on the timeline.
 - [x] When the user picks the points of a walk, the stage shows a box around the
       actor and a box at each point, with a line from the actor through the
@@ -76,10 +76,31 @@ another action for that character.
       the up and down arrow keys go to the start and the end of the scene. The
       keys do this except while the user types a text.
 - [x] User can change or remove an action.
+- [x] User can start the clip of an action from any point of the clip, such as a
+      day with the sun already high on the sky. The timeline shows the first
+      loop of the clip as shorter.
+- [x] The speed of an action defaults to 1. The speed is between 0.05 and 20,
+      because the server doesn't save other values.
+
+## Changes in the middle of a scene
+
+- [ ] User can change a setting of an actor at a point in the middle of a scene,
+      such as its size or its place, so that the actor grows or jumps there at
+      once.
+- [ ] Each change has a time mark on the row of its actor, so that the user can
+      find it later.
+- [ ] When the user selects an actor, the [properties pane](properties.md) lists
+      its changes.
 
 ## Open questions
 
-- How does the user see and edit actions that are already on the timeline?
+- What is the term for a change in the middle of a scene? "Override" is taken
+  for a setting that an actor sets for one scene.
+- How does the user make a change in the middle of a scene? One idea: a button
+  turns on a mode where every edit of an actor makes a change at the current
+  time, instead of changing where and how the actor starts.
+- Can a change in the middle of a scene be animated, such as an actor growing
+  over a second? The first version changes at once.
 - What happens to the later actions when the user changes an earlier one?
 - How does the user add the points of a walk? Now the stage goes into a mode
   that adds a point on every tap when the user selects a walk. It might be

@@ -1,6 +1,6 @@
 // The sizes and times of the timeline, without the DOM.
 import type { Action, ClipKind } from '@toonhouse/model';
-import { clipOf } from '@toonhouse/renderer';
+import { actionSpeed, clipOf, clipStartOf } from '@toonhouse/renderer';
 
 /** A pointer that moves less than this, in CSS pixels, taps. */
 export const TAP_SLOP = 6;
@@ -104,11 +104,14 @@ export function midPoints(
 ): number[] {
   const walk = row.walkTimes.get(a.id);
   if (walk !== undefined) return a.t + walk <= until ? [a.t + walk] : [];
-  const loop = clipOf(row.kind, a.clip).duration;
+  const loop = clipOf(row.kind, a.clip).duration / actionSpeed(a);
   if (loop <= 0 || loop * pps < MIN_MARK_GAP) return [];
+  // An action that starts in the middle of its clip gets to the next loop
+  // sooner.
+  const first = a.t + (1 - clipStartOf(a)) * loop;
   const points: number[] = [];
-  for (let k = 1; a.t + k * loop <= until + 1e-6 && k <= 1000; k++)
-    points.push(a.t + k * loop);
+  for (let k = 0; first + k * loop <= until + 1e-6 && k < 1000; k++)
+    points.push(first + k * loop);
   return points;
 }
 
@@ -145,8 +148,10 @@ export function progressPoints(opts: {
   height: number;
   walk: number | undefined;
   loop: number;
+  /** Where in its first loop the clip starts, from 0 to 1. */
+  phase?: number;
 }): [number, number][] {
-  const { length, pps, height, walk, loop } = opts;
+  const { length, pps, height, walk, loop, phase = 0 } = opts;
   const y = (f: number) => height * (1 - f);
   const points: [number, number][] = [[0, height]];
   if (walk !== undefined) {
@@ -155,7 +160,9 @@ export function progressPoints(opts: {
   } else if (loop > 0 && loop * pps < MIN_TOOTH) {
     points.push([0, y(0.5)], [length * pps, y(0.5)]);
   } else if (loop > 0) {
-    for (let s = 0; s < length - 1e-9; s += loop) {
+    // The first loop starts part of the way up.
+    if (phase > 0) points.push([0, y(phase)]);
+    for (let s = -phase * loop; s < length - 1e-9; s += loop) {
       const e = Math.min(s + loop, length);
       points.push([e * pps, y((e - s) / loop)], [e * pps, height]);
     }

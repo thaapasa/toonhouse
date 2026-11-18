@@ -826,6 +826,241 @@ button:disabled {
   border-radius: 5px;
 }
 
+/* Properties pane */
+
+.walk-point.focused {
+  fill: var(--accent);
+}
+
+.pane-toggle {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  z-index: 5;
+  border-radius: 10px;
+  background: var(--panel);
+  box-shadow:
+    0 0 0 1px var(--line-2),
+    0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Floats over the stage, so that the stage keeps its size. */
+.properties-pane {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  z-index: 5;
+  width: 300px;
+  max-width: calc(100% - 16px);
+  max-height: calc(100% - 16px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow:
+    0 0 0 1px var(--line-2),
+    0 16px 40px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.properties-pane.attached {
+  position: static;
+  flex: none;
+  max-width: none;
+  max-height: none;
+  border-radius: 0;
+  border-left: 1px solid var(--line);
+  box-shadow: none;
+}
+
+.pane-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* The pin keeps the background of an unpressed button, so that only its
+   color shows that the pane is attached. */
+.pane-head .icon-button[aria-pressed='true'] {
+  background: transparent;
+  color: var(--accent);
+}
+
+@media (hover: hover) {
+  .pane-head .icon-button[aria-pressed='true']:hover {
+    background: var(--field);
+  }
+}
+
+.pane-head h2 {
+  flex: 1;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.pane-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pane-section + .pane-section {
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.pane-section h3,
+.walk-points h4 {
+  margin: 0;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.pane-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: var(--text-2);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.number-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  color: var(--text-2);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.hidden-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.number-input {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: 40px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: var(--field);
+}
+
+.number-input:focus-within {
+  border-color: var(--accent);
+}
+
+.number-input input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  /* 16px keeps iOS from zooming in on the field. */
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  outline: none;
+}
+
+.number-unit {
+  padding-right: 8px;
+  color: var(--muted);
+}
+
+.step-button {
+  width: 40px;
+  height: 100%;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+}
+
+.segmented {
+  display: flex;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--field);
+}
+
+.segmented button {
+  min-width: 64px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.segmented button[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.pane-select {
+  height: 40px;
+  min-width: 140px;
+  padding: 0 8px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: var(--field);
+  color: var(--text);
+  font: inherit;
+  font-size: 16px;
+}
+
+.walk-points {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.point-row {
+  display: grid;
+  grid-template-columns: 18px 1fr 1fr 40px 40px;
+  align-items: center;
+  gap: 4px;
+}
+
+.point-row.head {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.point-row.head span,
+.point-value {
+  text-align: right;
+  padding-right: 9px;
+}
+
+.point-number {
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.point-value {
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
 /* Timeline */
 
 .scene-tabs {

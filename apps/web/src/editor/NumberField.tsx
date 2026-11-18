@@ -1,0 +1,95 @@
+// A number that the user types or steps with the buttons beside it. The
+// buttons are big enough for a finger. A typed value takes effect when the
+// user presses Enter or leaves the field, so that each change is one undo step.
+import { type KeyboardEvent, useId, useState } from 'react';
+
+import { MinusIcon, PlusIcon } from '../components/icons.tsx';
+import { useI18n } from '../i18n/index.tsx';
+
+interface Props {
+  label: string;
+  /** Hides the label, when the labels show above a column of fields. */
+  hideLabel?: boolean;
+  value: number;
+  onChange(value: number): void;
+  /** How much the buttons add or take away. Leave out to hide the buttons. */
+  step?: number;
+  /** How many decimals to show. */
+  decimals: number;
+  /** The unit after the value, such as `%` or `s`. */
+  unit?: string;
+}
+
+export function NumberField(props: Props) {
+  const { tr, lang } = useI18n();
+  const id = useId();
+  // The text while the user types it, or null to show the value.
+  const [draft, setDraft] = useState<string | null>(null);
+  const format = new Intl.NumberFormat(lang === 'fi' ? 'fi-FI' : 'en-GB', {
+    maximumFractionDigits: props.decimals,
+    useGrouping: false,
+  });
+
+  const commit = () => {
+    if (draft === null) return;
+    setDraft(null);
+    // Both a comma and a point work as the decimal separator.
+    const v = Number(draft.trim().replace(',', '.').replace('−', '-'));
+    if (draft.trim() !== '' && Number.isFinite(v) && v !== props.value)
+      props.onChange(v);
+  };
+  const onKey = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') e.currentTarget.blur();
+    else if (e.key === 'Escape') {
+      setDraft(null);
+      e.currentTarget.blur();
+    }
+  };
+  const step = (d: number) => {
+    setDraft(null);
+    const f = 10 ** props.decimals;
+    props.onChange(Math.round((props.value + d) * f) / f);
+  };
+
+  return (
+    <div className="number-field">
+      <label htmlFor={id} className={props.hideLabel ? 'hidden-label' : ''}>
+        {props.label}
+      </label>
+      <div className="number-input">
+        {props.step !== undefined && (
+          <button
+            type="button"
+            className="step-button"
+            aria-label={tr('properties.less', { label: props.label })}
+            onClick={() => step(-props.step!)}
+          >
+            <MinusIcon />
+          </button>
+        )}
+        <input
+          id={id}
+          type="text"
+          inputMode="decimal"
+          autoComplete="off"
+          value={draft ?? format.format(props.value)}
+          onChange={(e) => setDraft(e.target.value)}
+          onFocus={(e) => e.currentTarget.select()}
+          onBlur={commit}
+          onKeyDown={onKey}
+        />
+        {props.unit && <span className="number-unit">{props.unit}</span>}
+        {props.step !== undefined && (
+          <button
+            type="button"
+            className="step-button"
+            aria-label={tr('properties.more', { label: props.label })}
+            onClick={() => step(props.step!)}
+          >
+            <PlusIcon />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}

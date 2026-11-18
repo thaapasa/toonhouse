@@ -32,6 +32,7 @@ import {
   BubbleIcon,
   CharacterIcon,
   PlayIcon,
+  PropertiesIcon,
   PropIcon,
   RedoIcon,
   SoundIcon,
@@ -49,6 +50,7 @@ import {
   type RigAsset,
 } from './library.ts';
 import { LibraryPanel, type LibraryTab } from './LibraryPanel.tsx';
+import { PropertiesPane } from './PropertiesPane.tsx';
 import {
   actionsOf,
   moveActor,
@@ -72,6 +74,8 @@ import { timelineLength } from './timelineMath.ts';
 import { type EditMode, useCartoonContent } from './useCartoonContent.ts';
 
 const FPS = 30;
+const PANE_KEY = 'toonhouse-properties-open';
+const ATTACH_KEY = 'toonhouse-properties-attached';
 
 /** A cartoon without scenes gets its first scene when it opens. */
 const withScene = (c: CartoonContent): CartoonContent =>
@@ -112,6 +116,24 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
   const [selected, setSelected] = useState<TimelineSelection | null>(null);
   const [walking, setWalking] = useState<WalkEdit | null>(null);
   const [removing, setRemoving] = useState(false);
+  const [paneOpen, setPaneOpenState] = useState(
+    () => localStorage.getItem(PANE_KEY) !== 'false',
+  );
+  const setPaneOpen = (open: boolean) => {
+    localStorage.setItem(PANE_KEY, String(open));
+    setPaneOpenState(open);
+  };
+  // An attached pane takes its own column beside the stage, instead of
+  // floating over it.
+  const [attached, setAttachedState] = useState(
+    () => localStorage.getItem(ATTACH_KEY) === 'true',
+  );
+  const setAttached = (on: boolean) => {
+    localStorage.setItem(ATTACH_KEY, String(on));
+    setAttachedState(on);
+  };
+  // The walk point that the user works on in the properties pane.
+  const [focusPoint, setFocusPoint] = useState<number | null>(null);
 
   const lengthOf = (s: Scene) =>
     sceneLength(s, bg?.background ?? null, (a) => kindOf(a.asset));
@@ -346,6 +368,30 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
     }
   }
 
+  const pane = (
+    <PropertiesPane
+      scene={scene}
+      bg={bg ?? null}
+      selection={selection}
+      duration={duration}
+      fps={FPS}
+      onEdit={(fn) => editScene(fn)}
+      onSeek={playback.seek}
+      onClipChanged={(actorId, action) => {
+        const kind = selectedActor && kindOf(selectedActor.asset);
+        setWalking(
+          actorId !== null && kind && isMoving(kind, action.clip)
+            ? { actorId, actionId: action.id }
+            : null,
+        );
+      }}
+      onFocusPoint={setFocusPoint}
+      attached={attached}
+      onAttach={setAttached}
+      onClose={() => setPaneOpen(false)}
+    />
+  );
+
   const toggleLibrary = (tab: LibraryTab) =>
     setLibrary((open) => (open === tab ? null : tab));
 
@@ -431,6 +477,7 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
               t={t}
               selectedActor={selection?.actorId ?? null}
               walk={walk}
+              focusPoint={focusPoint}
               onSelect={(actorId) => {
                 setSelected(actorId ? { actorId, actionId: null } : null);
                 setWalking(null);
@@ -463,7 +510,20 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
               onClose={() => setLibrary(null)}
             />
           )}
+          {paneOpen && !attached
+            ? pane
+            : !paneOpen && (
+                <div className="pane-toggle">
+                  <ToolButton
+                    label="properties.show"
+                    onClick={() => setPaneOpen(true)}
+                  >
+                    <PropertiesIcon />
+                  </ToolButton>
+                </div>
+              )}
         </div>
+        {paneOpen && attached && pane}
       </div>
 
       <Timeline
