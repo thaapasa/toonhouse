@@ -122,8 +122,8 @@ The parts have these colors and color roles:
 - Hands: `skin`. The finger gaps and the crease of the palm are lines. The
   crease is thin, so the open hand uses `scale` 8, `minLine` 0.5 and `smooth`
   0.5. The crease still has a small gap where it is thinnest.
-- Boot: `boot` and `sole`. The darker red band above the sole and under the cuff
-  was a shade, so it is part of `boot`.
+- Boot: `boot` and `boot-sole`. The darker red band above the sole and under the
+  cuff was a shade, so it is part of `boot`.
 
 ## Checks
 

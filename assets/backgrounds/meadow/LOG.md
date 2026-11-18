@@ -101,7 +101,7 @@ mixed with the sky color.
   trunk browns went to `trunk`. The borders between the crowns are line paths.
 - Ground: `grass`, `grass-dark` for the dark green inside the grass tufts,
   `flower` for the yellow flowers, `flower-light` for the white ones,
-  `flower-warm` for the pink ones and `flower-center`.
+  `flower-alt` for the pink ones and `flower-center`.
 
 ### Changes from the traced layers
 

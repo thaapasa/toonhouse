@@ -13,7 +13,7 @@
       "also": ["#e6a964", "#d59557"]
     },
     {
-      "name": "inner-ear-rim",
+      "name": "ear-inner-rim",
       "color": "#b14f3d",
       "also": [
         "#af4c3b",
@@ -29,7 +29,7 @@
       ]
     },
     {
-      "name": "inner-ear",
+      "name": "ear-inner",
       "color": "#fba8a3"
     }
   ],

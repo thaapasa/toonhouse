@@ -137,9 +137,9 @@ script, read from a grid over the piece.
 - Foot: `boot`. The sole has the color of the boot in the image, so it is part
   of `boot`, and the line between them is a line in the outline color. The
   opening at the top is in the outline color.
-- Staff: `wood` and `crystal`. The grain of the wood went to the wood. The green
-  rim around the crystal and the olive glow along the top of the knot are in the
-  outline color, so the crystal has an outline all around.
+- Staff: `staff` and `staff-crystal`. The grain of the wood went to the wood.
+  The green rim around the crystal and the olive glow along the top of the knot
+  are in the outline color, so the crystal has an outline all around.
 
 ### Checks
 

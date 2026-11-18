@@ -87,7 +87,7 @@ sky color.
   tried, but most of the trunk pixels still went to the outline.
 - Houses: `grass` for the hill and the poplar on the left, `leaves` for the
   trees between the houses, `wall` for the cream walls, `wall-side` for the
-  peach walls and the church tower, `wall-gray` for the gray walls, `roof`,
+  peach walls and the church tower, `wall-alt` for the gray walls, `roof`,
   `roof-side` for the darker roof slopes, `trim` for the tan window frames and
   doors, and `window` for the gray windows. The pink windows have the color of
   the roofs and are part of `roof`.

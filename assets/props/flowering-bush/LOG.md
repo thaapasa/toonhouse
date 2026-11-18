@@ -44,7 +44,7 @@ done
 
 The clumps have the same colors and color roles:
 
-- `outline`, `leaves` for the green, and `leaves-base` for the darker green band
+- `outline`, `leaves` for the green, and `leaves-dark` for the darker green band
   at the bottom.
 - `flower` for the pink flowers, `flower-alt` for the white flowers and
   `flower-center` for the middles of both. The middles of the pink flowers were

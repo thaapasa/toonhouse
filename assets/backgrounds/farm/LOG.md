@@ -79,16 +79,16 @@ done
 The colors are the ones of the traced layers, so the far layer stays mixed with
 the sky color.
 
-- Far: `field-wheat`, `field-ploughed` with `furrow` for its stripes,
-  `field-green`, `field-light`, `field-pale` for the field on the far hill in
-  the middle, and `tree`. The borders between the fields are line paths.
+- Far: `field-wheat`, `field-ploughed` with `furrow` for its stripes, `field`,
+  `field-light`, `field-pale` for the field on the far hill in the middle, and
+  `leaves-far`. The borders between the fields are line paths.
 - Middle: `grass`, `grass-light` for the band along the top of the rise,
   `trunk`, `leaves`, `barn`, `roof` for the roof of the farmhouse, `trim` for
   the white trim and the farmhouse door, `silo`, `silo-light`, `wall` for the
   walls of the farmhouse, `frame` for the window frames, the door frame and the
   chimney, `hay` and `hay-light` for the strands on the haystack.
 - Ground: `grass`, `grass-dark` for the tufts, `fence`, `fence-grain` for the
-  grain on the posts, `flower` and `flower-red`. The pebble and the middle of
+  grain on the posts, `flower` and `flower-alt`. The pebble and the middle of
   the red flower are in `fence-grain`.
 
 ### Prep scripts

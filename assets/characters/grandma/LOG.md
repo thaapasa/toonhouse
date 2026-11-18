@@ -67,9 +67,9 @@ python3 assets/characters/grandma/redraw/prep-torso.py \
   is `#00b9b6`, the same as `colors.outline`, `colors.skin` and
   `limbs.sleeve.color` of the rig. The hands were a little lighter before.
 - The color roles are `skin`, `hair`, `blush`, `earring` and `eye` on the head,
-  `dress`, `cardigan`, `dress-pattern` and `flower-center` on the torso, and
-  `slipper`, `slipper-inside` and `sole` on the slipper. The pink of the nose
-  tip is `blush`, as the cheek.
+  `dress`, `cardigan`, `dress-pattern` and `dress-pattern-center` on the torso,
+  and `slipper`, `slipper-inside` and `slipper-sole` on the slipper. The pink of
+  the nose tip is `blush`, as the cheek.
 - The shades went to the color they belong to: the strands of the hair, the
   darker red of the dress, the lighter teal of the cuff, the shades of the sole,
   and the dark purple band above the sole, which is now `slipper`. The ribs of

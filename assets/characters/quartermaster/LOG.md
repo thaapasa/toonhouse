@@ -68,8 +68,8 @@ done
   `colors.outline` and `colors.skin` of the rig. The shirt is `#e1cea1`, the
   color of the sleeve in `limbs`. The hands were a little lighter before.
 - The color roles are `skin`, `hair-tie` and `eye` on the head, `trousers`,
-  `waistcoat`, `shirt`, `sash` and `button` on the torso, and `boot`, `sole`,
-  `boot-inside`, `strap` and `buckle` on the boot.
+  `waistcoat`, `shirt`, `sash` and `button` on the torso, and `boot`,
+  `boot-sole`, `boot-inside`, `boot-strap` and `boot-buckle` on the boot.
 - The hair, the eyebrow and the mustache have no role of their own. In the image
   they are near-black, the same as the outline, and the trace draws them and the
   outline as one shape, so the script can't tell them apart. They are part of

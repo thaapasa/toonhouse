@@ -12,7 +12,7 @@
     },
     { "name": "fence-grain", "color": "#8a603b" },
     { "name": "flower", "color": "#e8db01" },
-    { "name": "flower-red", "color": "#e32414" }
+    { "name": "flower-alt", "color": "#e32414" }
   ],
   "openEdges": ["left", "right", "bottom"],
   "lines": {},

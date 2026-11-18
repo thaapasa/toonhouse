@@ -14,10 +14,10 @@
       "color": "#d3cd86",
       "also": ["#cfca83", "#d8d18a", "#d8ce86"]
     },
-    { "name": "field-green", "color": "#b2d58a", "also": ["#b1d58b"] },
+    { "name": "field", "color": "#b2d58a", "also": ["#b1d58b"] },
     { "name": "field-light", "color": "#bfda8d" },
     { "name": "field-pale", "color": "#bed59e" },
-    { "name": "tree", "color": "#a9d095", "also": ["#a7bf84"] }
+    { "name": "leaves-far", "color": "#a9d095", "also": ["#a7bf84"] }
   ],
   "openEdges": ["left", "right", "bottom"],
   "lines": {}

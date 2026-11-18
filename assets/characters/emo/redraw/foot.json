@@ -29,12 +29,12 @@
       "also": ["#8c30c4", "#741da1", "#b83edd", "#95569b", "#9030c4"]
     },
     {
-      "name": "laces",
+      "name": "boot-laces",
       "color": "#ff01d5",
       "also": ["#f814cd", "#c817a0", "#f600bf", "#ff01ca"]
     },
     {
-      "name": "sole",
+      "name": "boot-sole",
       "color": "#fbf4f8",
       "also": ["#f8f4f7", "#c5acbe", "#fcf5f8", "#7b665f"]
     }

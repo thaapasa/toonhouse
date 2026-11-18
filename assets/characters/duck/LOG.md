@@ -51,10 +51,10 @@ done
 ```
 
 - The outline of every part is `#392a20`, the same as `colors.outline` of the
-  rig. The green of the head is `feathers`, the color that the rig uses for the
-  neck and the lids, and the grey of the body is `colors.thigh`.
-- The color roles are `feathers`, `collar`, `breast`, `beak`, `eye` and `pupil`
-  on the head, `body` and `breast` on the body, `wing` and `speculum` on both
+  rig. The green of the head is `colors.feathers`, the color that the rig uses
+  for the neck and the lids, and the grey of the body is `colors.thigh`.
+- The color roles are `head`, `collar`, `breast`, `beak`, `eye` and `pupil` on
+  the head, `body` and `breast` on the body, `wing` and `wing-patch` on both
   wings, and `leg` on the foot. The tan strip under the collar is `breast`, so a
   color preset sets it with the breast of the body.
 - **Head:** the pupil was in the same dark green as parts of the outline, and
@@ -70,7 +70,7 @@ done
   `#5e4b35`, which draws the feather tips at the bottom.
 - **Open wing:** the traced SVG mirrored the wing with a transform. The redraw
   works from the rendered SVG, so the paths are now mirrored themselves. The
-  blue shades of the feather tips are one `speculum` role.
+  blue shades of the feather tips are one `wing-patch` role.
 - **Foot:** the hand-drawn foot was redrawn too, at `scale` 8, so that it has
   the same layers and classes as the other parts. The two toe lines were a
   darker orange and are now lines in the outline color.

@@ -79,8 +79,8 @@ python3 assets/characters/captain/redraw/prep-head.py \
   before.
 - The color roles are `skin`, `hair`, `bandana`, `lips`, `earring` and `eye` on
   the head, `jacket`, `shirt`, `belt` and `trousers` on the torso, and `boot`,
-  `boot-inside` and `sole` on the boot. The two layers of a part use the same
-  colors.
+  `boot-inside` and `boot-sole` on the boot. The two layers of a part use the
+  same colors.
 - The buttons and the belt buckle have the color of the trousers in the image,
   so they are part of `trousers`.
 - The shades went to the color they belong to: the neck shadow, the eye shadow,

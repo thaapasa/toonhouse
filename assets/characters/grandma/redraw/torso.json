@@ -11,7 +11,7 @@
       "name": "dress",
       "color": "#fc4b4c",
       "also": ["#f74548", "#d74b4c", "#bb3138"],
-      "covers": ["dress-pattern", "flower-center"]
+      "covers": ["dress-pattern", "dress-pattern-center"]
     },
     { "name": "cardigan", "color": "#00b9b6", "also": ["#00b2af"] },
     {
@@ -19,7 +19,7 @@
       "color": "#fd847c",
       "also": ["#f9917c", "#f5977e"]
     },
-    { "name": "flower-center", "color": "#fabd90", "also": ["#f4c69a"] }
+    { "name": "dress-pattern-center", "color": "#fabd90", "also": ["#f4c69a"] }
   ],
   "lines": {}
 }

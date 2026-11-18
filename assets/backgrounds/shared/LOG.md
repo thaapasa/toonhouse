@@ -45,8 +45,8 @@ done
 The redraw keeps the colors and the `viewBox` of each piece, so the sizes and
 the pivots in the `background.json` files stay right.
 
-- The sun has the roles `rays`, for the orange rays and the ring around the
-  disc, and `core`, for the yellow disc. Its config uses `smooth` 6, because the
+- The sun has the roles `sun-rays`, for the orange rays and the ring around the
+  disc, and `sun`, for the yellow disc. Its config uses `smooth` 6, because the
   edge of the disc had small steps from the trace that a lower value kept.
 - The clouds have the roles `cloud` and `cloud-dark`, for the light blue-gray
   underside. The outline has an even width now, and the specks and notches of

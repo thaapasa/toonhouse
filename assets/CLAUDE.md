@@ -244,7 +244,13 @@ hair layer, a mirrored hand, or a pattern drawn by hand. Write a script that
 makes the final SVG from the redrawn one, and keep it in `redraw/` with the
 configs, as the emo character's `finish.py`. Set `"minify": false` in the
 configs whose output the finish script reads, and minify the final SVG with
-`MISE_ENV=art mise run redraw-image -- minify <svg>`. Keep the configs in
+`MISE_ENV=art mise run redraw-image -- minify <svg>`.
+
+A pattern drawn by a finish script, such as the emo character's plaid, is fixed
+when the SVG is made. Letting the app draw such patterns with the colors of a
+color preset is an open question in
+[specs/characters.md](../specs/characters.md). Keep pattern scripts small and
+pure, so that they could move into the app later. Keep the configs in
 `<asset>/redraw/`, and write in the `LOG.md` of the asset how to get the sources
 back with `git show`. The boy is the example.
 
@@ -331,9 +337,13 @@ of that character. See [specs/characters.md](../specs/characters.md).
   color.
 - Name the role, not the color: `trim` for the white sole, toe cap and laces of
   a shoe, not `white`.
-- If a prop has two shades of the same thing, such as a darker hedge section or
-  pink and white flowers, add a suffix to the name: `leaves`, `leaves-dark`,
-  `flower`, `flower-alt`.
+- Name a part of a thing `<thing>-<part>`, such as `boot-sole`, `boot-laces`,
+  `ear-inner` or `shirt-logo`, and a pattern on it `<thing>-pattern`, such as
+  `skirt-pattern`.
+- Give each asset a plain name for the main color of a thing, such as `leaves`
+  or `flower`. Name another shade of it with `-dark`, `-light` or `-pale`, such
+  as `leaves-dark`, and another color of it with `-alt`, such as `flower-alt`
+  for white flowers next to pink ones.
 - If two things in a part need different colors in some color preset, give them
   different colors in the image and separate layers, such as a shirt and the
   logo on it. The script can't split one color into two roles.

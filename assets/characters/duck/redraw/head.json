@@ -19,7 +19,7 @@
         "#5e4b02"
       ]
     },
-    { "name": "feathers", "color": "#00ae47" },
+    { "name": "head", "color": "#00ae47" },
     { "name": "collar", "color": "#f6f5f2" },
     { "name": "breast", "color": "#c19f71", "also": ["#a9986f", "#bfac7f"] },
     { "name": "beak", "color": "#f8e600" },

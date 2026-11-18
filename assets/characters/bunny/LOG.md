@@ -142,8 +142,8 @@ python3 assets/characters/bunny/redraw/prep-body.py \
   of the head and the paw, and the shaded belly.
 - `belly` is the role of all the light fur: the muzzle, the belly, the inner
   side of the paw and the sole of the foot.
-- The other roles are `eye`, `pupil` and `nose` on the head, `inner-ear` and
-  `inner-ear-rim` on the ear, and `tail` on the body. The highlight of the eye
+- The other roles are `eye`, `pupil` and `nose` on the head, `ear-inner` and
+  `ear-inner-rim` on the ear, and `tail` on the body. The highlight of the eye
   is part of `eye`, and the highlight of the nose is part of `nose`.
 - The line of the haunch was a lighter brown and is now in the outline color.
 - These lines are line paths (`lines` in the configs): the smile and the ring of

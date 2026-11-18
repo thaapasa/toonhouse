@@ -55,7 +55,7 @@ svg, body = read("torso")
 m = re.search(r'<path class="c-skirt" fill="[^"]*" d="([^"]*)"/>', body)
 group = (
     f'<defs><clipPath id="emo-skirt-clip"><path d="{m.group(1)}"/></clipPath></defs>\n'
-    f'<g class="c-skirt-plaid" fill="{PLAID_COLOR}" clip-path="url(#emo-skirt-clip)"><path d="{plaid}"/></g>'
+    f'<g class="c-skirt-pattern" fill="{PLAID_COLOR}" clip-path="url(#emo-skirt-clip)"><path d="{plaid}"/></g>'
 )
 write("torso", svg, body[: m.end()] + "\n" + group + body[m.end() :])
 

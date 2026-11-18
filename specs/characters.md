@@ -34,3 +34,10 @@ with the [character studio](studio.md).
   the hair and the clothes from separate presets?
 - Can a color preset change the outline color, such as a lighter outline for a
   dark character?
+- Can an asset draw part of itself with a script, with the colors from the color
+  preset? The emo character's skirt plaid is drawn by a script at build time,
+  because a redrawn plaid comes out as blotches. If the app ran such scripts, a
+  pattern could follow the color preset and even change its layout, such as a
+  plaid, stripes or polka dots on the same skirt. The script would have to be
+  pure, like the renderer, so that the picture still depends only on the scene
+  data and the time.

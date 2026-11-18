@@ -56,6 +56,6 @@ The parts have these colors and color roles:
 - The outline of every part is `#2a1004`, the outline color of the trunk. The
   clumps had a slightly greener outline, which now goes to the same color.
 - Trunk: `bark`.
-- Clumps: `leaves-dark`, `leaves-light` or `leaves-bright`, after the clump, and
+- Clumps: `leaves-dark`, `leaves-light` or `leaves`, after the clump, and
   `apple`. Each clump has its own leaf role, so that a color preset can keep the
   clumps in different greens.

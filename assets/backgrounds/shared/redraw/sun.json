@@ -8,12 +8,12 @@
       "also": ["#501e06", "#582305", "#844a06"]
     },
     {
-      "name": "rays",
+      "name": "sun-rays",
       "color": "#fbb200",
       "also": ["#f8b107", "#c07f02"]
     },
     {
-      "name": "core",
+      "name": "sun",
       "color": "#f9e101",
       "also": ["#fae110"]
     }

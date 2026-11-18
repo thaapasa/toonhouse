@@ -137,12 +137,12 @@ The parts have these colors and color roles:
   outline color. The shades of the skin, such as the ear, the nose and the
   shadow under the eye, went to the skin. The mouth line went too, and the mouth
   patch covers that spot as before.
-- Torso: `shirt`, `shirt-logo` for the skull, `skirt` and `skirt-plaid`. The
+- Torso: `shirt`, `shirt-logo` for the skull, `skirt` and `skirt-pattern`. The
   sleeve line and the pleat lines are lines in the outline color.
 - Hands: `skin`, and `nails` for the purple nail of the relaxed hand. The finger
   gaps and the palm crease are lines in the outline color.
-- Foot: `boot`, `laces` and `sole`. The seam lines of the boot and the line
-  between the boot and the sole are lines in the outline color.
+- Foot: `boot`, `boot-laces` and `boot-sole`. The seam lines of the boot and the
+  line between the boot and the sole are lines in the outline color.
 
 ### The plaid
 

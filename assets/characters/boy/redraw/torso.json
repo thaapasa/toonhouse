@@ -16,10 +16,10 @@
       "name": "shirt",
       "color": "#e80000",
       "also": ["#ea0000", "#f50000", "#f90000", "#b00300"],
-      "covers": ["stripes"]
+      "covers": ["shirt-pattern"]
     },
     {
-      "name": "stripes",
+      "name": "shirt-pattern",
       "color": "#0a0505",
       "also": ["#060100", "#000000"]
     }
