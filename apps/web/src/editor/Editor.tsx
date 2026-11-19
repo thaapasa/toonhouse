@@ -59,6 +59,7 @@ import {
 } from './library.ts';
 import { LibraryPanel, type LibraryTab } from './LibraryPanel.tsx';
 import { placeActors } from './placement.ts';
+import { PreviewButton } from './PreviewButton.tsx';
 import { PropertiesPane } from './PropertiesPane.tsx';
 import {
   actionsOf,
@@ -471,6 +472,7 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
         </Link>
         <CartoonTitle cartoon={cartoon} saveState={doc.saveState} />
         <div className="spacer" />
+        <PreviewButton cartoonId={cartoon.id} frame={bg && { scene, bg, t }} />
         <ToolButton
           label="editor.undo"
           onClick={doc.canUndo ? doc.undo : undefined}

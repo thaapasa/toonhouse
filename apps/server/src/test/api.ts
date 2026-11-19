@@ -12,6 +12,8 @@ export function request(
   opts: {
     method?: string;
     json?: unknown;
+    /** A body of bytes, sent with the `content-type` header of `headers`. */
+    body?: Uint8Array;
     cookie?: string;
     headers?: Record<string, string> | undefined;
   } = {},
@@ -24,6 +26,7 @@ export function request(
     headers.set('content-type', 'application/json');
     init.body = JSON.stringify(opts.json);
   }
+  if (opts.body) init.body = opts.body;
   return Promise.resolve(app.request(path, init));
 }
 

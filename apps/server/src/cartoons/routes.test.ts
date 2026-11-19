@@ -290,6 +290,95 @@ describe('content', () => {
   });
 });
 
+describe('preview image', () => {
+  // Only the first bytes matter to the server.
+  const webp = new Uint8Array([
+    ...new TextEncoder().encode('RIFF'),
+    1,
+    2,
+    3,
+    4,
+    ...new TextEncoder().encode('WEBPVP8 '),
+  ]);
+  const png = new Uint8Array([
+    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3,
+  ]);
+
+  const upload = (id: string, body: Uint8Array, cookie = owner) =>
+    request(`/api/app/cartoons/${id}/preview`, {
+      method: 'PUT',
+      body,
+      headers: { 'content-type': 'image/webp' },
+      cookie,
+    });
+  const preview = (id: string, cookie?: string) =>
+    request(`/api/app/cartoons/${id}/preview`, cookie ? { cookie } : {});
+
+  it('has no preview at first', async () => {
+    const cartoon = await create();
+    expect(cartoon.previewUpdatedAt).toBeNull();
+    expect((await preview(cartoon.id, owner)).status).toBe(404);
+  });
+
+  it('stores the image and serves it with the type from its bytes', async () => {
+    const { id, updatedAt } = await create();
+    const res = await upload(id, png);
+    expect(res.status).toBe(200);
+    const cartoon = (await res.json()) as Cartoon;
+    expect(cartoon.previewUpdatedAt).not.toBeNull();
+    // Setting the preview doesn't count as an edit.
+    expect(cartoon.updatedAt).toBe(updatedAt);
+
+    const got = await preview(id, owner);
+    expect(got.headers.get('content-type')).toBe('image/png');
+    expect(new Uint8Array(await got.arrayBuffer())).toEqual(png);
+  });
+
+  it('replaces the old image', async () => {
+    const { id } = await create();
+    await upload(id, png);
+    await upload(id, webp);
+    const got = await preview(id, owner);
+    expect(got.headers.get('content-type')).toBe('image/webp');
+    expect(new Uint8Array(await got.arrayBuffer())).toEqual(webp);
+  });
+
+  it('refuses bytes that are not a WebP or PNG image', async () => {
+    const { id } = await create();
+    const svg = new TextEncoder().encode('<svg onload="alert(1)"/>');
+    expect((await upload(id, svg)).status).toBe(400);
+  });
+
+  it('shows the preview only to users who can watch the cartoon', async () => {
+    const { id } = await create();
+    await upload(id, webp);
+    expect((await preview(id, member)).status).toBe(404);
+    expect((await preview(id)).status).toBe(404);
+    await share(id, { visibility: 'public' });
+    expect((await preview(id)).status).toBe(200);
+  });
+
+  it('lets only the owner set the preview', async () => {
+    const { id } = await create();
+    expect((await upload(id, webp, member)).status).toBe(404);
+    await share(id, { visibility: 'public' });
+    expect((await upload(id, webp, member)).status).toBe(403);
+    expect((await upload(id, webp, '')).status).toBe(401);
+  });
+
+  it('caches the image only for a URL with a version', async () => {
+    const { id } = await create();
+    await upload(id, webp);
+    expect((await preview(id, owner)).headers.get('cache-control')).toBe(
+      'private, no-cache',
+    );
+    const versioned = await request(`/api/app/cartoons/${id}/preview?v=1`, {
+      cookie: owner,
+    });
+    expect(versioned.headers.get('cache-control')).toContain('immutable');
+  });
+});
+
 describe('cross-site requests', () => {
   it('refuses a form post from another site', async () => {
     // A form on another site can post text/plain without a CORS preflight.

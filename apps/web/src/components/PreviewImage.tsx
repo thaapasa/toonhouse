@@ -1,4 +1,7 @@
+import type { Cartoon } from '@toonhouse/api';
 import { useId } from 'react';
+
+import { previewUrl } from '../api.ts';
 
 /** The x and y of the top of the trunk, and the size of the crown. */
 const trees = [
@@ -7,12 +10,18 @@ const trees = [
   [112, 59.5, 6],
 ] as const;
 
+/** The preview image of a cartoon on the home page. */
+export function PreviewImage({ cartoon }: { cartoon: Cartoon }) {
+  const src = previewUrl(cartoon);
+  if (!src) return <Placeholder />;
+  return <img className="preview-art" src={src} alt="" loading="lazy" />;
+}
+
 /**
- * The preview image of a cartoon on the home page. Until the user sets one in
- * the editor, every cartoon shows the same placeholder: a summer sky with the
- * sun, over a green hill with trees.
+ * Until the user sets a preview image in the editor, every cartoon shows the
+ * same placeholder: a summer sky with the sun, over a green hill with trees.
  */
-export function PreviewImage() {
+function Placeholder() {
   // Each card on the page has its own copy of the gradient.
   const skyId = useId();
   return (

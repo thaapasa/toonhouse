@@ -17,8 +17,11 @@ import {
   deleteCartoon,
   getCartoon,
   getContent,
+  getPreview,
   listCartoons,
+  type PreviewType,
   setContent,
+  setPreview,
   setSharing,
   setTitle,
 } from './repository.ts';
@@ -37,6 +40,19 @@ async function refuse(c: Context, id: string, userId: string) {
   return (await getCartoon(id, userId))
     ? c.json({ error: 'Forbidden' }, 403)
     : notFound(c);
+}
+
+/**
+ * The type of a preview image, from its first bytes. The server checks the
+ * bytes instead of trusting the `content-type` of the upload, because it sends
+ * the image back to other users with that type.
+ */
+function previewType(bytes: Uint8Array): PreviewType | null {
+  const ascii = (from: number, to: number) =>
+    String.fromCharCode(...bytes.subarray(from, to));
+  if (ascii(0, 4) === 'RIFF' && ascii(8, 12) === 'WEBP') return 'image/webp';
+  if (bytes[0] === 0x89 && ascii(1, 8) === 'PNG\r\n\x1a\n') return 'image/png';
+  return null;
 }
 
 /** Anyone can list and watch the cartoons they can see. Only the owner can change a cartoon. */
@@ -134,6 +150,39 @@ export const cartoonRoutes = new Hono<AuthEnv>()
       return c.body(null, 204);
     },
   )
+  // The web app adds the time of the preview to the URL, so that a new preview
+  // gets a new URL and the browser can keep the old one.
+  .get(
+    '/:id/preview',
+    zValidator('param', IdParam, (r, c) =>
+      r.success ? undefined : notFound(c),
+    ),
+    async (c) => {
+      const preview = await getPreview(
+        c.req.valid('param').id,
+        c.var.user?.id ?? null,
+      );
+      if (!preview) return notFound(c);
+      return c.body(preview.image, 200, {
+        'content-type': preview.contentType,
+        'x-content-type-options': 'nosniff',
+        // Private, because the cartoon may be visible only to some users.
+        'cache-control': c.req.query('v')
+          ? 'private, max-age=31536000, immutable'
+          : 'private, no-cache',
+      });
+    },
+  )
+  .put('/:id/preview', requireUser, zValidator('param', IdParam), async (c) => {
+    const { id } = c.req.valid('param');
+    const userId = c.var.user.id;
+    const image = new Uint8Array(await c.req.arrayBuffer());
+    const type = previewType(image);
+    if (!type) return c.json({ error: 'Not a WebP or PNG image' }, 400);
+    if (!(await setPreview(id, userId, image, type)))
+      return refuse(c, id, userId);
+    return c.json(await getCartoon(id, userId));
+  })
   .delete('/:id', requireUser, zValidator('param', IdParam), async (c) => {
     const { id } = c.req.valid('param');
     const userId = c.var.user.id;

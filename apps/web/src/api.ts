@@ -99,6 +99,21 @@ export const contentQuery = (id: string) =>
     refetchOnWindowFocus: false,
   });
 
+/** The URL of the preview image, which changes when the user sets a new one. */
+export const previewUrl = (cartoon: Cartoon) =>
+  cartoon.previewUpdatedAt &&
+  `/api/app/cartoons/${cartoon.id}/preview?v=${encodeURIComponent(cartoon.previewUpdatedAt)}`;
+
+export async function uploadPreview(id: string, image: Blob): Promise<Cartoon> {
+  const res = await fetch(`/api/app/cartoons/${id}/preview`, {
+    method: 'PUT',
+    headers: { 'content-type': image.type },
+    body: image,
+  });
+  if (!res.ok) throw new ApiError(res.status);
+  return Cartoon.parse(await res.json());
+}
+
 /**
  * Saves the scenes of a cartoon. With `keepalive`, the save finishes even if
  * the page closes.

@@ -17,6 +17,7 @@ type Row = {
   groupName: string | null;
   createdAt: Date;
   updatedAt: Date;
+  previewUpdatedAt: Date | null;
 };
 
 /**
@@ -37,10 +38,12 @@ function canWatch(userId: string | null) {
 function selectCartoons(userId: string | null, where = sql``) {
   return sql<Row[]>`
     SELECT c.id, c.title, c.owner_id, u.display_name AS owner_name, c.visibility,
-      c.group_id, g.name AS group_name, c.created_at, c.updated_at
+      c.group_id, g.name AS group_name, c.created_at, c.updated_at,
+      p.updated_at AS preview_updated_at
     FROM cartoons c
     JOIN users u ON u.id = c.owner_id
     LEFT JOIN groups g ON g.id = c.group_id
+    LEFT JOIN cartoon_previews p ON p.cartoon_id = c.id
     WHERE ${canWatch(userId)} ${where}
     ORDER BY c.updated_at DESC
   `;
@@ -59,6 +62,7 @@ function toCartoon(row: Row, userId: string | null): Cartoon {
     canEdit: row.ownerId === userId,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
+    previewUpdatedAt: row.previewUpdatedAt?.toISOString() ?? null,
   };
 }
 
@@ -144,4 +148,45 @@ export async function setContent(
     WHERE id = ${id} AND owner_id = ${ownerId}
   `;
   return rows.count > 0;
+}
+
+export type PreviewType = 'image/webp' | 'image/png';
+
+/**
+ * Sets the preview image. It doesn't change `updated_at` of the cartoon, so
+ * that the cartoon keeps its place in the list.
+ */
+export async function setPreview(
+  id: string,
+  ownerId: string,
+  image: Uint8Array,
+  contentType: PreviewType,
+): Promise<boolean> {
+  const rows = await sql`
+    INSERT INTO cartoon_previews (cartoon_id, image, content_type)
+    SELECT c.id, ${image}, ${contentType} FROM cartoons c
+    WHERE c.id = ${id} AND c.owner_id = ${ownerId}
+    ON CONFLICT (cartoon_id) DO UPDATE
+      SET image = excluded.image, content_type = excluded.content_type,
+        updated_at = now()
+  `;
+  return rows.count > 0;
+}
+
+/** Returns the preview image, or `null` if there is none or the user can't watch the cartoon. */
+export async function getPreview(
+  id: string,
+  userId: string | null,
+): Promise<{
+  image: Uint8Array<ArrayBuffer>;
+  contentType: PreviewType;
+} | null> {
+  const [row] = await sql<
+    { image: Uint8Array<ArrayBuffer>; contentType: PreviewType }[]
+  >`
+    SELECT p.image, p.content_type FROM cartoon_previews p
+    JOIN cartoons c ON c.id = p.cartoon_id
+    WHERE c.id = ${id} AND ${canWatch(userId)}
+  `;
+  return row ?? null;
 }

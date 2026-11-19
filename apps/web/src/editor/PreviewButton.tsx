@@ -1,0 +1,62 @@
+// The button that makes the frame on the stage the preview image of the
+// cartoon. The image stays until the user sets a new one, even if the scene
+// changes.
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { Scene } from '@toonhouse/model';
+import { useEffect } from 'react';
+
+import { cartoonQuery, cartoonsQuery, uploadPreview } from '../api.ts';
+import { PreviewIcon } from '../components/icons.tsx';
+import { useI18n } from '../i18n/index.tsx';
+import type { BackgroundAsset } from './library.ts';
+import { placeActors } from './placement.ts';
+
+/** How long the result shows next to the button. */
+const STATUS_MS = 3000;
+
+export function PreviewButton(props: {
+  cartoonId: string;
+  /** The frame on the stage, or `undefined` if the scene has no background. */
+  frame: { scene: Scene; bg: BackgroundAsset; t: number } | undefined;
+}) {
+  const { tr } = useI18n();
+  const queryClient = useQueryClient();
+  const set = useMutation({
+    mutationFn: async (frame: NonNullable<typeof props.frame>) => {
+      const { makePreviewImage } = await import('./previewImage.tsx');
+      const placed = placeActors(frame.scene, frame.bg.background, frame.t);
+      const image = await makePreviewImage({ ...frame, placed });
+      return uploadPreview(props.cartoonId, image);
+    },
+    onSuccess: async (cartoon) => {
+      queryClient.setQueryData(cartoonQuery(cartoon.id).queryKey, cartoon);
+      await queryClient.invalidateQueries(cartoonsQuery);
+    },
+  });
+  const { reset, isSuccess, isError } = set;
+  useEffect(() => {
+    if (!isSuccess && !isError) return;
+    const timer = setTimeout(reset, STATUS_MS);
+    return () => clearTimeout(timer);
+  }, [isSuccess, isError, reset]);
+
+  const frame = props.frame;
+  return (
+    <>
+      <span className={isError ? 'error small' : 'muted small'} role="status">
+        {isSuccess && tr('editor.previewSet')}
+        {isError && tr('editor.previewError')}
+      </span>
+      <button
+        type="button"
+        className="icon-button"
+        aria-label={tr('editor.setPreview')}
+        title={tr('editor.setPreview')}
+        disabled={!frame || set.isPending}
+        onClick={frame && (() => set.mutate(frame))}
+      >
+        <PreviewIcon />
+      </button>
+    </>
+  );
+}

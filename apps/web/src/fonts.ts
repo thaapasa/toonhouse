@@ -20,17 +20,29 @@ const STYLES = {
   boldItalic: { weight: 'bold', style: 'italic' },
 } as const;
 
-const css = Object.values(list)
+export interface FontFace {
+  family: string;
+  url: string;
+  weight: string;
+  style: string;
+}
+
+/** Each file of each bubble font. */
+export const fontFaces: FontFace[] = Object.values(list)
   .flat()
   .flatMap((font) =>
-    Object.entries(font.files).map(([key, file]) => {
-      const url = urls[`../../../assets/fonts/${file}`];
-      const s = STYLES[key as keyof typeof STYLES];
-      return `@font-face { font-family: '${font.family}'; src: url('${url}') format('truetype'); font-weight: ${s.weight}; font-style: ${s.style}; font-display: block; }`;
-    }),
-  )
-  .join('\n');
+    Object.entries(font.files).map(([key, file]) => ({
+      family: font.family,
+      url: urls[`../../../assets/fonts/${file}`]!,
+      ...STYLES[key as keyof typeof STYLES],
+    })),
+  );
+
+/** The `@font-face` rule of a font, with `src` as the URL of the file. */
+export function fontFaceRule(face: FontFace, src: string): string {
+  return `@font-face { font-family: '${face.family}'; src: url('${src}') format('truetype'); font-weight: ${face.weight}; font-style: ${face.style}; font-display: block; }`;
+}
 
 const style = document.createElement('style');
-style.textContent = css;
+style.textContent = fontFaces.map((f) => fontFaceRule(f, f.url)).join('\n');
 document.head.append(style);

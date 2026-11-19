@@ -31,6 +31,8 @@ export const Cartoon = z.object({
   canEdit: z.boolean(),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
+  /** When the preview image was set, or `null` if the cartoon has none. */
+  previewUpdatedAt: z.iso.datetime().nullable(),
 });
 export type Cartoon = z.infer<typeof Cartoon>;
 

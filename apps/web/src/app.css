@@ -299,6 +299,7 @@ button:disabled {
   display: block;
   width: 100%;
   height: 100%;
+  object-fit: cover;
 }
 
 /* The play button of the player board, on the picture of the card. */

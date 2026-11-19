@@ -63,6 +63,13 @@ export const RedoIcon = () => (
   </Icon>
 );
 
+export const PreviewIcon = () => (
+  <Icon>
+    <path d="M3 8.5a2 2 0 0 1 2-2h2.5L9 4.5h6l1.5 2H19a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    <circle cx="12" cy="13" r="3.5" />
+  </Icon>
+);
+
 export const PlayIcon = ({ size = 18 }: { size?: number }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden>
     <path d="M7 4.5v15l13-7.5z" fill="currentColor" />

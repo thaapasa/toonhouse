@@ -339,14 +339,19 @@ dragged thing stays under the finger when the scene gets longer or shorter.
 
 ### Preview images
 
-When the user sets the preview image in the editor, the web app turns the SVG of
-the stage into a WebP image in the browser and uploads it. The server stores the
-image in PostgreSQL and serves it with the same visibility check as the cartoon.
-The server does no rendering, and the home page shows one small image per
-cartoon instead of drawing each scene.
+When the user sets the preview image in the editor, the web app draws the frame
+as the player shows it, turns that SVG into a WebP image in the browser and
+uploads it. A browser that can't make WebP, such as Safari, makes a PNG, and the
+server accepts both. The server checks the type from the first bytes of the
+image, because it sends the image to other users with that type. The server
+stores the image in PostgreSQL and serves it with the same visibility check as
+the cartoon. The server does no rendering, and the home page shows one small
+image per cartoon instead of drawing each scene.
 
 The app never makes the image again by itself, so the home page shows the old
 frame after the scene changes. The user sets it again when they want a new one.
+The URL of the image has the time when it was set, so that the browser can keep
+an image and still gets the new one.
 
 An SVG drawn as an image can't use the fonts of the page, so the web app puts
 the fonts of the speech bubbles into the SVG before it turns the SVG into an

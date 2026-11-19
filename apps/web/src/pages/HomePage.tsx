@@ -118,7 +118,7 @@ function CartoonCard({ cartoon }: { cartoon: Cartoon }) {
         aria-label={tr('home.watch', { title: cartoon.title })}
         className="preview-image"
       >
-        <PreviewImage />
+        <PreviewImage cartoon={cartoon} />
         <span className="play-badge">
           <PlayIcon size={26} />
         </span>
