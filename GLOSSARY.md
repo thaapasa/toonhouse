@@ -69,7 +69,15 @@ for something else or too vague.
 - **Action**: something that an actor does on the timeline, from a point in time
   until its next action, such as walking to a point or waving. An action plays
   one or more clips.
-- **Speech bubble**: text that an actor says for a time.
+- **Speech bubble**: a text that shows on the stage for a time. Short form:
+  bubble.
+- **Attached bubble**: a speech bubble that follows an actor, at an offset from
+  its ground point.
+- **Free bubble**: a speech bubble that stays at its place in the scene and
+  belongs to no actor.
+- **Tail**: the point of a speech bubble that shows who says it.
+- **Bubble lane**: the part of the row of an actor on the timeline that shows
+  its speech bubbles.
 - **Sound**: a sound effect at a point on the timeline of a scene. A shot plays
   the sounds of its scene.
 - **Music**: sound that belongs to the cartoon and plays across several shots.

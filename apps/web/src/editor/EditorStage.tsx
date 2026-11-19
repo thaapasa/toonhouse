@@ -1,7 +1,16 @@
-// The scene at the current time, where the user edits it. Tap an actor to select it and drag it to move it. While the user picks
-// the points of a walk, a tap adds a point and a drag moves the box of one.
+// The scene at the current time, where the user edits it. Tap an actor or a
+// bubble to select it and drag it to move it. While the user picks the points
+// of a walk, a tap adds a point and a drag moves the box of one. With the
+// bubble tool, a tap on an actor adds a bubble attached to it, and a tap
+// elsewhere adds a free bubble.
 import type { Pt, Scene } from '@toonhouse/model';
-import { actorStateAt } from '@toonhouse/renderer';
+import {
+  actorStateAt,
+  type BubbleAnchor,
+  bubbleOffset,
+  bubblePoint,
+  placeBubbles,
+} from '@toonhouse/renderer';
 import {
   type CSSProperties,
   type PointerEvent,
@@ -11,10 +20,11 @@ import {
 
 import { SceneDrawing } from '../components/SceneDrawing.tsx';
 import { useI18n } from '../i18n/index.tsx';
+import { bubbleContext } from './bubbles.ts';
 import type { BackgroundAsset } from './library.ts';
 import { placeActors } from './placement.ts';
 import { released } from './pointer.ts';
-import { roundPoint } from './sceneEdit.ts';
+import { roundPoint, savedPoint } from './sceneEdit.ts';
 import type { EditMode } from './useCartoonContent.ts';
 import { useSize } from './useSize.ts';
 
@@ -23,11 +33,22 @@ const PREFIX = 'stage';
 const POINT_BOX = 26;
 /** A pointer that moves less than this, in CSS pixels, taps. */
 const TAP_SLOP = 8;
+/** Two taps on a bubble closer than this in milliseconds open its text. */
+const DOUBLE_TAP = 400;
+/** The radius of the handle of the tip of a tail, in CSS pixels. */
+const TIP_HANDLE = 14;
 /**
  * How far the stage shows past each edge of the frame, as parts of the width
  * and the height of the frame.
  */
 const OFFSTAGE = { x: 0.12, y: 0.08 };
+
+/** Where a new bubble goes: on an actor, or free at a point. */
+export interface BubblePlace {
+  at: Pt;
+  /** The actor under the tap, with where it is and the top of its box. */
+  attach: { actorId: string; anchor: BubbleAnchor; top: number } | null;
+}
 
 /** The walk whose points the user is picking. */
 export interface WalkEdit {
@@ -41,11 +62,25 @@ interface Props {
   t: number;
   /** The selected actor, if any. */
   selectedActor: string | null;
+  /** The selected bubble, if any. */
+  selectedBubble: string | null;
+  /** Whether the cartoon plays, so that the bubbles pop in and out. */
+  playing: boolean;
+  /** Whether a tap adds a bubble. */
+  bubbleTool: boolean;
   walk: WalkEdit | null;
   /** The walk point to show as picked, such as while the user edits it in the properties pane. */
   focusPoint: number | null;
   /** Selects an actor, or clears the selection with null. */
   onSelect(actorId: string | null): void;
+  onSelectBubble(id: string): void;
+  /** The user tapped a bubble twice, to change its text. */
+  onEditBubbleText(id: string): void;
+  onAddBubble(place: BubblePlace): void;
+  /** Moves a bubble to `at`, an offset or a point as `Bubble.at` is given. */
+  onMoveBubble(id: string, at: Pt, mode: EditMode): void;
+  /** Moves the tip of the tail of a bubble, given as `Bubble.tailTip`. */
+  onMoveTail(id: string, tip: Pt, mode: EditMode): void;
   /** Moves an actor by `d` from where it was when the drag started. */
   onMoveActor(actorId: string, d: Pt, mode: EditMode): void;
   onAddPoint(at: Pt): void;
@@ -59,6 +94,23 @@ interface Props {
 type Gesture =
   | { type: 'actor'; id: string; start: Pt; from: Pt; moved: boolean }
   | { type: 'point'; index: number; start: Pt; moved: boolean }
+  | {
+      type: 'bubble';
+      id: string;
+      start: Pt;
+      from: Pt;
+      /** Where the bubble was in frame pixels when the drag started. */
+      origin: Pt;
+      anchor: BubbleAnchor | null;
+      moved: boolean;
+    }
+  | {
+      type: 'tail';
+      id: string;
+      start: Pt;
+      anchor: BubbleAnchor | null;
+      moved: boolean;
+    }
   | { type: 'tap'; start: Pt; onTap: (at: Pt) => void };
 
 export function EditorStage(props: Props) {
@@ -69,8 +121,20 @@ export function EditorStage(props: Props) {
   const [barRef, bar] = useSize<HTMLDivElement>();
   const svgRef = useRef<SVGSVGElement>(null);
   const gesture = useRef<{ pointer: number; g: Gesture } | null>(null);
+  const lastTap = useRef<{ id: string; time: number } | null>(null);
 
   const placed = placeActors(scene, bg, t);
+  const bubbleCtx = bubbleContext(scene, bg, placed);
+  // While the cartoon doesn't play, a bubble shows at its full size also at
+  // its first and last moments, so that the user can work on it.
+  const bubbles = placeBubbles(
+    scene.bubbles ?? [],
+    t,
+    bubbleCtx,
+    props.playing,
+  );
+  const anchorOf = (actorId: string | undefined) =>
+    actorId === undefined ? null : (bubbleCtx.anchors.get(actorId) ?? null);
   // The part of the frame coordinates that the stage shows.
   const view = {
     x: -bg.width * OFFSTAGE.x,
@@ -81,6 +145,9 @@ export function EditorStage(props: Props) {
   // Frame pixels for one CSS pixel.
   const unit = size.width > 0 ? view.width / size.width : 1;
   const selected = placed.find((p) => p.actor.id === props.selectedActor);
+  const selectedBubble = bubbles.find(
+    (b) => b.bubble.id === props.selectedBubble,
+  );
 
   // The walk being picked starts where the actor is when the walk starts.
   const walkActor = walk && placed.find((p) => p.actor.id === walk.actorId);
@@ -111,8 +178,64 @@ export function EditorStage(props: Props) {
     const target = e.target instanceof Element ? e.target : null;
     const point = target?.closest('[data-point]');
     const actor = target?.closest('[data-actor]');
+    const bubbleEl = target?.closest('[data-bubble]');
+    const tailEl = target?.closest('[data-tail]');
+    const bubble =
+      bubbleEl &&
+      bubbles.find((b) => b.bubble.id === bubbleEl.getAttribute('data-bubble'));
     let g: Gesture;
-    if (walk && point) {
+    if (props.bubbleTool) {
+      const id = actor?.getAttribute('data-actor');
+      const p = id ? placed.find((a) => a.actor.id === id) : undefined;
+      const anchor = id ? anchorOf(id) : null;
+      g = {
+        type: 'tap',
+        start: client(e),
+        onTap: (at) =>
+          props.onAddBubble({
+            at,
+            attach:
+              p && anchor
+                ? {
+                    actorId: p.actor.id,
+                    anchor,
+                    top: p.box?.y ?? anchor.head.y,
+                  }
+                : null,
+          }),
+      };
+    } else if (!walk && tailEl && selectedBubble) {
+      g = {
+        type: 'tail',
+        id: selectedBubble.bubble.id,
+        start: client(e),
+        anchor: anchorOf(selectedBubble.bubble.actorId),
+        moved: false,
+      };
+    } else if (!walk && bubble) {
+      const { id } = bubble.bubble;
+      const now = e.timeStamp;
+      if (
+        lastTap.current?.id === id &&
+        now - lastTap.current.time < DOUBLE_TAP
+      ) {
+        lastTap.current = null;
+        props.onEditBubbleText(id);
+      } else {
+        lastTap.current = { id, time: now };
+        props.onSelectBubble(id);
+      }
+      const anchor = anchorOf(bubble.bubble.actorId);
+      g = {
+        type: 'bubble',
+        id,
+        start: client(e),
+        from: toFrame(e),
+        origin: bubblePoint(bubble.bubble.at, anchor),
+        anchor,
+        moved: false,
+      };
+    } else if (walk && point) {
       g = {
         type: 'point',
         index: Number(point.getAttribute('data-point')),
@@ -150,6 +273,14 @@ export function EditorStage(props: Props) {
     if (g.type === 'actor') {
       // From where the drag started, as each move redoes the whole drag.
       props.onMoveActor(g.id, { x: at.x - g.from.x, y: at.y - g.from.y }, mode);
+    } else if (g.type === 'bubble') {
+      const p = {
+        x: g.origin.x + at.x - g.from.x,
+        y: g.origin.y + at.y - g.from.y,
+      };
+      props.onMoveBubble(g.id, savedPoint(bubbleOffset(p, g.anchor)), mode);
+    } else if (g.type === 'tail') {
+      props.onMoveTail(g.id, savedPoint(bubbleOffset(at, g.anchor)), mode);
     } else {
       props.onMovePoint(g.index, at, mode);
     }
@@ -167,7 +298,7 @@ export function EditorStage(props: Props) {
   // The toolbar goes above the selected actor, or below it if there is no
   // room above, and stays inside the stage.
   const k = size.width / view.width;
-  const box = selected?.box;
+  const box = selectedBubble?.box ?? selected?.box;
   let barStyle: { left: number; top: number } | null = null;
   if (box && bar.width > 0) {
     const gap = 10;
@@ -192,7 +323,7 @@ export function EditorStage(props: Props) {
       {size.width > 0 && (
         <svg
           ref={svgRef}
-          className="stage-svg"
+          className={props.bubbleTool ? 'stage-svg adding' : 'stage-svg'}
           viewBox={`${view.x} ${view.y} ${view.width} ${view.height}`}
           onPointerDown={down}
           onPointerMove={move}
@@ -205,9 +336,21 @@ export function EditorStage(props: Props) {
             bg={asset}
             t={t}
             placed={placed}
+            bubbles={bubbles}
             prefix={PREFIX}
             offstage
           />
+          {bubbles.map((b) => (
+            <rect
+              key={b.bubble.id}
+              data-bubble={b.bubble.id}
+              className="bubble-hit"
+              x={b.box.x}
+              y={b.box.y}
+              width={b.box.width}
+              height={b.box.height}
+            />
+          ))}
           <rect
             className="frame-edge"
             width={bg.width}
@@ -224,6 +367,16 @@ export function EditorStage(props: Props) {
               rx={6 * unit}
               strokeWidth={2 * unit}
               strokeDasharray={`${6 * unit} ${5 * unit}`}
+            />
+          )}
+          {selectedBubble?.tip && (
+            <circle
+              data-tail
+              className="tail-handle"
+              cx={selectedBubble.tip.x}
+              cy={selectedBubble.tip.y}
+              r={TIP_HANDLE * unit}
+              strokeWidth={2 * unit}
             />
           )}
           {walkPoints.length > 0 && (

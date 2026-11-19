@@ -14,6 +14,7 @@ import type {
 } from '@toonhouse/model';
 
 import { actorScaleAt } from './background.ts';
+import { bubbleEnd } from './bubbles/bubble.ts';
 import { clipsFor } from './clips/index.ts';
 
 /** A scene is at least this long, in seconds. */
@@ -233,20 +234,22 @@ export function backgroundStateAt(
 
 /**
  * The shortest length that the user can set for a scene: a bit after its last
- * action starts, so that every action shows on the timeline, and at least a
+ * action or bubble starts, so that each shows on the timeline, and at least a
  * second, so that there is something to play.
  */
 export function minSceneLength(scene: Scene): number {
   const starts = [
     ...scene.backgroundActions,
     ...scene.actors.flatMap((a) => a.actions),
+    ...(scene.bubbles ?? []),
   ].map((a) => a.t);
   return Math.max(1, Math.max(0, ...starts) + 0.1);
 }
 
 /**
  * The length of a scene in seconds. It is the length that the user has set,
- * or else a few seconds after the last action ends, in whole seconds, and at
+ * or else a few seconds after the last action or bubble ends, in whole
+ * seconds, and at
  * least `MIN_SCENE_LENGTH`. `kindOf` gives the rig kind of an actor.
  */
 export function sceneLength(
@@ -256,7 +259,11 @@ export function sceneLength(
 ): number {
   if (scene.length !== undefined)
     return Math.max(scene.length, minSceneLength(scene));
-  let end = Math.max(0, ...scene.backgroundActions.map((a) => a.t));
+  let end = Math.max(
+    0,
+    ...scene.backgroundActions.map((a) => a.t),
+    ...(scene.bubbles ?? []).map(bubbleEnd),
+  );
   if (bg) {
     for (const actor of scene.actors) {
       const kind = kindOf(actor);

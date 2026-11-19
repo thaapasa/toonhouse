@@ -689,6 +689,22 @@ button:disabled {
   pointer-events: none;
 }
 
+.bubble-hit {
+  fill: transparent;
+  cursor: grab;
+}
+
+.stage-svg.adding,
+.stage-svg.adding .bubble-hit {
+  cursor: crosshair;
+}
+
+.tail-handle {
+  fill: #ffffff;
+  stroke: var(--accent);
+  cursor: grab;
+}
+
 .walk-point {
   fill: #ffffff;
   stroke: var(--accent);
@@ -1026,6 +1042,63 @@ button:disabled {
   font-size: 16px;
 }
 
+.pane-label {
+  color: var(--text-2);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.pane-textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 80px;
+  padding: 8px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: var(--field);
+  color: var(--text);
+  font: inherit;
+  /* 16px keeps iOS from zooming in on the field. */
+  font-size: 16px;
+  resize: vertical;
+}
+
+.pane-textarea:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.pane-color {
+  width: 64px;
+  height: 40px;
+  padding: 2px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: var(--field);
+}
+
+/* The choices of a bubble go under their labels, so that they fit the pane. */
+.pane-choice {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--text-2);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.bubble-section .segmented button {
+  min-width: 0;
+  flex: 1;
+  padding: 0 6px;
+}
+
+.bubble-section h4 {
+  margin: 8px 0 0;
+  font-weight: 600;
+  font-size: 13px;
+}
+
 .walk-points {
   display: flex;
   flex-direction: column;
@@ -1262,6 +1335,48 @@ button:disabled {
 
 /* A dot where an action starts or a walk ends. The button is bigger than the
    dot, so that a finger hits it. */
+.bubble-track {
+  min-height: 0;
+}
+
+.bubble-lane {
+  margin-top: 1px;
+  margin-bottom: 4px;
+  background: none;
+}
+
+.bubble-bar-wrap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 24px;
+}
+
+.bubble-bar {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  box-sizing: border-box;
+  padding: 0 10px;
+  border: 1.5px solid var(--line-2);
+  border-radius: 10px;
+  background: #ffffff;
+  color: #1a1a1a;
+  font-weight: 500;
+  font-size: 12px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  touch-action: none;
+  cursor: grab;
+}
+
+.bubble-bar[aria-pressed='true'] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1.5px var(--accent);
+}
+
 .time-mark {
   position: absolute;
   top: 50%;

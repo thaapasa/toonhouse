@@ -3,9 +3,15 @@
 // editor, the viewBox can be larger than the frame, and then what is outside
 // the frame shows dimmer.
 import type { Scene } from '@toonhouse/model';
-import { drawScene, wholeBackground } from '@toonhouse/renderer';
+import {
+  drawBubbles,
+  drawScene,
+  type PlacedBubble,
+  wholeBackground,
+} from '@toonhouse/renderer';
 import { actorPrefix, Drawing, PartSymbols } from '@toonhouse/stage';
 
+import { placeSceneBubbles } from '../editor/bubbles.ts';
 import type { BackgroundAsset } from '../editor/library.ts';
 import { backgroundFrame, type PlacedActor } from '../editor/placement.ts';
 
@@ -18,6 +24,8 @@ export function SceneDrawing(props: {
   t: number;
   /** The actors at time `t`, from `placeActors`. */
   placed: readonly PlacedActor[];
+  /** The bubbles at time `t`, if already placed, such as by the editor. */
+  bubbles?: readonly PlacedBubble[];
   /** Makes the ids of the symbols unique on the page. */
   prefix: string;
   /**
@@ -33,6 +41,9 @@ export function SceneDrawing(props: {
     backgroundFrame(props.scene, props.t),
     wholeBackground(bg),
     props.placed.map((p) => p.drawing),
+  );
+  const bubbles = drawBubbles(
+    props.bubbles ?? placeSceneBubbles(props.scene, bg, props.placed, props.t),
   );
   return (
     <>
@@ -74,6 +85,7 @@ export function SceneDrawing(props: {
       >
         <Drawing node={node} prefix={prefix} />
       </g>
+      <Drawing node={bubbles} prefix={prefix} />
     </>
   );
 }

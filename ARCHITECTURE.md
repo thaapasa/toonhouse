@@ -186,6 +186,22 @@ prototype, where the walk ties the steps to the distance walked so that the feet
 don't slide. Clips with keyframes, stored as JSON and edited in the studio, may
 come later as a second kind of clip.
 
+### Speech bubbles
+
+The renderer draws the speech bubbles too, on top of the actors. It wraps the
+text of a bubble into lines itself, with the widths of the letters of each font
+saved in the renderer by `pnpm font-metrics`, because it can't measure text
+without a DOM. So a line breaks in the same place in the editor, the player and
+the exported video. The stage draws the text with kerning and ligatures off,
+since the saved widths leave them out. It keeps the contextual alternates on,
+because a font whose letters join needs them for the joins. They can make a line
+a few percent wider than measured, and the padding of the bubble takes that.
+
+An attached bubble keeps its place as an offset from the ground point of its
+actor, in the pixels of the actor at size 1. The offset grows and shrinks with
+the actor, so that the bubble stays as near to the head, but the bubble itself
+keeps its size.
+
 ### Files
 
 The graphics are generated with AI and traced to SVG, as described in

@@ -43,6 +43,45 @@ const Actor = z.object({
   actions: z.array(Action).max(1000),
 });
 
+const Color = z.string().regex(/^#[0-9a-fA-F]{6}$/);
+
+const Bubble = z.object({
+  id: Id,
+  t: z.number().finite().min(0).max(3600),
+  length: z.number().finite().min(0.1).max(3600).exactOptional(),
+  text: z.string().max(2000),
+  actorId: Id.exactOptional(),
+  at: Point,
+  width: z.number().finite().min(10).max(10_000),
+  shape: z.enum(['speech', 'thought', 'shout', 'caption']),
+  tail: z.boolean(),
+  tailTip: Point.exactOptional(),
+  font: z
+    .enum([
+      'comic-relief',
+      'bangers',
+      'chewy',
+      'indie-flower',
+      'shantell-sans',
+      'oooh-baby',
+      'crafty-girls',
+      'fondamento',
+    ])
+    .exactOptional(),
+  fontSize: z.number().finite().min(1).max(1000),
+  color: Color,
+  bold: z.boolean().exactOptional(),
+  italic: z.boolean().exactOptional(),
+  caps: z.boolean().exactOptional(),
+  align: z.enum(['left', 'center', 'right']).exactOptional(),
+  lineSpacing: z.number().finite().min(0.5).max(5).exactOptional(),
+  fill: Color,
+  border: z.enum(['solid', 'dashed', 'double', 'wobbly', 'none']),
+  borderColor: Color,
+  borderWidth: z.number().finite().min(0).max(100),
+  pop: z.boolean().exactOptional(),
+});
+
 const Scene = z.object({
   id: Id,
   background: z
@@ -51,6 +90,7 @@ const Scene = z.object({
     .nullable(),
   backgroundActions: z.array(Action).max(1000),
   actors: z.array(Actor).max(100),
+  bubbles: z.array(Bubble).max(1000).exactOptional(),
   length: z.number().finite().min(0).max(3600).exactOptional(),
 });
 

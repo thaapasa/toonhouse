@@ -8,6 +8,7 @@ import {
   BiggerIcon,
   DeleteIcon,
   DoneIcon,
+  EditIcon,
   RemoveActionIcon,
   SmallerIcon,
   TurnIcon,
@@ -82,6 +83,21 @@ export function ActionBar(props: Props) {
           </BarButton>
         </>
       )}
+    </div>
+  );
+}
+
+/** The toolbar of the selected speech bubble. */
+export function BubbleBar(props: { onEditText(): void; onRemove(): void }) {
+  const { tr } = useI18n();
+  return (
+    <div className="action-bar" role="toolbar" aria-label={tr('bubble.title')}>
+      <BarButton label="bubble.editText" onClick={props.onEditText}>
+        <EditIcon />
+      </BarButton>
+      <BarButton label="bubble.remove" onClick={props.onRemove}>
+        <DeleteIcon />
+      </BarButton>
     </div>
   );
 }

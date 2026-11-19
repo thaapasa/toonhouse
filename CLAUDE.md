@@ -23,6 +23,8 @@ them again.
   `MISE_ENV=art mise install` first. Read [assets/CLAUDE.md](assets/CLAUDE.md)
   before you use them. To make an animated character, follow
   [assets/cutout-toons.md](assets/cutout-toons.md).
+- `pnpm font-metrics`: saves the widths of the letters of the bubble fonts for
+  the renderer. Run it after changing a font in `assets/fonts/`.
 
 The CI workflow runs the same checks, with `pnpm format:check` instead of
 `pnpm format`.

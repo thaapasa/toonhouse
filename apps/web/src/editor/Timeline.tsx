@@ -1,5 +1,7 @@
 // The timeline of a scene: a row for the background and one for each actor,
-// with the actions as blocks from their start until the next action. Tap or
+// with the actions as blocks from their start until the next action. An actor
+// with speech bubbles has a bubble lane under its row, and the free bubbles
+// have a row of their own at the end. Tap or
 // drag the ruler to move the playhead, and tap a row to move it there. Tap an
 // action to select it, and drag it to move it. The time marks on each row
 // move the playhead and change where actions start and the scene ends.
@@ -8,12 +10,13 @@
 // time. `useTimelineZoom` has the zoom. The timeline goes on a bit past the end
 // of the scene, so that the end shows and the user can start new actions
 // after it.
-import type { Background, Scene } from '@toonhouse/model';
+import type { Background, Bubble, Scene } from '@toonhouse/model';
 import { sortedActions, walkTime } from '@toonhouse/renderer';
 import { type PointerEvent, type ReactNode, useRef, useState } from 'react';
 
 import {
   BackgroundIcon,
+  BubbleIcon,
   DeleteIcon,
   PauseIcon,
   PlayIcon,
@@ -26,6 +29,7 @@ import {
 } from '../components/icons.tsx';
 import { type TextKey, useI18n } from '../i18n/index.tsx';
 import { ActionBlocks } from './ActionBlocks.tsx';
+import { BUBBLE_LINE, BubbleLane, bubbleLines } from './BubbleLane.tsx';
 import { kindOf } from './library.ts';
 import { useNames } from './names.ts';
 import { released } from './pointer.ts';
@@ -93,6 +97,12 @@ interface Props {
   ): void;
   /** Sets the length of the scene. */
   onLength(length: number, mode: EditMode): void;
+  /** The selected speech bubble, if any. */
+  selectedBubble: string | null;
+  onSelectBubble(id: string): void;
+  /** Moves a bubble to start at `t`, and keeps its length. */
+  onMoveBubble(id: string, t: number, mode: EditMode): void;
+  onBubbleLength(id: string, length: number, mode: EditMode): void;
 }
 
 export function Timeline(props: Props) {
@@ -188,6 +198,56 @@ export function Timeline(props: Props) {
     const last = sortedActions(row.actions).at(-1);
     return last ? midPoints(last, row, length, pps) : [];
   });
+
+  const bubbles = scene.bubbles ?? [];
+  const actorIds = new Set(rows.map((r) => r.actorId));
+  const bubblesOf = (actorId: string | null) =>
+    bubbles.filter((b) =>
+      actorId === null
+        ? b.actorId === undefined || !actorIds.has(b.actorId)
+        : b.actorId === actorId,
+    );
+  /** The lane of the bubbles of an actor, or of the free bubbles. */
+  const bubbleTrack = (
+    list: readonly Bubble[],
+    key: string,
+    label: ReactNode,
+  ) => {
+    if (list.length === 0) return null;
+    const count = Math.max(...bubbleLines(list).values()) + 1;
+    return (
+      <div key={key} className="track bubble-track">
+        <div className="track-label">{label}</div>
+        <div
+          className="lane bubble-lane"
+          style={{ width, height: count * BUBBLE_LINE }}
+          onClick={(e) => props.onSeek(timeAt(e, e.currentTarget))}
+        >
+          <BubbleLane
+            bubbles={list}
+            length={length}
+            pps={pps}
+            fps={props.fps}
+            selected={props.selectedBubble}
+            onSelect={(id, at) => {
+              props.onSelectBubble(id);
+              props.onSeek(at);
+            }}
+            onSeek={props.onSeek}
+            onMove={(id, at, mode) => {
+              freeze(mode);
+              props.onMoveBubble(id, at, mode);
+            }}
+            onLength={(id, v, mode) => {
+              freeze(mode);
+              props.onBubbleLength(id, v, mode);
+            }}
+            onDragDone={unfreeze}
+          />
+        </div>
+      </div>
+    );
+  };
 
   return (
     <section className="timeline" aria-label={tr('editor.timeline')}>
@@ -311,14 +371,14 @@ export function Timeline(props: Props) {
               </span>
             </div>
           </div>
-          {rows.length === 0 && (
+          {rows.length === 0 && bubbles.length === 0 && (
             <p className="muted tracks-empty">{tr('editor.emptyTimeline')}</p>
           )}
           {rows.map((row) => {
             const rowSelected =
               props.selection !== null &&
               props.selection.actorId === row.actorId;
-            return (
+            return [
               <div
                 key={row.actorId ?? 'background'}
                 className="track"
@@ -372,9 +432,23 @@ export function Timeline(props: Props) {
                     onDragDone={unfreeze}
                   />
                 </div>
-              </div>
-            );
+              </div>,
+              row.actorId !== null &&
+                bubbleTrack(
+                  bubblesOf(row.actorId),
+                  `bubbles-${row.actorId}`,
+                  <BubbleIcon size={16} />,
+                ),
+            ];
           })}
+          {bubbleTrack(
+            bubblesOf(null),
+            'bubbles-free',
+            <>
+              <BubbleIcon size={16} />
+              <span>{tr('bubble.freeRow')}</span>
+            </>,
+          )}
           <div className="track tracks-fill" aria-hidden>
             <div className="track-label" />
           </div>

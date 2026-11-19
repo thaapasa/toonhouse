@@ -17,6 +17,7 @@ import {
   drawCharacter,
   partBounds,
   type SceneActor,
+  type Skeleton,
 } from '@toonhouse/renderer';
 
 import { type RigAsset, rigAsset } from './library.ts';
@@ -27,6 +28,8 @@ export interface PlacedActor {
   kind: ClipKind;
   state: ActorState;
   drawing: SceneActor;
+  /** The joints of the drawing, in the pixels of the actor. */
+  skeleton: Skeleton;
   /** The box around the drawing, in the pixels of the background frame. */
   box: Bounds | null;
 }
@@ -48,9 +51,9 @@ export function placeActors(
     const state = actorStateAt(actor, kind, bg, t);
     const clip = clipOf(kind, state.clip);
     const frame = clip.frameAt(loop(state.clipT, clip.duration));
-    const node = drawCharacter(asset.rig, frame, {
+    const { node, skeleton } = drawCharacter(asset.rig, frame, {
       facing: state.facing,
-    }).node;
+    });
     const s = actorScaleAt(bg, state.at.y) * actor.scale;
     const b = partBounds(node);
     const box = b && {
@@ -72,6 +75,7 @@ export function placeActors(
           y: state.at.y,
           scale: actor.scale,
         },
+        skeleton,
         box,
       },
     ];

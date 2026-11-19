@@ -1,0 +1,63 @@
+[
+  {
+    "id": "comic-relief",
+    "family": "Comic Relief",
+    "files": {
+      "regular": "comic-relief/ComicRelief-Regular.ttf",
+      "bold": "comic-relief/ComicRelief-Bold.ttf"
+    }
+  },
+  {
+    "id": "bangers",
+    "family": "Bangers",
+    "files": {
+      "regular": "bangers/Bangers-Regular.ttf"
+    }
+  },
+  {
+    "id": "chewy",
+    "family": "Chewy",
+    "files": {
+      "regular": "chewy/Chewy-Regular.ttf"
+    }
+  },
+  {
+    "id": "indie-flower",
+    "family": "Indie Flower",
+    "files": {
+      "regular": "indie-flower/IndieFlower-Regular.ttf"
+    }
+  },
+  {
+    "id": "shantell-sans",
+    "family": "Shantell Sans",
+    "files": {
+      "regular": "shantell-sans/ShantellSans-Regular.ttf",
+      "bold": "shantell-sans/ShantellSans-Bold.ttf",
+      "italic": "shantell-sans/ShantellSans-Italic.ttf",
+      "boldItalic": "shantell-sans/ShantellSans-BoldItalic.ttf"
+    }
+  },
+  {
+    "id": "oooh-baby",
+    "family": "Oooh Baby",
+    "files": {
+      "regular": "oooh-baby/OoohBaby-Regular.ttf"
+    }
+  },
+  {
+    "id": "crafty-girls",
+    "family": "Crafty Girls",
+    "files": {
+      "regular": "crafty-girls/CraftyGirls-Regular.ttf"
+    }
+  },
+  {
+    "id": "fondamento",
+    "family": "Fondamento",
+    "files": {
+      "regular": "fondamento/Fondamento-Regular.ttf",
+      "italic": "fondamento/Fondamento-Italic.ttf"
+    }
+  }
+]

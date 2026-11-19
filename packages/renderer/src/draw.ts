@@ -83,6 +83,21 @@ export type DrawNode =
       opacity?: number;
     }
   | {
+      /** One line of text, with `x` and `y` at the start of its baseline. */
+      type: 'text';
+      x: number;
+      y: number;
+      text: string;
+      /** The CSS font family. */
+      font: string;
+      size: number;
+      fill: string;
+      bold?: boolean;
+      italic?: boolean;
+      /** Which point of the line `x` is at. */
+      anchor: 'start' | 'middle' | 'end';
+    }
+  | {
       type: 'rect';
       x: number;
       y: number;

@@ -1,12 +1,20 @@
 // The properties pane: all the data of the selection, which the user can read
 // and change. It shows the scene when nothing is selected, the actor when an
 // actor is selected, and also the action when an action is selected on the
-// timeline.
-import type { Action, Actor, ClipId, Pt, Scene } from '@toonhouse/model';
+// timeline. A selected speech bubble shows its own section.
+import type {
+  Action,
+  Actor,
+  Bubble,
+  ClipId,
+  Pt,
+  Scene,
+} from '@toonhouse/model';
 import {
   actionSpeed,
   actorStateAt,
   backgroundClips,
+  type BubbleAnchor,
   clipsFor,
   clipStartOf,
   isMoving,
@@ -22,6 +30,7 @@ import {
   PinIcon,
 } from '../components/icons.tsx';
 import { useI18n } from '../i18n/index.tsx';
+import { BubbleSection } from './BubbleSection.tsx';
 import { type BackgroundAsset, kindOf } from './library.ts';
 import { useNames } from './names.ts';
 import { NumberField } from './NumberField.tsx';
@@ -41,11 +50,19 @@ import {
   updateActor,
 } from './sceneEdit.ts';
 import type { TimelineSelection } from './Timeline.tsx';
+import type { EditMode } from './useCartoonContent.ts';
 
 interface Props {
   scene: Scene;
   bg: BackgroundAsset | null;
   selection: TimelineSelection | null;
+  /** The selected bubble, which the pane shows instead of the selection. */
+  bubble: Bubble | null;
+  /** Where the actors are at the current time. */
+  anchors: ReadonlyMap<string, BubbleAnchor>;
+  /** Goes up by one each time the text of the bubble should get the focus. */
+  textFocus: number;
+  onEditBubble(fn: (b: Bubble) => Bubble, mode?: EditMode): void;
   /** The length of the scene in seconds. */
   duration: number;
   fps: number;
@@ -77,6 +94,17 @@ export function PropertiesPane(props: Props) {
 
   let content: ReactNode;
   if (!bg) content = <p className="muted small">{tr('properties.noScene')}</p>;
+  else if (props.bubble)
+    content = (
+      <BubbleSection
+        scene={scene}
+        bubble={props.bubble}
+        anchors={props.anchors}
+        textFocus={props.textFocus}
+        onEdit={props.onEditBubble}
+        onSeek={props.onSeek}
+      />
+    );
   else if (!selection) content = <SceneSection {...props} />;
   else
     content = (

@@ -91,8 +91,8 @@ export const BackgroundIcon = () => (
   </Icon>
 );
 
-export const BubbleIcon = () => (
-  <Icon>
+export const BubbleIcon = ({ size = 20 }: { size?: number }) => (
+  <Icon size={size}>
     <path d="M4 5h16v11H11l-5 4v-4H4z" />
   </Icon>
 );

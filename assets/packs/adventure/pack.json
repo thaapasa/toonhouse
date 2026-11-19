@@ -1,6 +1,6 @@
 {
   "id": "adventure",
-  "bubbleFont": "Patrick Hand",
+  "bubbleFont": "Indie Flower",
   "characters": ["captain", "quartermaster"],
   "props": [],
   "backgrounds": ["harbor"]

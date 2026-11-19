@@ -1,4 +1,5 @@
 import './app.css';
+import './fonts.ts';
 import './update-check.ts';
 
 import { QueryClientProvider } from '@tanstack/react-query';

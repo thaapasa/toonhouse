@@ -4,6 +4,8 @@ The timeline works like in Cartooners. The user moves to a point in time and
 starts an action for a character there. The action goes on until the user starts
 another action for that character.
 
+The speech bubbles on the timeline are in [Speech bubbles](bubbles.md).
+
 - [x] User can move to any point on the timeline, by scrolling it or by stepping
       one frame at a time.
 - [x] User can start an action for a character at the current point, such as
@@ -26,11 +28,6 @@ another action for that character.
 - [x] When the user picks the points of a walk, the stage shows a box around the
       actor and a box at each point, with a line from the actor through the
       points. The user moves a point by dragging its box.
-- [ ] User can add a speech bubble to a character for a time.
-- [ ] Speech bubbles use a comic font that the app serves itself, so that a
-      bubble looks the same in the editor, the player and the exported video.
-- [ ] User can change the font of a speech bubble. The default font comes from
-      the asset pack of the character.
 - [ ] User can add a sound at the current point.
 - [x] The timeline scrolls in time and up and down through the rows. The mouse
       wheel scrolls the rows, and Shift with the wheel or a sideways swipe on a

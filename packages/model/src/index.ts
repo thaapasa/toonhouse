@@ -10,6 +10,10 @@ export type {
   Action,
   Actor,
   ActorAsset,
+  Bubble,
+  BubbleBorder,
+  BubbleFontId,
+  BubbleShape,
   CartoonContent,
   Scene,
 } from './cartoon.ts';

@@ -25,6 +25,15 @@ export const partId = (prefix: string, part: PartId, layer?: string) =>
 export const actorPrefix = (prefix: string, actor: string) =>
   `${prefix}-${actor}`;
 
+// The renderer wraps the lines with the widths of single letters, so kerning
+// and ligatures are off. The contextual alternates stay on, since a font
+// whose letters join needs them for the joins.
+const TEXT_STYLE = {
+  fontKerning: 'none',
+  fontVariantLigatures: 'no-common-ligatures no-discretionary-ligatures',
+  whiteSpace: 'pre',
+} as const;
+
 function clipShape(shape: ClipShape) {
   return shape.type === 'ellipse' ? (
     <ellipse cx={shape.cx} cy={shape.cy} rx={shape.rx} ry={shape.ry} />
@@ -93,6 +102,23 @@ function render(node: DrawNode, prefix: string, key: string): ReactNode {
           fill={node.fill}
           opacity={node.opacity}
         />
+      );
+    case 'text':
+      return (
+        <text
+          key={key}
+          x={node.x}
+          y={node.y}
+          fontFamily={node.font}
+          fontSize={node.size}
+          fontWeight={node.bold ? 'bold' : undefined}
+          fontStyle={node.italic ? 'italic' : undefined}
+          fill={node.fill}
+          textAnchor={node.anchor}
+          style={TEXT_STYLE}
+        >
+          {node.text}
+        </text>
       );
     case 'rect':
       return (

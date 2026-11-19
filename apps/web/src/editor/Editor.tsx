@@ -8,6 +8,7 @@ import type { Cartoon } from '@toonhouse/api';
 import type {
   Action,
   Actor,
+  Bubble,
   CartoonContent,
   ClipId,
   Pt,
@@ -39,7 +40,14 @@ import {
   UndoIcon,
 } from '../components/icons.tsx';
 import { type TextKey, useI18n } from '../i18n/index.tsx';
-import { ActionBar, WalkBar } from './ActionBar.tsx';
+import { ActionBar, BubbleBar, WalkBar } from './ActionBar.tsx';
+import {
+  addBubble,
+  bubbleAnchors,
+  newBubble,
+  removeBubble,
+  updateBubble,
+} from './bubbles.ts';
 import { CartoonTitle } from './CartoonTitle.tsx';
 import { EditorStage, type WalkEdit } from './EditorStage.tsx';
 import { editorCommand, isTyping } from './keys.ts';
@@ -50,6 +58,7 @@ import {
   type RigAsset,
 } from './library.ts';
 import { LibraryPanel, type LibraryTab } from './LibraryPanel.tsx';
+import { placeActors } from './placement.ts';
 import { PropertiesPane } from './PropertiesPane.tsx';
 import {
   actionsOf,
@@ -61,6 +70,7 @@ import {
   removeAction,
   removeActor,
   removeScene,
+  savedTime,
   setLength,
   startAction,
   stepSize,
@@ -115,6 +125,10 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
   );
   const [selected, setSelected] = useState<TimelineSelection | null>(null);
   const [walking, setWalking] = useState<WalkEdit | null>(null);
+  // A selected bubble takes the place of the selected actor or action.
+  const [bubbleId, setBubbleId] = useState<string | null>(null);
+  const [bubbleTool, setBubbleTool] = useState(false);
+  const [textFocus, setTextFocus] = useState(0);
   const [removing, setRemoving] = useState(false);
   const [paneOpen, setPaneOpenState] = useState(
     () => localStorage.getItem(PANE_KEY) !== 'false',
@@ -164,6 +178,9 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
             ? selected.actionId
             : null,
         };
+  const selectedBubble =
+    (bubbleId !== null && scene.bubbles?.find((b) => b.id === bubbleId)) ||
+    null;
   const walk =
     walking &&
     actionsOf(scene, walking.actorId).some((a) => a.id === walking.actionId)
@@ -172,13 +189,35 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
 
   const editScene = (fn: (s: Scene) => Scene, mode: EditMode = 'push') =>
     doc.edit((c) => updateScene(c, scene.id, fn), mode);
+  const editBubble = (
+    id: string,
+    fn: (b: Bubble) => Bubble,
+    mode: EditMode = 'push',
+  ) => editScene((s) => updateBubble(s, id, fn), mode);
+  /** Selects an actor or an action, or nothing with null. */
+  const select = (sel: TimelineSelection | null) => {
+    setSelected(sel);
+    setBubbleId(null);
+  };
+  const selectBubble = (id: string) => {
+    setBubbleId(id);
+    setSelected(null);
+    setWalking(null);
+  };
+  /** Selects a bubble and puts the focus in its text field. */
+  const editBubbleText = (id: string) => {
+    selectBubble(id);
+    setPaneOpen(true);
+    setTextFocus((n) => n + 1);
+  };
   /** The current time, on a whole frame. */
   const now = () => Math.round(t * FPS) / FPS;
 
   /** Opens scene `i` of `list`, which is the scenes after the edit, if any. */
   const openScene = (i: number, list: readonly Scene[] = scenes) => {
     setSceneIndex(i);
-    setSelected(null);
+    select(null);
+    setBubbleTool(false);
     setWalking(null);
     playback.seek(0);
     setLibrary(list[i]?.background ? null : 'background');
@@ -207,7 +246,7 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
       actions: [],
     };
     editScene((s) => ({ ...s, actors: [...s.actors, actor] }));
-    setSelected({ actorId: actor.id, actionId: null });
+    select({ actorId: actor.id, actionId: null });
     setWalking(null);
     setLibrary(null);
   };
@@ -266,7 +305,7 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
   };
 
   const selectOnTimeline = (sel: TimelineSelection) => {
-    setSelected(sel);
+    select(sel);
     // Selecting a walk shows its points, so that the user can move them.
     const actor = scene.actors.find((a) => a.id === sel.actorId);
     const action = actor?.actions.find((a) => a.id === sel.actionId);
@@ -279,7 +318,10 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
   };
 
   const play = (on: boolean) => {
-    if (on) setWalking(null);
+    if (on) {
+      setWalking(null);
+      setBubbleTool(false);
+    }
     playback.setPlaying(on);
   };
 
@@ -307,6 +349,17 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
   let toolbar: ReactNode = null;
   if (bg && walk) {
     toolbar = <WalkBar onDone={walkDone} />;
+  } else if (bg && selectedBubble) {
+    const id = selectedBubble.id;
+    toolbar = (
+      <BubbleBar
+        onEditText={() => editBubbleText(id)}
+        onRemove={() => {
+          editScene((s) => removeBubble(s, id));
+          setBubbleId(null);
+        }}
+      />
+    );
   } else if (bg && selection) {
     const { actorId, actionId } = selection;
     const onRemoveAction = actionId
@@ -373,6 +426,16 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
       scene={scene}
       bg={bg ?? null}
       selection={selection}
+      bubble={selectedBubble}
+      anchors={
+        bg
+          ? bubbleAnchors(bg.background, placeActors(scene, bg.background, t))
+          : new Map()
+      }
+      textFocus={textFocus}
+      onEditBubble={(fn, mode) =>
+        selectedBubble && editBubble(selectedBubble.id, fn, mode)
+      }
       duration={duration}
       fps={FPS}
       onEdit={(fn) => editScene(fn)}
@@ -462,7 +525,20 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
           >
             <BackgroundIcon />
           </ToolButton>
-          <ToolButton label="editor.speechBubble">
+          <ToolButton
+            label="editor.speechBubble"
+            pressed={bubbleTool}
+            onClick={
+              bg
+                ? () => {
+                    // The next tap adds a bubble, not a point of a walk.
+                    if (!bubbleTool) walkDone();
+                    setBubbleTool(!bubbleTool);
+                    setLibrary(null);
+                  }
+                : undefined
+            }
+          >
             <BubbleIcon />
           </ToolButton>
           <ToolButton label="editor.sounds">
@@ -476,12 +552,34 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
               bg={bg}
               t={t}
               selectedActor={selection?.actorId ?? null}
+              selectedBubble={selectedBubble?.id ?? null}
+              bubbleTool={bubbleTool}
+              playing={playback.playing}
               walk={walk}
               focusPoint={focusPoint}
               onSelect={(actorId) => {
-                setSelected(actorId ? { actorId, actionId: null } : null);
+                select(actorId ? { actorId, actionId: null } : null);
                 setWalking(null);
               }}
+              onSelectBubble={selectBubble}
+              onEditBubbleText={editBubbleText}
+              onAddBubble={(place) => {
+                const bubble: Bubble = newBubble(
+                  newId(),
+                  now(),
+                  place.at,
+                  place.attach,
+                );
+                editScene((s) => addBubble(s, bubble));
+                setBubbleTool(false);
+                editBubbleText(bubble.id);
+              }}
+              onMoveBubble={(id, at, mode) =>
+                editBubble(id, (b) => ({ ...b, at }), mode)
+              }
+              onMoveTail={(id, tailTip, mode) =>
+                editBubble(id, (b) => ({ ...b, tailTip }), mode)
+              }
               onMoveActor={(id, d, mode) =>
                 editScene(
                   (s) => updateActor(s, id, (a) => moveActor(a, d)),
@@ -560,6 +658,15 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
           playback.seek(moved.find((a) => a.id === actionId)?.t ?? at);
         }}
         onLength={(v, mode) => editScene((s) => setLength(s, v), mode)}
+        selectedBubble={selectedBubble?.id ?? null}
+        onSelectBubble={selectBubble}
+        onMoveBubble={(id, at, mode) => {
+          editBubble(id, (b) => ({ ...b, t: savedTime(at) }), mode);
+          playback.seek(at);
+        }}
+        onBubbleLength={(id, v, mode) =>
+          editBubble(id, (b) => ({ ...b, length: savedTime(v) }), mode)
+        }
       />
       {removing && (
         <Dialog

@@ -11,6 +11,28 @@ export {
   partPosition,
   wholeBackground,
 } from './background.ts';
+export type {
+  BubbleAnchor,
+  BubbleContext,
+  PlacedBubble,
+} from './bubbles/bubble.ts';
+export {
+  bubbleEnd,
+  bubbleLength,
+  bubbleOffset,
+  bubblePoint,
+  drawBubbles,
+  headPoint,
+  placeBubbles,
+  sortedBubbles,
+  textLength,
+} from './bubbles/bubble.ts';
+export {
+  BUBBLE_FONTS,
+  DEFAULT_BUBBLE_FONT,
+  fontByFamily,
+  fontFamily,
+} from './bubbles/text.ts';
 export {
   BACKGROUND_CLIPS,
   backgroundClips,

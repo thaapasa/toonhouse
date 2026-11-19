@@ -23,6 +23,8 @@ export interface Scene {
   /** The actions of the background, such as the sun moving across the sky. */
   backgroundActions: Action[];
   actors: Actor[];
+  /** The speech bubbles of the scene, both attached and free. */
+  bubbles?: Bubble[];
   /**
    * The length of the scene in seconds, if the user has set it. Without it,
    * the scene ends a few seconds after its last action.
@@ -82,4 +84,77 @@ export interface Action {
    * the sky.
    */
   clipStart?: number;
+}
+
+/** The fonts that speech bubbles can use. See assets/fonts. */
+export type BubbleFontId =
+  | 'comic-relief'
+  | 'bangers'
+  | 'chewy'
+  | 'indie-flower'
+  | 'shantell-sans'
+  | 'oooh-baby'
+  | 'crafty-girls'
+  | 'fondamento';
+
+export type BubbleShape = 'speech' | 'thought' | 'shout' | 'caption';
+
+export type BubbleBorder = 'solid' | 'dashed' | 'double' | 'wobbly' | 'none';
+
+/**
+ * A text that shows on the stage from `t` for its length. An attached bubble
+ * follows its actor, and a free bubble stays at its place in the scene.
+ */
+export interface Bubble {
+  /** Unique within the scene. */
+  id: string;
+  /** When the bubble shows, in seconds from the start of the scene. */
+  t: number;
+  /**
+   * How long the bubble shows, in seconds, if the user has set it. Without
+   * it, the length comes from the length of the text.
+   */
+  length?: number;
+  /** The text. A line break in it stays in the bubble. */
+  text: string;
+  /** The actor that the bubble is attached to, or none for a free bubble. */
+  actorId?: string;
+  /**
+   * Where the middle of the bubble is. For an attached bubble, an offset from
+   * the ground point of the actor at the size 1 of the actor, so that it
+   * grows and shrinks with the actor. For a free bubble, a point in the pixels
+   * of the background frame.
+   */
+  at: Pt;
+  /** The widest that the text gets before it wraps, in frame pixels. */
+  width: number;
+  shape: BubbleShape;
+  tail: boolean;
+  /**
+   * Where the tail points, as `at` is given, if the user has moved it.
+   * Without it, the tail of an attached bubble points at the head of the
+   * actor, and the tail of a free bubble points down.
+   */
+  tailTip?: Pt;
+  /** The font, if not the default font of the asset pack. */
+  font?: BubbleFontId;
+  /** The size of the text in frame pixels. */
+  fontSize: number;
+  /** The colors are CSS hex colors, such as `#1a1a1a`. */
+  color: string;
+  bold?: boolean;
+  italic?: boolean;
+  /** Shows the text in capital letters. */
+  caps?: boolean;
+  /** How the lines line up, `center` if not set. */
+  align?: 'left' | 'center' | 'right';
+  /** The height of a line against the size of the text, 1.2 if not set. */
+  lineSpacing?: number;
+  fill: string;
+  border: BubbleBorder;
+  borderColor: string;
+  /** The width of the border in frame pixels. */
+  borderWidth: number;
+  /** Whether the bubble pops in and out, true if not set. */
+  pop?: boolean;
 }

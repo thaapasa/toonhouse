@@ -19,9 +19,8 @@ pack in `packs/` has two files:
 - `pack.json` lists the characters, props and backgrounds of the pack by their
   folder names. The assets stay in `characters/`, `props/` and `backgrounds/`,
   so that saved cartoons keep finding them.
-- `bubbleFont` in `pack.json` is the default font of the speech bubbles. Pick a
-  free font, such as one under the SIL Open Font License, because the app serves
-  the font itself.
+- `bubbleFont` in `pack.json` is the family of the default font of the speech
+  bubbles. It must be one of the fonts in `fonts/`.
 - `style.txt` is the style prompt of the pack. Put it in every prompt for an
   image of the pack, so that the assets of the pack look alike.
 
@@ -32,6 +31,15 @@ a part bends or stretches in a clip.
 To make a new pack, write its style prompt first and try it on one character
 before you make the rest. The style lives only in the style prompt. The rest of
 the prompt describes the subject and what the tracing needs.
+
+## Fonts
+
+`fonts/` has the fonts of the speech bubbles, with their licenses, and
+`fonts/fonts.json` lists them. Pick free fonts, such as ones under the SIL Open
+Font License, because the app serves the fonts itself. A font needs the letters
+of Finnish. After adding or changing a font, run `pnpm font-metrics`. It saves
+the widths of the letters for the renderer, which wraps the text of a bubble
+without a browser. A font is part of the library, so keep its id stable.
 
 ## Generating images
 

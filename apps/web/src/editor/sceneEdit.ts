@@ -51,9 +51,13 @@ export const updateActor = (
   actors: scene.actors.map((a) => (a.id === actorId ? fn(a) : a)),
 });
 
+/** Removes an actor and the bubbles attached to it. */
 export const removeActor = (scene: Scene, actorId: string): Scene => ({
   ...scene,
   actors: scene.actors.filter((a) => a.id !== actorId),
+  ...(scene.bubbles && {
+    bubbles: scene.bubbles.filter((b) => b.actorId !== actorId),
+  }),
 });
 
 /**
@@ -99,7 +103,7 @@ export function updateActions(
 /** The shortest time between two actions that the user moves. */
 const MIN_GAP = 0.1;
 /** A time to a ten-thousandth of a second, which keeps the saved data short. */
-const short = (t: number) => Math.round(t * 1e4) / 1e4;
+export const savedTime = (t: number) => Math.round(t * 1e4) / 1e4;
 
 /**
  * Moves the start of an action to `t`, between the actions before and after
@@ -116,7 +120,7 @@ export function moveStart(
   if (i < 0) return [...actions];
   const lo = i > 0 ? sorted[i - 1]!.t + MIN_GAP : 0;
   const hi = sorted[i + 1] ? sorted[i + 1]!.t - MIN_GAP : Infinity;
-  const at = short(Math.min(Math.max(t, lo), hi));
+  const at = savedTime(Math.min(Math.max(t, lo), hi));
   return updateAction(actions, actionId, (a) => ({ ...a, t: at }));
 }
 
@@ -146,13 +150,16 @@ export function moveBlock(
   const d = Math.min(Math.max(t - action.t, lo), hi);
   const moved = updateActions(scene, actorId, (actions) =>
     actions.map((a) =>
-      a.id === action.id || a.id === next?.id ? { ...a, t: short(a.t + d) } : a,
+      a.id === action.id || a.id === next?.id
+        ? { ...a, t: savedTime(a.t + d) }
+        : a,
     ),
   );
   const end = sceneEnd + d;
   return {
-    scene: !next && end > sceneEnd ? { ...moved, length: short(end) } : moved,
-    t: short(action.t + d),
+    scene:
+      !next && end > sceneEnd ? { ...moved, length: savedTime(end) } : moved,
+    t: savedTime(action.t + d),
   };
 }
 
@@ -162,7 +169,7 @@ export function moveBlock(
  */
 export const setLength = (scene: Scene, length: number): Scene => ({
   ...scene,
-  length: short(Math.max(length, minSceneLength(scene))),
+  length: savedTime(Math.max(length, minSceneLength(scene))),
 });
 
 /** A point to a tenth of a pixel, which keeps the saved data short. */
