@@ -1,0 +1,14 @@
+# Home page
+
+The home page lists the cartoons that the user can watch. Each cartoon in the
+list shows a preview image.
+
+## Preview image
+
+- [ ] In the editor, the user can set the frame on the stage as the preview
+      image of the cartoon.
+- [ ] The home page shows the preview image of each cartoon.
+- [x] If the user has not set a preview image, the cartoon shows a placeholder
+      image that is the same for every cartoon.
+- [ ] The preview image stays as it is until the user sets it again, even if the
+      user changes or deletes the scene that it came from.

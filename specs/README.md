@@ -23,6 +23,7 @@ After editing a spec, format it with Prettier: `pnpm format`.
 
 - [General](general.md): the users, the devices, the languages and new versions.
 - [Users and login](users.md): users, login and groups.
+- [Home page](home.md): the list of cartoons and their preview images.
 - [Profile](profile.md): the user's own name and password.
 - [Sharing](sharing.md): who can watch and edit a cartoon.
 - [Library](library.md): the asset packs and their art styles.

@@ -11,6 +11,8 @@ for something else or too vague.
 - **Shot**: one entry in a cartoon. It plays a part of one scene, at some speed,
   and the shots play one after another. Several shots can use the same scene.
   Not: clip, cut, segment.
+- **Preview image**: the picture of a cartoon in the lists of the home page. The
+  user sets it from a frame in the editor. Not: thumbnail, snapshot, cover.
 - **Scene**: a background with actors on it and a timeline for them. The user
   edits each scene on its own. Each scene belongs to one cartoon.
 - **Background**: the actor behind the other actors in a scene. It has one or

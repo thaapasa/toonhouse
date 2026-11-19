@@ -5,8 +5,8 @@ import type { Cartoon } from '@toonhouse/api';
 import { cartoonQuery, cartoonsQuery, createCartoon, meQuery } from '../api.ts';
 import { AppHeader } from '../components/AppHeader.tsx';
 import { EditIcon, PlayIcon, PlusIcon } from '../components/icons.tsx';
+import { PreviewImage } from '../components/PreviewImage.tsx';
 import { PageMessage } from '../components/RequireUser.tsx';
-import { Thumbnail } from '../components/Thumbnail.tsx';
 import { useI18n } from '../i18n/index.tsx';
 
 export function HomePage() {
@@ -116,9 +116,9 @@ function CartoonCard({ cartoon }: { cartoon: Cartoon }) {
         to="/cartoons/$cartoonId"
         params={{ cartoonId: cartoon.id }}
         aria-label={tr('home.watch', { title: cartoon.title })}
-        className="thumbnail"
+        className="preview-image"
       >
-        <Thumbnail id={cartoon.id} />
+        <PreviewImage />
         <span className="play-badge">
           <PlayIcon size={26} />
         </span>

@@ -337,6 +337,25 @@ there too, and playing from there starts the scene from the beginning. While the
 user drags an action or a time mark, the timeline keeps its scale, so that the
 dragged thing stays under the finger when the scene gets longer or shorter.
 
+### Preview images
+
+When the user sets the preview image in the editor, the web app turns the SVG of
+the stage into a WebP image in the browser and uploads it. The server stores the
+image in PostgreSQL and serves it with the same visibility check as the cartoon.
+The server does no rendering, and the home page shows one small image per
+cartoon instead of drawing each scene.
+
+The app never makes the image again by itself, so the home page shows the old
+frame after the scene changes. The user sets it again when they want a new one.
+
+An SVG drawn as an image can't use the fonts of the page, so the web app puts
+the fonts of the speech bubbles into the SVG before it turns the SVG into an
+image. This needs to work only in Chrome.
+
+When export is built, it draws the renderer output on a canvas. The preview
+images can then use the same canvas drawing instead of turning the SVG into an
+image.
+
 The build writes `version.json` next to `index.html`. When the web app comes
 back to the foreground, it compares the build ID in that file to its own and
 loads the page again if they differ.
