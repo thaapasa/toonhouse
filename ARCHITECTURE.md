@@ -327,6 +327,14 @@ along its path at the speed of the walk clip, so that the feet don't slide. With
 a perspective, each line of the path uses the mean of the actor sizes at its
 ends, so the feet can slide a little when an actor walks toward the camera.
 
+The stage shows the frame and a band around it, wide enough for the largest
+character or prop of the library at the size that the background gives the
+actors. The trees make the band almost as large as the frame, so the stage opens
+at a home view, the frame with a thin margin, and the user zooms out from it to
+see the whole band. Zooming and panning the stage scales the drawing of the
+frame as a whole, so it shows what the cartoon shows, larger. It isn't the
+camera, so the layers don't move against each other.
+
 If the user has set the length of a scene, the scene lasts that long, but it
 never ends before its last action starts. Otherwise it lasts a few seconds past
 the end of its last action, and at least 10 seconds.

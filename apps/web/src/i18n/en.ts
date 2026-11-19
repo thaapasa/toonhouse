@@ -87,6 +87,7 @@ export const en = {
   'editor.sceneEnd': 'End of the scene at {time}. Drag to change.',
   'editor.actionStart': 'Action starts at {time}. Drag to move the start.',
   'editor.zoomFit': 'Show the whole scene',
+  'editor.stageHome': 'Show the whole frame',
   'editor.emptyTimeline': 'The actions of the actors show here.',
   'editor.notOwner': 'Only the owner of the cartoon can edit it.',
 

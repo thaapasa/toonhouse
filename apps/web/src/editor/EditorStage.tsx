@@ -3,6 +3,9 @@
 // of a walk, a tap adds a point and a drag moves the box of one. With the
 // bubble tool, a tap on an actor adds a bubble attached to it, and a tap
 // elsewhere adds a free bubble.
+//
+// The user zooms and pans the stage with the mouse wheel, the wheel button, a
+// trackpad or two fingers. See `stageView.ts`.
 import type { Pt, Scene } from '@toonhouse/model';
 import {
   actorStateAt,
@@ -15,16 +18,33 @@ import {
   type CSSProperties,
   type PointerEvent,
   type ReactNode,
+  useEffect,
+  useEffectEvent,
+  useLayoutEffect,
+  useMemo,
   useRef,
+  useState,
 } from 'react';
 
+import { ZoomFitIcon } from '../components/icons.tsx';
 import { SceneDrawing } from '../components/SceneDrawing.tsx';
 import { useI18n } from '../i18n/index.tsx';
 import { bubbleContext } from './bubbles.ts';
-import type { BackgroundAsset } from './library.ts';
+import { type BackgroundAsset, CHARACTERS, PROPS } from './library.ts';
 import { placeActors } from './placement.ts';
 import { released } from './pointer.ts';
 import { roundPoint, savedPoint } from './sceneEdit.ts';
+import {
+  bandSize,
+  clampView,
+  homeView,
+  insideStage,
+  moveView,
+  stageArea,
+  type StageView,
+  viewRect,
+  wheelAction,
+} from './stageView.ts';
 import type { EditMode } from './useCartoonContent.ts';
 import { useSize } from './useSize.ts';
 
@@ -37,11 +57,10 @@ const TAP_SLOP = 8;
 const DOUBLE_TAP = 400;
 /** The radius of the handle of the tip of a tail, in CSS pixels. */
 const TIP_HANDLE = 14;
-/**
- * How far the stage shows past each edge of the frame, as parts of the width
- * and the height of the frame.
- */
-const OFFSTAGE = { x: 0.12, y: 0.08 };
+/** How much a pixel of mouse wheel zooms. */
+const WHEEL_ZOOM = 0.002;
+/** How much a pixel of a pinch on a trackpad zooms. */
+const PINCH_ZOOM = 0.01;
 
 /** Where a new bubble goes: on an actor, or free at a point. */
 export interface BubblePlace {
@@ -92,7 +111,15 @@ interface Props {
 }
 
 type Gesture =
-  | { type: 'actor'; id: string; start: Pt; from: Pt; moved: boolean }
+  | {
+      type: 'actor';
+      id: string;
+      start: Pt;
+      from: Pt;
+      /** Where the actor stood when the drag started. */
+      ground: Pt;
+      moved: boolean;
+    }
   | { type: 'point'; index: number; start: Pt; moved: boolean }
   | {
       type: 'bubble';
@@ -111,7 +138,25 @@ type Gesture =
       anchor: BubbleAnchor | null;
       moved: boolean;
     }
-  | { type: 'tap'; start: Pt; onTap: (at: Pt) => void };
+  | { type: 'tap'; start: Pt; onTap: (at: Pt) => void }
+  /** A drag with the wheel button pans the view. */
+  | { type: 'pan'; start: Pt; view: StageView };
+
+/** Two fingers that zoom and pan the view. */
+interface Pinch {
+  ids: [number, number];
+  /** The middle point of the fingers and how far apart they were at first. */
+  mid: Pt;
+  span: number;
+  view: StageView;
+}
+
+const middle = (a: Pt, b: Pt): Pt => ({
+  x: (a.x + b.x) / 2,
+  y: (a.y + b.y) / 2,
+});
+const clamp = (v: number, lo: number, hi: number) =>
+  Math.min(Math.max(v, lo), hi);
 
 export function EditorStage(props: Props) {
   const { scene, bg: asset, t, walk } = props;
@@ -122,6 +167,37 @@ export function EditorStage(props: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const gesture = useRef<{ pointer: number; g: Gesture } | null>(null);
   const lastTap = useRef<{ id: string; time: number } | null>(null);
+  // The touches on the stage, in client pixels, for a pinch.
+  const touches = useRef(new Map<number, Pt>());
+  const pinch = useRef<Pinch | null>(null);
+
+  const band = useMemo(() => bandSize(bg, [...CHARACTERS, ...PROPS]), [bg]);
+  const area = stageArea(bg, band);
+  // The view goes back home when another scene opens.
+  const [saved, setSaved] = useState<{
+    sceneId: string;
+    view: StageView;
+  } | null>(null);
+  const stageView = clampView(
+    area,
+    saved?.sceneId === scene.id ? saved.view : homeView(area),
+  );
+  // Many wheel and pointer events can come before the next render, so the
+  // view that they lead to is kept here until then.
+  const liveView = useRef(stageView);
+  useLayoutEffect(() => {
+    liveView.current = stageView;
+  });
+  const changeView = (fn: (v: StageView) => StageView) => {
+    const next = clampView(area, fn(liveView.current));
+    liveView.current = next;
+    setSaved({ sceneId: scene.id, view: next });
+  };
+  const home = homeView(area);
+  const atHome =
+    Math.abs(stageView.zoom - 1) < 1e-6 &&
+    Math.abs(stageView.x - home.x) < 1e-3 &&
+    Math.abs(stageView.y - home.y) < 1e-3;
 
   const placed = placeActors(scene, bg, t);
   const bubbleCtx = bubbleContext(scene, bg, placed);
@@ -136,12 +212,8 @@ export function EditorStage(props: Props) {
   const anchorOf = (actorId: string | undefined) =>
     actorId === undefined ? null : (bubbleCtx.anchors.get(actorId) ?? null);
   // The part of the frame coordinates that the stage shows.
-  const view = {
-    x: -bg.width * OFFSTAGE.x,
-    y: -bg.height * OFFSTAGE.y,
-    width: bg.width * (1 + 2 * OFFSTAGE.x),
-    height: bg.height * (1 + 2 * OFFSTAGE.y),
-  };
+  const view = viewRect(area, stageView);
+  const { stage } = area;
   // Frame pixels for one CSS pixel.
   const unit = size.width > 0 ? view.width / size.width : 1;
   const selected = placed.find((p) => p.actor.id === props.selectedActor);
@@ -167,14 +239,47 @@ export function EditorStage(props: Props) {
     const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
     return roundPoint(p);
   };
-  const client = (e: PointerEvent): Pt => ({ x: e.clientX, y: e.clientY });
+  const client = (e: { clientX: number; clientY: number }): Pt => ({
+    x: e.clientX,
+    y: e.clientY,
+  });
+  /** A point in client pixels, from the top left corner of the stage. */
+  const local = (p: Pt): Pt => {
+    const r = svgRef.current?.getBoundingClientRect();
+    return r ? { x: p.x - r.left, y: p.y - r.top } : p;
+  };
   const far = (a: Pt, b: Pt) => Math.hypot(a.x - b.x, a.y - b.y) > TAP_SLOP;
 
   const down = (e: PointerEvent<SVGSVGElement>) => {
-    // One finger at a time. A second finger does nothing.
-    if (gesture.current) return;
+    if (e.pointerType === 'touch') {
+      touches.current.set(e.pointerId, client(e));
+      // A second finger ends what the first one did and starts a pinch.
+      if (touches.current.size === 2 && !pinch.current) {
+        const [a, b] = [...touches.current.entries()];
+        e.currentTarget.setPointerCapture(e.pointerId);
+        gesture.current = null;
+        pinch.current = {
+          ids: [a![0], b![0]],
+          mid: middle(a![1], b![1]),
+          span: Math.hypot(a![1].x - b![1].x, a![1].y - b![1].y),
+          view: liveView.current,
+        };
+        return;
+      }
+    }
+    // One finger at a time, and a third finger does nothing.
+    if (gesture.current || pinch.current) return;
     props.onTouch();
     e.currentTarget.setPointerCapture(e.pointerId);
+    if (e.pointerType === 'mouse' && e.button === 1) {
+      // The wheel button pans, and doesn't start the scrolling of the browser.
+      e.preventDefault();
+      gesture.current = {
+        pointer: e.pointerId,
+        g: { type: 'pan', start: client(e), view: liveView.current },
+      };
+      return;
+    }
     const target = e.target instanceof Element ? e.target : null;
     const point = target?.closest('[data-point]');
     const actor = target?.closest('[data-actor]');
@@ -243,7 +348,11 @@ export function EditorStage(props: Props) {
         moved: false,
       };
     } else if (walk) {
-      g = { type: 'tap', start: client(e), onTap: props.onAddPoint };
+      g = {
+        type: 'tap',
+        start: client(e),
+        onTap: (at) => props.onAddPoint(insideStage(stage, at)),
+      };
     } else if (actor) {
       const id = actor.getAttribute('data-actor')!;
       props.onSelect(id);
@@ -252,6 +361,10 @@ export function EditorStage(props: Props) {
         id,
         start: client(e),
         from: toFrame(e),
+        ground: placed.find((p) => p.actor.id === id)?.state.at ?? {
+          x: 0,
+          y: 0,
+        },
         moved: false,
       };
     } else {
@@ -261,18 +374,54 @@ export function EditorStage(props: Props) {
   };
 
   const move = (e: PointerEvent<SVGSVGElement>) => {
+    if (touches.current.has(e.pointerId))
+      touches.current.set(e.pointerId, client(e));
+    const p = pinch.current;
+    if (p?.ids.includes(e.pointerId)) {
+      const a = touches.current.get(p.ids[0]);
+      const b = touches.current.get(p.ids[1]);
+      if (!a || !b) return;
+      const span = Math.hypot(a.x - b.x, a.y - b.y);
+      const ratio = p.span > 0 ? span / p.span : 1;
+      changeView(() =>
+        moveView(
+          area,
+          p.view,
+          local(p.mid),
+          local(middle(a, b)),
+          ratio,
+          size.width,
+        ),
+      );
+      return;
+    }
     const current = gesture.current;
     if (current?.pointer !== e.pointerId) return;
     if (released(e)) return up(e);
     const g = current.g;
     if (g.type === 'tap') return;
+    if (g.type === 'pan') {
+      const view = g.view;
+      changeView(() => moveView(area, view, g.start, client(e), 1, size.width));
+      return;
+    }
     if (!g.moved && !far(g.start, client(e))) return;
     const at = toFrame(e);
     const mode = g.moved ? 'replace' : 'push';
     g.moved = true;
     if (g.type === 'actor') {
-      // From where the drag started, as each move redoes the whole drag.
-      props.onMoveActor(g.id, { x: at.x - g.from.x, y: at.y - g.from.y }, mode);
+      // From where the drag started, as each move redoes the whole drag. The
+      // actor stays on the stage, so that the user can find it again.
+      const to = insideStage(
+        stage,
+        { x: g.ground.x + at.x - g.from.x, y: g.ground.y + at.y - g.from.y },
+        g.ground,
+      );
+      props.onMoveActor(
+        g.id,
+        { x: to.x - g.ground.x, y: to.y - g.ground.y },
+        mode,
+      );
     } else if (g.type === 'bubble') {
       const p = {
         x: g.origin.x + at.x - g.from.x,
@@ -282,11 +431,14 @@ export function EditorStage(props: Props) {
     } else if (g.type === 'tail') {
       props.onMoveTail(g.id, savedPoint(bubbleOffset(at, g.anchor)), mode);
     } else {
-      props.onMovePoint(g.index, at, mode);
+      props.onMovePoint(g.index, insideStage(stage, at), mode);
     }
   };
 
   const up = (e: PointerEvent<SVGSVGElement>) => {
+    touches.current.delete(e.pointerId);
+    // The finger that stays after a pinch does nothing until it lifts.
+    if (pinch.current?.ids.includes(e.pointerId)) pinch.current = null;
     const current = gesture.current;
     if (current?.pointer !== e.pointerId) return;
     gesture.current = null;
@@ -294,6 +446,42 @@ export function EditorStage(props: Props) {
     if (g.type === 'tap' && e.type === 'pointerup' && !far(g.start, client(e)))
       g.onTap(toFrame(e));
   };
+
+  const onWheel = useEffectEvent((e: WheelEvent) => {
+    const r = svgRef.current?.getBoundingClientRect();
+    if (!r) return;
+    e.preventDefault();
+    const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1;
+    const action = wheelAction({
+      ctrlKey: e.ctrlKey,
+      metaKey: e.metaKey,
+      deltaMode: e.deltaMode,
+      deltaX: e.deltaX,
+      deltaY: e.deltaY,
+      // Not in the standard, but all browsers but Firefox have it.
+      wheelDeltaY: (e as { wheelDeltaY?: number }).wheelDeltaY,
+    });
+    if (action === 'pan') {
+      const d = { x: -e.deltaX * unit, y: -e.deltaY * unit };
+      changeView((v) => moveView(area, v, { x: 0, y: 0 }, d, 1, r.width));
+    } else {
+      const p = local(client(e));
+      const d = clamp(e.deltaY * unit, -100, 100);
+      const ratio = Math.exp(
+        -d * (action === 'pinch' ? PINCH_ZOOM : WHEEL_ZOOM),
+      );
+      changeView((v) => moveView(area, v, p, p, ratio, r.width));
+    }
+  });
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    // React adds wheel listeners as passive, and a passive listener can't stop
+    // the page from scrolling or zooming.
+    const wheel = (e: WheelEvent) => onWheel(e);
+    el.addEventListener('wheel', wheel, { passive: false });
+    return () => el.removeEventListener('wheel', wheel);
+  }, [ref]);
 
   // The toolbar goes above the selected actor, or below it if there is no
   // room above, and stays inside the stage.
@@ -318,7 +506,9 @@ export function EditorStage(props: Props) {
       className="stage offstage"
       ref={ref}
       aria-label={tr('editor.stage')}
-      style={{ '--aspect': view.width / view.height } as CSSProperties}
+      style={
+        { '--aspect': area.home.width / area.home.height } as CSSProperties
+      }
     >
       {size.width > 0 && (
         <svg
@@ -326,11 +516,22 @@ export function EditorStage(props: Props) {
           className={props.bubbleTool ? 'stage-svg adding' : 'stage-svg'}
           viewBox={`${view.x} ${view.y} ${view.width} ${view.height}`}
           onPointerDown={down}
+          onMouseDown={(e) => {
+            // Stops the scrolling that the wheel button starts in the browser.
+            if (e.button === 1) e.preventDefault();
+          }}
           onPointerMove={move}
           onPointerUp={up}
           onPointerCancel={up}
           onLostPointerCapture={up}
         >
+          <rect
+            className="stage-band"
+            x={stage.x}
+            y={stage.y}
+            width={stage.width}
+            height={stage.height}
+          />
           <SceneDrawing
             scene={scene}
             bg={asset}
@@ -338,7 +539,7 @@ export function EditorStage(props: Props) {
             placed={placed}
             bubbles={bubbles}
             prefix={PREFIX}
-            offstage
+            offstage={stage}
           />
           {bubbles.map((b) => (
             <rect
@@ -404,6 +605,17 @@ export function EditorStage(props: Props) {
             </g>
           )}
         </svg>
+      )}
+      {!atHome && (
+        <button
+          type="button"
+          className="icon-button stage-home"
+          aria-label={tr('editor.stageHome')}
+          title={tr('editor.stageHome')}
+          onClick={() => changeView(() => home)}
+        >
+          <ZoomFitIcon />
+        </button>
       )}
       {/* Always there, so that its size is measured when it gets content. */}
       <div

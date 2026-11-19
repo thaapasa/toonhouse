@@ -4,6 +4,7 @@
 // the frame shows dimmer.
 import type { Scene } from '@toonhouse/model';
 import {
+  type Bounds,
   drawBubbles,
   drawScene,
   type PlacedBubble,
@@ -29,10 +30,11 @@ export function SceneDrawing(props: {
   /** Makes the ids of the symbols unique on the page. */
   prefix: string;
   /**
-   * Draws what is outside the frame too, dimmer, so that the user can place
-   * actors there before they come in. The player leaves it out.
+   * Draws what is outside the frame too, dimmer, as far as these bounds go,
+   * so that the user can place actors there before they come in. The player
+   * leaves it out.
    */
-  offstage?: boolean;
+  offstage?: Bounds;
 }) {
   const { bg: asset, prefix } = props;
   const bg = asset.background;
@@ -60,18 +62,9 @@ export function SceneDrawing(props: {
         <mask
           id={`${prefix}-frame`}
           maskUnits="userSpaceOnUse"
-          x={-bg.width}
-          y={-bg.height}
-          width={bg.width * 3}
-          height={bg.height * 3}
+          {...props.offstage}
         >
-          <rect
-            x={-bg.width}
-            y={-bg.height}
-            width={bg.width * 3}
-            height={bg.height * 3}
-            fill={OFFSTAGE_SHADE}
-          />
+          <rect {...props.offstage} fill={OFFSTAGE_SHADE} />
           <rect width={bg.width} height={bg.height} fill="white" />
         </mask>
       ) : (

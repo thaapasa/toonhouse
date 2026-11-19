@@ -653,9 +653,26 @@ button:disabled {
   -webkit-user-select: none;
 }
 
-/* The band around the frame, where the actors wait before they come in. */
+/* The band around the frame, where the actors wait before they come in.
+   Past the band, when zoomed out, the stage is darker. */
 .stage.offstage {
-  background: var(--field);
+  background: var(--bg);
+}
+
+.stage-band {
+  fill: var(--field);
+}
+
+.stage-home {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  z-index: 2;
+  background: var(--panel);
+  box-shadow:
+    0 0 0 1px var(--line-2),
+    0 8px 24px rgba(0, 0, 0, 0.4);
+  border-radius: 10px;
 }
 
 .frame-edge {

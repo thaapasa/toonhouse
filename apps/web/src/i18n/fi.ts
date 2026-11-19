@@ -92,6 +92,7 @@ export const fi: Texts = {
   'editor.actionStart':
     'Toiminto alkaa kohdassa {time}. Vedä siirtääksesi alkua.',
   'editor.zoomFit': 'Näytä koko kohtaus',
+  'editor.stageHome': 'Näytä koko kuva-ala',
   'editor.emptyTimeline': 'Hahmojen toiminnot näkyvät tässä.',
   'editor.notOwner': 'Vain piirretyn tekijä voi muokata sitä.',
 

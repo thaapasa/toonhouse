@@ -164,6 +164,10 @@ for something else or too vague.
   change it. It floats over the stage, or the user attaches it to the side. Not:
   inspector, panel.
 - **Stage**: the area where a scene is drawn, in the web app and in the studio.
+- **Band**: the area around the frame on the stage of the editor, where actors
+  wait before they come in.
+- **Home view**: the view of the stage that shows the whole frame with a thin
+  margin. The editor opens a scene at it.
 
 ## Users
 
