@@ -1,7 +1,8 @@
 // The properties pane: all the data of the selection, which the user can read
 // and change. It shows the scene when nothing is selected, the actor when an
 // actor is selected, and also the action when an action is selected on the
-// timeline. A selected speech bubble shows its own section.
+// timeline. A selected speech bubble and the selected camera show their own
+// sections.
 import type {
   Action,
   Actor,
@@ -33,6 +34,7 @@ import {
 import { useI18n } from '../i18n/index.tsx';
 import { type BackgroundAsset, kindOf } from '../library/index.ts';
 import { BubbleSection } from './BubbleSection.tsx';
+import { CameraSection } from './CameraSection.tsx';
 import type { EditRun } from './history.ts';
 import { useNames } from './names.ts';
 import { NumberField } from './NumberField.tsx';
@@ -64,6 +66,9 @@ interface Props {
   /** Goes up by one each time the text of the bubble should get the focus. */
   textFocus: number;
   onEditBubble(fn: (b: Bubble) => Bubble, run?: EditRun): void;
+  /** Whether the camera is selected, which the pane shows instead of the selection. */
+  cameraSelected: boolean;
+  t: number;
   /** The length of the scene in seconds. */
   duration: number;
   fps: number;
@@ -104,6 +109,17 @@ export function PropertiesPane(props: Props) {
         anchors={props.anchors}
         textFocus={props.textFocus}
         onEdit={props.onEditBubble}
+        onSeek={props.onSeek}
+      />
+    );
+  else if (props.cameraSelected)
+    content = (
+      <CameraSection
+        scene={scene}
+        bg={bg.background}
+        t={props.t}
+        fps={props.fps}
+        onEdit={props.onEdit}
         onSeek={props.onSeek}
       />
     );

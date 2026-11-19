@@ -1,4 +1,5 @@
-// The timeline of a scene: a row for the background and one for each actor,
+// The timeline of a scene: a row for the camera, one for the background and
+// one for each actor,
 // with the actions as blocks from their start until the next action. An actor
 // with speech bubbles has a bubble lane under its row, and the free bubbles
 // have a row of their own at the end. Tap or
@@ -24,6 +25,7 @@ import { IconButton } from '../components/IconButton.tsx';
 import {
   BackgroundIcon,
   BubbleIcon,
+  CameraIcon,
   DeleteIcon,
   PauseIcon,
   PlayIcon,
@@ -38,6 +40,8 @@ import { useI18n } from '../i18n/index.tsx';
 import { kindOf } from '../library/index.ts';
 import { ActionBlocks } from './ActionBlocks.tsx';
 import { BUBBLE_LINE, BubbleLane, bubbleLines } from './BubbleLane.tsx';
+import type { CameraDrag } from './cameraEdit.ts';
+import { CameraLane } from './CameraLane.tsx';
 import type { EditRun } from './history.ts';
 import { useNames } from './names.ts';
 import {
@@ -112,6 +116,10 @@ interface Props {
   onBubbleLength(id: string, length: number, run: EditRun): void;
   /** Takes away the step of a drag that a pinch cancelled. */
   onRevert(run: EditRun): void;
+  cameraSelected: boolean;
+  /** Selects the camera, and moves the playhead to `t` if given. */
+  onSelectCamera(t?: number): void;
+  onCameraDrag(id: string, part: CameraDrag, t: number, run: EditRun): void;
 }
 
 export function Timeline(props: Props) {
@@ -407,6 +415,39 @@ export function Timeline(props: Props) {
               </span>
             </div>
           </div>
+          {scene.background && (
+            <div className="track" aria-selected={props.cameraSelected}>
+              <button
+                type="button"
+                className="track-label"
+                onClick={() => props.onSelectCamera()}
+              >
+                <CameraIcon />
+                <span>{tr('editor.camera')}</span>
+              </button>
+              <div
+                className="lane"
+                style={{ width }}
+                onClick={(e) => props.onSeek(timeAt(e, e.currentTarget))}
+              >
+                <CameraLane
+                  scene={scene}
+                  pps={pps}
+                  fps={props.fps}
+                  t={t}
+                  selected={props.cameraSelected}
+                  onSelect={props.onSelectCamera}
+                  onDrag={(id, part, at, run) => {
+                    dragMove(run);
+                    props.onCameraDrag(id, part, at, run);
+                  }}
+                  onDragDone={unfreeze}
+                  pinches={pinches}
+                  onCancel={revert}
+                />
+              </div>
+            </div>
+          )}
           {rows.length === 0 && bubbles.length === 0 && (
             <p className="muted tracks-empty">{tr('editor.emptyTimeline')}</p>
           )}

@@ -78,7 +78,7 @@ the sky, the hills far away and the ground that the actors stand on, and it can
 have clips, such as the sun moving across the sky.
 
 - [x] User can pick a background from the library.
-- [ ] A background has one or more layers, each at its own depth. The
+- [x] A background has one or more layers, each at its own depth. The
       [camera](camera.md) moves the far layers less than the near ones.
 - [x] The actors stand on the ground layer of the background. Each actor has its
       own place on it, so actors can stand nearer to the camera or further from

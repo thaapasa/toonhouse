@@ -92,6 +92,19 @@ export const homeView = ({ home }: StageArea): StageView => ({
   y: home.y,
 });
 
+/**
+ * The view of `box` with the same thin margin as the home view, such as the
+ * view of the camera. `box` has the shape of the frame.
+ */
+export const fitView = ({ home }: StageArea, box: Bounds): StageView => {
+  const width = box.width * (1 + 2 * MARGIN.x);
+  return {
+    zoom: home.width / width,
+    x: box.x - box.width * MARGIN.x,
+    y: box.y - box.height * MARGIN.y,
+  };
+};
+
 /** The zoom at which the whole stage shows. */
 export const minZoom = ({ stage, home }: StageArea) =>
   Math.min(1, home.width / stage.width, home.height / stage.height);

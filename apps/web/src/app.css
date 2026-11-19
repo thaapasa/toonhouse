@@ -668,11 +668,65 @@ button:disabled {
   left: 8px;
   bottom: 8px;
   z-index: 2;
+  display: flex;
+  gap: 6px;
+}
+
+.stage-home .icon-button {
   background: var(--panel);
   box-shadow:
     0 0 0 1px var(--line-2),
     0 8px 24px rgba(0, 0, 0, 0.4);
   border-radius: 10px;
+}
+
+.camera-edge {
+  fill: none;
+  stroke: #ffffff;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.camera-edge.selected {
+  stroke: var(--accent);
+  opacity: 1;
+}
+
+.camera-hit {
+  fill: transparent;
+  cursor: move;
+}
+
+.camera-tab {
+  cursor: pointer;
+}
+
+.camera-tab rect {
+  fill: var(--panel);
+  stroke: var(--line-2);
+}
+
+.camera-tab path {
+  fill: none;
+  stroke: var(--text);
+}
+
+.camera-tab.selected rect {
+  fill: var(--accent);
+  stroke: var(--accent);
+}
+
+.camera-tab.selected path {
+  stroke: var(--on-accent);
+}
+
+.camera-corner circle {
+  fill: transparent;
+}
+
+.camera-corner rect {
+  fill: #ffffff;
+  stroke: var(--accent);
 }
 
 .frame-edge {
@@ -934,6 +988,7 @@ button:disabled {
 }
 
 .pane-section h3,
+.pane-section h4,
 .walk-points h4 {
   margin: 0;
   font-weight: 600;
@@ -1028,6 +1083,16 @@ button:disabled {
   border-radius: 6px;
   font-weight: 500;
   font-size: 14px;
+}
+
+.segmented.easing {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.segmented.easing button {
+  width: auto;
+  min-width: 0;
 }
 
 .segmented button[aria-pressed='true'] {
@@ -1409,6 +1474,40 @@ button:disabled {
 .time-mark.end {
   touch-action: none;
   cursor: ew-resize;
+}
+
+/* The camera row. */
+.camera-block {
+  background: #3d4a63;
+  padding: 0;
+}
+
+.camera-curve {
+  position: absolute;
+  left: 0;
+  top: 4px;
+  pointer-events: none;
+}
+
+.camera-curve polyline {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.55);
+  stroke-width: 1.5;
+}
+
+.time-mark.camera-jump {
+  touch-action: none;
+  cursor: ew-resize;
+}
+
+.time-mark.camera-jump::after {
+  inset: 5px;
+  border-radius: 2px;
+  transform: rotate(45deg);
+}
+
+.time-mark[aria-pressed='true']::after {
+  background: var(--accent);
 }
 
 /* A loop or the end of a walk inside an action. */

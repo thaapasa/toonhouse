@@ -22,6 +22,7 @@ import {
   actorStateAt,
   backgroundClips,
   backgroundStateAt,
+  cameraHolder,
   clipsFor,
   FPS,
   isMoving,
@@ -55,8 +56,18 @@ import {
   LIBRARY,
   type RigAsset,
 } from '../library/index.ts';
-import { ActionBar, BubbleBar, WalkBar } from './ActionBar.tsx';
+import { ActionBar, BubbleBar, CameraBar, WalkBar } from './ActionBar.tsx';
 import { addBubble, newBubble, removeBubble, updateBubble } from './bubbles.ts';
+import {
+  addCameraMove,
+  canAddCameraMove,
+  dragCameraMove,
+  newCameraMove,
+  removeCameraMove,
+  resetStartView,
+  setCameraView,
+  withBackground,
+} from './cameraEdit.ts';
 import { CartoonTitle } from './CartoonTitle.tsx';
 import { EditorStage, type WalkEdit } from './EditorStage.tsx';
 import type { EditRun } from './history.ts';
@@ -143,6 +154,8 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
   // A selected bubble takes the place of the selected actor or action.
   const [bubbleId, setBubbleId] = useState<string | null>(null);
   const [bubbleTool, setBubbleTool] = useState(false);
+  // A selected camera takes the place of the other selections.
+  const [cameraSelected, setCameraSelected] = useState(false);
   const [textFocus, setTextFocus] = useState(0);
   const [removing, setRemoving] = useState(false);
   const [paneOpen, setPaneOpenState] = useState(
@@ -213,11 +226,20 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
   const select = (sel: TimelineSelection | null) => {
     setSelected(sel);
     setBubbleId(null);
+    setCameraSelected(false);
   };
   const selectBubble = (id: string) => {
     setBubbleId(id);
     setSelected(null);
     setWalking(null);
+    setCameraSelected(false);
+  };
+  const selectCamera = () => {
+    setCameraSelected(true);
+    setSelected(null);
+    setBubbleId(null);
+    walkDone();
+    setBubbleTool(false);
   };
   /** Selects a bubble and puts the focus in its text field. */
   const editBubbleText = (id: string) => {
@@ -266,7 +288,7 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
     setLibrary(null);
   };
   const setBackground = (id: string) => {
-    editScene((s) => ({ ...s, background: id }));
+    editScene((s) => withBackground(s, id));
     setLibrary(null);
   };
 
@@ -362,8 +384,51 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
+  /** Adds a camera move or jump at the current time and selects it. */
+  const addCamera = (jump: boolean) => {
+    if (!bg) return;
+    const at = now();
+    const move = newCameraMove(scene, bg.background, newId(), at, jump);
+    if (!move) return;
+    editScene((s) => addCameraMove(s, move));
+    // The stage shows the view that the user sets next: the end of a move.
+    playback.seek(move.t + (move.length ?? 0));
+  };
+
   let toolbar: ReactNode = null;
-  if (bg && walk) {
+  if (bg && cameraSelected) {
+    const at = now();
+    const { move, moving } = cameraHolder(scene, t);
+    toolbar = (
+      <CameraBar
+        onMove={
+          canAddCameraMove(scene, at, false)
+            ? () => addCamera(false)
+            : undefined
+        }
+        onJump={
+          canAddCameraMove(scene, at, true) ? () => addCamera(true) : undefined
+        }
+        removeLabel={
+          move
+            ? move.length
+              ? 'camera.removeMove'
+              : 'camera.removeJump'
+            : 'camera.resetStart'
+        }
+        onRemove={
+          move
+            ? () => {
+                editScene((s) => removeCameraMove(s, move.id));
+                if (moving) playback.seek(move.t);
+              }
+            : scene.camera?.start
+              ? () => editScene(resetStartView)
+              : undefined
+        }
+      />
+    );
+  } else if (bg && walk) {
     toolbar = <WalkBar onDone={walkDone} />;
   } else if (bg && selectedBubble) {
     const id = selectedBubble.id;
@@ -451,6 +516,8 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
       bubble={selectedBubble}
       anchors={frame?.bubbleContext.anchors ?? new Map()}
       textFocus={textFocus}
+      cameraSelected={cameraSelected}
+      t={t}
       onEditBubble={(fn, run) =>
         selectedBubble && editBubble(selectedBubble.id, fn, run)
       }
@@ -610,6 +677,13 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
                 editWalk((path) => path.map((p, j) => (j === i ? at : p)), run)
               }
               onRevert={doc.revert}
+              cameraSelected={cameraSelected}
+              cameraMoving={cameraHolder(scene, t).moving}
+              onSelectCamera={selectCamera}
+              onCameraView={(view, run) => {
+                const { move } = cameraHolder(scene, t);
+                editScene((s) => setCameraView(s, move?.id ?? null, view), run);
+              }}
               onTouch={() => playback.setPlaying(false)}
               toolbar={toolbar}
             />
@@ -688,6 +762,22 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
           editBubble(id, (b) => ({ ...b, length: savedTime(v) }), run)
         }
         onRevert={doc.revert}
+        cameraSelected={cameraSelected}
+        onSelectCamera={(at) => {
+          selectCamera();
+          if (at !== undefined) playback.seek(at);
+        }}
+        onCameraDrag={(id, part, at, run) => {
+          editScene((s) => dragCameraMove(s, id, part, at), run);
+          const moved = dragCameraMove(scene, id, part, at).camera?.moves.find(
+            (m) => m.id === id,
+          );
+          // The playhead goes to the view that the user is likely to check.
+          if (moved)
+            playback.seek(
+              part === 'start' ? moved.t : moved.t + (moved.length ?? 0),
+            );
+        }}
       />
       <SaveProblem
         cartoonId={cartoon.id}

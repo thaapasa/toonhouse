@@ -56,9 +56,9 @@ later.
 
 The renderer puts together the frame of a scene at time `t` with `sceneFrame`:
 where each actor is, its clip frame and its drawing, its size on the background,
-the bubbles with their fonts and anchors, and the tree to draw. `cartoonTime`
-maps a time of the cartoon to a scene and a time in it. The editor, the player
-and the preview image use both, and export will too.
+the bubbles with their fonts and anchors, the view of the camera, and the tree
+to draw. `cartoonTime` maps a time of the cartoon to a scene and a time in it.
+The editor, the player and the preview image use both, and export will too.
 
 The renderer doesn't load the library. The app passes it a `Library`, which
 gives the rig of a character or a prop, a background by its id, and the default
@@ -193,6 +193,15 @@ the middle of the frame by `d` times as much as the camera. So a layer at depth
 zooms by the same factor, which looks more natural than a zoom that grows evenly
 with the depth. With this formula the view of every layer stays inside the frame
 whenever the view of the ground layer does, so only the camera needs clamping.
+
+A scene stores its start view and a list of camera moves and jumps, and the
+renderer computes the camera at `t` from them. Each move starts from the view
+that the camera holds when the move starts, so the move stores only the view
+that it goes to. Dragging either end of a move then changes only its speed. A
+move zooms by the same factor in each step and moves the view around the one
+point that stays in place on the screen. With that, a zoom into a corner keeps
+the corner still, and each view between two views inside the background is
+inside it too.
 
 The renderer draws a background with its actors as one tree, in the pixels of
 the picture, which has the size of the frame. Each actor is a group that names
@@ -434,9 +443,15 @@ The stage shows the frame and a band around it, wide enough for the largest
 character or prop of the library at the size that the background gives the
 actors. The trees make the band almost as large as the frame, so the stage opens
 at a home view, the frame with a thin margin, and the user zooms out from it to
-see the whole band. Zooming and panning the stage scales the drawing of the
-frame as a whole, so it shows what the cartoon shows, larger. It isn't the
-camera, so the layers don't move against each other.
+see the whole band.
+
+The stage draws the scene on the ground layer, not in the picture of the camera.
+It maps the picture of the camera back onto the ground layer, so the ground
+layer and the actors keep their places, the far layers move with the camera, and
+the camera box shows what the frame shows. Outside the box, the layers go on as
+the camera sees them, until their drawings end. Zooming and panning the stage
+only scales this drawing as a whole, so it isn't the camera, and the layers
+don't move against each other.
 
 If the user has set the length of a scene, the scene lasts that long, but it
 never ends before its last action starts. Otherwise it lasts a few seconds past

@@ -6,6 +6,8 @@ import type { Clip, ClipId, ClipKind } from '@toonhouse/model';
 import { IconButton } from '../components/IconButton.tsx';
 import {
   BiggerIcon,
+  CameraJumpIcon,
+  CameraMoveIcon,
   DeleteIcon,
   DoneIcon,
   EditIcon,
@@ -13,7 +15,7 @@ import {
   SmallerIcon,
   TurnIcon,
 } from '../components/icons.tsx';
-import { useI18n } from '../i18n/index.tsx';
+import { type TextKey, useI18n } from '../i18n/index.tsx';
 import { CLIP_ICONS } from './clipIcons.tsx';
 import { useNames } from './names.ts';
 
@@ -122,6 +124,46 @@ export function BubbleBar(props: { onEditText(): void; onRemove(): void }) {
       <IconButton
         className="bar-button"
         label="bubble.remove"
+        onClick={props.onRemove}
+      >
+        <DeleteIcon />
+      </IconButton>
+    </div>
+  );
+}
+
+/**
+ * The toolbar of the camera: a new camera move or jump at the current time,
+ * and the removal of the one whose view the camera holds.
+ */
+export function CameraBar(props: {
+  onMove?: (() => void) | undefined;
+  onJump?: (() => void) | undefined;
+  onRemove?: (() => void) | undefined;
+  /** What the remove button does: removes an entry or resets the start view. */
+  removeLabel: TextKey;
+}) {
+  const { tr } = useI18n();
+  return (
+    <div className="action-bar" role="toolbar" aria-label={tr('editor.camera')}>
+      <IconButton
+        className="bar-button"
+        label="camera.addMove"
+        onClick={props.onMove}
+      >
+        <CameraMoveIcon />
+      </IconButton>
+      <IconButton
+        className="bar-button"
+        label="camera.addJump"
+        onClick={props.onJump}
+      >
+        <CameraJumpIcon />
+      </IconButton>
+      <div className="divider" />
+      <IconButton
+        className="bar-button"
+        label={props.removeLabel}
         onClick={props.onRemove}
       >
         <DeleteIcon />

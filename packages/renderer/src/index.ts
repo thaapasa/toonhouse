@@ -26,8 +26,6 @@ export {
   fontByFamily,
   fontFamily,
 } from './bubbles/text.ts';
-export type { CartoonEntry, CartoonTimeline } from './cartoon.ts';
-export { cartoonTime, cartoonTimeline } from './cartoon.ts';
 export {
   CAMERA_EASINGS,
   cameraAt,
@@ -43,6 +41,8 @@ export {
   sortedCameraMoves,
   startView,
 } from './camera.ts';
+export type { CartoonEntry, CartoonTimeline } from './cartoon.ts';
+export { cartoonTime, cartoonTimeline } from './cartoon.ts';
 export {
   backgroundClips,
   clipOf,

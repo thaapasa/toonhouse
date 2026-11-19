@@ -145,6 +145,37 @@ export const ZoomFitIcon = () => (
   </Icon>
 );
 
+export const CameraIcon = ({ size = 20 }: { size?: number }) => (
+  <Icon size={size}>
+    <rect x="3" y="7" width="13" height="10" rx="2" />
+    <path d="M16 11l5-3v8l-5-3" />
+  </Icon>
+);
+
+export const CameraFitIcon = () => (
+  <Icon size={18}>
+    <path d="M4 9V5h4M20 9V5h-4M4 15v4h4M20 15v4h-4" />
+    <rect x="7" y="10" width="7" height="5" rx="1" />
+    <path d="M14 12l3-1.5v4L14 13" />
+  </Icon>
+);
+
+export const CameraMoveIcon = () => (
+  <Icon>
+    <rect x="2" y="8" width="8" height="6" rx="1" strokeDasharray="2 2" />
+    <rect x="13" y="6" width="9" height="10" rx="1" />
+    <path d="M7 19h9M13 17l3 2-3 2" />
+  </Icon>
+);
+
+export const CameraJumpIcon = () => (
+  <Icon>
+    <rect x="2" y="8" width="8" height="6" rx="1" strokeDasharray="2 2" />
+    <rect x="13" y="6" width="9" height="10" rx="1" />
+    <path d="M10 19h4l-2-4z" />
+  </Icon>
+);
+
 export const CloseIcon = () => (
   <Icon size={18}>
     <path d="M6 6l12 12M18 6L6 18" strokeWidth={2} />
