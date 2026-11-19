@@ -14,8 +14,12 @@ export type {
   BubbleBorder,
   BubbleFontId,
   BubbleShape,
+  CameraEasing,
+  CameraMove,
+  CameraView,
   CartoonContent,
   Scene,
+  SceneCamera,
 } from './cartoon.ts';
 export { CARTOON_VERSION, emptyContent } from './cartoon.ts';
 export type { Matrix, Pt } from './geometry.ts';

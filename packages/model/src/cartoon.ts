@@ -32,6 +32,8 @@ export interface Scene {
   actors: Actor[];
   /** The speech bubbles of the scene, both attached and free. */
   bubbles?: Bubble[];
+  /** Where the camera is and how it moves. Without it, it shows the whole background. */
+  camera?: SceneCamera;
   /**
    * The length of the scene in seconds, if the user has set it. Without it,
    * the scene ends a few seconds after its last action.
@@ -99,6 +101,47 @@ export interface Action {
    * the sky.
    */
   clipStart?: number;
+}
+
+/**
+ * A view of the camera on the ground layer. It has the shape of the frame, so
+ * the middle point and the zoom set it.
+ */
+export interface CameraView {
+  /** The middle of the view, in the pixels of the background frame. */
+  x: number;
+  y: number;
+  /** 1 shows the whole background, 2 a view half as wide. */
+  zoom: number;
+}
+
+/** How a camera move speeds up and slows down. */
+export type CameraEasing = 'linear' | 'ease-in' | 'ease-out' | 'ease-in-out';
+
+/**
+ * A camera move or a camera jump at `t`. It starts from where the camera is
+ * at `t`, which is the view of the entry before it, or the start view. A move
+ * gets to `to` after `length` seconds. A jump has no length and shows `to` at
+ * once.
+ */
+export interface CameraMove {
+  /** Unique within the scene. */
+  id: string;
+  /** When the move or the jump starts, in seconds from the start of the scene. */
+  t: number;
+  to: CameraView;
+  /** How long a move takes, in seconds. A jump has none. */
+  length?: number;
+  /** How a move speeds up and slows down, `ease-in-out` if not set. */
+  easing?: CameraEasing;
+}
+
+/** The camera of a scene. */
+export interface SceneCamera {
+  /** The view at the start of the scene, the whole background if not set. */
+  start?: CameraView;
+  /** The moves and the jumps. They don't overlap, and the order doesn't matter. */
+  moves: CameraMove[];
 }
 
 /** The fonts that speech bubbles can use. See assets/fonts. */

@@ -48,6 +48,11 @@ export const CONTENT_LIMITS = {
    */
   fontSize: { min: 1, max: 10_000 },
   borderWidth: { min: 0, max: 10_000 },
+  /**
+   * The zoom of a camera view. The renderer divides by it, and clamps it to
+   * the zoom that it can show.
+   */
+  zoom: { min: 0.01, max: 1000 },
   /** The height of a line against the size of the text. */
   lineSpacing: { min: 0, max: 100 },
   /** The renderer wraps the text of each bubble in every frame. */
@@ -59,6 +64,7 @@ export const CONTENT_LIMITS = {
   actions: 10_000,
   pathPoints: 10_000,
   bubbles: 10_000,
+  cameraMoves: 10_000,
 } as const;
 
 const L = CONTENT_LIMITS;
@@ -136,6 +142,22 @@ const Bubble = z.looseObject({
   pop: z.boolean().exactOptional(),
 });
 
+const CameraView = z.looseObject({
+  x: Coordinate,
+  y: Coordinate,
+  zoom: range(L.zoom),
+});
+
+const CameraMove = z.looseObject({
+  id: Id,
+  t: Time,
+  to: CameraView,
+  length: Time.exactOptional(),
+  easing: z
+    .enum(['linear', 'ease-in', 'ease-out', 'ease-in-out'])
+    .exactOptional(),
+});
+
 const Scene = z.looseObject({
   id: Id,
   background: z
@@ -145,6 +167,12 @@ const Scene = z.looseObject({
   backgroundActions: z.array(Action).max(L.actions),
   actors: z.array(Actor).max(L.actors),
   bubbles: z.array(Bubble).max(L.bubbles).exactOptional(),
+  camera: z
+    .looseObject({
+      start: CameraView.exactOptional(),
+      moves: z.array(CameraMove).max(L.cameraMoves),
+    })
+    .exactOptional(),
   length: Time.exactOptional(),
 });
 
