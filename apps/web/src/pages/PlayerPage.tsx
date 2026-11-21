@@ -15,7 +15,7 @@ export function PlayerPage() {
   const { cartoonId } = route.useParams();
   const cartoon = useQuery(cartoonQuery(cartoonId));
   // The owner may have changed the cartoon since it was last loaded.
-  const content = useQuery({ ...contentQuery(cartoonId), staleTime: 30_000 });
+  const content = useQuery(contentQuery(cartoonId));
 
   const notFound = [cartoon, content].some(
     (q) => q.error instanceof ApiError && q.error.status === 404,
@@ -25,7 +25,11 @@ export function PlayerPage() {
   if (cartoon.isPending || content.isPending)
     return <Fallback text="loading" />;
   return (
-    <Player key={cartoonId} cartoon={cartoon.data} content={content.data} />
+    <Player
+      key={cartoonId}
+      cartoon={cartoon.data}
+      content={content.data.content}
+    />
   );
 }
 

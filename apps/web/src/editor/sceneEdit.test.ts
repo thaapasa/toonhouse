@@ -1,3 +1,4 @@
+import { CONTENT_LIMITS } from '@toonhouse/api';
 import {
   type Action,
   type Actor,
@@ -16,7 +17,6 @@ import {
   removePoint,
   removeScene,
   savedPoint,
-  SCALE_LIMITS,
   setClip,
   setLength,
   setScale,
@@ -153,8 +153,8 @@ describe('properties', () => {
 
   it('keeps the size inside the limits of the server', () => {
     const actor = { scale: 1 } as Actor;
-    expect(setScale(actor, 0).scale).toBe(SCALE_LIMITS.min);
-    expect(setScale(actor, 99).scale).toBe(SCALE_LIMITS.max);
+    expect(setScale(actor, 0).scale).toBe(CONTENT_LIMITS.scale.min);
+    expect(setScale(actor, 5000).scale).toBe(CONTENT_LIMITS.scale.max);
     expect(setScale(actor, 1.23456).scale).toBe(1.2346);
   });
 

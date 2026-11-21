@@ -14,6 +14,15 @@ parts of its scenes in a row.
 - [ ] User can select a locked actor and unlock it from outside the stage, such
       as from the timeline or a list of the actors.
 - [x] Scenes are saved on the server, and the user can open them later.
+- [x] The editor opens the latest saved version of the cartoon.
+- [x] If the server refuses a save, for example because the cartoon is too
+      large, the editor tells the user what is wrong. It tries again after the
+      next edit.
+- [x] If the login has ended, the editor tells the user to log in again and
+      keeps the edits on the device. After the login, the editor saves them.
+- [x] If the cartoon was saved in another window or on another device after the
+      editor opened it, the editor doesn't overwrite that save. It tells the
+      user and offers to load the cartoon again.
 - [x] User can undo and redo the edits of a scene.
 - [x] User can remove a scene, after confirming it. The removal can be undone.
       If the user removes the last scene, the cartoon gets a new empty scene.

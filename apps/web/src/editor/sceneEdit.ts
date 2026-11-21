@@ -1,5 +1,6 @@
 // Pure edits of the scenes of a cartoon. Each returns a new value and leaves
 // the old one as it was, so that undo can keep the old values.
+import { CONTENT_LIMITS } from '@toonhouse/api';
 import type {
   Action,
   Actor,
@@ -8,6 +9,12 @@ import type {
   Scene,
 } from '@toonhouse/model';
 import { minSceneLength, sortedActions } from '@toonhouse/renderer';
+
+// The edits keep the content inside the limits that the server saves.
+const L = CONTENT_LIMITS;
+
+const clamp = (v: number, lo: number, hi: number) =>
+  Math.min(Math.max(v, lo), hi);
 
 /** Two actions closer than this in seconds start at the same time. */
 const SAME_TIME = 1e-6;
@@ -102,8 +109,12 @@ export function updateActions(
 
 /** The shortest time between two actions that the user moves. */
 const MIN_GAP = 0.1;
-/** A time to a ten-thousandth of a second, which keeps the saved data short. */
-export const savedTime = (t: number) => Math.round(t * 1e4) / 1e4;
+/**
+ * A time inside the limits that the server saves, to a ten-thousandth of a
+ * second, which keeps the saved data short.
+ */
+export const savedTime = (t: number) =>
+  Math.round(clamp(t, 0, L.time) * 1e4) / 1e4;
 
 /**
  * Moves the start of an action to `t`, between the actions before and after
@@ -178,7 +189,14 @@ export const roundPoint = (p: Pt): Pt => ({
   y: Math.round(p.y * 10) / 10,
 });
 
-const shift = (p: Pt, d: Pt): Pt => roundPoint({ x: p.x + d.x, y: p.y + d.y });
+/** A point inside the limits that the server saves, to a tenth of a pixel. */
+export const savedPoint = (p: Pt): Pt =>
+  roundPoint({
+    x: clamp(p.x, -L.coordinate, L.coordinate),
+    y: clamp(p.y, -L.coordinate, L.coordinate),
+  });
+
+const shift = (p: Pt, d: Pt): Pt => savedPoint({ x: p.x + d.x, y: p.y + d.y });
 
 /**
  * Moves an actor and all of its walks by `d`, so that it stays under the
@@ -201,35 +219,14 @@ export function stepSize(scale: number, step: 1 | -1): number {
   return SIZES.findLast((s) => s < scale - 1e-6) ?? scale;
 }
 
-/**
- * The limits of the size of an actor and the speed of an action. The server
- * doesn't save values outside them.
- */
-export const SCALE_LIMITS = { min: 0.05, max: 20 } as const;
-export const SPEED_LIMITS = { min: 0.05, max: 20 } as const;
-/** The server doesn't save a point further away than this from the frame. */
-const COORDINATE_LIMIT = 100_000;
-
-const clamp = (v: number, lo: number, hi: number) =>
-  Math.min(Math.max(v, lo), hi);
-
-/** A point inside the limits that the server saves, to a tenth of a pixel. */
-export const savedPoint = (p: Pt): Pt =>
-  roundPoint({
-    x: clamp(p.x, -COORDINATE_LIMIT, COORDINATE_LIMIT),
-    y: clamp(p.y, -COORDINATE_LIMIT, COORDINATE_LIMIT),
-  });
-
 export const setScale = (actor: Actor, scale: number): Actor => ({
   ...actor,
-  scale:
-    Math.round(clamp(scale, SCALE_LIMITS.min, SCALE_LIMITS.max) * 1e4) / 1e4,
+  scale: Math.round(clamp(scale, L.scale.min, L.scale.max) * 1e4) / 1e4,
 });
 
 /** Sets the speed of an action. The normal speed 1 leaves the field out. */
 export function setSpeed(action: Action, speed: number): Action {
-  const v =
-    Math.round(clamp(speed, SPEED_LIMITS.min, SPEED_LIMITS.max) * 1e4) / 1e4;
+  const v = Math.round(clamp(speed, L.speed.min, L.speed.max) * 1e4) / 1e4;
   const rest = { ...action };
   delete rest.speed;
   return v === 1 ? rest : { ...rest, speed: v };
@@ -246,13 +243,17 @@ export const setClip = (
   ...(moves && !action.path && { path: [] }),
 });
 
+/** Adds a point to the end of a path, unless the path is as long as the server saves. */
+export const addPoint = (path: readonly Pt[], at: Pt): Pt[] =>
+  path.length < L.pathPoints ? [...path, savedPoint(at)] : [...path];
+
 /**
  * Adds a point to a path halfway between point `i` and the point before it,
  * which is `start` for the first point.
  */
 export function insertPoint(path: readonly Pt[], i: number, start: Pt): Pt[] {
   const to = path[i];
-  if (!to) return [...path];
+  if (!to || path.length >= L.pathPoints) return [...path];
   const from = i > 0 ? path[i - 1]! : start;
   const mid = roundPoint({ x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 });
   return [...path.slice(0, i), mid, ...path.slice(i)];

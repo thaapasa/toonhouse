@@ -3,8 +3,9 @@ import type { ClipId } from './pose.ts';
 
 /**
  * The version of the cartoon format. It goes up by one when the format changes
- * so that old cartoons no longer fit it, and the previous version gets a
- * converter to the new one. See "Cartoon format versions" in ARCHITECTURE.md.
+ * so that old cartoons no longer fit it. A change that old cartoons still fit,
+ * such as a new optional field, keeps the version. See "Cartoon format
+ * versions" in ARCHITECTURE.md.
  */
 export const CARTOON_VERSION = 1;
 
@@ -13,6 +14,12 @@ export interface CartoonContent {
   version: typeof CARTOON_VERSION;
   scenes: Scene[];
 }
+
+/** The content of a new cartoon. */
+export const emptyContent = (): CartoonContent => ({
+  version: CARTOON_VERSION,
+  scenes: [],
+});
 
 /** A background with actors on it, and a timeline for them. */
 export interface Scene {
@@ -65,6 +72,12 @@ export interface Actor {
 export interface Action {
   /** Unique within its actor. */
   id: string;
+  /**
+   * What the action does, `clip` if not set. Only `clip` exists so far: the
+   * actor plays a clip. Other kinds of actions, such as a change of a setting
+   * in the middle of a scene, can come later without a new format version.
+   */
+  type?: 'clip';
   /** When the action starts, in seconds from the start of the scene. */
   t: number;
   clip: ClipId;

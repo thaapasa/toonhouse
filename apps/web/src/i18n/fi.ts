@@ -104,6 +104,20 @@ export const fi: Texts = {
   'editor.saving': 'Tallennetaan…',
   'editor.unsaved': 'Ei vielä tallennettu',
   'editor.saveError': 'Tallennus epäonnistui. Yritetään pian uudelleen.',
+  'editor.notSaved': 'Ei tallennettu',
+  'editor.notSavedLogin': 'Ei tallennettu. Kirjaudu uudelleen.',
+  'save.refusedTitle': 'Piirrettyä ei ole tallennettu',
+  'save.refusedInfo':
+    'Palvelin ei hyväksy viimeisintä muutosta. Peru se, niin editori tallentaa piirretyn taas.',
+  'save.tooLargeInfo':
+    'Piirretty on liian suuri tallennettavaksi. Poista siitä jotain, esimerkiksi kohtaus, niin editori tallentaa sen taas.',
+  'save.loggedOutTitle': 'Kirjautumisesi on päättynyt',
+  'save.loggedOutInfo':
+    'Kirjaudu uudelleen, niin muutoksesi tallentuvat. Siihen asti tämä selain säilyttää ne.',
+  'save.conflictTitle': 'Piirretty on muuttunut',
+  'save.conflictInfo':
+    'Piirretty tallennettiin toisessa ikkunassa tai toisella laitteella. Lataa piirretty uudelleen, niin näet sen version. Tässä viimeisen tallennuksen jälkeen tehdyt muutokset menetetään.',
+  'save.reload': 'Lataa uudelleen',
   'editor.scenes': 'Kohtaukset',
   'editor.scene': 'Kohtaus {n}',
   'editor.addScene': 'Uusi kohtaus',

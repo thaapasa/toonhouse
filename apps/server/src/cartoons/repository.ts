@@ -1,9 +1,11 @@
 import type {
   Cartoon,
   CartoonContent,
+  SavedContent,
   Sharing,
   Visibility,
 } from '@toonhouse/api';
+import { emptyContent } from '@toonhouse/model';
 
 import { sql } from '../db.ts';
 
@@ -97,8 +99,8 @@ export async function createCartoon(
   // Parallel requests can go a few over the limit, which doesn't matter for
   // disk space.
   const [row] = await sql<{ id: string }[]>`
-    INSERT INTO cartoons (owner_id, title)
-    SELECT ${ownerId}, ${title}
+    INSERT INTO cartoons (owner_id, title, content)
+    SELECT ${ownerId}, ${title}, ${sql.json(emptyContent())}
     WHERE (SELECT count(*) FROM cartoons WHERE owner_id = ${ownerId}) < ${maxCartoonsPerUser}
     RETURNING id
   `;
@@ -145,23 +147,38 @@ export async function deleteCartoon(
 export async function getContent(
   id: string,
   userId: string | null,
-): Promise<CartoonContent | null> {
-  const [row] = await sql<{ content: CartoonContent }[]>`
-    SELECT c.content FROM cartoons c WHERE c.id = ${id} AND ${canWatch(userId)}
+): Promise<SavedContent | null> {
+  const [row] = await sql<
+    { content: CartoonContent; contentRevision: number }[]
+  >`
+    SELECT c.content, c.content_revision FROM cartoons c
+    WHERE c.id = ${id} AND ${canWatch(userId)}
   `;
-  return row?.content ?? null;
+  return row ? { revision: row.contentRevision, content: row.content } : null;
 }
 
+/**
+ * Saves the scenes of a cartoon if they still have the revision that the save
+ * edited. Gives the new revision, `'conflict'` if the revision has changed,
+ * or `null` if the user doesn't own the cartoon.
+ */
 export async function setContent(
   id: string,
   ownerId: string,
+  revision: number,
   content: CartoonContent,
-): Promise<boolean> {
-  const rows = await sql`
-    UPDATE cartoons SET content = ${sql.json(content)}, updated_at = now()
-    WHERE id = ${id} AND owner_id = ${ownerId}
+): Promise<number | 'conflict' | null> {
+  const [row] = await sql<{ contentRevision: number }[]>`
+    UPDATE cartoons SET content = ${sql.json(content)},
+      content_revision = content_revision + 1, updated_at = now()
+    WHERE id = ${id} AND owner_id = ${ownerId} AND content_revision = ${revision}
+    RETURNING content_revision
   `;
-  return rows.count > 0;
+  if (row) return row.contentRevision;
+  const [owned] = await sql`
+    SELECT 1 FROM cartoons WHERE id = ${id} AND owner_id = ${ownerId}
+  `;
+  return owned ? 'conflict' : null;
 }
 
 export type PreviewType = 'image/webp' | 'image/png';

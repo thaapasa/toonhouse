@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { sql } from '../db.ts';
 import { createUser, resetDatabase } from '../test/db.ts';
-import { createSession, deleteSession, getSessionUser } from './sessions.ts';
+import { createSession, deleteSession, getSession } from './sessions.ts';
 import { hashToken } from './tokens.ts';
 
 let userId: string;
@@ -30,10 +30,9 @@ async function daysLeft(token: string): Promise<number> {
 describe('sessions', () => {
   it('returns the user of a session', async () => {
     const token = await createSession(userId);
-    expect(await getSessionUser(token)).toEqual({
-      id: userId,
-      username: 'artist',
-      displayName: 'artist display',
+    expect(await getSession(token)).toEqual({
+      user: { id: userId, username: 'artist', displayName: 'artist display' },
+      extended: false,
     });
   });
 
@@ -47,33 +46,33 @@ describe('sessions', () => {
   });
 
   it('returns null for an unknown token', async () => {
-    expect(await getSessionUser('nope')).toBeNull();
+    expect(await getSession('nope')).toBeNull();
   });
 
   it('returns null for an expired session', async () => {
     const token = await createSession(userId);
     await setExpiry(token, -1);
-    expect(await getSessionUser(token)).toBeNull();
+    expect(await getSession(token)).toBeNull();
   });
 
   it('extends a session that was last extended over a day ago', async () => {
     const token = await createSession(userId);
     await setExpiry(token, 80);
-    await getSessionUser(token);
+    expect((await getSession(token))?.extended).toBe(true);
     expect(await daysLeft(token)).toBeCloseTo(90, 1);
   });
 
   it('does not extend a session on every request', async () => {
     const token = await createSession(userId);
     await setExpiry(token, 89.5);
-    await getSessionUser(token);
+    expect((await getSession(token))?.extended).toBe(false);
     expect(await daysLeft(token)).toBeCloseTo(89.5, 1);
   });
 
   it('ends a deleted session', async () => {
     const token = await createSession(userId);
     await deleteSession(token);
-    expect(await getSessionUser(token)).toBeNull();
+    expect(await getSession(token)).toBeNull();
   });
 
   it('removes expired sessions when a new session is created', async () => {

@@ -1,7 +1,7 @@
 import path from 'node:path';
 
 import { serveStatic } from '@hono/node-server/serve-static';
-import { Hono, type MiddlewareHandler } from 'hono';
+import { type Context, Hono, type MiddlewareHandler } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { csrf } from 'hono/csrf';
 import { secureHeaders } from 'hono/secure-headers';
@@ -55,13 +55,17 @@ app.get('/health', async (c) => {
 });
 
 // Without a limit, a few large requests without a login could use up the memory
-// of the server.
-app.use(
-  '/api/*',
-  bodyLimit({
-    maxSize: 1024 * 1024,
-    onError: (c) => c.json({ error: 'Request body is too large' }, 413),
-  }),
+// of the server. The content of a cartoon can be much larger than the other
+// requests, so its save has a limit of its own.
+const tooLarge = (c: Context) =>
+  c.json({ error: 'Request body is too large' }, 413);
+const smallBody = bodyLimit({ maxSize: 1024 * 1024, onError: tooLarge });
+const contentBody = bodyLimit({ maxSize: 10 * 1024 * 1024, onError: tooLarge });
+app.use('/api/*', (c, next) =>
+  c.req.method === 'PUT' &&
+  /^\/api\/app\/cartoons\/[^/]+\/content$/.test(c.req.path)
+    ? contentBody(c, next)
+    : smallBody(c, next),
 );
 
 // The API of the web app, which authenticates with the session cookie.

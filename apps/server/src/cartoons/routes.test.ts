@@ -90,8 +90,9 @@ describe('creating', () => {
   it('refuses a cartoon over the limit of the user', async () => {
     const first = await create();
     await sql`
-      INSERT INTO cartoons (owner_id, title)
-      SELECT ${first.owner.id}, 'X' FROM generate_series(2, ${maxCartoonsPerUser})
+      INSERT INTO cartoons (owner_id, title, content)
+      SELECT ${first.owner.id}, 'X', '{"version": 1, "scenes": []}'
+      FROM generate_series(2, ${maxCartoonsPerUser})
     `;
     const res = await request('/api/app/cartoons', {
       method: 'POST',
@@ -269,25 +270,62 @@ describe('content', () => {
     ],
   };
 
-  const save = (id: string, json: unknown, cookie = owner) =>
-    request(`/api/app/cartoons/${id}/content`, { method: 'PUT', json, cookie });
+  const save = (id: string, json: unknown, cookie = owner, revision = 0) =>
+    request(`/api/app/cartoons/${id}/content`, {
+      method: 'PUT',
+      json: { revision, content: json },
+      cookie,
+    });
   const load = (id: string, cookie = owner) =>
     request(`/api/app/cartoons/${id}/content`, { cookie });
 
   it('starts with no scenes', async () => {
     const { id } = await create();
-    expect(await (await load(id)).json()).toEqual({ version: 1, scenes: [] });
+    expect(await (await load(id)).json()).toEqual({
+      revision: 0,
+      content: { version: 1, scenes: [] },
+    });
   });
 
   it('saves the scenes and gives them back', async () => {
     const { id } = await create();
-    expect((await save(id, content)).status).toBe(204);
-    expect(await (await load(id)).json()).toEqual(content);
+    const res = await save(id, content);
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ revision: 1 });
+    expect(await (await load(id)).json()).toEqual({ revision: 1, content });
+  });
+
+  // A key with an underscore also checks that the keys in the JSON keep their
+  // names.
+  it('keeps the fields that it does not know', async () => {
+    const { id } = await create();
+    const newer = {
+      ...content,
+      future: true,
+      scenes: [{ ...content.scenes[0], new_field: 'calm' }],
+    };
+    expect((await save(id, newer)).status).toBe(200);
+    expect(
+      ((await (await load(id)).json()) as { content: unknown }).content,
+    ).toEqual(newer);
+  });
+
+  it('refuses a save of an old revision with 409', async () => {
+    const { id } = await create();
+    expect((await save(id, content, owner, 0)).status).toBe(200);
+    const stale = await save(id, { ...content, scenes: [] }, owner, 0);
+    expect(stale.status).toBe(409);
+    expect(await stale.json()).toMatchObject({ reason: 'revision' });
+    expect(
+      ((await (await load(id)).json()) as { content: unknown }).content,
+    ).toEqual(content);
   });
 
   it('refuses a save in an old format with 409', async () => {
     const { id } = await create();
-    expect((await save(id, { version: 0, scenes: [] })).status).toBe(409);
+    const res = await save(id, { version: 0, scenes: [] });
+    expect(res.status).toBe(409);
+    expect(await res.json()).toMatchObject({ reason: 'version' });
   });
 
   it('refuses content that is not valid', async () => {

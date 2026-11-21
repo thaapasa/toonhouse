@@ -34,7 +34,7 @@ import type { EditRun } from './history.ts';
 import { type BackgroundAsset, CHARACTERS, PROPS } from './library.ts';
 import { placeActors } from './placement.ts';
 import { released } from './pointer.ts';
-import { roundPoint, savedPoint } from './sceneEdit.ts';
+import { savedPoint } from './sceneEdit.ts';
 import {
   bandSize,
   clampView,
@@ -237,7 +237,7 @@ export function EditorStage(props: Props) {
     const ctm = svgRef.current?.getScreenCTM();
     if (!ctm) return { x: 0, y: 0 };
     const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
-    return roundPoint(p);
+    return savedPoint(p);
   };
   const client = (e: { clientX: number; clientY: number }): Pt => ({
     x: e.clientX,

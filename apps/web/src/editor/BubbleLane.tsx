@@ -3,6 +3,7 @@
 // Bubbles that overlap in time go on separate lines of the lane. A tap selects
 // a bubble, a drag moves it, and a drag on the mark at its end changes its
 // length. A tap on a mark moves the playhead there.
+import { CONTENT_LIMITS } from '@toonhouse/api';
 import type { Bubble } from '@toonhouse/model';
 import { bubbleEnd, bubbleLength, sortedBubbles } from '@toonhouse/renderer';
 import { type PointerEvent, useRef } from 'react';
@@ -15,7 +16,7 @@ import { formatTime, snapTenth, TAP_SLOP } from './timelineMath.ts';
 /** The height of one line of a bubble lane, in CSS pixels. */
 export const BUBBLE_LINE = 24;
 /** The shortest length that a drag gives a bubble, in seconds. */
-const MIN_LENGTH = 0.1;
+const MIN_LENGTH = CONTENT_LIMITS.bubbleLength.min;
 
 /**
  * The line of the lane for each bubble, so that the bubbles on a line don't

@@ -187,18 +187,22 @@ export type ClipFrame =
 /** The kinds of things that clips work on: the rig kinds and backgrounds. */
 export type ClipKind = ClipFrame['kind'];
 
-export type ClipId =
-  | 'idle'
-  | 'walk'
-  | 'wave'
-  | 'talk'
-  | 'peck'
-  | 'flap'
-  | 'hop'
-  | 'lookout'
-  | 'rustle'
-  | 'day'
-  | 'drift';
+/** The ids of all clips, of every rig kind and of backgrounds. */
+export const CLIP_IDS = [
+  'idle',
+  'walk',
+  'wave',
+  'talk',
+  'peck',
+  'flap',
+  'hop',
+  'lookout',
+  'rustle',
+  'day',
+  'drift',
+] as const;
+
+export type ClipId = (typeof CLIP_IDS)[number];
 
 /**
  * A motion for the rigs of one kind, or for backgrounds. The frame at `t`

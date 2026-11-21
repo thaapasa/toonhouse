@@ -98,6 +98,20 @@ export const en = {
   'editor.saving': 'Saving…',
   'editor.unsaved': 'Not saved yet',
   'editor.saveError': 'Saving failed. Trying again soon.',
+  'editor.notSaved': 'Not saved',
+  'editor.notSavedLogin': 'Not saved. Log in again.',
+  'save.refusedTitle': 'The cartoon is not saved',
+  'save.refusedInfo':
+    'The server does not accept the latest edit. Undo it, and the editor saves the cartoon again.',
+  'save.tooLargeInfo':
+    'The cartoon is too large to save. Remove something from it, such as a scene, and the editor saves it again.',
+  'save.loggedOutTitle': 'Your login has ended',
+  'save.loggedOutInfo':
+    'Log in again to save your edits. Until then, this browser keeps them.',
+  'save.conflictTitle': 'The cartoon has changed',
+  'save.conflictInfo':
+    'The cartoon was saved in another window or on another device. Load the cartoon again to see that version. The edits made here after the last save are lost.',
+  'save.reload': 'Load again',
   'editor.scenes': 'Scenes',
   'editor.scene': 'Scene {n}',
   'editor.addScene': 'New scene',

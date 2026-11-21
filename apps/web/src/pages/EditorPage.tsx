@@ -21,9 +21,12 @@ export function EditorPage() {
 function EditorContent() {
   const { cartoonId } = route.useParams();
   const cartoon = useQuery(cartoonQuery(cartoonId));
+  // The editor starts from the content on the server, not from a copy in the
+  // cache, because a save of an old revision fails.
   const content = useQuery({
     ...contentQuery(cartoonId),
     enabled: cartoon.data?.canEdit === true,
+    refetchOnMount: 'always',
   });
 
   if (cartoon.isPending) return <Fallback text="loading" />;
@@ -35,8 +38,9 @@ function EditorContent() {
     );
   }
   if (!cartoon.data.canEdit) return <Fallback text="editor.notOwner" />;
-  if (content.isPending) return <Fallback text="loading" />;
   if (content.isError) return <Fallback text="loadError" />;
+  if (!content.isFetchedAfterMount || content.isPending)
+    return <Fallback text="loading" />;
   return (
     <Editor key={cartoonId} cartoon={cartoon.data} initial={content.data} />
   );

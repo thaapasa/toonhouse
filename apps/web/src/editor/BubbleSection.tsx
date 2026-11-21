@@ -1,5 +1,6 @@
 // The part of the properties pane for the selected speech bubble: its text,
 // its time, which actor it is attached to, and its look.
+import { CONTENT_LIMITS } from '@toonhouse/api';
 import type {
   Bubble,
   BubbleBorder,
@@ -42,8 +43,10 @@ const BORDERS: readonly BubbleBorder[] = [
 ];
 const ALIGNS = ['left', 'center', 'right'] as const;
 
-const clamp = (v: number, min: number, max: number) =>
-  Math.min(Math.max(v, min), max);
+const L = CONTENT_LIMITS;
+
+const clamp = (v: number, r: { min: number; max: number }) =>
+  Math.min(Math.max(v, r.min), r.max);
 
 interface Props {
   scene: Scene;
@@ -101,6 +104,7 @@ export function BubbleSection(props: Props) {
         ref={textRef}
         className="pane-textarea"
         rows={3}
+        maxLength={L.bubbleText}
         value={bubble.text}
         onChange={(e) => {
           const text = e.target.value;
@@ -116,7 +120,7 @@ export function BubbleSection(props: Props) {
         decimals={2}
         unit={tr('properties.seconds')}
         onChange={(v, closed) => {
-          const t = savedTime(Math.max(0, v));
+          const t = savedTime(v);
           set('t', t);
           // The playhead stays with the new selection.
           if (!closed) props.onSeek(t);
@@ -128,7 +132,7 @@ export function BubbleSection(props: Props) {
         step={0.5}
         decimals={2}
         unit={tr('properties.seconds')}
-        onChange={(v) => set('length', savedTime(clamp(v, 0.1, 3600)))}
+        onChange={(v) => set('length', savedTime(clamp(v, L.bubbleLength)))}
       />
       {bubble.length === undefined ? (
         <p className="muted small">{tr('bubble.lengthAuto')}</p>
@@ -207,7 +211,7 @@ export function BubbleSection(props: Props) {
         value={bubble.width}
         step={20}
         decimals={0}
-        onChange={(v) => set('width', Math.round(clamp(v, 10, 10_000)))}
+        onChange={(v) => set('width', Math.round(clamp(v, L.bubbleWidth)))}
       />
       <ColorField
         label="bubble.fill"
@@ -245,7 +249,7 @@ export function BubbleSection(props: Props) {
             value={bubble.borderWidth}
             step={1}
             decimals={1}
-            onChange={(v) => set('borderWidth', clamp(v, 0, 100))}
+            onChange={(v) => set('borderWidth', clamp(v, L.borderWidth))}
           />
         </>
       )}
@@ -289,7 +293,7 @@ export function BubbleSection(props: Props) {
         value={bubble.fontSize}
         step={4}
         decimals={0}
-        onChange={(v) => set('fontSize', Math.round(clamp(v, 1, 1000)))}
+        onChange={(v) => set('fontSize', Math.round(clamp(v, L.fontSize)))}
       />
       <ColorField
         label="bubble.color"
@@ -329,7 +333,7 @@ export function BubbleSection(props: Props) {
         decimals={2}
         unit="×"
         onChange={(v) =>
-          set('lineSpacing', Math.round(clamp(v, 0.5, 5) * 100) / 100)
+          set('lineSpacing', Math.round(clamp(v, L.lineSpacing) * 100) / 100)
         }
       />
     </div>

@@ -226,17 +226,47 @@ way.
 
 The server stores the content of a cartoon, its scenes with their actors and
 actions, as JSON in the `content` column of the cartoon. `packages/model` has
-its types, and `packages/api` the schema that checks a save.
+its types, and `packages/api` the schema that checks a save, with the limits of
+the content. The editor keeps the content inside the same limits, so that a save
+doesn't fail on them.
 
-Each saved cartoon has the version number of its data format. When the format
-changes so that old cartoons no longer fit it, the version goes up by one, and
-`packages/model` gets a converter from the previous version to the new one. The
-converters are pure functions, and they run in a chain, so a cartoon at version
-1 goes through every converter up to the latest version. The tests keep a saved
-cartoon of each old version and check that it upgrades to the latest one.
+Each saved cartoon has the version number of its data format. A change that
+keeps the old cartoons valid, such as a new optional field, keeps the version as
+it is. Each object in the schema keeps the fields that it doesn't know, so a web
+app that is older than the server keeps the new fields when it saves, and the
+server stores them.
 
-A change that keeps the old cartoons valid, such as a new optional field, keeps
-the version as it is.
+The app is not deployed yet, so until the first deploy the format can change in
+ways that break the saved cartoons, without a new version or a converter. The
+tests in `apps/web/src/format` keep a saved cartoon of version 1 that uses every
+field, and a list of the library ids that saved cartoons refer to. They fail
+when a change could break the saved cartoons. Before the first deploy, update
+them to match. After it, the change needs a new version.
+
+Every save from the web app includes the version that the web app knows. If the
+version is older than the latest, the server refuses the save with 409, and the
+web app loads the new version. The unsaved edits can be lost, which is rare
+enough to accept: the web app checks for a new version each time it comes back
+to the foreground, and saves the edits before it loads the new version.
+
+Each save also names the revision of the content that it edited, and the
+revision goes up by one with each save. If someone has saved the cartoon after
+that revision, in another window or on another device, the server refuses the
+save with 409 too. The editor then tells the user and offers to load the cartoon
+again. The edits after the last save are lost, but the other save is not
+overwritten without a word.
+
+#### Planned upgrades
+
+After the first deploy, a change that breaks the old cartoons gets a new version
+and an upgrade. None of this is built yet.
+
+When the format changes so that old cartoons no longer fit it, the version goes
+up by one, and `packages/model` gets a converter from the previous version to
+the new one. The converters are pure functions, and they run in a chain, so a
+cartoon at version 1 goes through every converter up to the latest version. The
+tests keep a saved cartoon of each old version and check that it upgrades to the
+latest one.
 
 A change to the library can also need a new version. If a character, a prop, a
 clip or a background is renamed, removed or changes its structure, such as the
@@ -246,14 +276,8 @@ At startup, the server upgrades every cartoon that has an older version and
 saves the result. If a converter fails on a cartoon, the server marks that
 cartoon as broken and goes on with the startup. The web app can't open a broken
 cartoon, so that the developer can fix it by hand. Because of this, the server
-reads and sends only cartoons in the latest format.
-
-Every save from the web app includes the version that the web app knows. If the
-version is older than the latest, the server refuses the save, and the web app
-loads the new version. The unsaved edits can be lost, which is rare enough to
-accept: the web app checks for a new version each time it comes back to the
-foreground. The export client sends its version too, and the server tells an old
-export client to update.
+reads and sends only cartoons in the latest format. The export client sends its
+version too, and the server tells an old export client to update.
 
 The web app calls the API under `/api/app`. The server serves the build of the
 web app from `apps/web/dist`, and every other path gets its `index.html`.
@@ -278,6 +302,10 @@ A login makes a session. The browser keeps the session token in an HTTP-only
 cookie, and the database stores only a SHA-256 hash of the token, so a copy of
 the database doesn't let anyone log in. The web app has no other way to
 authenticate, such as personal tokens.
+
+A session lasts 90 days from the last use. The server extends it at most once a
+day, and then sends the cookie again with the new expiry, because the browser
+drops the cookie at the expiry that it got last.
 
 The server counts the login attempts per client address, and per username from
 each address, in memory, and refuses a login before it checks the password.
@@ -326,6 +354,16 @@ cartoon in memory, with a history of the edits for undo and redo, and saves the
 content to the server a moment after each edit, and at once when the page goes
 to the background. A drag on the stage or on the timeline is one step in the
 history: each move of the drag redoes that step from where the drag started.
+
+The editor loads the content from the server each time it opens, because a save
+of an old revision fails. One save runs at a time. A save that the editor asks
+for while another one runs, such as when the page goes to the background, goes
+right after that one. If a save fails without an answer or with a server error,
+the editor tries again after a while. If the server refuses the content, the
+editor tells the user and tries again only after the next edit. If the login has
+ended, the editor keeps the edits in the `localStorage` of the browser and tells
+the user to log in again. After the login, the editor opens with the kept edits
+and saves them.
 
 The library assets come from `assets/` through `import.meta.glob`, so the build
 bundles them into the web app, as in the studio.
@@ -383,7 +421,9 @@ image.
 
 The build writes `version.json` next to `index.html`. When the web app comes
 back to the foreground, it compares the build ID in that file to its own and
-loads the page again if they differ.
+loads the page again if they differ. If the editor has edits that are not saved,
+the web app saves them first. If the save fails, the web app doesn't load the
+page and checks again the next time.
 
 ## Hosting
 

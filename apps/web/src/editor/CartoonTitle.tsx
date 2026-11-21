@@ -11,7 +11,12 @@ const SAVE_TEXTS = {
   unsaved: 'editor.unsaved',
   saving: 'editor.saving',
   error: 'editor.saveError',
-} as const;
+  refused: 'editor.notSaved',
+  tooLarge: 'editor.notSaved',
+  loggedOut: 'editor.notSavedLogin',
+  conflict: 'editor.notSaved',
+} as const satisfies Record<SaveState, string>;
+const OK_STATES: readonly SaveState[] = ['saved', 'unsaved', 'saving'];
 
 /** The title of the cartoon. A tap on it opens a field to rename it. */
 export function CartoonTitle({
@@ -63,7 +68,9 @@ export function CartoonTitle({
           {cartoon.title}
         </button>
         <span
-          className={saveState === 'error' ? 'error small' : 'muted small'}
+          className={
+            OK_STATES.includes(saveState) ? 'muted small' : 'error small'
+          }
           role="status"
         >
           {tr(SAVE_TEXTS[saveState])}

@@ -4,7 +4,11 @@
 // action of the same actor.
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import type { Cartoon } from '@toonhouse/api';
+import {
+  type Cartoon,
+  CONTENT_LIMITS,
+  type SavedContent,
+} from '@toonhouse/api';
 import type {
   Action,
   Actor,
@@ -51,6 +55,7 @@ import {
 import { CartoonTitle } from './CartoonTitle.tsx';
 import { EditorStage, type WalkEdit } from './EditorStage.tsx';
 import type { EditRun } from './history.ts';
+import { keptContent } from './keptContent.ts';
 import { editorCommand, isTyping } from './keys.ts';
 import {
   type BackgroundAsset,
@@ -62,8 +67,10 @@ import { LibraryPanel, type LibraryTab } from './LibraryPanel.tsx';
 import { placeActors } from './placement.ts';
 import { PreviewButton } from './PreviewButton.tsx';
 import { PropertiesPane } from './PropertiesPane.tsx';
+import { SaveProblem } from './SaveProblem.tsx';
 import {
   actionsOf,
+  addPoint,
   moveActor,
   moveBlock,
   moveStart,
@@ -111,12 +118,22 @@ function freeSpot(bg: BackgroundAsset, actors: readonly Actor[]): Pt {
   return start;
 }
 
-export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
+export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
   const { cartoon } = props;
   const { tr } = useI18n();
   const queryClient = useQueryClient();
-  const [initial] = useState(() => withScene(props.initial));
-  const doc = useCartoonContent(cartoon.id, initial);
+  // The edits kept over a login go on from where they were.
+  const [start] = useState(() => {
+    const kept = keptContent(cartoon.id);
+    const from = kept ?? props.initial;
+    return { ...from, content: withScene(from.content), unsaved: !!kept };
+  });
+  const doc = useCartoonContent(
+    cartoon.id,
+    start.content,
+    start.revision,
+    start.unsaved,
+  );
   const scenes = doc.content.scenes;
   const [sceneIndex, setSceneIndex] = useState(0);
   const index = Math.min(sceneIndex, scenes.length - 1);
@@ -258,7 +275,9 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
   const startClip = (clip: ClipId) => {
     if (!selection) return;
     const { actorId } = selection;
-    const at = now();
+    // The playhead can go a few seconds past the end of a scene, and so past
+    // the latest time that the server saves.
+    const at = Math.min(now(), CONTENT_LIMITS.time);
     playback.seek(at);
     const kind = selectedActor && kindOf(selectedActor.asset);
     const moves = kind !== null && isMoving(kind, clip);
@@ -493,7 +512,7 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
           onClick={() =>
             queryClient.setQueryData(
               contentQuery(cartoon.id).queryKey,
-              doc.content,
+              (old) => old && { ...old, content: doc.content },
             )
           }
         >
@@ -586,7 +605,7 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
                   run,
                 )
               }
-              onAddPoint={(at) => editWalk((path) => [...path, at])}
+              onAddPoint={(at) => editWalk((path) => addPoint(path, at))}
               onMovePoint={(i, at, run) =>
                 editWalk((path) => path.map((p, j) => (j === i ? at : p)), run)
               }
@@ -669,6 +688,7 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
         }
         onRevert={doc.revert}
       />
+      <SaveProblem cartoonId={cartoon.id} state={doc.saveState} />
       {removing && (
         <Dialog
           title={tr('editor.removeSceneTitle', { n: index + 1 })}
