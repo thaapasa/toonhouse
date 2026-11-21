@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 import boy from '../../../assets/characters/boy/rig.json';
 import testHills from '../../../assets/fixtures/backgrounds/test-hills/background.json';
 import { actorScaleAt } from './background.ts';
+import { cameraBounds } from './camera.ts';
 import { clipOf } from './clips/index.ts';
 import { actorKind, type Library, sceneFrame } from './frame.ts';
 
@@ -91,5 +92,36 @@ describe('scene frame', () => {
       )!.node;
     expect(free(0)).not.toEqual(free(1));
     expect(free(0, false)).toEqual(free(1));
+  });
+
+  describe('bubbles under the camera', () => {
+    // The camera shows the top left quarter of the background at zoom 2.
+    const camera = { x: bg.width / 4, y: bg.height / 4, zoom: 2 };
+    const free = { ...bubble('free'), at: { x: 900, y: 300 } };
+    const zoomed: Scene = {
+      ...scene,
+      bubbles: [free],
+      camera: { start: camera, moves: [] },
+    };
+    const boxOf = (s: Scene, ground = false) =>
+      sceneFrame(s, bg, library, 1, { ground }).bubbles[0]!.box;
+
+    it('keeps its size in the picture and stays inside it', () => {
+      const box = boxOf(zoomed);
+      const whole = boxOf({ ...zoomed, camera: { moves: [] } });
+      expect(box.width).toBeCloseTo(whole.width);
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(bg.width);
+      expect(box.y).toBeGreaterThanOrEqual(0);
+      expect(box.y + box.height).toBeLessThanOrEqual(bg.height);
+    });
+
+    it('shows on the ground layer inside the camera box, smaller', () => {
+      const box = boxOf(zoomed, true);
+      const view = cameraBounds(bg, camera);
+      expect(box.width).toBeCloseTo(boxOf(zoomed).width / 2);
+      expect(box.x).toBeGreaterThanOrEqual(view.x);
+      expect(box.x + box.width).toBeLessThanOrEqual(view.x + view.width);
+    });
   });
 });

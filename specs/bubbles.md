@@ -22,9 +22,9 @@ adds bubbles in the [editor](scenes.md), and they show on the
       the head. The bubble itself keeps its size.
 - [x] When an attached actor turns the other way, the bubble stays on the same
       side.
-- [ ] A free bubble stays at its place in the scene. When the
+- [x] A free bubble stays at its place in the scene. When the
       [camera](camera.md) pans, it moves with the scene.
-- [ ] A bubble keeps its size on the screen when the camera zooms, so that the
+- [x] A bubble keeps its size on the screen when the camera zooms, so that the
       text stays readable.
 - [x] A bubble stays inside the frame. If its place would take it past the edge
       of the frame, such as when its actor walks to the edge, the bubble moves

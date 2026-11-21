@@ -7,7 +7,7 @@ import type {
 import { describe, expect, it } from 'vitest';
 
 import testHills from '../../../assets/fixtures/backgrounds/test-hills/background.json';
-import { wholeBackground } from './background.ts';
+import { MAX_ZOOM, wholeBackground } from './background.ts';
 import {
   cameraAt,
   cameraBetween,
@@ -76,11 +76,42 @@ describe('cameraAt', () => {
   });
 
   it('keeps the camera inside the background', () => {
-    const s = scene([{ id: 'j', t: 0, to: { x: -500, y: 0, zoom: 9 } }]);
-    const c = cameraAt(s, bg, 1);
+    const s = scene([
+      { id: 'j', t: 0, to: { x: -500, y: 0, zoom: 9 } },
+      { id: 'k', t: 1, to: { x: 9000, y: 9000, zoom: 2 } },
+    ]);
+    const c = cameraAt(s, bg, 0.5);
+    expect(c.zoom).toBe(MAX_ZOOM);
     const b = cameraBounds(bg, c);
     expect(b.x).toBeGreaterThanOrEqual(0);
     expect(b.y).toBeGreaterThanOrEqual(0);
+    const far = cameraBounds(bg, cameraAt(s, bg, 2));
+    expect(far.x + far.width).toBeCloseTo(bg.width);
+    expect(far.y + far.height).toBeCloseTo(bg.height);
+  });
+
+  it('gives the same views when the entries are out of order', () => {
+    const moves: CameraMove[] = [
+      { id: 'j', t: 1, to: corner },
+      { id: 'm', t: 2, length: 2, to: close, easing: 'linear' },
+      { id: 'k', t: 5, to: whole },
+    ];
+    const sorted = scene(moves);
+    const shuffled = scene([moves[2]!, moves[0]!, moves[1]!]);
+    for (const t of [0, 1, 2.5, 4, 6]) {
+      expect(cameraAt(shuffled, bg, t)).toEqual(cameraAt(sorted, bg, t));
+      expect(cameraHolder(shuffled, t)).toEqual(cameraHolder(sorted, t));
+    }
+  });
+
+  it('starts a move from the view of a jump at the same time', () => {
+    const s = scene([
+      { id: 'm', t: 2, length: 2, to: close, easing: 'linear' },
+      { id: 'j', t: 2, to: corner },
+    ]);
+    expect(cameraAt(s, bg, 2)).toEqual(near(corner));
+    expect(cameraAt(s, bg, 4)).toEqual(close);
+    expect(cameraHolder(s, 2).move?.id).toBe('j');
   });
 
   it('eases a move', () => {

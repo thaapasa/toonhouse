@@ -232,6 +232,11 @@ actor, in the pixels of the actor at size 1. The offset grows and shrinks with
 the actor, so that the bubble stays as near to the head, but the bubble itself
 keeps its size.
 
+The bubbles are placed on the ground layer, but the renderer draws them in the
+picture of the camera, after it maps their places through the camera. So a
+bubble keeps its size on the screen when the camera zooms, and it stays inside
+the picture, not only inside the background.
+
 ### Files
 
 The graphics are generated with AI and traced to SVG, as described in
@@ -446,12 +451,13 @@ at a home view, the frame with a thin margin, and the user zooms out from it to
 see the whole band.
 
 The stage draws the scene on the ground layer, not in the picture of the camera.
-It maps the picture of the camera back onto the ground layer, so the ground
-layer and the actors keep their places, the far layers move with the camera, and
-the camera box shows what the frame shows. Outside the box, the layers go on as
-the camera sees them, until their drawings end. Zooming and panning the stage
-only scales this drawing as a whole, so it isn't the camera, and the layers
-don't move against each other.
+`sceneFrame` with the `ground` option maps the picture of the camera, with its
+bubbles, back onto the ground layer, so the ground layer and the actors keep
+their places, the far layers move with the camera, and the camera box shows what
+the frame shows. Outside the box, the layers go on as the camera sees them,
+until their drawings end. Zooming and panning the stage only scales this drawing
+as a whole, so it isn't the camera, and the layers don't move against each
+other.
 
 If the user has set the length of a scene, the scene lasts that long, but it
 never ends before its last action starts. Otherwise it lasts a few seconds past

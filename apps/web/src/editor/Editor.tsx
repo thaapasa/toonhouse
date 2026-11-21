@@ -506,7 +506,10 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
   // its first and last moments, so that the user can work on it.
   const frame =
     bg &&
-    sceneFrame(scene, bg.background, LIBRARY, t, { pop: playback.playing });
+    sceneFrame(scene, bg.background, LIBRARY, t, {
+      pop: playback.playing,
+      ground: true,
+    });
 
   const pane = (
     <PropertiesPane

@@ -12,6 +12,7 @@ import type {
   BackgroundFrame,
   BubbleFontId,
   ClipKind,
+  Matrix,
   Rig,
   Scene,
 } from '@toonhouse/model';
@@ -20,6 +21,8 @@ import {
   actorScaleAt,
   type Camera,
   drawScene,
+  groundDepth,
+  layerTransform,
   type SceneActor,
 } from './background.ts';
 import {
@@ -30,7 +33,7 @@ import {
   placeBubbles,
   type PlacedBubble,
 } from './bubbles/bubble.ts';
-import { cameraAt } from './camera.ts';
+import { cameraAt, pictureToGround } from './camera.ts';
 import { clipOf } from './clips/index.ts';
 import {
   type Bounds,
@@ -39,6 +42,7 @@ import {
   partBounds,
   type RigOutline,
 } from './draw.ts';
+import { transformPoint } from './math.ts';
 import { type ActorState, actorStateAt, backgroundStateAt } from './scene.ts';
 
 /** The library assets that a scene refers to. */
@@ -64,7 +68,7 @@ export const actorKind = (
   asset: ActorAsset,
 ): ClipKind | null => library.rig(asset)?.kind ?? null;
 
-/** An actor at the time of the frame. */
+/** An actor at the time of the frame, on the ground layer. */
 export interface PlacedActor {
   actor: Actor;
   rig: Rig;
@@ -79,6 +83,10 @@ export interface PlacedActor {
   anchor: BubbleAnchor;
 }
 
+/**
+ * The frame of a scene. The bubbles and the drawing are in picture pixels, as
+ * the camera sees them, or on the ground layer with the `ground` option.
+ */
 export interface SceneFrame {
   background: Background;
   backgroundFrame: BackgroundFrame;
@@ -90,12 +98,9 @@ export interface SceneFrame {
   bubbles: PlacedBubble[];
   /** The view of the camera at the time of the frame. */
   camera: Camera;
-  /** The background with the actors as the camera sees them, in the pixels of the frame. */
+  /** The background with the actors. */
   node: DrawNode;
-  /**
-   * The bubbles, to draw on top of `node`. They are placed on the ground
-   * layer, so they need the transform of the ground layer to go on the picture.
-   */
+  /** The bubbles, to draw on top of `node`. */
   bubbleNode: DrawNode;
 }
 
@@ -149,17 +154,34 @@ function backgroundFrame(scene: Scene, t: number): BackgroundFrame {
   return clip.frameAt(loop(state.clipT, clip.duration));
 }
 
+/** A bubble in picture pixels mapped by `m`, which only scales and moves. */
+function mappedBubble(p: PlacedBubble, m: Matrix): PlacedBubble {
+  const corner = transformPoint(m, p.box);
+  return {
+    ...p,
+    center: transformPoint(m, p.center),
+    box: { ...corner, width: p.box.width * m[0], height: p.box.height * m[3] },
+    tip: p.tip && transformPoint(m, p.tip),
+    node: { type: 'group', transform: m, children: [p.node] },
+  };
+}
+
 /**
  * The frame of a scene at time `t`, on its background `bg`. With `pop`
  * false, the bubbles show at their full size also while they pop in and out,
  * as in the editor when the cartoon doesn't play.
+ *
+ * With `ground`, the frame is drawn on the ground layer, as the editor shows
+ * it: the actors and the ground layer keep their places, and the far layers
+ * move with the camera. The bubbles look as they do in the picture, so they
+ * get smaller when the camera zooms in.
  */
 export function sceneFrame(
   scene: Scene,
   bg: Background,
   library: Library,
   t: number,
-  options: { pop?: boolean } = {},
+  options: { pop?: boolean; ground?: boolean } = {},
 ): SceneFrame {
   const actors = scene.actors.flatMap((actor) => {
     const rig = library.rig(actor.asset);
@@ -167,23 +189,35 @@ export function sceneFrame(
   });
   const byId = new Map(scene.actors.map((a) => [a.id, a]));
   const free = library.backgroundFont(scene.background);
+  const camera = cameraAt(scene, bg, t);
   const bubbleContext: BubbleContext = {
     width: bg.width,
     height: bg.height,
+    toPicture: layerTransform(bg, camera, groundDepth(bg)),
     anchors: new Map(actors.map((p) => [p.actor.id, p.anchor])),
     fontOf: (b) => {
       const actor = b.actorId === undefined ? undefined : byId.get(b.actorId);
       return actor ? library.actorFont(actor.asset) : free;
     },
   };
-  const bubbles = placeBubbles(
+  let bubbles = placeBubbles(
     scene.bubbles ?? [],
     t,
     bubbleContext,
     options.pop ?? true,
   );
   const frame = backgroundFrame(scene, t);
-  const camera = cameraAt(scene, bg, t);
+  let node = drawScene(
+    bg,
+    frame,
+    camera,
+    actors.map((p) => p.drawing),
+  );
+  if (options.ground) {
+    const toGround = pictureToGround(bg, camera);
+    node = { type: 'group', transform: toGround, children: [node] };
+    bubbles = bubbles.map((p) => mappedBubble(p, toGround));
+  }
   return {
     background: bg,
     backgroundFrame: frame,
@@ -191,12 +225,7 @@ export function sceneFrame(
     bubbleContext,
     bubbles,
     camera,
-    node: drawScene(
-      bg,
-      frame,
-      camera,
-      actors.map((p) => p.drawing),
-    ),
+    node,
     bubbleNode: drawBubbles(bubbles),
   };
 }
