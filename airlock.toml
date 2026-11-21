@@ -39,3 +39,6 @@ paths = [
 
 [disk.cache.yarn]
 paths = ["~/.yarn/berry/cache", "~/.cache/node/corepack"]
+
+[disk]
+size = "20 GB"
