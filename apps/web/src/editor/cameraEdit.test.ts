@@ -54,6 +54,12 @@ describe('newCameraEntry', () => {
     expect(canAddCameraEntry(s, 2, false)).toBe(true);
   });
 
+  it('is not possible as a jump at the frame of a saved jump', () => {
+    const s = scene([{ id: 'j', t: 1.0333, to: close }]);
+    expect(newCameraEntry(s, bg, 'x', 31 / 30, true)).toBeNull();
+    expect(canAddCameraEntry(s, 31 / 30, true)).toBe(false);
+  });
+
   it('ends before the next entry when it fits flush', () => {
     const s = scene([{ id: 'j', t: 0.3, to: close }]);
     const m = newCameraEntry(s, bg, 'm', 0.1, false)!;

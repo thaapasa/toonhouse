@@ -109,10 +109,12 @@ function room(scene: Scene, t: number, id: string | null) {
 
 /**
  * Whether a camera jump sits at `t`. A second jump there would hide the first
- * one in the picture and on the timeline, so the user can't add one.
+ * one in the picture and on the timeline, so the user can't add one. A saved
+ * time is rounded to `TIME_STEP` and the playhead to a frame, so the times of
+ * the same frame can differ by less than one step.
  */
 const jumpAt = (scene: Scene, t: number) =>
-  entriesOf(scene).some((m) => isJump(m) && m.t === t);
+  entriesOf(scene).some((m) => isJump(m) && Math.abs(m.t - t) < TIME_STEP);
 
 /**
  * A new camera move or jump at `t`, which starts at the view of the camera
