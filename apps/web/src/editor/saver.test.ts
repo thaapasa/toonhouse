@@ -268,6 +268,16 @@ describe('start of the editor', () => {
     });
   });
 
+  it('asks about kept edits that differ from a later save of their editor', () => {
+    // A delayed save of older edits landed after the editor kept newer ones.
+    const server = { revision: 4, editor, content: content(0) };
+    expect(startFrom(server, kept)).toMatchObject({
+      content: content(1),
+      ask: true,
+      dropKept: false,
+    });
+  });
+
   it('asks about kept edits older than a save from elsewhere', () => {
     // The laptop kept edits, and then the iPad saved.
     const server = {

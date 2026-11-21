@@ -113,9 +113,13 @@ export function startFrom(
       dropKept: false,
     };
   }
-  // The save of the editor that kept them landed after it closed.
+  // The save of the editor that kept them landed after it closed. Another
+  // save of that editor, such as a delayed one of older edits, is no reason
+  // to drop them.
   const landed =
-    server.revision === kept.revision + 1 && server.editor === kept.editor;
+    server.revision === kept.revision + 1 &&
+    server.editor === kept.editor &&
+    sameJson(asSent(server.content), asSent(kept.content));
   if (landed) {
     return {
       ...fresh,
@@ -133,6 +137,9 @@ export function startFrom(
     dropKept: false,
   };
 }
+
+/** A value as the server stores it, without the keys that JSON drops. */
+const asSent = (v: unknown): unknown => JSON.parse(JSON.stringify(v));
 
 /** Whether two JSON values are the same, in any order of the keys. */
 function sameJson(a: unknown, b: unknown): boolean {
@@ -199,14 +206,14 @@ export function createSaver(deps: SaverDeps, start: SaverStart): Saver {
   const keptSave = start.keptBy && {
     editor: start.keptBy,
     revision: start.revision + 1,
-    content: JSON.parse(JSON.stringify(start.content)) as unknown,
+    content: asSent(start.content),
   };
   const isMine = (s: SavedContent) =>
     s.editor === editor ||
     (!!keptSave &&
       s.editor === keptSave.editor &&
       s.revision === keptSave.revision &&
-      sameJson(s.content, keptSave.content));
+      sameJson(asSent(s.content), keptSave.content));
   let latest = start.content;
   let saved: CartoonContent | null = start.unsaved ? null : start.content;
   let revision = start.revision;
