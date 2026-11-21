@@ -32,6 +32,8 @@ the background, and the camera can move on the [timeline](timeline.md).
 - [x] With the camera selected, the user pans the camera by dragging inside the
       camera box, and zooms it by dragging a corner. The opposite corner stays
       in place. With Alt, the middle of the box stays in place instead.
+- [x] With the camera selected, a tap on an actor or a bubble inside the camera
+      box selects it, and a tap on the background clears the selection.
 - [x] The corners of the camera box are big enough for a finger at any zoom of
       the stage.
 - [x] Dragging the camera box changes the view that the camera holds at the

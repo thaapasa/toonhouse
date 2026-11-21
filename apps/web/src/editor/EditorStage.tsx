@@ -8,13 +8,15 @@
 // trackpad or two fingers. See `stageView.ts`.
 //
 // The stage shows the view of the camera at the current time as a box. When
-// the camera is selected, a drag inside the box pans the camera, and a drag on
-// a corner zooms it. The opposite corner stays in place, or the middle with
-// Alt. While a camera move plays, the camera has no view of its own, so the
-// box can't be changed.
+// the camera is selected, a drag on the background inside the box pans the
+// camera, and a drag on a corner zooms it. The opposite corner stays in place,
+// or the middle with Alt. Actors and bubbles inside the box still take taps
+// and drags. While a camera move plays, the camera has no view of its own, so
+// the box can't be changed.
 import type { CameraView, Pt, Scene } from '@toonhouse/model';
 import {
   actorStateAt,
+  type Bounds,
   type BubbleAnchor,
   bubbleOffset,
   bubblePoint,
@@ -123,9 +125,14 @@ interface Props {
    * view of its own that the user could change.
    */
   cameraMoving: boolean;
+  /**
+   * The camera move or jump whose view the camera holds at the current time,
+   * or null for the start view.
+   */
+  cameraEntry: string | null;
   onSelectCamera(): void;
-  /** Changes the view that the camera holds at the current time. */
-  onCameraView(view: CameraView, run: EditRun): void;
+  /** Changes the view of a camera move or jump, or the start view with null. */
+  onCameraView(entry: string | null, view: CameraView, run: EditRun): void;
   /** The user touched the stage, so playback should stop. */
   onTouch(): void;
   /** The toolbar of the selection, placed next to the selected actor. */
@@ -164,6 +171,8 @@ type Gesture =
       type: 'camera';
       start: Pt;
       from: Pt;
+      /** The entry whose view the drag changes, from when the drag started. */
+      entry: string | null;
       view: CameraView;
       moved: boolean;
     }
@@ -171,6 +180,7 @@ type Gesture =
       type: 'corner';
       corner: Corner;
       start: Pt;
+      entry: string | null;
       view: CameraView;
       moved: boolean;
     }
@@ -186,6 +196,9 @@ interface Pinch {
   span: number;
   view: StageView;
 }
+
+const insideBox = (b: Bounds, p: Pt) =>
+  p.x >= b.x && p.x <= b.x + b.width && p.y >= b.y && p.y <= b.y + b.height;
 
 const middle = (a: Pt, b: Pt): Pt => ({
   x: (a.x + b.x) / 2,
@@ -327,7 +340,6 @@ export function EditorStage(props: Props) {
     const bubbleEl = target?.closest('[data-bubble]');
     const tailEl = target?.closest('[data-tail]');
     const cornerEl = target?.closest('[data-camera-corner]');
-    const cameraEl = target?.closest('[data-camera]');
     const cameraTab = target?.closest('[data-camera-tab]');
     const bubble =
       bubbleEl &&
@@ -358,19 +370,12 @@ export function EditorStage(props: Props) {
         type: 'corner',
         corner: Number(cornerEl.getAttribute('data-camera-corner')) as Corner,
         start: client(e),
+        entry: props.cameraEntry,
         view: camera,
         moved: false,
       };
     } else if (!walk && cameraTab) {
       g = { type: 'tap', start: client(e), onTap: props.onSelectCamera };
-    } else if (cameraEditable && cameraEl) {
-      g = {
-        type: 'camera',
-        start: client(e),
-        from: exactFrame(e),
-        view: camera,
-        moved: false,
-      };
     } else if (!walk && tailEl && selectedBubble) {
       g = {
         type: 'tail',
@@ -429,6 +434,17 @@ export function EditorStage(props: Props) {
         },
         moved: false,
       };
+    } else if (cameraEditable && insideBox(cameraBox, exactFrame(e))) {
+      // Actors and bubbles take the pointer first, so that a tap can select
+      // them. A tap on the background clears the selection in `up`.
+      g = {
+        type: 'camera',
+        start: client(e),
+        from: exactFrame(e),
+        entry: props.cameraEntry,
+        view: camera,
+        moved: false,
+      };
     } else {
       g = { type: 'tap', start: client(e), onTap: () => props.onSelect(null) };
     }
@@ -473,11 +489,13 @@ export function EditorStage(props: Props) {
     if (g.type === 'camera') {
       const p = exactFrame(e);
       props.onCameraView(
+        g.entry,
         panCamera(bg, g.view, { x: p.x - g.from.x, y: p.y - g.from.y }),
         g,
       );
     } else if (g.type === 'corner') {
       props.onCameraView(
+        g.entry,
         zoomCamera(bg, g.view, g.corner, exactFrame(e), e.altKey),
         g,
       );
@@ -515,8 +533,9 @@ export function EditorStage(props: Props) {
     if (current?.pointer !== e.pointerId) return;
     gesture.current = null;
     const g = current.g;
-    if (g.type === 'tap' && e.type === 'pointerup' && !far(g.start, client(e)))
-      g.onTap(toFrame(e));
+    if (e.type !== 'pointerup' || far(g.start, client(e))) return;
+    if (g.type === 'tap') g.onTap(toFrame(e));
+    else if (g.type === 'camera' && !g.moved) props.onSelect(null);
   };
 
   const onWheel = useEffectEvent((e: WheelEvent) => {
@@ -585,7 +604,13 @@ export function EditorStage(props: Props) {
       {size.width > 0 && (
         <svg
           ref={svgRef}
-          className={props.bubbleTool ? 'stage-svg adding' : 'stage-svg'}
+          className={
+            props.bubbleTool
+              ? 'stage-svg adding'
+              : cameraEditable
+                ? 'stage-svg panning'
+                : 'stage-svg'
+          }
           viewBox={`${view.x} ${view.y} ${view.width} ${view.height}`}
           onPointerDown={down}
           onMouseDown={(e) => {
@@ -627,9 +652,6 @@ export function EditorStage(props: Props) {
             height={bg.height}
             strokeWidth={1.5 * unit}
           />
-          {cameraEditable && (
-            <rect data-camera className="camera-hit" {...cameraBox} />
-          )}
           <rect
             className={
               props.cameraSelected ? 'camera-edge selected' : 'camera-edge'

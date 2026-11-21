@@ -395,10 +395,11 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
     playback.seek(move.t + (move.length ?? 0));
   };
 
+  const holder = cameraHolder(scene, t);
   let toolbar: ReactNode = null;
   if (bg && cameraSelected) {
     const at = now();
-    const { move, moving } = cameraHolder(scene, t);
+    const { move, moving } = holder;
     toolbar = (
       <CameraBar
         onMove={
@@ -681,12 +682,15 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
               }
               onRevert={doc.revert}
               cameraSelected={cameraSelected}
-              cameraMoving={cameraHolder(scene, t).moving}
+              cameraMoving={holder.moving}
+              cameraEntry={holder.move?.id ?? null}
               onSelectCamera={selectCamera}
-              onCameraView={(view, run) => {
-                const { move } = cameraHolder(scene, t);
-                editScene((s) => setCameraView(s, move?.id ?? null, view), run);
-              }}
+              onCameraView={(entry, view, run) =>
+                editScene(
+                  (s) => setCameraView(s, bg.background, entry, view),
+                  run,
+                )
+              }
               onTouch={() => playback.setPlaying(false)}
               toolbar={toolbar}
             />

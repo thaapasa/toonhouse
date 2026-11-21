@@ -15,6 +15,7 @@ import {
 
 import { type TextKey, useI18n } from '../i18n/index.tsx';
 import {
+  type CameraDrag,
   dragCameraMove,
   setCameraView,
   updateCameraMove,
@@ -44,8 +45,21 @@ export function CameraSection(props: {
   const frame = 1 / props.fps;
   const setView = (v: Partial<typeof view>) =>
     props.onEdit((s) =>
-      setCameraView(s, id, clampCamera(bg, { ...view, ...v })),
+      setCameraView(s, bg, id, clampCamera(bg, { ...view, ...v })),
     );
+  /**
+   * Changes a time of the entry `moveId`, as a drag on the timeline does. With
+   * `seek`, the playhead goes to the changed time after the entries beside it
+   * have stopped it, so that the pane keeps showing the entry.
+   */
+  const drag = (moveId: string, part: CameraDrag, v: number, seek: boolean) => {
+    props.onEdit((s) => dragCameraMove(s, moveId, part, v));
+    const moved = dragCameraMove(scene, moveId, part, v).camera?.moves.find(
+      (m) => m.id === moveId,
+    );
+    if (seek && moved)
+      props.onSeek(part === 'end' ? cameraMoveEnd(moved) : moved.t);
+  };
 
   const title: TextKey = !move
     ? 'camera.startView'
@@ -63,10 +77,7 @@ export function CameraSection(props: {
           step={frame}
           decimals={2}
           unit={tr('properties.seconds')}
-          onChange={(v) => {
-            props.onEdit((s) => dragCameraMove(s, move.id, 'block', v));
-            props.onSeek(Math.max(v, 0));
-          }}
+          onChange={(v) => drag(move.id, 'block', v, true)}
         />
       )}
       {move && !isJump(move) && (
@@ -77,9 +88,7 @@ export function CameraSection(props: {
             step={frame}
             decimals={2}
             unit={tr('properties.seconds')}
-            onChange={(v) =>
-              props.onEdit((s) => dragCameraMove(s, move.id, 'start', v))
-            }
+            onChange={(v) => drag(move.id, 'start', v, false)}
           />
           <NumberField
             label={tr('camera.length')}
@@ -87,11 +96,7 @@ export function CameraSection(props: {
             step={0.1}
             decimals={2}
             unit={tr('properties.seconds')}
-            onChange={(v) => {
-              props.onEdit((s) =>
-                dragCameraMove(s, move.id, 'end', move.t + v),
-              );
-            }}
+            onChange={(v) => drag(move.id, 'end', move.t + v, true)}
           />
           <div className="pane-row">
             <span>{tr('camera.easing')}</span>

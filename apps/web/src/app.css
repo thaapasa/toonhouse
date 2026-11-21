@@ -692,8 +692,7 @@ button:disabled {
   opacity: 1;
 }
 
-.camera-hit {
-  fill: transparent;
+.stage-svg.panning {
   cursor: move;
 }
 
