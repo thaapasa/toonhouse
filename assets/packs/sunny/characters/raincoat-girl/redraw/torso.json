@@ -1,6 +1,6 @@
 {
   "src": "assets/work/raincoat/pieces/torso-prep.png",
-  "out": "assets/packs/sunny/characters/raincoat-girl/torso.svg",
+  "out": "assets/packs/sunny/characters/raincoat-girl/torso-back.svg",
   "layers": [
     {
       "name": "outline",

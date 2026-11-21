@@ -310,6 +310,9 @@ export const en = {
   'colorSetting.nails': 'Nails',
   'colorSetting.skirt': 'Skirt',
   'colorSetting.boots': 'Boots',
+  'colorSetting.coat': 'Coat',
+  'colorSetting.buttons': 'Buttons',
+  'color.cyan': 'Cyan',
 };
 
 export type TextKey = keyof typeof en;

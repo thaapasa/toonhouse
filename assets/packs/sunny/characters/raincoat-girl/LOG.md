@@ -126,6 +126,31 @@ The parts have these colors and color roles:
 - Boot: `boot` and `boot-sole`. The darker red band above the sole and under the
   cuff was a shade, so it is part of `boot`.
 
+## Collar in front of the head
+
+The collar of the coat rises over the chin, so the torso has two layers, as the
+captain's has. `torso-back.svg` is the redrawn torso, and the `redraw` config
+writes it. `torso-front.svg` is the front of the collar, drawn by hand in
+Affinity, and it is the main layer of the part. The draw order puts the head
+between the two layers. The front got the role classes of the torso, `outline`,
+`coat` and `coat-seam`, with the paths of the drawing unchanged.
+
+## Color presets
+
+The raincoat girl has color settings for the skin, the hair, the coat, the
+buttons, the boots and the outline. A coat preset colors the seam lines and the
+lining too, with the seam a darker shade and the lining a pale one of the coat,
+as in the drawings. A button preset colors the rim, and a boot preset the sole.
+
+- The eyelids follow the skin, the sleeves follow the coat and the face lines
+  follow the outline, through `colorRoles`. The mouth patch got the class
+  `c-skin`, so that it follows the skin.
+- The default skin `#bc6b26` is the `brown` preset, and the default outline
+  `#2a1202` is the `dark-brown` preset.
+- The pupil is part of the outline paths, so the girl has no eye setting.
+- Black hair is about as dark as the default outline, so the outline doesn't
+  show around it. A lighter outline preset, such as charcoal, brings it back.
+
 ## Checks
 
 I rendered frames of each clip to SVG with `tools/frames.ts` in the work folder

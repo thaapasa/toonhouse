@@ -311,4 +311,7 @@ export const fi: Texts = {
   'colorSetting.nails': 'Kynnet',
   'colorSetting.skirt': 'Hame',
   'colorSetting.boots': 'Saappaat',
+  'colorSetting.coat': 'Takki',
+  'colorSetting.buttons': 'Napit',
+  'color.cyan': 'Turkoosi',
 };
