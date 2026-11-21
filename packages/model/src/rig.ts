@@ -87,13 +87,18 @@ export interface RolePattern {
   kind: PatternKind;
   color: string;
   /**
+   * A second color for the details of the pattern, such as the middles of the
+   * flowers. The pattern color if not set.
+   */
+  accent?: string;
+  /**
    * The size of the pattern against its default size. A part that the rig
    * draws smaller, such as the head, needs a larger scale to match.
    */
   scale?: number;
 }
 
-export type PatternKind = 'stars';
+export type PatternKind = 'stars' | 'flowers';
 
 export type RigPartId =
   'head' | 'mouthPatch' | 'torso' | 'hand' | 'handOpen' | 'foot' | 'staff';

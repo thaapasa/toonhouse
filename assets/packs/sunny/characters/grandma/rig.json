@@ -5,100 +5,57 @@
       "svg": "head.svg",
       "width": 318,
       "height": 321,
-      "pivot": {
-        "x": 200,
-        "y": 298
-      }
+      "pivot": { "x": 179, "y": 299 }
     },
     "mouthPatch": {
       "svg": "mouth-patch.svg",
       "width": 318,
       "height": 321,
-      "pivot": {
-        "x": 200,
-        "y": 298
-      }
+      "pivot": { "x": 179, "y": 299 }
     },
     "torso": {
       "svg": "torso.svg",
       "width": 221.25,
       "height": 438.75,
-      "pivot": {
-        "x": 112,
-        "y": 282
-      }
+      "pivot": { "x": 112, "y": 282 }
     },
     "hand": {
       "svg": "hand.svg",
       "width": 113,
       "height": 152,
-      "pivot": {
-        "x": 48,
-        "y": 14
-      }
+      "pivot": { "x": 54, "y": 17 }
     },
     "handOpen": {
       "svg": "hand-open.svg",
       "width": 147,
       "height": 166,
-      "pivot": {
-        "x": 59,
-        "y": 150
-      }
+      "pivot": { "x": 66, "y": 150 }
     },
     "foot": {
-      "svg": "foot.svg",
+      "svg": "foot-back.svg",
+      "layers": [{ "id": "front", "svg": "foot-front.svg" }],
       "width": 228,
       "height": 121,
-      "pivot": {
-        "x": 55,
-        "y": 48
-      }
+      "pivot": { "x": 64, "y": 45 }
     }
   },
   "torso": {
-    "neck": {
-      "x": 139,
-      "y": 19
-    },
-    "shoulderNear": {
-      "x": 120,
-      "y": 116
-    },
-    "shoulderFar": {
-      "x": 112,
-      "y": 110
-    },
-    "hipNear": {
-      "x": 120,
-      "y": 282
-    },
-    "hipFar": {
-      "x": 102,
-      "y": 282
-    }
+    "neck": { "x": 148, "y": 19 },
+    "shoulderNear": { "x": 114, "y": 82 },
+    "shoulderFar": { "x": 141, "y": 81 },
+    "hipNear": { "x": 98, "y": 284 },
+    "hipFar": { "x": 105, "y": 283 }
   },
-  "scales": {
-    "head": 0.82,
-    "hand": 0.62,
-    "foot": 0.62
-  },
-  "hands": {
-    "relaxedAngle": -90,
-    "openAngle": 90
-  },
+  "scales": { "head": 0.79, "hand": 0.58, "foot": 0.57 },
+  "hands": { "relaxedAngle": -90, "openAngle": 90 },
   "ankleHeight": 62,
   "limbs": {
     "armLength": 152,
     "legLength": 205,
-    "armWidth": 24,
+    "armWidth": 22,
     "legWidth": 26,
-    "outlineWidth": 7,
-    "sleeve": {
-      "color": "#00b9b6",
-      "length": 0.85,
-      "extraWidth": 12
-    }
+    "outlineWidth": 5.5,
+    "sleeve": { "color": "#00b9b6", "length": 0.85, "extraWidth": 12 }
   },
   "colors": {
     "outline": "#533121",
@@ -109,31 +66,14 @@
     "tongue": "#e74f5a"
   },
   "farShade": 0.82,
-  "shadow": {
-    "rx": 130,
-    "ry": 22
-  },
+  "shadow": { "rx": 130, "ry": 22 },
   "face": {
-    "eye": {
-      "cx": 258,
-      "cy": 195,
-      "rx": 24,
-      "ry": 24
-    },
+    "eye": { "cx": 258, "cy": 195, "rx": 24, "ry": 24 },
     "shutY": 199,
     "mouth": {
-      "back": {
-        "x": 258,
-        "y": 251
-      },
-      "front": {
-        "x": 279,
-        "y": 261
-      },
-      "control": {
-        "x": 264,
-        "y": 261
-      },
+      "back": { "x": 258, "y": 251 },
+      "front": { "x": 279, "y": 261 },
+      "control": { "x": 264, "y": 261 },
       "openDepth": 36,
       "corner": "M258 251Q255 250 254 247",
       "tongue": {
@@ -145,5 +85,213 @@
         "grow": 4
       }
     }
-  }
+  },
+  "drawOrder": [
+    "armFar",
+    "handFar",
+    "footFar",
+    "legFar",
+    "footFar.front",
+    "footNear",
+    "legNear",
+    "torso",
+    "footNear.front",
+    "head",
+    "armNear",
+    "handNear"
+  ],
+  "colorRoles": { "lid": "skin", "line": "outline", "sleeve": "cardigan" },
+  "colorSettings": [
+    {
+      "id": "skin",
+      "presets": [
+        { "id": "light", "colors": { "skin": "#fbc08c", "blush": "#fe908a" } },
+        { "id": "pale", "colors": { "skin": "#fde0c4", "blush": "#f8a8a0" } },
+        { "id": "tan", "colors": { "skin": "#e0a46c", "blush": "#e07a64" } },
+        { "id": "brown", "colors": { "skin": "#b8784a", "blush": "#c05a4a" } },
+        {
+          "id": "dark-brown",
+          "colors": { "skin": "#8a5434", "blush": "#a04a3a" }
+        },
+        { "id": "deep", "colors": { "skin": "#5e3822", "blush": "#7a3428" } }
+      ]
+    },
+    {
+      "id": "hair",
+      "presets": [
+        { "id": "silver", "colors": { "hair": "#dcd4e0" } },
+        { "id": "white", "colors": { "hair": "#f4f2ea" } },
+        { "id": "gray", "colors": { "hair": "#a8a4a0" } },
+        { "id": "lilac", "colors": { "hair": "#c8a8e0" } },
+        { "id": "light-blue", "colors": { "hair": "#a8c4e8" } },
+        { "id": "pink", "colors": { "hair": "#f0b0c8" } },
+        { "id": "brown", "colors": { "hair": "#8a5a34" } },
+        { "id": "red", "colors": { "hair": "#b8441c" } },
+        { "id": "black", "colors": { "hair": "#2e2826" } }
+      ]
+    },
+    {
+      "id": "cardigan",
+      "presets": [
+        { "id": "teal", "colors": { "cardigan": "#00b9b6" } },
+        { "id": "pink", "colors": { "cardigan": "#f07ab0" } },
+        { "id": "purple", "colors": { "cardigan": "#9a5ad0" } },
+        { "id": "yellow", "colors": { "cardigan": "#f2c230" } },
+        { "id": "green", "colors": { "cardigan": "#4cae4c" } },
+        { "id": "blue", "colors": { "cardigan": "#3a7bd5" } },
+        { "id": "red", "colors": { "cardigan": "#d94040" } },
+        { "id": "cream", "colors": { "cardigan": "#efe4c8" } },
+        { "id": "gray", "colors": { "cardigan": "#9a9a9a" } }
+      ]
+    },
+    {
+      "id": "dress",
+      "presets": [
+        {
+          "id": "coral-flowers",
+          "colors": { "dress": "#fc4b4c" },
+          "patterns": {
+            "dress": {
+              "kind": "flowers",
+              "color": "#fffaf0",
+              "accent": "#ffd21f"
+            }
+          }
+        },
+        { "id": "coral", "colors": { "dress": "#fc4b4c" } },
+        {
+          "id": "blue-flowers",
+          "colors": { "dress": "#3a6fc8" },
+          "patterns": {
+            "dress": {
+              "kind": "flowers",
+              "color": "#ff6fb5",
+              "accent": "#ffd21f"
+            }
+          }
+        },
+        {
+          "id": "purple-flowers",
+          "colors": { "dress": "#7a4ab0" },
+          "patterns": {
+            "dress": {
+              "kind": "flowers",
+              "color": "#6fd3ff",
+              "accent": "#ffd21f"
+            }
+          }
+        },
+        {
+          "id": "green-flowers",
+          "colors": { "dress": "#3e9a4e" },
+          "patterns": {
+            "dress": {
+              "kind": "flowers",
+              "color": "#ff9a2e",
+              "accent": "#ffd21f"
+            }
+          }
+        },
+        {
+          "id": "white-flowers",
+          "colors": { "dress": "#f4f2ea" },
+          "patterns": {
+            "dress": {
+              "kind": "flowers",
+              "color": "#ff3b4a",
+              "accent": "#ffd21f"
+            }
+          }
+        },
+        {
+          "id": "yellow-flowers",
+          "colors": { "dress": "#f2c230" },
+          "patterns": {
+            "dress": {
+              "kind": "flowers",
+              "color": "#ff4fa0",
+              "accent": "#ffd21f"
+            }
+          }
+        },
+        { "id": "blue", "colors": { "dress": "#3a6fc8" } },
+        { "id": "purple", "colors": { "dress": "#7a4ab0" } },
+        { "id": "green", "colors": { "dress": "#3e9a4e" } },
+        { "id": "yellow", "colors": { "dress": "#f2c230" } },
+        { "id": "navy", "colors": { "dress": "#24324f" } }
+      ]
+    },
+    {
+      "id": "slippers",
+      "presets": [
+        {
+          "id": "purple",
+          "colors": {
+            "slipper": "#b04ced",
+            "slipper-inside": "#7111ac",
+            "slipper-sole": "#eedcf8"
+          }
+        },
+        {
+          "id": "pink",
+          "colors": {
+            "slipper": "#f07ab0",
+            "slipper-inside": "#c04a80",
+            "slipper-sole": "#fde0ee"
+          }
+        },
+        {
+          "id": "blue",
+          "colors": {
+            "slipper": "#3a7bd5",
+            "slipper-inside": "#2050a0",
+            "slipper-sole": "#dce8f8"
+          }
+        },
+        {
+          "id": "red",
+          "colors": {
+            "slipper": "#d94040",
+            "slipper-inside": "#9a2020",
+            "slipper-sole": "#f8dcdc"
+          }
+        },
+        {
+          "id": "green",
+          "colors": {
+            "slipper": "#4cae4c",
+            "slipper-inside": "#2a7a2a",
+            "slipper-sole": "#e0f4e0"
+          }
+        },
+        {
+          "id": "brown",
+          "colors": {
+            "slipper": "#8a5a34",
+            "slipper-inside": "#5a3a1a",
+            "slipper-sole": "#f0e0c8"
+          }
+        },
+        {
+          "id": "gray",
+          "colors": {
+            "slipper": "#8a8a90",
+            "slipper-inside": "#5a5a60",
+            "slipper-sole": "#e8e8ec"
+          }
+        }
+      ]
+    },
+    {
+      "id": "outline",
+      "presets": [
+        { "id": "dark-brown", "colors": { "outline": "#533121" } },
+        { "id": "black", "colors": { "outline": "#161414" } },
+        { "id": "charcoal", "colors": { "outline": "#3a3a3f" } },
+        { "id": "navy", "colors": { "outline": "#1c2444" } },
+        { "id": "plum", "colors": { "outline": "#3b1d33" } }
+      ]
+    }
+  ],
+  "motion": { "feetOffset": -7, "groundOffset": 6 }
 }

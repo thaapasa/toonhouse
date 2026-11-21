@@ -161,11 +161,11 @@ into a color for each role. Two places use those colors:
 
 A preset can also draw a pattern over a role, such as stars on a robe, in
 `patterns`. `PartSymbols` adds a copy of each path of the role, filled with an
-SVG `<pattern>` that `packages/stage` draws in code from a fixed layout. The
-pattern is in the pixels of the part, so it moves with the part, and the lines
-drawn after the path stay on top of it. The limbs that the renderer draws get
-the color of the role but not its pattern, because a pattern on a bending limb
-would stay still while the limb moves.
+SVG `<pattern>` that `packages/stage` draws in code from a fixed layout, such as
+stars or flowers in one or two colors. The pattern is in the pixels of the part,
+so it moves with the part, and the lines drawn after the path stay on top of it.
+The limbs that the renderer draws get the color of the role but not its pattern,
+because a pattern on a bending limb would stay still while the limb moves.
 
 The colors and the patterns are data of the rig, so the renderer stays pure. A
 test in `apps/studio` checks that every role in a preset is in the SVG layers or

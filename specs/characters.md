@@ -38,8 +38,8 @@ with the [character studio](studio.md).
       such as the dark and the light shades of the leaves or the sole of a shoe,
       so that they still match.
 - [ ] A color preset can draw a pattern over a role, such as stars on the robe
-      and the hat of a wizard. The app draws the pattern in code, so it stays
-      sharp and moves with the part.
+      and the hat of a wizard, or flowers on a dress. The app draws the pattern
+      in code, so it stays sharp and moves with the part.
 - [ ] If a character gets new parts, a saved cartoon still shows its actors in
       the colors that the user picked.
 - [x] Each layer of a character has its own place in the draw order, so the

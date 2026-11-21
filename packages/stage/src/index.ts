@@ -9,6 +9,6 @@ export {
 } from './library.ts';
 export type { PartSources, PartSymbolsProps } from './PartSymbols.tsx';
 export { PartSymbols } from './PartSymbols.tsx';
-export { starPath } from './patterns.ts';
+export { patternIcon } from './patterns.ts';
 export type { Playback, PlaybackOptions } from './usePlayback.ts';
 export { usePlayback } from './usePlayback.ts';

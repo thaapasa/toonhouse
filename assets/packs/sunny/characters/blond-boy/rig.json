@@ -79,7 +79,7 @@
     }
   },
   "scales": {
-    "head": 0.74,
+    "head": 0.71,
     "hand": 0.6,
     "foot": 0.57,
     "torso": 1

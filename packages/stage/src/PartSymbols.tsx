@@ -61,10 +61,18 @@ function addPatterns(svg: Element, patterns: RolePatterns, id: string) {
         'patternTransform',
         `rotate(${tile.turn}) scale(${pattern.scale ?? 1})`,
       );
-      const shapes = doc.createElementNS(SVG_NS, 'path');
-      shapes.setAttribute('d', tile.d);
-      shapes.setAttribute('fill', pattern.color);
-      p.append(shapes);
+      const layers = [
+        { d: tile.d, fill: pattern.color },
+        ...(tile.accent
+          ? [{ d: tile.accent, fill: pattern.accent ?? pattern.color }]
+          : []),
+      ];
+      for (const layer of layers) {
+        const shapes = doc.createElementNS(SVG_NS, 'path');
+        shapes.setAttribute('d', layer.d);
+        shapes.setAttribute('fill', layer.fill);
+        p.append(shapes);
+      }
       svg.prepend(p);
     }
     const over = el.cloneNode() as Element;

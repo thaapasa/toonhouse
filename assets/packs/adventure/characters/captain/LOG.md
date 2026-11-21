@@ -127,3 +127,28 @@ I rendered frames of the walk, the wave, the talk and the blink with
 `assets/work/quartermaster/frames.ts` (`CHAR=captain`) and checked them with
 `pnpm render-svg`. The wave shows the traced lips, because the wave uses the
 traced mouth.
+
+## Color presets
+
+The captain has color settings for the skin, the hair, the bandana, the jacket,
+the shirt, the trousers, the buttons and the buckle, the boots and the outline.
+A skin preset colors the lips too, so that they suit the skin. A boot preset
+colors the inside of the cuff and the sole.
+
+- The eyelids follow the skin, the sleeves follow the jacket, the legs follow
+  the trousers and the face lines follow the outline, through `colorRoles`. The
+  mouth patch got the class `c-skin`, so that it follows the skin.
+- The rig had a navy sleeve `#0b2a3c`, ochre legs `#8d6b0b` and face lines
+  `#320c01` that were close to the colors of the parts but not the same. They
+  are now the colors of the jacket `#002e42`, the trousers `#a7801c` and the
+  outline `#080401`, so that one preset colors each of them everywhere.
+- The buttons of the jacket and the buckle of the belt had the color of the
+  trousers, so they were part of `trousers`. The buttons were four separate
+  shapes in the trousers path, and they are now a path of their own with the
+  role `button`. The buckle was part of the same shape as the trousers, with
+  outline lines on its left and under it and the belt over the rest. Its role
+  `buckle` is a copy of the trousers shape, clipped to the frame of the buckle
+  with `captain-buckle-clip`, so the shape was not cut. The `metal` setting
+  colors both. At the default colors, only the edges changed a little.
+- The pupil is part of the outline paths, so the captain has no eye setting. The
+  earring and the belt keep their colors.

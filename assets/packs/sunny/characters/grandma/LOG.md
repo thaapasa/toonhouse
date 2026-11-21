@@ -130,3 +130,39 @@ regions out of a large render.
 
 - In the walk, the top of the arm starts a little below the sleeve cap that is
   drawn on the torso.
+
+## Color presets
+
+The head and the torso were edited by hand in Affinity: the tip of the nose is
+now skin instead of `blush`, and the flowers of the dress are gone, because the
+redrawn flowers were broken. The exports got the role classes back, and the
+torso keeps its old size of 221.3 × 438.8, because Affinity rounded the canvas
+up to whole pixels while the paths stayed where they were. The roles
+`dress-pattern` and `dress-pattern-center` are gone with the flowers.
+
+The grandma has color settings for the skin, the hair, the cardigan, the dress,
+the slippers and the outline. A skin preset colors the blush too, so that the
+cheek suits the skin. A slipper preset colors the inside and the sole.
+
+- The dress is coral with white flowers by default, drawn in code with the
+  `flowers` pattern, and the plain coral comes next. Five more dress presets
+  have flowers, each in one bright color with a yellow middle, so that they
+  stand out on the dress. The plain colors come after them.
+- The eyelids follow the skin, the sleeves follow the cardigan and the face
+  lines follow the outline, through `colorRoles`. The mouth patch got the class
+  `c-skin`, so that it follows the skin.
+- The pupil is part of the outline paths, so the grandma has no eye setting. The
+  earrings stay pearl white.
+
+## Legs inside the slippers
+
+The slipper has two layers, as the boots of the wizard and the captain have.
+`foot-back.svg` is the back wall of the slipper behind the ankle, the main layer
+of the part, and `foot-front.svg` is the rest of the slipper, as the `front`
+layer. They were drawn by hand in Affinity in the frame of the old `foot.svg`,
+so the pivot stays the same, and that file is gone. The exports got the role
+classes of the old file, with the paths of the drawings unchanged.
+
+The rig has its own draw order now, with each leg between the two layers of its
+slipper. The front of the near slipper is drawn after the dress, as the near
+foot was before.

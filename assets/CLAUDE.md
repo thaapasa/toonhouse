@@ -473,9 +473,15 @@ the iris if the eye has one.
 
 A preset can draw a pattern over a role, such as stars on the robe and the hat
 of the wizard, in `patterns` of the preset. The role keeps the color of the
-preset under the pattern. The kinds of pattern are in `packages/stage`, and so
-far there is `stars`. Use patterns for a few presets of a setting, next to the
-plain colors.
+preset under the pattern. The kinds of pattern are in `packages/stage`: `stars`,
+and `flowers` for a printed dress. A pattern has a `color`, and `flowers` also
+has an `accent` for the middles of the flowers. Use patterns for a few presets
+of a setting, next to the plain colors.
+
+Draw a pattern in code rather than into the drawing when the user should be able
+to change it, such as the flowers of the grandma's dress. The first preset of
+the setting still has the colors of the drawing, and it can add a pattern, so
+that the asset has the pattern by default.
 
 - Put the same pattern on every role of the setting that shows it, such as the
   robe and the hat, so that they match.

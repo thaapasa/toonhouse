@@ -116,3 +116,40 @@ I wrote `rig.json` by hand from the row extents of the alpha masks and from
 I rendered frames of the idle, the walk, the wave and the talk to SVG with
 `assets/work/quartermaster/frames.ts` and checked them with `pnpm render-svg`.
 The blink in the idle at t = 1.3 covers the whole eye.
+
+## Layers of the torso and the boots
+
+The torso and the boot have two layers each, as the captain's have. They were
+drawn by hand in Affinity in the frames of the old `torso.svg` and `foot.svg`,
+so the pivots stay the same, and those files are gone.
+
+- `torso-back.svg` is the torso, and `torso-front.svg` is the front tip of the
+  collar, the main layer of the part. The head is drawn between them, so the
+  neck goes into the collar. This replaces drawing the whole head before the
+  torso. The ponytail ends above the waistcoat, so it still doesn't cover the
+  back.
+- `foot-back.svg` is the inside of the cuff and the back of the boot, the main
+  layer of the part, and `foot-front.svg` is the rest of the boot. Each leg is
+  drawn between the two layers of its boot. The front of the near boot is drawn
+  after the torso, as the near foot was before.
+- The exports got the role classes of the old files, with the paths of the
+  drawings unchanged.
+
+## Color presets
+
+The quartermaster has color settings for the skin, the waistcoat, the shirt, the
+sash, the trousers, the buttons and the buckle, the boots and the outline.
+
+- The hair tie is the teal of the waistcoat, so a waistcoat preset colors it
+  too. The buttons of the waistcoat and the buckle of the boot are both brass,
+  so the `metal` setting colors them together, as for the captain. A boot preset
+  colors the sole, the inside and the strap with shades of the boot.
+- The eyelids follow the skin, the sleeves follow the shirt, the legs follow the
+  trousers and the face lines follow the outline, through `colorRoles`. The
+  mouth patch got the class `c-skin`, so that it follows the skin.
+- The hair, the eyebrow and the mustache are part of the outline, so the outline
+  preset is also the color of the hair: black, dark brown, charcoal for grey
+  hair, navy or plum. A hair setting of its own needs the hair as a layer of its
+  own.
+- The pupil is part of the outline paths, so the quartermaster has no eye
+  setting.

@@ -113,16 +113,16 @@
     "legWidth": 35,
     "outlineWidth": 4,
     "sleeve": {
-      "color": "#0b2a3c",
+      "color": "#002e42",
       "length": 0.85,
       "extraWidth": 6
     },
-    "legColor": "#8d6b0b"
+    "legColor": "#a7801c"
   },
   "colors": {
     "outline": "#080401",
     "skin": "#da965a",
-    "line": "#320c01",
+    "line": "#080401",
     "lid": "#da965a",
     "mouth": "#5a1414",
     "tongue": "#c8504a"
@@ -185,5 +185,176 @@
     "feetOffset": -2,
     "hipHeight": 270,
     "groundOffset": 30
-  }
+  },
+  "colorRoles": {
+    "lid": "skin",
+    "line": "outline",
+    "sleeve": "jacket",
+    "leg": "trousers"
+  },
+  "colorSettings": [
+    {
+      "id": "skin",
+      "presets": [
+        { "id": "tan", "colors": { "skin": "#da965a", "lips": "#b0603b" } },
+        { "id": "pale", "colors": { "skin": "#fde0c4", "lips": "#e09080" } },
+        { "id": "light", "colors": { "skin": "#f6bf7a", "lips": "#d0785a" } },
+        { "id": "brown", "colors": { "skin": "#b8784a", "lips": "#8a4a34" } },
+        {
+          "id": "dark-brown",
+          "colors": { "skin": "#8a5434", "lips": "#6a3424" }
+        },
+        { "id": "deep", "colors": { "skin": "#5e3822", "lips": "#4a2418" } }
+      ]
+    },
+    {
+      "id": "hair",
+      "presets": [
+        { "id": "auburn", "colors": { "hair": "#702c03" } },
+        { "id": "dark-brown", "colors": { "hair": "#4a2410" } },
+        { "id": "brown", "colors": { "hair": "#8a5a34" } },
+        { "id": "red", "colors": { "hair": "#b8441c" } },
+        { "id": "blond", "colors": { "hair": "#e8b830" } },
+        { "id": "black", "colors": { "hair": "#2e2826" } },
+        { "id": "gray", "colors": { "hair": "#9a9a9a" } },
+        { "id": "white", "colors": { "hair": "#eeeae0" } }
+      ]
+    },
+    {
+      "id": "bandana",
+      "presets": [
+        { "id": "red", "colors": { "bandana": "#8f1e0d" } },
+        { "id": "blue", "colors": { "bandana": "#1f4f9a" } },
+        { "id": "green", "colors": { "bandana": "#2f6e3a" } },
+        { "id": "yellow", "colors": { "bandana": "#d9a400" } },
+        { "id": "purple", "colors": { "bandana": "#5a2a7a" } },
+        { "id": "black", "colors": { "bandana": "#2e2826" } },
+        { "id": "white", "colors": { "bandana": "#eeeae0" } }
+      ]
+    },
+    {
+      "id": "jacket",
+      "presets": [
+        { "id": "navy", "colors": { "jacket": "#002e42" } },
+        { "id": "red", "colors": { "jacket": "#8a1a1a" } },
+        { "id": "green", "colors": { "jacket": "#1f4a32" } },
+        { "id": "blue", "colors": { "jacket": "#2f5fa8" } },
+        { "id": "purple", "colors": { "jacket": "#4a2266" } },
+        { "id": "brown", "colors": { "jacket": "#5a3a22" } },
+        { "id": "black", "colors": { "jacket": "#2e2826" } },
+        { "id": "white", "colors": { "jacket": "#e8e6da" } }
+      ]
+    },
+    {
+      "id": "shirt",
+      "presets": [
+        { "id": "cream", "colors": { "shirt": "#e5e4d0" } },
+        { "id": "white", "colors": { "shirt": "#f7f6f5" } },
+        { "id": "light-blue", "colors": { "shirt": "#b8d4ec" } },
+        { "id": "red", "colors": { "shirt": "#c8302c" } },
+        { "id": "black", "colors": { "shirt": "#2e2826" } }
+      ]
+    },
+    {
+      "id": "trousers",
+      "presets": [
+        { "id": "ochre", "colors": { "trousers": "#a7801c" } },
+        { "id": "khaki", "colors": { "trousers": "#c8a66a" } },
+        { "id": "brown", "colors": { "trousers": "#6e4a2c" } },
+        { "id": "navy", "colors": { "trousers": "#24324f" } },
+        { "id": "gray", "colors": { "trousers": "#8c8c8c" } },
+        { "id": "red", "colors": { "trousers": "#8a1a1a" } },
+        { "id": "black", "colors": { "trousers": "#2e2826" } },
+        { "id": "white", "colors": { "trousers": "#eeeae0" } }
+      ]
+    },
+    {
+      "id": "metal",
+      "presets": [
+        {
+          "id": "brass",
+          "colors": { "button": "#a7801c", "buckle": "#a7801c" }
+        },
+        {
+          "id": "gold",
+          "colors": { "button": "#e8c040", "buckle": "#e8c040" }
+        },
+        {
+          "id": "silver",
+          "colors": { "button": "#c8d0d8", "buckle": "#c8d0d8" }
+        },
+        {
+          "id": "copper",
+          "colors": { "button": "#b8643a", "buckle": "#b8643a" }
+        },
+        {
+          "id": "black",
+          "colors": { "button": "#2e2826", "buckle": "#2e2826" }
+        }
+      ]
+    },
+    {
+      "id": "boots",
+      "presets": [
+        {
+          "id": "burgundy",
+          "colors": {
+            "boot": "#611d20",
+            "boot-inside": "#390b0d",
+            "boot-sole": "#23201e"
+          }
+        },
+        {
+          "id": "black",
+          "colors": {
+            "boot": "#2e2826",
+            "boot-inside": "#161414",
+            "boot-sole": "#4a4442"
+          }
+        },
+        {
+          "id": "brown",
+          "colors": {
+            "boot": "#6e4a2c",
+            "boot-inside": "#4a2e18",
+            "boot-sole": "#23201e"
+          }
+        },
+        {
+          "id": "tan",
+          "colors": {
+            "boot": "#b8844a",
+            "boot-inside": "#8a5a2c",
+            "boot-sole": "#23201e"
+          }
+        },
+        {
+          "id": "red",
+          "colors": {
+            "boot": "#c8202c",
+            "boot-inside": "#8a1018",
+            "boot-sole": "#23201e"
+          }
+        },
+        {
+          "id": "navy",
+          "colors": {
+            "boot": "#24324f",
+            "boot-inside": "#141c30",
+            "boot-sole": "#23201e"
+          }
+        }
+      ]
+    },
+    {
+      "id": "outline",
+      "presets": [
+        { "id": "black", "colors": { "outline": "#080401" } },
+        { "id": "dark-brown", "colors": { "outline": "#422517" } },
+        { "id": "charcoal", "colors": { "outline": "#3a3a3f" } },
+        { "id": "navy", "colors": { "outline": "#1c2444" } },
+        { "id": "plum", "colors": { "outline": "#3b1d33" } }
+      ]
+    }
+  ]
 }
