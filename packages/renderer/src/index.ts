@@ -31,14 +31,14 @@ export {
   cameraAt,
   cameraBetween,
   cameraBounds,
+  cameraEntryEnd,
   cameraFromBounds,
   cameraHolder,
-  cameraMoveEnd,
   DEFAULT_EASING,
   ease,
   isJump,
   pictureToGround,
-  sortedCameraMoves,
+  sortedCameraEntries,
   startView,
 } from './camera.ts';
 export type { CartoonEntry, CartoonTimeline } from './cartoon.ts';

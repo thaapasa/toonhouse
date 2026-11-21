@@ -101,14 +101,14 @@ describe('scene frame', () => {
     const zoomed: Scene = {
       ...scene,
       bubbles: [free],
-      camera: { start: camera, moves: [] },
+      camera: { start: camera, entries: [] },
     };
     const boxOf = (s: Scene, ground = false) =>
       sceneFrame(s, bg, library, 1, { ground }).bubbles[0]!.box;
 
     it('keeps its size in the picture and stays inside it', () => {
       const box = boxOf(zoomed);
-      const whole = boxOf({ ...zoomed, camera: { moves: [] } });
+      const whole = boxOf({ ...zoomed, camera: { entries: [] } });
       expect(box.width).toBeCloseTo(whole.width);
       expect(box.x).toBeGreaterThanOrEqual(0);
       expect(box.x + box.width).toBeLessThanOrEqual(bg.width);

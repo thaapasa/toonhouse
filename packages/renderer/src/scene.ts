@@ -16,7 +16,7 @@ import type {
 
 import { actorScaleAt, minScaleY } from './background.ts';
 import { bubbleEnd } from './bubbles/bubble.ts';
-import { cameraMoveEnd } from './camera.ts';
+import { cameraEntryEnd } from './camera.ts';
 import { clipOf, restClip } from './clips/index.ts';
 
 /** The frames a second that the editor, the player and export step by. */
@@ -361,7 +361,7 @@ export function minSceneLength(scene: Scene): number {
     ...scene.backgroundActions,
     ...scene.actors.flatMap((a) => a.actions),
     ...(scene.bubbles ?? []),
-    ...(scene.camera?.moves ?? []),
+    ...(scene.camera?.entries ?? []),
   ].map((a) => a.t);
   return Math.max(1, Math.max(0, ...starts) + 0.1);
 }
@@ -383,7 +383,7 @@ export function sceneLength(
     0,
     ...scene.backgroundActions.map((a) => a.t),
     ...(scene.bubbles ?? []).map(bubbleEnd),
-    ...(scene.camera?.moves ?? []).map(cameraMoveEnd),
+    ...(scene.camera?.entries ?? []).map(cameraEntryEnd),
   );
   if (bg) {
     for (const actor of scene.actors) {

@@ -44,6 +44,8 @@ for something else or too vague.
   camera action, transition.
 - **Camera jump**: a change of the camera to a new view at once, at a point on
   the timeline. Not: cut, which sounds like a shot.
+- **Camera entry**: a camera move or a camera jump. A scene saves them in one
+  list, and the code uses the term for what holds for both.
 - **Easing**: how a camera move speeds up and slows down: linear, ease in, ease
   out, or ease in and out.
 - **Camera box**: the box on the stage of the editor that shows the camera view

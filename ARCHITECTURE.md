@@ -194,14 +194,14 @@ zooms by the same factor, which looks more natural than a zoom that grows evenly
 with the depth. With this formula the view of every layer stays inside the frame
 whenever the view of the ground layer does, so only the camera needs clamping.
 
-A scene stores its start view and a list of camera moves and jumps, and the
-renderer computes the camera at `t` from them. Each move starts from the view
-that the camera holds when the move starts, so the move stores only the view
-that it goes to. Dragging either end of a move then changes only its speed. A
-move zooms by the same factor in each step and moves the view around the one
-point that stays in place on the screen. With that, a zoom into a corner keeps
-the corner still, and each view between two views inside the background is
-inside it too.
+A scene stores its start view and a list of camera entries, which are the camera
+moves and jumps, and the renderer computes the camera at `t` from them. Each
+move starts from the view that the camera holds when the move starts, so the
+move stores only the view that it goes to. Dragging either end of a move then
+changes only its speed. A move zooms by the same factor in each step and moves
+the view around the one point that stays in place on the screen. With that, a
+zoom into a corner keeps the corner still, and each view between two views
+inside the background is inside it too.
 
 The renderer draws a background with its actors as one tree, in the pixels of
 the picture, which has the size of the frame. Each actor is a group that names

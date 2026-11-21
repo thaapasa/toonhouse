@@ -5,8 +5,8 @@ import type { Background, CameraEasing, Scene } from '@toonhouse/model';
 import {
   CAMERA_EASINGS,
   cameraAt,
+  cameraEntryEnd,
   cameraHolder,
-  cameraMoveEnd,
   clampCamera,
   DEFAULT_EASING,
   isJump,
@@ -16,9 +16,9 @@ import {
 import { type TextKey, useI18n } from '../i18n/index.tsx';
 import {
   type CameraDrag,
-  dragCameraMove,
+  dragCameraEntry,
   setCameraView,
-  updateCameraMove,
+  updateCameraEntry,
 } from './cameraEdit.ts';
 import { NumberField } from './NumberField.tsx';
 
@@ -39,64 +39,69 @@ export function CameraSection(props: {
 }) {
   const { tr } = useI18n();
   const { scene, bg } = props;
-  const { move, moving } = cameraHolder(scene, props.t);
-  const id = move?.id ?? null;
-  const view = move ? clampCamera(bg, move.to) : cameraAt(scene, bg, 0);
+  const { entry, moving } = cameraHolder(scene, props.t);
+  const id = entry?.id ?? null;
+  const view = entry ? clampCamera(bg, entry.to) : cameraAt(scene, bg, 0);
   const frame = 1 / props.fps;
   const setView = (v: Partial<typeof view>) =>
     props.onEdit((s) =>
       setCameraView(s, bg, id, clampCamera(bg, { ...view, ...v })),
     );
   /**
-   * Changes a time of the entry `moveId`, as a drag on the timeline does. With
+   * Changes a time of the entry `entryId`, as a drag on the timeline does. With
    * `seek`, the playhead goes to the changed time after the entries beside it
    * have stopped it, so that the pane keeps showing the entry.
    */
-  const drag = (moveId: string, part: CameraDrag, v: number, seek: boolean) => {
-    props.onEdit((s) => dragCameraMove(s, moveId, part, v));
-    const moved = dragCameraMove(scene, moveId, part, v).camera?.moves.find(
-      (m) => m.id === moveId,
+  const drag = (
+    entryId: string,
+    part: CameraDrag,
+    v: number,
+    seek: boolean,
+  ) => {
+    props.onEdit((s) => dragCameraEntry(s, entryId, part, v));
+    const moved = dragCameraEntry(scene, entryId, part, v).camera?.entries.find(
+      (m) => m.id === entryId,
     );
     if (seek && moved)
-      props.onSeek(part === 'end' ? cameraMoveEnd(moved) : moved.t);
+      props.onSeek(part === 'end' ? cameraEntryEnd(moved) : moved.t);
   };
 
-  const title: TextKey = !move
+  const title: TextKey = !entry
     ? 'camera.startView'
-    : isJump(move)
+    : isJump(entry)
       ? 'camera.jump'
       : 'camera.move';
 
   return (
     <div className="pane-section">
       <h3>{tr(title)}</h3>
-      {move && isJump(move) && (
+      {entry && isJump(entry) && (
         <NumberField
           label={tr('properties.start')}
-          value={move.t}
+          value={entry.t}
           step={frame}
           decimals={2}
           unit={tr('properties.seconds')}
-          onChange={(v) => drag(move.id, 'block', v, true)}
+          onChange={(v) => drag(entry.id, 'block', v, true)}
         />
       )}
-      {move && !isJump(move) && (
+      {entry && !isJump(entry) && (
         <>
           <NumberField
             label={tr('properties.start')}
-            value={move.t}
+            value={entry.t}
             step={frame}
             decimals={2}
             unit={tr('properties.seconds')}
-            onChange={(v) => drag(move.id, 'start', v, false)}
+            onChange={(v) => drag(entry.id, 'start', v, false)}
           />
           <NumberField
             label={tr('camera.length')}
-            value={move.length ?? 0}
+            value={entry.length ?? 0}
             step={0.1}
             decimals={2}
             unit={tr('properties.seconds')}
-            onChange={(v) => drag(move.id, 'end', move.t + v, true)}
+            onChange={(v) => drag(entry.id, 'end', entry.t + v, true)}
           />
           <div className="pane-row">
             <span>{tr('camera.easing')}</span>
@@ -110,10 +115,13 @@ export function CameraSection(props: {
               <button
                 key={e}
                 type="button"
-                aria-pressed={(move.easing ?? DEFAULT_EASING) === e}
+                aria-pressed={(entry.easing ?? DEFAULT_EASING) === e}
                 onClick={() =>
                   props.onEdit((s) =>
-                    updateCameraMove(s, move.id, (m) => ({ ...m, easing: e })),
+                    updateCameraEntry(s, entry.id, (m) => ({
+                      ...m,
+                      easing: e,
+                    })),
                   )
                 }
               >
@@ -123,14 +131,14 @@ export function CameraSection(props: {
           </div>
         </>
       )}
-      <h4>{tr(move && !isJump(move) ? 'camera.moveTo' : 'camera.view')}</h4>
-      {moving && move && (
+      <h4>{tr(entry && !isJump(entry) ? 'camera.moveTo' : 'camera.view')}</h4>
+      {moving && entry && (
         <>
           <p className="muted small">{tr('camera.movingHint')}</p>
           <button
             type="button"
             className="button small"
-            onClick={() => props.onSeek(cameraMoveEnd(move))}
+            onClick={() => props.onSeek(cameraEntryEnd(entry))}
           >
             {tr('camera.goToEnd')}
           </button>

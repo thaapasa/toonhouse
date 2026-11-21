@@ -4,7 +4,7 @@
 // so dragging the start or the end of a move changes only its speed.
 import type {
   Background,
-  CameraMove,
+  CameraEntry,
   CameraView,
   Pt,
   Scene,
@@ -13,13 +13,13 @@ import {
   type Bounds,
   cameraAt,
   cameraBounds,
+  cameraEntryEnd,
   cameraFromBounds,
-  cameraMoveEnd,
   clampCamera,
   groundDepth,
   isJump,
   MAX_ZOOM,
-  sortedCameraMoves,
+  sortedCameraEntries,
   startView,
 } from '@toonhouse/renderer';
 
@@ -41,11 +41,11 @@ const TIME_STEP = 1e-4;
 /** The part of a camera move that the user drags on the timeline. */
 export type CameraDrag = 'block' | 'start' | 'end';
 
-const movesOf = (scene: Scene) => scene.camera?.moves ?? [];
+const entriesOf = (scene: Scene) => scene.camera?.entries ?? [];
 
-const withMoves = (scene: Scene, moves: CameraMove[]): Scene => ({
+const withEntries = (scene: Scene, entries: CameraEntry[]): Scene => ({
   ...scene,
-  camera: { ...scene.camera, moves },
+  camera: { ...scene.camera, entries },
 });
 
 /** A view rounded to what the scene saves. */
@@ -66,23 +66,23 @@ const sameView = (a: CameraView, b: CameraView) =>
 export function setCameraView(
   scene: Scene,
   bg: Background,
-  moveId: string | null,
+  entryId: string | null,
   view: CameraView,
 ): Scene {
   const to = savedView(view);
   const held =
-    moveId === null
+    entryId === null
       ? startView(scene, bg)
-      : movesOf(scene).find((m) => m.id === moveId)?.to;
+      : entriesOf(scene).find((m) => m.id === entryId)?.to;
   if (held && sameView(savedView(held), to)) return scene;
-  if (moveId === null)
+  if (entryId === null)
     return {
       ...scene,
-      camera: { ...scene.camera, moves: movesOf(scene), start: to },
+      camera: { ...scene.camera, entries: entriesOf(scene), start: to },
     };
-  return withMoves(
+  return withEntries(
     scene,
-    movesOf(scene).map((m) => (m.id === moveId ? { ...m, to } : m)),
+    entriesOf(scene).map((m) => (m.id === entryId ? { ...m, to } : m)),
   );
 }
 
@@ -98,9 +98,9 @@ export function resetStartView(scene: Scene): Scene {
 function room(scene: Scene, t: number, id: string | null) {
   let lo = 0;
   let hi = Infinity;
-  for (const m of sortedCameraMoves(scene)) {
+  for (const m of sortedCameraEntries(scene)) {
     if (m.id === id) continue;
-    if (cameraMoveEnd(m) <= t) lo = Math.max(lo, cameraMoveEnd(m));
+    if (cameraEntryEnd(m) <= t) lo = Math.max(lo, cameraEntryEnd(m));
     else if (m.t >= t) hi = Math.min(hi, m.t);
     else return null;
   }
@@ -112,20 +112,20 @@ function room(scene: Scene, t: number, id: string | null) {
  * one in the picture and on the timeline, so the user can't add one.
  */
 const jumpAt = (scene: Scene, t: number) =>
-  movesOf(scene).some((m) => isJump(m) && m.t === t);
+  entriesOf(scene).some((m) => isJump(m) && m.t === t);
 
 /**
  * A new camera move or jump at `t`, which starts at the view of the camera
  * there. Null if `t` is inside a move, a jump is already at `t`, or a move is
  * too short to fit before the next entry.
  */
-export function newCameraMove(
+export function newCameraEntry(
   scene: Scene,
   bg: Background,
   id: string,
   t: number,
   jump: boolean,
-): CameraMove | null {
+): CameraEntry | null {
   const r = room(scene, t, null);
   if (!r) return null;
   const to = savedView(cameraAt(scene, bg, t));
@@ -136,23 +136,23 @@ export function newCameraMove(
   return { id, t, to, length };
 }
 
-export const addCameraMove = (scene: Scene, move: CameraMove): Scene =>
-  withMoves(scene, [...movesOf(scene), move]);
+export const addCameraEntry = (scene: Scene, entry: CameraEntry): Scene =>
+  withEntries(scene, [...entriesOf(scene), entry]);
 
-export const removeCameraMove = (scene: Scene, id: string): Scene =>
-  withMoves(
+export const removeCameraEntry = (scene: Scene, id: string): Scene =>
+  withEntries(
     scene,
-    movesOf(scene).filter((m) => m.id !== id),
+    entriesOf(scene).filter((m) => m.id !== id),
   );
 
-export const updateCameraMove = (
+export const updateCameraEntry = (
   scene: Scene,
   id: string,
-  fn: (m: CameraMove) => CameraMove,
+  fn: (m: CameraEntry) => CameraEntry,
 ): Scene =>
-  withMoves(
+  withEntries(
     scene,
-    movesOf(scene).map((m) => (m.id === id ? fn(m) : m)),
+    entriesOf(scene).map((m) => (m.id === id ? fn(m) : m)),
   );
 
 /**
@@ -161,22 +161,22 @@ export const updateCameraMove = (
  * moves only that end, so that the move gets faster or slower. An entry
  * stops at the entries beside it.
  */
-export function dragCameraMove(
+export function dragCameraEntry(
   scene: Scene,
   id: string,
   part: CameraDrag,
   t: number,
 ): Scene {
-  const move = movesOf(scene).find((m) => m.id === id);
-  if (!move) return scene;
-  const sorted = sortedCameraMoves(scene);
-  const i = sorted.indexOf(move);
+  const entry = entriesOf(scene).find((m) => m.id === id);
+  if (!entry) return scene;
+  const sorted = sortedCameraEntries(scene);
+  const i = sorted.indexOf(entry);
   const before = sorted[i - 1];
   const after = sorted[i + 1];
-  const lo = before ? cameraMoveEnd(before) : 0;
+  const lo = before ? cameraEntryEnd(before) : 0;
   const hi = after?.t ?? Infinity;
-  const length = move.length ?? 0;
-  const end = move.t + length;
+  const length = entry.length ?? 0;
+  const end = entry.t + length;
   const clamp = (v: number, a: number, b: number) =>
     Math.min(Math.max(v, a), b);
   // A start rounded below `lo` steps forward, and an end past `hi` back.
@@ -188,19 +188,19 @@ export function dragCameraMove(
     const l = savedTime(v);
     return start + l > hi ? savedTime(l - TIME_STEP) : l;
   };
-  let next: CameraMove;
-  if (part === 'block' || !move.length) {
+  let next: CameraEntry;
+  if (part === 'block' || !entry.length) {
     let start = from(clamp(t, lo, hi - length));
     if (start + length > hi) start = savedTime(start - TIME_STEP);
-    next = { ...move, t: start };
+    next = { ...entry, t: start };
   } else if (part === 'start') {
     const start = from(clamp(t, lo, end - MIN_MOVE_LENGTH));
-    next = { ...move, t: start, length: upTo(start, end - start) };
+    next = { ...entry, t: start, length: upTo(start, end - start) };
   } else {
-    const stop = clamp(t, move.t + MIN_MOVE_LENGTH, hi);
-    next = { ...move, length: upTo(move.t, stop - move.t) };
+    const stop = clamp(t, entry.t + MIN_MOVE_LENGTH, hi);
+    next = { ...entry, length: upTo(entry.t, stop - entry.t) };
   }
-  return updateCameraMove(scene, id, () => next);
+  return updateCameraEntry(scene, id, () => next);
 }
 
 /** The corner of the camera view that the user drags, from the top left clockwise. */
@@ -277,7 +277,7 @@ export const withBackground = (scene: Scene, id: string): Scene =>
   resetStartView({ ...scene, background: id });
 
 /** Whether the camera at `t` can get a new move or jump. */
-export const canAddCameraMove = (scene: Scene, t: number, jump: boolean) => {
+export const canAddCameraEntry = (scene: Scene, t: number, jump: boolean) => {
   const r = room(scene, t, null);
   if (!r) return false;
   return jump ? !jumpAt(scene, t) : r.hi - t >= MIN_MOVE_LENGTH;

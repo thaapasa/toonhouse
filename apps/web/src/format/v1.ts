@@ -1,7 +1,9 @@
 // A saved cartoon of version 1 that uses every optional field and every value
-// of each list of choices. Don't edit it: the next version gets a file of its
-// own. The type check catches a key that the model doesn't have, such as an
-// old name of a renamed field, which the schema would keep as unknown.
+// of each list of choices. Until the first deploy, update it when the format
+// changes. From the first deploy on, it is frozen, and the next version gets a
+// file of its own. The type check catches a key that the model doesn't have,
+// such as an old name of a renamed field, which the schema would keep as
+// unknown.
 import type { CartoonContent } from '@toonhouse/model';
 
 export const v1 = {
@@ -332,6 +334,44 @@ export const v1 = {
           borderWidth: 0,
         },
       ],
+      camera: {
+        start: { x: 1024, y: 576, zoom: 1.5 },
+        entries: [
+          {
+            id: 'e1a2b3c4-0a1b-4c2d-8e3f-4a5b6c7d8e01',
+            t: 1,
+            to: { x: 800, y: 500, zoom: 2 },
+          },
+          {
+            id: 'e1a2b3c4-0a1b-4c2d-8e3f-4a5b6c7d8e02',
+            t: 2,
+            to: { x: 1200, y: 500, zoom: 2 },
+            length: 2,
+            easing: 'linear',
+          },
+          {
+            id: 'e1a2b3c4-0a1b-4c2d-8e3f-4a5b6c7d8e03',
+            t: 4.5,
+            to: { x: 1200, y: 600, zoom: 3 },
+            length: 1.5,
+            easing: 'ease-in',
+          },
+          {
+            id: 'e1a2b3c4-0a1b-4c2d-8e3f-4a5b6c7d8e04',
+            t: 6.5,
+            to: { x: 900, y: 650, zoom: 2.5 },
+            length: 2,
+            easing: 'ease-out',
+          },
+          {
+            id: 'e1a2b3c4-0a1b-4c2d-8e3f-4a5b6c7d8e05',
+            t: 9,
+            to: { x: 1024, y: 576, zoom: 1 },
+            length: 3,
+            easing: 'ease-in-out',
+          },
+        ],
+      },
       length: 14,
     },
     {

@@ -64,7 +64,7 @@ export const CONTENT_LIMITS = {
   actions: 10_000,
   pathPoints: 10_000,
   bubbles: 10_000,
-  cameraMoves: 10_000,
+  cameraEntries: 10_000,
 } as const;
 
 const L = CONTENT_LIMITS;
@@ -148,7 +148,7 @@ const CameraView = z.looseObject({
   zoom: range(L.zoom),
 });
 
-const CameraMove = z.looseObject({
+const CameraEntry = z.looseObject({
   id: Id,
   t: Time,
   to: CameraView,
@@ -170,7 +170,7 @@ const Scene = z.looseObject({
   camera: z
     .looseObject({
       start: CameraView.exactOptional(),
-      moves: z.array(CameraMove).max(L.cameraMoves),
+      entries: z.array(CameraEntry).max(L.cameraEntries),
     })
     .exactOptional(),
   length: Time.exactOptional(),

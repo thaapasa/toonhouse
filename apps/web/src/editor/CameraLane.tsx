@@ -7,14 +7,14 @@
 // end, where its view is. Dragging the start or the end of a move changes only
 // that time, so the views stay and the move gets faster or slower. Dragging
 // the block moves the whole move, and dragging a jump moves the jump.
-import type { CameraMove, Scene } from '@toonhouse/model';
+import type { CameraEntry, Scene } from '@toonhouse/model';
 import {
+  cameraEntryEnd,
   cameraHolder,
-  cameraMoveEnd,
   DEFAULT_EASING,
   ease,
   isJump,
-  sortedCameraMoves,
+  sortedCameraEntries,
 } from '@toonhouse/renderer';
 
 import { type TextKey, useI18n } from '../i18n/index.tsx';
@@ -29,7 +29,7 @@ const CURVE = 18;
 
 /** A part of a camera move or jump that the user drags. */
 interface Grip {
-  move: CameraMove;
+  entry: CameraEntry;
   part: CameraDrag;
   /** Where the dragged part is when the drag starts. */
   t: number;
@@ -52,7 +52,7 @@ interface Props {
 }
 
 /** The curve of an easing as SVG points, `width` wide. */
-function curvePoints(m: CameraMove, width: number): string {
+function curvePoints(m: CameraEntry, width: number): string {
   const steps = 16;
   return Array.from({ length: steps + 1 }, (_, i) => {
     const u = i / steps;
@@ -64,14 +64,14 @@ function curvePoints(m: CameraMove, width: number): string {
 export function CameraLane(props: Props) {
   const { tr } = useI18n();
   const { pps, fps } = props;
-  const moves = sortedCameraMoves(props.scene);
+  const entries = sortedCameraEntries(props.scene);
   const holder = props.selected ? cameraHolder(props.scene, props.t) : null;
   const frame = (t: number) => Math.round(t * fps) / fps;
 
   const drag = useLaneDrag<Grip>({
     pinches: props.pinches,
     onMove: (g, dx, run) =>
-      props.onDrag(g.move.id, g.part, Math.max(frame(g.t + dx / pps), 0), run),
+      props.onDrag(g.entry.id, g.part, Math.max(frame(g.t + dx / pps), 0), run),
     onTap: (g) => props.onSelect(g.tap),
     onDone: props.onDragDone,
     onCancel: (_, run) => props.onCancel(run),
@@ -102,7 +102,7 @@ export function CameraLane(props: Props) {
       <button
         type="button"
         className="time-mark camera-start"
-        aria-pressed={holder?.move === null}
+        aria-pressed={holder?.entry === null}
         style={{ left: 0 }}
         aria-label={tr('camera.startMark')}
         title={tr('camera.startMark')}
@@ -111,17 +111,17 @@ export function CameraLane(props: Props) {
           props.onSelect(0);
         }}
       />
-      {moves.map((m) => {
-        const held = holder?.move?.id === m.id;
+      {entries.map((m) => {
+        const held = holder?.entry?.id === m.id;
         if (isJump(m))
           return mark(
             `jump-${m.id}`,
-            { move: m, part: 'block', t: m.t, tap: m.t },
+            { entry: m, part: 'block', t: m.t, tap: m.t },
             'camera.jumpMark',
             'camera-jump',
             held,
           );
-        const end = cameraMoveEnd(m);
+        const end = cameraEntryEnd(m);
         const width = Math.max((end - m.t) * pps - 2, 6);
         return [
           <button
@@ -135,7 +135,7 @@ export function CameraLane(props: Props) {
             })}
             style={{ left: m.t * pps, width }}
             onClick={drag.click()}
-            {...drag.handlers({ move: m, part: 'block', t: m.t, tap: end })}
+            {...drag.handlers({ entry: m, part: 'block', t: m.t, tap: end })}
           >
             <svg
               className="camera-curve"
@@ -148,14 +148,14 @@ export function CameraLane(props: Props) {
           </button>,
           mark(
             `start-${m.id}`,
-            { move: m, part: 'start', t: m.t, tap: m.t },
+            { entry: m, part: 'start', t: m.t, tap: m.t },
             'camera.moveStart',
             'start',
             false,
           ),
           mark(
             `end-${m.id}`,
-            { move: m, part: 'end', t: end, tap: end },
+            { entry: m, part: 'end', t: end, tap: end },
             'camera.moveEnd',
             'end camera-end',
             held && !holder?.moving,

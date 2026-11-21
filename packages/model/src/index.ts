@@ -15,7 +15,7 @@ export type {
   BubbleFontId,
   BubbleShape,
   CameraEasing,
-  CameraMove,
+  CameraEntry,
   CameraView,
   CartoonContent,
   Scene,
