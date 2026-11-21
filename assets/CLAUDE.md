@@ -171,6 +171,9 @@ up. These rules come from making the trees and the bushes.
 - Dark green fills can trace with specks and thin lines along a jagged edge.
   Redraw them with `redraw-image`, which removes both.
 
+Give the prop its color settings, such as the leaves, the flowers and the bark,
+as "Color settings" below describes.
+
 In the rig, the clumps overlap each other by a good part of their size, so that
 no gap opens when they sway. A clump behind the trunk lets the branches show in
 front of the leaves. The pivot of a clump of a tree is in its middle, a little
@@ -394,12 +397,7 @@ of that character. See [specs/characters.md](../specs/characters.md).
 - Give a class to every path that the user can recolor, also in the parts that
   you write by hand, such as a mouth patch in the color of the skin.
 
-The color settings and their color presets are in `colorSettings` of `rig.json`,
-written by hand for each character. Give the first preset of each setting the
-colors of the drawings, and pick the other presets so that they suit the
-character. If the renderer draws a part in a color whose key is not the name of
-a role, such as the sleeves of a shirt, map it to the role in `colorRoles`. See
-"Colors" in [ARCHITECTURE.md](../ARCHITECTURE.md).
+The roles become color settings in the rig, as "Color settings" below describes.
 
 ### Limits
 
@@ -425,6 +423,90 @@ a role, such as the sleeves of a shirt, map it to the role in `colorRoles`. See
   runs into the outline along the edge, it is cut there, and the outline keeps
   the rest. The wedges between the spikes of the boy's hair taper into the
   outline, so they stay part of it.
+
+## Color settings
+
+Every new character and prop gets its color settings in the same task that adds
+it to the library, so that the user can change its colors from the start. The
+settings and their color presets are in `colorSettings` of `rig.json`, written
+by hand. The boy in `packs/sunny/characters/blond-boy/` is the example. See
+"Colors" in [ARCHITECTURE.md](../ARCHITECTURE.md) for how the app uses them.
+
+### Pick the settings
+
+Make a setting for each thing that a user would want to color on its own:
+
+- A person: the skin, the hair, the eyes, each piece of clothing, the shoes and
+  the outline.
+- An animal: the fur or the feathers, the eyes, and the parts that tell it
+  apart, such as the comb of a hen. Keep a beak or a nose in a natural color
+  unless a playful color suits the character.
+- A prop: the main colors, such as the leaves, the flowers, the fruit and the
+  bark.
+
+A setting colors every role that has to change with it, so that the colors still
+match:
+
+- The details of a thing: the shirt and its pattern, the shoe and its trim, the
+  boot and its sole.
+- The shades of a color: `leaves`, `leaves-dark` and `leaves-light` go in one
+  setting, and each preset gives each shade its own color.
+
+Make no setting for the whites of the eyes, the inside of the mouth or small
+details that only look right in one color. An eye setting colors the pupil, or
+the iris if the eye has one.
+
+### Pick the presets
+
+- The first preset of a setting has the colors of the drawings. A test in
+  `apps/studio` checks this.
+- Give each setting 5 to 9 presets. Start with the natural range, then add a few
+  playful ones. Hair goes from blond and red to brown, black and white, and then
+  to blue or pink. Skin goes from pale to deep brown. Clothes take the bright
+  colors of the asset pack.
+- In a preset that colors several roles, keep the contrast between them, such as
+  white stripes on a blue shirt and a red pattern on a yellow one.
+- Pick each color in the saturation and the lightness of the drawings, so that a
+  preset looks drawn in the same style.
+
+### The outline
+
+Every character and prop has one outline setting with one color for all its
+lines. The line paths have the class `c-outline`, and the renderer draws its
+outlines in `colors.outline`. Map the face lines to the outline with
+`"line": "outline"` in `colorRoles`, and give them the outline color in the
+drawings.
+
+The outline presets are dark tones that go with the other presets: the color of
+the drawings, black, charcoal, navy and plum. A fill that is darker than the
+outline hides the outline around it. So keep the darkest presets of the other
+settings, such as black hair, a little lighter than the black outline.
+
+### Map the drawn colors
+
+The renderer draws some parts itself, such as the rubber-hose limbs, the
+sleeves, the eyelids and the lines of the face. A drawn color follows the role
+of the same name, such as `skin`. Map the others in `colorRoles`, such as
+`"lid": "skin"`, `"sleeve": "shirt"`, `"leg": "trousers"` and
+`"line": "outline"`. A bird draws its lids in `colors.feathers` and a rabbit in
+`colors.fur`, so they follow the role of that name without a mapping.
+
+### Names and checks
+
+- Name a setting after the thing, such as `hair` or `shoes`, and a preset after
+  its main color, such as `dark-brown`. Reuse the ids that other assets use, so
+  that the same color has the same name everywhere.
+- Treat the ids as part of the asset, because saved cartoons refer to them.
+- Add the names of new setting ids and color ids in Finnish and English to the
+  translations of the studio, under `colorSetting.<id>` and `color.<id>`.
+- Run `pnpm test`. The studio test checks that every role in a preset is in the
+  SVG layers or drawn by the renderer, and that the first preset matches the
+  drawings.
+- Open the Colors tab of the studio and try the presets while a clip plays. Try
+  the extremes too, such as the darkest skin with each outline, and white hair.
+  Take screenshots and look at them.
+- Write the settings and the reasons for any color you had to adjust in the
+  `LOG.md` of the asset.
 
 ## Tracing
 

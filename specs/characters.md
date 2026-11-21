@@ -27,6 +27,16 @@ with the [character studio](studio.md).
       lines of the character, so that the lines suit the other colors.
 - [ ] The first color preset of each setting is the default, and it has the
       colors that the character has in the library.
+- [ ] Every character and prop in the library has color settings from the time
+      it is added, for the colors that a user would want to change. A person has
+      settings for the skin, the hair, the eyes, the clothes and the outline, an
+      animal for its fur or feathers, and a plant for its leaves or flowers.
+- [ ] Each color setting has a range of presets that suit the character, such as
+      natural hair colors from blond to black and a few playful ones, such as
+      blue.
+- [ ] A color setting colors the shades and the details of a thing together,
+      such as the dark and the light shades of the leaves or the sole of a shoe,
+      so that they still match.
 - [ ] If a character gets new parts, a saved cartoon still shows its actors in
       the colors that the user picked.
 - [x] Each layer of a character has its own place in the draw order, so the

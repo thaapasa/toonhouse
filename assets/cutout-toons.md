@@ -365,6 +365,9 @@ his [log](packs/sunny/characters/wizard/LOG.md) describes how it was set up:
    `build-rig-2d.ts` wrote, and the face coordinates from step 5.
 3. Add the name of the character in Finnish and English to the translations of
    the web app and the studio, under `character.<pack>/<name>`.
+4. Add the color settings of the character to `rig.json`, as "Color settings" in
+   [CLAUDE.md](CLAUDE.md) describes, and try them in the Colors tab of the
+   studio.
 
 The studio finds the folder by itself. Start it with `pnpm studio` and play each
 clip on the new character.
