@@ -16,8 +16,17 @@ with the [character studio](studio.md).
 - [ ] The color roles and the color presets are made by hand for each character
       or prop, so that every preset is a set of colors that suits that
       character.
-- [ ] A color preset can set any of the color roles. A role that the preset
-      doesn't set keeps the color that the character has in the library.
+- [ ] A color preset sets the color roles of its color setting. A role that no
+      setting colors keeps the color that the character has in the library.
+- [ ] A character or a prop has color settings, such as the skin, the hair and
+      the shirt. Each setting has its own color presets, and the user picks one
+      preset for each setting.
+- [ ] A color preset of a setting can color several roles, such as the shirt and
+      the stripes on it.
+- [ ] The outline is a color setting of its own, with one color for all the
+      lines of the character, so that the lines suit the other colors.
+- [ ] The first color preset of each setting is the default, and it has the
+      colors that the character has in the library.
 - [ ] If a character gets new parts, a saved cartoon still shows its actors in
       the colors that the user picked.
 - [x] Each layer of a character has its own place in the draw order, so the
@@ -30,10 +39,6 @@ with the [character studio](studio.md).
 
 ## Open questions
 
-- Is a color preset one set of all the colors, or can the user pick the skin,
-  the hair and the clothes from separate presets?
-- Can a color preset change the outline color, such as a lighter outline for a
-  dark character?
 - Can an asset draw part of itself with a script, with the colors from the color
   preset? The emo character's skirt plaid is drawn by a script at build time,
   because a redrawn plaid comes out as blotches. If the app ran such scripts, a

@@ -1,4 +1,4 @@
-import type { PartId, Pt, Rig } from '@toonhouse/model';
+import type { PartId, Pt, Rig, RoleColors } from '@toonhouse/model';
 import { partBounds, type RigDrawing } from '@toonhouse/renderer';
 import {
   Drawing,
@@ -35,6 +35,8 @@ const unit = (deg: number): Pt => ({
 interface Props {
   prefix: string;
   parts: PartSources;
+  /** The colors of the color roles, to preview a color preset. */
+  colors: RoleColors;
   rig: Rig;
   part: PartId;
   /** The rest angles of the piece. */
@@ -279,14 +281,18 @@ export function PieceView(props: Props) {
           viewBox={`${box.x} ${box.y} ${box.width} ${box.height}`}
           aria-hidden="true"
         >
-          <PartSymbols prefix={prefix} sources={parts} />
+          <PartSymbols prefix={prefix} sources={parts} colors={props.colors} />
           {content}
         </svg>
       )}
 
       <div className="preview" aria-label={tr('preview')}>
         <svg viewBox={previewBox} aria-hidden="true">
-          <PartSymbols prefix={`${prefix}-preview`} sources={parts} />
+          <PartSymbols
+            prefix={`${prefix}-preview`}
+            sources={parts}
+            colors={props.colors}
+          />
           <Drawing node={props.drawing.node} prefix={`${prefix}-preview`} />
         </svg>
       </div>

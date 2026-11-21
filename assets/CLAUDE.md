@@ -391,6 +391,15 @@ of that character. See [specs/characters.md](../specs/characters.md).
   logo on it. The script can't split one color into two roles.
 - Treat the names as part of the asset, like the names of the parts. Saved
   cartoons will refer to them once the app has color presets.
+- Give a class to every path that the user can recolor, also in the parts that
+  you write by hand, such as a mouth patch in the color of the skin.
+
+The color settings and their color presets are in `colorSettings` of `rig.json`,
+written by hand for each character. Give the first preset of each setting the
+colors of the drawings, and pick the other presets so that they suit the
+character. If the renderer draws a part in a color whose key is not the name of
+a role, such as the sleeves of a shirt, map it to the role in `colorRoles`. See
+"Colors" in [ARCHITECTURE.md](../ARCHITECTURE.md).
 
 ### Limits
 

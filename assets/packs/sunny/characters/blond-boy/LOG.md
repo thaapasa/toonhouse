@@ -36,3 +36,19 @@ done
   the mouth, the lid line, the ear and its curl on the head, the finger gaps and
   the creases on the hands, the waistband and the split line of the torso, and
   the lace outlines and the sole line of the shoe.
+
+## Color presets
+
+The boy has color settings for the skin, the hair, the eyes, the shirt, the
+shorts, the shoes and the outline. An eye preset colors the pupil. A shirt
+preset colors the stripes too, and a shoe preset colors the trim. The eyelids
+follow the skin, and the sleeves follow the shirt. The mouth patch got the class
+`c-skin`, so that it follows the skin.
+
+The outline is one color for the whole boy. The lines of the face, `colors.line`
+and the line of the mouth patch, were `#44260c`, next to the `#422517` of the
+outline. They are now the outline color, and `colors.line` follows the outline
+role, so that the outline preset colors every line.
+
+The black hair is `#2e2826`, a little lighter than the outline, so that the
+outline still shows around the hair.

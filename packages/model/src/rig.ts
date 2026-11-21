@@ -37,6 +37,41 @@ interface RigBase {
    * after the entry before them in the default order.
    */
   drawOrder?: string[];
+  /**
+   * The colors that the user can change, such as the hair or the shirt, in
+   * the order that the app shows them.
+   */
+  colorSettings?: ColorSetting[];
+  /**
+   * The color role of each color that the renderer draws, if it isn't the
+   * role of the same name. The keys are the keys of `colors`, and for a
+   * cutout also `sleeve` and `leg`. For example, `lid: "skin"` makes the
+   * eyelids follow the skin.
+   */
+  colorRoles?: Record<string, string>;
+}
+
+/**
+ * The colors of a rig by color role, such as `{ "hair": "#8a5a2b" }`. A role
+ * is the `c-<role>` class of the paths in the SVG layers.
+ */
+export type RoleColors = Record<string, string>;
+
+/** A color that the user can change, such as the hair, with its presets. */
+export interface ColorSetting {
+  /** A kebab-case name, unique within the rig, such as `hair`. */
+  id: string;
+  /**
+   * The first preset is the default, and it has the colors of the drawings.
+   * Saved cartoons refer to the presets by id.
+   */
+  presets: ColorPreset[];
+}
+
+export interface ColorPreset {
+  /** A kebab-case name, unique within the setting, such as `dark-brown`. */
+  id: string;
+  colors: RoleColors;
 }
 
 export type RigPartId =

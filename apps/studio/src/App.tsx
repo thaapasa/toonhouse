@@ -4,14 +4,17 @@ import {
   type Camera,
   clipOf,
   clipsFor,
+  type ColorChoice,
+  colorRig,
   drawRig,
   FPS,
   partBounds,
+  presetColors,
   restClip,
   wholeBackground,
 } from '@toonhouse/renderer';
 import { usePlayback } from '@toonhouse/stage';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { SAVE_RIG_URL } from '../server/api.ts';
 import { BACKGROUNDS } from './backgrounds.ts';
@@ -46,6 +49,8 @@ const KNOWN = {
   props: PROPS.map((c) => c.id),
   backgrounds: BACKGROUNDS.map((b) => b.id),
 };
+
+const NO_CHOICE: ColorChoice = {};
 
 const sameRig = (a: Rig, b: Rig) => JSON.stringify(a) === JSON.stringify(b);
 
@@ -86,6 +91,11 @@ export function App() {
   const [target, setTarget] = useState<RigTarget | null>(null);
   const [angleId, setAngleId] = useState<string | null>(null);
   const [status, setStatus] = useState<SaveStatus>({ state: 'idle' });
+  // The color presets that the views show, by character. Only a preview, so
+  // the rig doesn't change.
+  const [colorChoices, setColorChoices] = useState<Record<string, ColorChoice>>(
+    {},
+  );
 
   const character = RIGS.find((c) => c.id === characterId)!;
   const rigOf = (id: string) => {
@@ -116,7 +126,14 @@ export function App() {
     speed,
   });
   const frame = clip.frameAt(playback.t);
-  const drawing = drawRig(rig, frame, { facing: view.facing });
+  const colorChoice = colorChoices[characterId] ?? NO_CHOICE;
+  const roleColors = useMemo(
+    () => presetColors(rig, colorChoice),
+    [rig, colorChoice],
+  );
+  const drawing = drawRig(colorRig(rig, roleColors), frame, {
+    facing: view.facing,
+  });
 
   const pickClip = (id: ClipId) => {
     if (background) setBackgroundClipId(id);
@@ -143,6 +160,11 @@ export function App() {
   let guest: Guest | null = null;
   const guestAsset = RIGS.find((c) => c.id === guestId);
   const guestRig = guestId === null ? undefined : rigOf(guestId);
+  const guestChoice = (guestId && colorChoices[guestId]) || NO_CHOICE;
+  const guestColors = useMemo(
+    () => (guestRig ? presetColors(guestRig, guestChoice) : {}),
+    [guestRig, guestChoice],
+  );
   if (background && guestAsset && guestRig) {
     const gClips = clipsFor(guestRig.kind);
     const gClip = gClips.find((c) => c.id === clipId) ?? gClips[0]!;
@@ -150,10 +172,13 @@ export function App() {
     guest = {
       actor: {
         id: guestAsset.id,
-        node: drawRig(guestRig, gFrame, { facing: view.facing }).node,
+        node: drawRig(colorRig(guestRig, guestColors), gFrame, {
+          facing: view.facing,
+        }).node,
         ...(guestAt ?? background.background.ground.start),
       },
       parts: guestAsset.parts,
+      colors: guestColors,
     };
   }
   const rigName = (c: (typeof RIGS)[number]) => {
@@ -348,6 +373,7 @@ export function App() {
             <PieceView
               prefix={prefix}
               parts={character.parts}
+              colors={roleColors}
               rig={rig}
               part={selected.part}
               drawing={drawing}
@@ -364,6 +390,7 @@ export function App() {
             <Viewport
               prefix={prefix}
               parts={character.parts}
+              colors={roleColors}
               drawing={drawing}
               travel={'travel' in frame ? frame.travel : 0}
               view={view}
@@ -385,6 +412,10 @@ export function App() {
           angleMode={angleMode}
           onAngle={changeAngle}
           onRig={setRig}
+          colorChoice={colorChoice}
+          onColorChoice={(c) =>
+            setColorChoices((all) => ({ ...all, [characterId]: c }))
+          }
           dirty={dirty}
           status={status}
           onSave={() => void save()}

@@ -93,8 +93,8 @@
     "armLength": 162,
     "legLength": 196.91,
     "armWidth": 28,
-    "legWidth": 30,
-    "outlineWidth": 6,
+    "legWidth": 28,
+    "outlineWidth": 5,
     "sleeve": {
       "color": "#e80000",
       "length": 0.2,
@@ -104,7 +104,7 @@
   "colors": {
     "outline": "#422517",
     "skin": "#fbc688",
-    "line": "#44260c",
+    "line": "#422517",
     "lid": "#fbc688",
     "mouth": "#5a1414",
     "tongue": "#e74f5a"
@@ -148,8 +148,142 @@
     }
   },
   "motion": {
-    "groundOffset": 4,
+    "groundOffset": 6,
     "hipHeight": 215,
     "feetOffset": -20
-  }
+  },
+  "colorRoles": {
+    "lid": "skin",
+    "line": "outline",
+    "sleeve": "shirt"
+  },
+  "colorSettings": [
+    {
+      "id": "skin",
+      "presets": [
+        { "id": "light", "colors": { "skin": "#fbc688" } },
+        { "id": "pale", "colors": { "skin": "#fde0c4" } },
+        { "id": "tan", "colors": { "skin": "#e0a46c" } },
+        { "id": "brown", "colors": { "skin": "#b8784a" } },
+        { "id": "dark-brown", "colors": { "skin": "#8a5434" } },
+        { "id": "deep", "colors": { "skin": "#5e3822" } }
+      ]
+    },
+    {
+      "id": "hair",
+      "presets": [
+        { "id": "blond", "colors": { "hair": "#f9c900" } },
+        { "id": "light-blond", "colors": { "hair": "#fbe48a" } },
+        { "id": "red", "colors": { "hair": "#d9561c" } },
+        { "id": "brown", "colors": { "hair": "#9a5b24" } },
+        { "id": "dark-brown", "colors": { "hair": "#5a3218" } },
+        { "id": "black", "colors": { "hair": "#2e2826" } },
+        { "id": "white", "colors": { "hair": "#eeeae0" } },
+        { "id": "blue", "colors": { "hair": "#3a7bd5" } },
+        { "id": "pink", "colors": { "hair": "#f07ab0" } }
+      ]
+    },
+    {
+      "id": "eyes",
+      "presets": [
+        { "id": "black", "colors": { "pupil": "#0a0704" } },
+        { "id": "brown", "colors": { "pupil": "#5a3418" } },
+        { "id": "blue", "colors": { "pupil": "#2a6fd0" } },
+        { "id": "green", "colors": { "pupil": "#2f8a3a" } },
+        { "id": "gray", "colors": { "pupil": "#6b7280" } }
+      ]
+    },
+    {
+      "id": "shirt",
+      "presets": [
+        {
+          "id": "red",
+          "colors": { "shirt": "#e80000", "shirt-pattern": "#0a0505" }
+        },
+        {
+          "id": "blue",
+          "colors": { "shirt": "#2f6fe0", "shirt-pattern": "#f7f6f5" }
+        },
+        {
+          "id": "green",
+          "colors": { "shirt": "#2fb344", "shirt-pattern": "#f9d000" }
+        },
+        {
+          "id": "yellow",
+          "colors": { "shirt": "#f9d000", "shirt-pattern": "#e80000" }
+        },
+        {
+          "id": "orange",
+          "colors": { "shirt": "#f57c00", "shirt-pattern": "#0a0505" }
+        },
+        {
+          "id": "purple",
+          "colors": { "shirt": "#8a3fc8", "shirt-pattern": "#f9d000" }
+        },
+        {
+          "id": "white",
+          "colors": { "shirt": "#f7f6f5", "shirt-pattern": "#2f6fe0" }
+        },
+        {
+          "id": "black",
+          "colors": { "shirt": "#2a2626", "shirt-pattern": "#f7f6f5" }
+        }
+      ]
+    },
+    {
+      "id": "shorts",
+      "presets": [
+        { "id": "green", "colors": { "shorts": "#0eed00" } },
+        { "id": "blue", "colors": { "shorts": "#3b5fa8" } },
+        { "id": "navy", "colors": { "shorts": "#24324f" } },
+        { "id": "khaki", "colors": { "shorts": "#c8a66a" } },
+        { "id": "red", "colors": { "shorts": "#d42020" } },
+        { "id": "gray", "colors": { "shorts": "#8c8c8c" } },
+        { "id": "black", "colors": { "shorts": "#2a2626" } }
+      ]
+    },
+    {
+      "id": "shoes",
+      "presets": [
+        {
+          "id": "red",
+          "colors": { "shoe": "#f90000", "shoe-trim": "#f7f6f5" }
+        },
+        {
+          "id": "blue",
+          "colors": { "shoe": "#2f6fe0", "shoe-trim": "#f7f6f5" }
+        },
+        {
+          "id": "green",
+          "colors": { "shoe": "#2fb344", "shoe-trim": "#f7f6f5" }
+        },
+        {
+          "id": "yellow",
+          "colors": { "shoe": "#f9d000", "shoe-trim": "#f7f6f5" }
+        },
+        {
+          "id": "brown",
+          "colors": { "shoe": "#8a5434", "shoe-trim": "#e8d8b8" }
+        },
+        {
+          "id": "black",
+          "colors": { "shoe": "#2a2626", "shoe-trim": "#f7f6f5" }
+        },
+        {
+          "id": "white",
+          "colors": { "shoe": "#f7f6f5", "shoe-trim": "#c9c6c0" }
+        }
+      ]
+    },
+    {
+      "id": "outline",
+      "presets": [
+        { "id": "dark-brown", "colors": { "outline": "#422517" } },
+        { "id": "black", "colors": { "outline": "#161414" } },
+        { "id": "charcoal", "colors": { "outline": "#3a3a3f" } },
+        { "id": "navy", "colors": { "outline": "#1c2444" } },
+        { "id": "plum", "colors": { "outline": "#3b1d33" } }
+      ]
+    }
+  ]
 }

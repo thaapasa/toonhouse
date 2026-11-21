@@ -62,8 +62,12 @@ for something else or too vague.
 - **Setting**: something about a character or a prop that the user can change,
   such as a color or the size. A setting gets its value from the library, then
   the cast member, then the actor. Not: option, config.
-- **Color preset**: a named set of colors for a character or a prop, such as the
-  colors of all its clothes at once. A preset gives a color to color roles.
+- **Color setting**: a setting for one color of a character or a prop, such as
+  the hair, the shirt or the outline. It has its own color presets, and the user
+  picks one of them.
+- **Color preset**: a named choice of colors in a color setting, such as dark
+  brown hair or a blue shirt with white stripes. A preset gives a color to one
+  or more color roles.
 - **Color role**: one color of a character or a prop that a color preset can
   change, such as the skin, the shirt or the logo on the shirt. The role is the
   same in every part, so `skin` colors the head, the hands and the drawn limbs.

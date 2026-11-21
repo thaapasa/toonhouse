@@ -44,8 +44,12 @@ asset files in the repo. See [Characters](characters.md).
       them.
   - [ ] Developer can see the color roles of a character or a prop and which
         parts of it each role colors.
-  - [ ] Developer can make a color preset by picking a color for each role, and
-        see the character in it while a clip plays.
+  - [ ] Developer can make a color preset for a color setting by picking a color
+        for each role that the setting colors, and see the character in it while
+        a clip plays.
+- [x] Developer can try the color presets of a character or a prop while a clip
+      plays. The studio shows the character in them, but doesn't save the choice
+      to the rig.
 - [x] The URL names the picked character or prop and the picked background, so
       that a reload shows them again.
 - [x] The studio isn't part of the production build.

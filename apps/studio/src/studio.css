@@ -12,6 +12,11 @@
   --faint: #8d909b;
   --accent: #f2b544;
   --on-accent: #15161a;
+  /* The stage behind a character: a mid gray, so that both the dark outlines
+     and the light colors show. */
+  --stage: #a3a29e;
+  --stage-dot: #8f8e8a;
+  --stage-line: #6f6e6a;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
@@ -217,8 +222,12 @@ button:disabled {
   min-height: 0;
   position: relative;
   overflow: hidden;
-  background-color: #191a1f;
-  background-image: radial-gradient(circle, #2c2e36 1px, transparent 1.2px);
+  background-color: var(--stage);
+  background-image: radial-gradient(
+    circle,
+    var(--stage-dot) 1px,
+    transparent 1.2px
+  );
   background-size: 20px 20px;
 }
 
@@ -231,11 +240,11 @@ button:disabled {
 }
 
 .ground-line {
-  stroke: #3a3d46;
+  stroke: var(--stage-line);
 }
 
 .ground-mark {
-  stroke: #4a4d57;
+  stroke: var(--stage-line);
   stroke-linecap: round;
 }
 
@@ -476,7 +485,7 @@ button:disabled {
 
 .piece-bounds {
   fill: none;
-  stroke: #4a4d57;
+  stroke: var(--stage-line);
 }
 
 .toolbar-title {
@@ -493,7 +502,7 @@ button:disabled {
   width: 150px;
   height: 167px;
   border-radius: 9px;
-  background: var(--panel);
+  background: var(--stage);
   box-shadow: 0 0 0 1px var(--line);
 }
 
@@ -990,4 +999,43 @@ button:disabled {
 
 .tune-reset:disabled {
   opacity: 0.35;
+}
+
+/* Color presets */
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 6px 0;
+}
+
+.swatch {
+  width: 34px;
+  height: 34px;
+  padding: 3px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+}
+
+.swatch:hover {
+  border-color: var(--hover);
+}
+
+.swatch[aria-pressed='true'] {
+  border-color: var(--accent);
+}
+
+.swatch-colors {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  border: 1px solid rgb(255 255 255 / 25%);
+  border-radius: 50%;
+}
+
+.swatch-colors > span {
+  flex: 1;
 }

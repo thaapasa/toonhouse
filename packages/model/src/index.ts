@@ -46,6 +46,8 @@ export type {
   BirdHead,
   BirdPartId,
   BirdRig,
+  ColorPreset,
+  ColorSetting,
   CutoutFace,
   CutoutMotion,
   CutoutRig,
@@ -62,5 +64,6 @@ export type {
   RigLayer,
   RigPart,
   RigPartId,
+  RoleColors,
   StaffHold,
 } from './rig.ts';

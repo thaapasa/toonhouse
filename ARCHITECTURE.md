@@ -141,6 +141,28 @@ list leaves out an entry, such as a layer added later, the entry goes after the
 entry before it in the default order. The developer changes the draw order in
 the character studio.
 
+### Colors
+
+The paths of the SVG layers have the class of their color role, such as `c-skin`
+or `c-shirt`. A rig lists its color settings in `colorSettings`, such as the
+hair or the shirt, and each setting has a list of color presets. A preset gives
+colors to one or more roles, so a shirt preset can color the stripes too. The
+first preset of a setting is the default, and it has the colors of the drawings.
+
+`presetColors` in `packages/renderer` turns the presets that the user picked
+into a color for each role. Two places use those colors:
+
+- `PartSymbols` in `packages/stage` paints each path of a role in the color of
+  the role, when it parses the SVG layers.
+- `colorRig` gives the colors to what the renderer draws itself, such as the
+  rubber-hose limbs, the sleeves and the eyelids. Each drawn color follows the
+  role of the same name, such as `skin` or `outline`, or the role that
+  `colorRoles` of the rig names for it, such as `lid: "skin"`.
+
+The colors are data of the rig, so the renderer stays pure. A test in
+`apps/studio` checks that every role in a preset is in the SVG layers or drawn
+by the renderer, and that the first preset matches the drawings.
+
 ### Backgrounds
 
 Each background has a folder in `assets/packs/<pack>/backgrounds/` with a

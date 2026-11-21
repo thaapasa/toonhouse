@@ -1,4 +1,4 @@
-import type { BackgroundFrame, Pt } from '@toonhouse/model';
+import type { BackgroundFrame, Pt, RoleColors } from '@toonhouse/model';
 import {
   type Camera,
   clamp,
@@ -36,6 +36,7 @@ const ZOOM_STEP = Math.SQRT2;
 export interface Guest {
   actor: SceneActor;
   parts: PartSources;
+  colors: RoleColors;
 }
 
 /** A character or a prop that the developer can put on the background. */
@@ -303,6 +304,7 @@ export function BackgroundView(props: Props) {
             <PartSymbols
               prefix={actorPrefix(prefix, guest.actor.id)}
               sources={guest.parts}
+              colors={guest.colors}
             />
           )}
           <clipPath id={`${prefix}-frame`}>

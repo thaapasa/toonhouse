@@ -1,4 +1,5 @@
 import type { Pt, Rig } from '@toonhouse/model';
+import type { ColorChoice } from '@toonhouse/renderer';
 import { useState } from 'react';
 
 import { useI18n } from '../i18n/index.tsx';
@@ -13,6 +14,7 @@ import {
   type RigTarget,
 } from '../rigEdit.ts';
 import { useRigNames } from '../rigNames.ts';
+import { ColorPanel } from './ColorPanel.tsx';
 import { DrawOrderPanel } from './DrawOrderPanel.tsx';
 import { ArrowIcon, TurnIcon } from './icons.tsx';
 import { TuningPanel } from './TuningPanel.tsx';
@@ -38,6 +40,9 @@ interface Props {
   onAngle(field: AngleField, deg: number): void;
   /** Changes the rig, such as its draw order. */
   onRig(rig: Rig): void;
+  /** The color presets that the views preview. They aren't saved. */
+  colorChoice: ColorChoice;
+  onColorChoice(choice: ColorChoice): void;
   dirty: boolean;
   status: SaveStatus;
   onSave(): void;
@@ -51,7 +56,9 @@ export function Inspector(props: Props) {
   const { tr } = useI18n();
   const names = useRigNames();
   const [step, setStep] = useState<number>(1);
-  const [tab, setTab] = useState<'rig' | 'tuning' | 'drawOrder'>('rig');
+  const [tab, setTab] = useState<'rig' | 'tuning' | 'drawOrder' | 'colors'>(
+    'rig',
+  );
   const found = findTarget(rig, target);
   const list = attachments(rig);
   const groups = [...new Set(list.map((a) => a.group))];
@@ -96,7 +103,7 @@ export function Inspector(props: Props) {
   return (
     <aside className="inspector" aria-label={tr('properties')}>
       <div className="tabs" role="tablist">
-        {(['rig', 'tuning', 'drawOrder'] as const).map((id) => (
+        {(['rig', 'tuning', 'drawOrder', 'colors'] as const).map((id) => (
           <button
             key={id}
             type="button"
@@ -117,6 +124,15 @@ export function Inspector(props: Props) {
       {tab === 'drawOrder' && (
         <div className="inspector-body">
           <DrawOrderPanel rig={rig} onRig={props.onRig} />
+        </div>
+      )}
+      {tab === 'colors' && (
+        <div className="inspector-body">
+          <ColorPanel
+            rig={rig}
+            choice={props.colorChoice}
+            onChoice={props.onColorChoice}
+          />
         </div>
       )}
       {/* Hidden rather than removed, so that it keeps its scroll position. */}

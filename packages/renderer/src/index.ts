@@ -50,6 +50,8 @@ export {
   HIP_HEIGHT,
   restClip,
 } from './clips/index.ts';
+export type { ColorChoice } from './colors.ts';
+export { colorRig, presetColors } from './colors.ts';
 export type {
   Bounds,
   ClipShape,
