@@ -323,9 +323,11 @@ bundles them into the web app, as in the studio.
 The stage asks the renderer where each actor is at the current time. The
 renderer goes through the actions of the actor in the order of their times: an
 action plays its clip until the next action starts, and a walk moves the actor
-along its path at the speed of the walk clip, so that the feet don't slide. With
-a perspective, each line of the path uses the mean of the actor sizes at its
-ends, so the feet can slide a little when an actor walks toward the camera.
+along its path as far as the `travel` of the walk clip says, so that the feet
+don't slide. The travel doesn't have to be even: a hop stays in place while the
+rabbit crouches. With a perspective, the actor gets smaller further away, so the
+same travel covers fewer frame pixels there. The size is linear in y, so the
+renderer can work out the distance along a line of the path exactly.
 
 The stage shows the frame and a band around it, wide enough for the largest
 character or prop of the library at the size that the background gives the

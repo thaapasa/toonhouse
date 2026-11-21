@@ -1,7 +1,8 @@
 // Where the actors of a scene are and what they do at a time `t`. An action
-// goes on until the next action of the same actor. A walk follows its path at
-// the speed of its clip, so that the feet don't slide, and when the actor gets
-// to the last point, it stands still until its next action.
+// goes on until the next action of the same actor. A walk moves the actor
+// along its path as far as its clip has moved the rig, so that the feet don't
+// slide, and when the actor gets to the last point, it stands still until its
+// next action.
 import type {
   Action,
   Actor,
@@ -13,7 +14,7 @@ import type {
   Scene,
 } from '@toonhouse/model';
 
-import { actorScaleAt } from './background.ts';
+import { actorScaleAt, minScaleY } from './background.ts';
 import { bubbleEnd } from './bubbles/bubble.ts';
 import { clipsFor } from './clips/index.ts';
 
@@ -23,8 +24,8 @@ export const MIN_SCENE_LENGTH = 10;
 const SCENE_TAIL = 4;
 
 /**
- * How fast a clip moves its rig forward, in rig pixels a second. 0 for the
- * clips that stay in place.
+ * How fast a clip moves its rig forward on average, in rig pixels a second.
+ * 0 for the clips that stay in place.
  */
 export function clipSpeed(clip: Clip): number {
   const end = clip.frameAt(clip.duration);
@@ -68,62 +69,138 @@ export interface ActorState {
   action: Action | null;
 }
 
+/** How far a clip has moved its rig at `t` within one loop, in rig pixels. */
+function frameTravel(clip: Clip, t: number): number {
+  const frame = clip.frameAt(t);
+  return frame.kind === 'background' ? 0 : frame.travel;
+}
+
+/**
+ * How far a clip has moved its rig at the time `ct` in the clip, in rig
+ * pixels, counting the loops before it. The scene assumes that `travel` never
+ * goes down within a loop.
+ */
+function travelAt(clip: Clip, ct: number): number {
+  const loops = Math.floor(ct / clip.duration);
+  return (
+    loops * frameTravel(clip, clip.duration) +
+    frameTravel(clip, ct - loops * clip.duration)
+  );
+}
+
+/**
+ * The first time in a clip when its rig has moved `travel` rig pixels from the
+ * start of the clip. Within a loop it searches by halves, since the clips
+ * only give the travel at a time.
+ */
+function clipTimeAtTravel(clip: Clip, travel: number): number {
+  const perLoop = frameTravel(clip, clip.duration);
+  const loops = Math.floor(travel / perLoop);
+  const rest = travel - loops * perLoop;
+  let lo = 0;
+  let hi = rest > 0 ? clip.duration : 0;
+  for (let i = 0; i < 60 && hi > 0; i++) {
+    const mid = (lo + hi) / 2;
+    if (frameTravel(clip, mid) >= rest) hi = mid;
+    else lo = mid;
+  }
+  return loops * clip.duration + hi;
+}
+
+/**
+ * How far the rig of a walking action has moved `elapsed` seconds after the
+ * action starts, in rig pixels.
+ */
+function walkedAt(clip: Clip, action: Action, elapsed: number): number {
+  const start = clipTime(action, clip.duration, 0);
+  return (
+    travelAt(clip, clipTime(action, clip.duration, elapsed)) -
+    travelAt(clip, start)
+  );
+}
+
+/** How long a walking action takes to move its rig `distance` rig pixels. */
+function timeToWalk(clip: Clip, action: Action, distance: number): number {
+  const start = clipTime(action, clip.duration, 0);
+  const end = clipTimeAtTravel(clip, travelAt(clip, start) + distance);
+  return Math.max(0, (end - start) / actionSpeed(action));
+}
+
+/**
+ * The rig pixels that an actor walks on the line from `a` to `b`, and the
+ * point on the line after `d` rig pixels. `scaleAt` gives the frame pixels
+ * for one rig pixel at a height. It must be linear in y between `a` and `b`,
+ * so that both have a closed form: the integral of 1 / scale over the line.
+ */
+function linearLine(a: Pt, b: Pt, scaleAt: (y: number) => number) {
+  const length = Math.hypot(b.x - a.x, b.y - a.y);
+  const s0 = scaleAt(a.y);
+  const grow = (scaleAt(b.y) - s0) / s0;
+  const even = Math.abs(grow) < 1e-9;
+  return {
+    cost: even ? length / s0 : (length * Math.log1p(grow)) / (s0 * grow),
+    at(d: number): Pt {
+      const u = even
+        ? (d * s0) / length
+        : Math.expm1((d * s0 * grow) / length) / grow;
+      return { x: a.x + (b.x - a.x) * u, y: a.y + (b.y - a.y) * u };
+    },
+  };
+}
+
+/**
+ * The parts of the line from `a` to `b` where the size of the actor is linear
+ * in y. The line splits where it crosses `knee`, see `minScaleY`.
+ */
+function linearParts(a: Pt, b: Pt, knee: number | null): [Pt, Pt][] {
+  if (knee === null || (a.y - knee) * (b.y - knee) >= 0) return [[a, b]];
+  const u = (knee - a.y) / (b.y - a.y);
+  const mid = { x: a.x + (b.x - a.x) * u, y: knee };
+  return [
+    [a, mid],
+    [mid, b],
+  ];
+}
+
 interface WalkResult {
   at: Pt;
   facing: 1 | -1;
-  /** How long it took to get to the last point, or null if not there yet. */
+  /**
+   * The rig pixels of the whole path if the actor got to the last point, or
+   * null if not there yet.
+   */
   arrived: number | null;
 }
 
 /**
- * Walks `time` seconds from `from` through the points. `speedAt` gives the
- * speed in frame pixels a second at a height of the frame, since an actor is
- * smaller further away. Each line between two points uses the mean of the
- * speeds at its ends.
+ * Walks `distance` rig pixels from `from` through the points. An actor is
+ * smaller further away, so a rig pixel covers fewer frame pixels there.
  */
 function walkAlong(
+  bg: Background,
+  actor: Actor,
   from: Pt,
   path: readonly Pt[],
   facing: 1 | -1,
-  speedAt: (y: number) => number,
-  time: number,
+  distance: number,
 ): WalkResult {
+  const scaleAt = (y: number) => actorScaleAt(bg, y) * actor.scale;
+  const knee = minScaleY(bg);
   let at = from;
-  let left = time;
+  let left = distance;
   let spent = 0;
   for (const to of path) {
     const dx = to.x - at.x;
-    const length = Math.hypot(dx, to.y - at.y);
     if (Math.abs(dx) > 0.5) facing = dx > 0 ? 1 : -1;
-    const speed = (speedAt(at.y) + speedAt(to.y)) / 2;
-    const needs = speed > 0 ? length / speed : 0;
-    if (needs > left) {
-      const u = left / needs;
-      return {
-        at: { x: at.x + dx * u, y: at.y + (to.y - at.y) * u },
-        facing,
-        arrived: null,
-      };
+    for (const [a, b] of linearParts(at, to, knee)) {
+      const line = linearLine(a, b, scaleAt);
+      if (line.cost > left) return { at: line.at(left), facing, arrived: null };
+      left -= line.cost;
+      spent += line.cost;
     }
-    left -= needs;
-    spent += needs;
     at = to;
   }
   return { at, facing, arrived: spent };
-}
-
-/**
- * Frame pixels a second for an actor walking with the clip of the action at
- * the height `y`.
- */
-function speedOf(
-  bg: Background,
-  actor: Actor,
-  clip: Clip,
-  action: Action,
-): (y: number) => number {
-  const speed = clipSpeed(clip) * actionSpeed(action);
-  return (y) => speed * actorScaleAt(bg, y) * actor.scale;
 }
 
 /**
@@ -150,31 +227,29 @@ export function actorStateAt(
     const elapsed = until - action.t;
     if (clipSpeed(clip) > 0 && action.path?.length) {
       const walk = walkAlong(
+        bg,
+        actor,
         at,
         action.path,
         facing,
-        speedOf(bg, actor, clip, action),
-        elapsed,
+        walkedAt(clip, action, elapsed),
       );
       at = walk.at;
       facing = walk.facing;
       if (current) {
+        if (walk.arrived === null) {
+          const clipT = clipTime(action, clip.duration, elapsed);
+          return { at, facing, clip: clip.id, clipT, action };
+        }
         // After the last point, the actor stands still until its next action.
-        return walk.arrived === null
-          ? {
-              at,
-              facing,
-              clip: clip.id,
-              clipT: clipTime(action, clip.duration, elapsed),
-              action,
-            }
-          : {
-              at,
-              facing,
-              clip: clipsFor(kind)[0]!.id,
-              clipT: elapsed - walk.arrived,
-              action,
-            };
+        const arrived = timeToWalk(clip, action, walk.arrived);
+        return {
+          at,
+          facing,
+          clip: clipsFor(kind)[0]!.id,
+          clipT: Math.max(0, elapsed - arrived),
+          action,
+        };
       }
     } else if (current) {
       const clipT = clipTime(action, clip.duration, elapsed);
@@ -197,13 +272,15 @@ export function walkTime(
   const clip = clipOf(kind, action.clip);
   if (clipSpeed(clip) === 0 || !action.path?.length) return null;
   const from = actorStateAt(actor, kind, bg, action.t);
-  return walkAlong(
+  const walk = walkAlong(
+    bg,
+    actor,
     from.at,
     action.path,
     from.facing,
-    speedOf(bg, actor, clip, action),
     Infinity,
-  ).arrived;
+  );
+  return timeToWalk(clip, action, walk.arrived ?? 0);
 }
 
 /**

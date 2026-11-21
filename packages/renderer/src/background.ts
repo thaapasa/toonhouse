@@ -194,6 +194,20 @@ export function actorScaleAt(
 }
 
 /**
+ * The height of the frame where `actorScaleAt` stops making actors smaller.
+ * Between it and the bottom of the frame, the size is linear in y. Null if
+ * the size is the same at every height.
+ */
+export function minScaleY(bg: Background): number | null {
+  const { perspective } = bg.ground;
+  if (!perspective) return null;
+  return (
+    perspective.horizon +
+    MIN_PERSPECTIVE * (perspective.y - perspective.horizon)
+  );
+}
+
+/**
  * The background and the actors as the camera sees them, in the pixels of
  * the picture, which has the size of the frame. The actors stand on the
  * ground layer and are drawn right after it, so the layers after the ground

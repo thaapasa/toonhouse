@@ -1,7 +1,13 @@
 import type { Pt } from '@toonhouse/model';
 import { describe, expect, it } from 'vitest';
 
-import { outline, SHOUT_SPIKE, THOUGHT_HEIGHT } from './shape.ts';
+import {
+  circle,
+  outline,
+  SHOUT_SPIKE,
+  THOUGHT_HEIGHT,
+  wobble,
+} from './shape.ts';
 
 const UNIT = 40;
 const extent = (points: readonly Pt[]) => ({
@@ -42,5 +48,17 @@ describe('bubble outlines', () => {
     expect(outline('shout', 200, 60, UNIT, 7)).toEqual(
       outline('shout', 200, 60, UNIT, 7),
     );
+  });
+
+  it('closes a wobbly line without a kink', () => {
+    for (const r of [50, 87, 133, 260]) {
+      const round = circle({ x: 0, y: 0 }, r);
+      const offsets = wobble(round, 4, 3).map((p) => Math.hypot(p.x, p.y) - r);
+      const steps = offsets.map(
+        (h, i) => h - offsets[(i - 1 + offsets.length) % offsets.length]!,
+      );
+      const inside = Math.max(...steps.slice(1).map(Math.abs));
+      expect(Math.abs(steps[0]!)).toBeLessThanOrEqual(inside * 1.01);
+    }
   });
 });

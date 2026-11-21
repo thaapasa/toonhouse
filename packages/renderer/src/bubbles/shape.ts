@@ -230,11 +230,22 @@ export function withTail(points: readonly Pt[], tip: Pt, width: number): Pt[] {
   ];
 }
 
+/**
+ * How long the two waves of a wobbly line are along the outline, in frame
+ * pixels. Each is rounded so that a whole number of waves fits around the
+ * outline, and the line has no kink where it closes.
+ */
+const WOBBLE_WAVES = [23 * 2 * Math.PI, 9 * 2 * Math.PI] as const;
+
 /** Moves each point a bit along the outline's normal, so the line looks drawn by hand. */
 export function wobble(points: readonly Pt[], amount: number, seed: number) {
   const n = points.length;
   const p1 = noise(seed, 1) * 6;
   const p2 = noise(seed, 2) * 6;
+  const total = perimeter(points);
+  const [f1, f2] = WOBBLE_WAVES.map(
+    (wave) => (2 * Math.PI * Math.max(1, Math.round(total / wave))) / total,
+  ) as [number, number];
   let along = 0;
   return points.map((p, i) => {
     const prev = points[(i - 1 + n) % n]!;
@@ -245,7 +256,7 @@ export function wobble(points: readonly Pt[], amount: number, seed: number) {
     const ny = -(next.x - prev.x) / len;
     const h =
       amount *
-      (0.6 * Math.sin(along / 23 + p1) + 0.4 * Math.sin(along / 9 + p2));
+      (0.6 * Math.sin(along * f1 + p1) + 0.4 * Math.sin(along * f2 + p2));
     return { x: p.x + nx * h, y: p.y + ny * h };
   });
 }
