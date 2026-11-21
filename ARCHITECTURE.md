@@ -194,14 +194,14 @@ zooms by the same factor, which looks more natural than a zoom that grows evenly
 with the depth. With this formula the view of every layer stays inside the frame
 whenever the view of the ground layer does, so only the camera needs clamping.
 
-A scene stores its start view and a list of camera moves and jumps, and the
-renderer computes the camera at `t` from them. Each move starts from the view
-that the camera holds when the move starts, so the move stores only the view
-that it goes to. Dragging either end of a move then changes only its speed. A
-move zooms by the same factor in each step and moves the view around the one
-point that stays in place on the screen. With that, a zoom into a corner keeps
-the corner still, and each view between two views inside the background is
-inside it too.
+A scene stores its start view and a list of camera entries, which are the camera
+moves and jumps, and the renderer computes the camera at `t` from them. Each
+move starts from the view that the camera holds when the move starts, so the
+move stores only the view that it goes to. Dragging either end of a move then
+changes only its speed. A move zooms by the same factor in each step and moves
+the view around the one point that stays in place on the screen. With that, a
+zoom into a corner keeps the corner still, and each view between two views
+inside the background is inside it too.
 
 The renderer draws a background with its actors as one tree, in the pixels of
 the picture, which has the size of the frame. Each actor is a group that names
@@ -231,6 +231,11 @@ An attached bubble keeps its place as an offset from the ground point of its
 actor, in the pixels of the actor at size 1. The offset grows and shrinks with
 the actor, so that the bubble stays as near to the head, but the bubble itself
 keeps its size.
+
+The bubbles are placed on the ground layer, but the renderer draws them in the
+picture of the camera, after it maps their places through the camera. So a
+bubble keeps its size on the screen when the camera zooms, and it stays inside
+the picture, not only inside the background.
 
 ### Files
 
@@ -415,18 +420,22 @@ the user is no longer its owner, the editor tells the user and stops.
 
 When the editor can't save for now, it keeps the edits in the `localStorage` of
 the browser, and the next editor of the cartoon starts from them and saves them.
-This happens when the login has ended, after a conflict, and when the page goes
-to the background or the editor closes before its edits are saved. While the
-editor can't save, it writes them at most once a second, so that a drag doesn't
-write the whole cartoon on each move. A closed editor sends its edits once more,
-but doesn't try again, so that it can't race the next editor.
+This happens when the login has ended, after a conflict, before the editor loads
+a new version of the app, and when the page goes to the background or the editor
+closes before its edits are saved. While the editor can't save, it writes them
+at most once a second, so that a drag doesn't write the whole cartoon on each
+move. A closed editor sends its edits once more, but doesn't try again, so that
+it can't race the next editor. After a save, the editor removes the kept edits
+only if it kept them or started from them, because another editor of the cartoon
+may have kept its own since.
 
 When the editor opens, it compares the kept edits with the content on the
 server. If the server has the same revision, the editor goes on with the kept
-edits. If the server is one revision ahead from the editor that kept them, that
-editor saved them as it closed, and the editor drops them. Otherwise, the
-cartoon was saved elsewhere after the edits were kept, and the user chooses
-between the kept edits and the saved version.
+edits. If the server is one revision ahead from the editor that kept them, and
+its content is the same as the kept edits, that editor saved them as it closed,
+and the editor drops them. Otherwise, the cartoon was saved elsewhere after the
+edits were kept, and the user chooses between the kept edits and the saved
+version.
 
 The stage asks the renderer where each actor is at the current time. The
 renderer goes through the actions of the actor in the order of their times: an
@@ -446,12 +455,13 @@ at a home view, the frame with a thin margin, and the user zooms out from it to
 see the whole band.
 
 The stage draws the scene on the ground layer, not in the picture of the camera.
-It maps the picture of the camera back onto the ground layer, so the ground
-layer and the actors keep their places, the far layers move with the camera, and
-the camera box shows what the frame shows. Outside the box, the layers go on as
-the camera sees them, until their drawings end. Zooming and panning the stage
-only scales this drawing as a whole, so it isn't the camera, and the layers
-don't move against each other.
+`sceneFrame` with the `ground` option maps the picture of the camera, with its
+bubbles, back onto the ground layer, so the ground layer and the actors keep
+their places, the far layers move with the camera, and the camera box shows what
+the frame shows. Outside the box, the layers go on as the camera sees them,
+until their drawings end. Zooming and panning the stage only scales this drawing
+as a whole, so it isn't the camera, and the layers don't move against each
+other.
 
 If the user has set the length of a scene, the scene lasts that long, but it
 never ends before its last action starts. Otherwise it lasts a few seconds past

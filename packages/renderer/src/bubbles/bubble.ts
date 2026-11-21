@@ -1,13 +1,21 @@
 // Where the speech bubbles of a scene are at a time `t`, and how they look. An
 // attached bubble is at an offset from the ground point of its actor, which
-// grows and shrinks with the actor, and a free bubble stays at its place. A
-// bubble stays inside the frame, and it keeps its size when its actor gets
-// smaller further away.
-import type { Bubble, BubbleFontId, Pt } from '@toonhouse/model';
+// grows and shrinks with the actor, and a free bubble stays at its place. The
+// places are on the ground layer, but the bubbles are drawn on the picture of
+// the camera. So a bubble stays inside the picture, and it keeps its size when
+// the camera zooms or its actor gets smaller further away.
+import type { Bubble, BubbleFontId, Matrix, Pt } from '@toonhouse/model';
 
 import type { Bounds, DrawNode, RigDrawing } from '../draw.ts';
 import { partBounds } from '../draw.ts';
-import { clamp, easeOutBack, multiply, scaling, translation } from '../math.ts';
+import {
+  clamp,
+  easeOutBack,
+  multiply,
+  scaling,
+  transformPoint,
+  translation,
+} from '../math.ts';
 import {
   circle,
   hash,
@@ -24,7 +32,7 @@ import { fontFamily, layoutText } from './text.ts';
 /** How long a bubble takes to pop in and to pop out, in seconds. */
 const POP_IN = 0.2;
 const POP_OUT = 0.12;
-/** How far a bubble stays from the edges of the frame, in frame pixels. */
+/** How far a bubble stays from the edges of the picture, in picture pixels. */
 const FRAME_MARGIN = 8;
 /** A bubble shows at least this long by default, in seconds. */
 const MIN_LENGTH = 2;
@@ -58,21 +66,23 @@ export interface BubbleAnchor {
 }
 
 export interface BubbleContext {
-  /** The size of the background frame. */
+  /** The size of the picture, which is the size of the background frame. */
   width: number;
   height: number;
+  /** Maps the ground layer, where the actors and the bubbles are placed, onto the picture. */
+  toPicture: Matrix;
   /** The actors that the bubbles can be attached to, by id. */
   anchors: ReadonlyMap<string, BubbleAnchor>;
   /** The font of a bubble that doesn't set one, such as from its asset pack. */
   fontOf(bubble: Bubble): BubbleFontId;
 }
 
-/** A bubble as it shows at a moment. */
+/** A bubble as it shows at a moment, in picture pixels. */
 export interface PlacedBubble {
   bubble: Bubble;
-  /** The middle of the bubble, after it moved inside the frame. */
+  /** The middle of the bubble, after it moved inside the picture. */
   center: Pt;
-  /** The box around the bubble without its tail, in frame pixels. */
+  /** The box around the bubble without its tail. */
   box: Bounds;
   /** Where the tail points, or null without a tail. */
   tip: Pt | null;
@@ -170,9 +180,10 @@ function placeBubble(
       : points;
   shape = wobbly(shape);
 
-  // Move the bubble inside the frame.
+  // Move the bubble inside the picture.
   const anchor = anchorOf(b, ctx);
-  const wanted = bubblePoint(b.at, anchor);
+  const onPicture = (p: Pt) => transformPoint(ctx.toPicture, p);
+  const wanted = onPicture(bubblePoint(b.at, anchor));
   const xs = shape.map((p) => p.x);
   const ys = shape.map((p) => p.y);
   const left = Math.min(...xs);
@@ -196,10 +207,10 @@ function placeBubble(
 
   let tip: Pt | null = null;
   if (b.tail) {
-    if (b.tailTip) tip = bubblePoint(b.tailTip, anchor);
+    if (b.tailTip) tip = onPicture(bubblePoint(b.tailTip, anchor));
     else if (anchor) {
       // Stop short of the head, so that the tail doesn't cover the face.
-      const h = anchor.head;
+      const h = onPicture(anchor.head);
       const d = Math.hypot(h.x - center.x, h.y - center.y);
       const gap = Math.min(d * 0.3, unit * 1.5);
       tip = {
@@ -329,7 +340,7 @@ function bubblePaths(b: Bubble, points: readonly Pt[]): DrawNode[] {
   ];
 }
 
-/** The bubbles that show at `t`, as one drawing in frame pixels. */
+/** The bubbles that show at `t`, as one drawing. */
 export const drawBubbles = (placed: readonly PlacedBubble[]): DrawNode => ({
   type: 'group',
   children: placed.map((p) => p.node),

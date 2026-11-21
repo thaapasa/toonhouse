@@ -1,6 +1,7 @@
 import type { Bubble, Scene } from '@toonhouse/model';
 import { describe, expect, it } from 'vitest';
 
+import { IDENTITY, scaling } from '../math.ts';
 import { sceneLength } from '../scene.ts';
 import {
   type BubbleContext,
@@ -32,6 +33,7 @@ const bubble = (more: Partial<Bubble> = {}): Bubble => ({
 const ctx = (more: Partial<BubbleContext> = {}): BubbleContext => ({
   width: 1600,
   height: 900,
+  toPicture: IDENTITY,
   anchors: new Map(),
   fontOf: () => 'comic-relief',
   ...more,
@@ -158,6 +160,34 @@ describe('placing bubbles', () => {
     );
     expect(placed!.box.x).toBeGreaterThanOrEqual(0);
     expect(placed!.box.y + placed!.box.height).toBeLessThanOrEqual(900);
+  });
+
+  it('keeps its size and stays inside the picture when the camera zooms', () => {
+    // The camera shows the top left quarter of the ground layer at zoom 2.
+    const camera = ctx({ toPicture: scaling(2) });
+    const b = bubble({ at: { x: 790, y: 200 } });
+    const [whole] = placeBubbles([b], 2, ctx());
+    const [zoomed] = placeBubbles([b], 2, camera);
+    expect(zoomed!.box.width).toBeCloseTo(whole!.box.width);
+    expect(zoomed!.box.height).toBeCloseTo(whole!.box.height);
+    expect(zoomed!.box.x + zoomed!.box.width).toBeLessThanOrEqual(1600);
+    expect(zoomed!.center.y).toBeCloseTo(400);
+  });
+
+  it('points the tail at the head of the actor through the camera', () => {
+    const anchor = {
+      at: { x: 300, y: 400 },
+      size: 1,
+      head: { x: 300, y: 300 },
+    };
+    const [placed] = placeBubbles(
+      [bubble({ actorId: 'a', at: { x: 0, y: -200 } })],
+      2,
+      ctx({ toPicture: scaling(2), anchors: new Map([['a', anchor]]) }),
+    );
+    expect(placed!.tip!.x).toBeCloseTo(600);
+    expect(placed!.tip!.y).toBeLessThan(600);
+    expect(placed!.tip!.y).toBeGreaterThan(placed!.center.y);
   });
 
   it('points the tail at the head of the actor', () => {

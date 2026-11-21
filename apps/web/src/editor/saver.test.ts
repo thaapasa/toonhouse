@@ -67,8 +67,8 @@ function setup(keptBy: string | null = null) {
         kept = s;
         return true;
       },
-      clearKept: () => {
-        kept = null;
+      clearKept: (by) => {
+        if (!by || (kept && by.includes(kept.editor ?? ''))) kept = null;
       },
       onState: (s) => states.push(s),
       onSaved: () => {},
@@ -92,6 +92,9 @@ function setup(keptBy: string | null = null) {
     answer,
     fail,
     kept: () => kept,
+    keepElsewhere: (s: SavedContent) => {
+      kept = s;
+    },
     state: () => states.at(-1)?.status,
   };
 }
@@ -140,6 +143,29 @@ describe('saver', () => {
     await t.answer();
     expect(t.server.content).toEqual(content(2));
     expect(t.kept()).toBeNull();
+  });
+
+  it('leaves the edits that another editor kept after its own save', async () => {
+    const t = setup();
+    t.saver.update(content(1));
+    t.saver.hide();
+    const other = {
+      revision: 0,
+      editor: crypto.randomUUID(),
+      content: content(7),
+    };
+    t.keepElsewhere(other);
+    await t.answer();
+    expect(t.state()).toBe('saved');
+    expect(t.kept()).toEqual(other);
+  });
+
+  it('keeps the edits before it loads a new version of the app', async () => {
+    const t = setup();
+    t.saver.update(content(1));
+    void t.saver.save();
+    await t.fail(new ApiError(409, { error: 'x', reason: 'version' }));
+    expect(t.kept()?.content).toEqual(content(1));
   });
 
   it('keeps the edits after a lost login, also the later ones', async () => {

@@ -5,7 +5,7 @@
 import type {
   Background,
   CameraEasing,
-  CameraMove,
+  CameraEntry,
   Matrix,
   Scene,
 } from '@toonhouse/model';
@@ -47,17 +47,17 @@ export function ease(easing: CameraEasing, u: number): number {
 }
 
 /** Whether an entry is a jump, which has no length. */
-export const isJump = (m: CameraMove) => !m.length;
+export const isJump = (m: CameraEntry) => !m.length;
 
 /** When an entry gets to its view. A jump gets there when it starts. */
-export const cameraMoveEnd = (m: CameraMove) => m.t + (m.length ?? 0);
+export const cameraEntryEnd = (m: CameraEntry) => m.t + (m.length ?? 0);
 
 /**
  * The moves and the jumps in the order of their times. A jump that starts
  * with a move goes first, so that the move starts from the view of the jump.
  */
-export const sortedCameraMoves = (scene: Scene): CameraMove[] =>
-  [...(scene.camera?.moves ?? [])].sort(
+export const sortedCameraEntries = (scene: Scene): CameraEntry[] =>
+  [...(scene.camera?.entries ?? [])].sort(
     (a, b) => a.t - b.t || (a.length ?? 0) - (b.length ?? 0),
   );
 
@@ -92,10 +92,10 @@ export function cameraBetween(a: Camera, b: Camera, u: number): Camera {
 /** Where the camera is at `t`. */
 export function cameraAt(scene: Scene, bg: Background, t: number): Camera {
   let view = startView(scene, bg);
-  for (const m of sortedCameraMoves(scene)) {
+  for (const m of sortedCameraEntries(scene)) {
     if (t < m.t) break;
     const to = clampCamera(bg, m.to);
-    const end = cameraMoveEnd(m);
+    const end = cameraEntryEnd(m);
     if (t >= end) {
       view = to;
       continue;
@@ -107,22 +107,22 @@ export function cameraAt(scene: Scene, bg: Background, t: number): Camera {
 }
 
 /**
- * The entry whose view the camera holds at `t`, or null for the start view.
- * While a move plays, the camera holds no view, and `moving` is true with the
- * move. At the first moment of a move, the camera still holds the view that
+ * The camera entry whose view the camera holds at `t`, or null for the start
+ * view. While a move plays, the camera holds no view, and `moving` is true
+ * with the move as `entry`. At the first moment of a move, the camera still holds the view that
  * the move starts from.
  */
 export function cameraHolder(
   scene: Scene,
   t: number,
-): { move: CameraMove | null; moving: boolean } {
-  let move: CameraMove | null = null;
-  for (const m of sortedCameraMoves(scene)) {
+): { entry: CameraEntry | null; moving: boolean } {
+  let entry: CameraEntry | null = null;
+  for (const m of sortedCameraEntries(scene)) {
     if (t < m.t || (t === m.t && !isJump(m))) break;
-    if (t < cameraMoveEnd(m)) return { move: m, moving: true };
-    move = m;
+    if (t < cameraEntryEnd(m)) return { entry: m, moving: true };
+    entry = m;
   }
-  return { move, moving: false };
+  return { entry, moving: false };
 }
 
 /** The part of the ground layer that the camera shows, in frame pixels. */

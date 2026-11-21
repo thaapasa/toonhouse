@@ -119,12 +119,12 @@ export interface CameraView {
 export type CameraEasing = 'linear' | 'ease-in' | 'ease-out' | 'ease-in-out';
 
 /**
- * A camera move or a camera jump at `t`. It starts from where the camera is
+ * A camera entry: a camera move or a camera jump at `t`. It starts from where the camera is
  * at `t`, which is the view of the entry before it, or the start view. A move
  * gets to `to` after `length` seconds. A jump has no length and shows `to` at
  * once.
  */
-export interface CameraMove {
+export interface CameraEntry {
   /** Unique within the scene. */
   id: string;
   /** When the move or the jump starts, in seconds from the start of the scene. */
@@ -141,7 +141,7 @@ export interface SceneCamera {
   /** The view at the start of the scene, the whole background if not set. */
   start?: CameraView;
   /** The moves and the jumps. They don't overlap, and the order doesn't matter. */
-  moves: CameraMove[];
+  entries: CameraEntry[];
 }
 
 /** The fonts that speech bubbles can use. See assets/fonts. */

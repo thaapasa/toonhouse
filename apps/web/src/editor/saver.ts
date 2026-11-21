@@ -74,7 +74,11 @@ export interface SaverDeps {
   load(): Promise<SavedContent>;
   /** Keeps unsaved content in the browser. Tells whether it could. */
   keep(saved: SavedContent): boolean;
-  clearKept(): void;
+  /**
+   * Removes the kept content. With `by`, removes it only if one of these
+   * editors kept it.
+   */
+  clearKept(by?: string[]): void;
   onState(state: SaveState): void;
   /** The latest content is saved. */
   onSaved(saved: SavedContent): void;
@@ -269,7 +273,8 @@ export function createSaver(deps: SaverDeps, start: SaverStart): Saver {
     if (latest === content) {
       clearTimeout(keepTimer);
       keepTimer = undefined;
-      deps.clearKept();
+      // Another editor of the cartoon may have kept its own edits since.
+      deps.clearKept(start.keptBy ? [editor, start.keptBy] : [editor]);
       deps.onSaved({ revision, editor, content });
       set({ status: 'saved' });
     } else {
@@ -346,6 +351,7 @@ export function createSaver(deps: SaverDeps, start: SaverStart): Saver {
         case 'version':
           // A new version of the app has a new format of the cartoon.
           stopped = 'reloading';
+          keepNow();
           deps.reload();
           break;
         default:

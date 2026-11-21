@@ -100,6 +100,12 @@ export function multiply(m: Matrix, n: Matrix): Matrix {
   ];
 }
 
+/** The point `p` mapped by `m`. */
+export const transformPoint = (m: Matrix, p: Pt): Pt => ({
+  x: m[0] * p.x + m[2] * p.y + m[4],
+  y: m[1] * p.x + m[3] * p.y + m[5],
+});
+
 export const translation = (x: number, y: number): Matrix => [1, 0, 0, 1, x, y];
 export const scaling = (sx: number, sy = sx): Matrix => [sx, 0, 0, sy, 0, 0];
 export function rotation(a: number): Matrix {

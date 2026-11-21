@@ -29,9 +29,12 @@ the background, and the camera can move on the [timeline](timeline.md).
       camera moves. Only the far layers move against them.
 - [x] User selects the camera from its row on the timeline, or from the tab at
       the top of the camera box.
-- [x] With the camera selected, the user pans the camera by dragging inside the
-      camera box, and zooms it by dragging a corner. The opposite corner stays
-      in place. With Alt, the middle of the box stays in place instead.
+- [x] With the camera selected, the user pans the camera by dragging the
+      background inside the camera box, and zooms it by dragging a corner. The
+      opposite corner stays in place. With Alt, the middle of the box stays in
+      place instead.
+- [x] With the camera selected, a tap on an actor or a bubble inside the camera
+      box selects it, and a tap on the background clears the selection.
 - [x] The corners of the camera box are big enough for a finger at any zoom of
       the stage.
 - [x] Dragging the camera box changes the view that the camera holds at the
@@ -72,19 +75,6 @@ the background, and the camera can move on the [timeline](timeline.md).
       numbers there and go back to the whole background with one button.
 - [x] User can remove a camera move or jump, and reset the start view to the
       whole background.
-
-## Technical notes
-
-### The camera in the frame of a scene
-
-The `camera-moves` branch works out the camera in `SceneDrawing` in the web app.
-Since then, `sceneFrame` in `packages/renderer` builds the frame of a scene for
-the editor, the player and the preview image, and export will use it too. When
-the branch is rebased, put the camera into `sceneFrame`. It calls `cameraAt`,
-returns the camera with the frame, draws the scene through the camera and wraps
-the bubbles in the transform of the ground layer. An option gives the editor its
-view of the ground layer. Then every caller of `sceneFrame` draws through the
-camera, and `SceneDrawing` keeps only the mask and the SVG symbols.
 
 ## Open questions
 

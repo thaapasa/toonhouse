@@ -64,7 +64,7 @@ export function useCartoonContent(
         send: (body, keepalive) => saveContent(cartoonId, body, keepalive),
         load: () => fetchContent(cartoonId),
         keep: (saved) => keepContent(cartoonId, saved),
-        clearKept: () => clearKeptContent(cartoonId),
+        clearKept: (by) => clearKeptContent(cartoonId, by),
         onState: setSaveState,
         onSaved: (saved) =>
           queryClient.setQueryData(contentQuery(cartoonId).queryKey, saved),

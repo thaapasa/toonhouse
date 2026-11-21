@@ -59,11 +59,11 @@ import {
 import { ActionBar, BubbleBar, CameraBar, WalkBar } from './ActionBar.tsx';
 import { addBubble, newBubble, removeBubble, updateBubble } from './bubbles.ts';
 import {
-  addCameraMove,
-  canAddCameraMove,
-  dragCameraMove,
-  newCameraMove,
-  removeCameraMove,
+  addCameraEntry,
+  canAddCameraEntry,
+  dragCameraEntry,
+  newCameraEntry,
+  removeCameraEntry,
   resetStartView,
   setCameraView,
   withBackground,
@@ -388,39 +388,40 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
   const addCamera = (jump: boolean) => {
     if (!bg) return;
     const at = now();
-    const move = newCameraMove(scene, bg.background, newId(), at, jump);
-    if (!move) return;
-    editScene((s) => addCameraMove(s, move));
+    const entry = newCameraEntry(scene, bg.background, newId(), at, jump);
+    if (!entry) return;
+    editScene((s) => addCameraEntry(s, entry));
     // The stage shows the view that the user sets next: the end of a move.
-    playback.seek(move.t + (move.length ?? 0));
+    playback.seek(entry.t + (entry.length ?? 0));
   };
 
+  const holder = cameraHolder(scene, t);
   let toolbar: ReactNode = null;
   if (bg && cameraSelected) {
     const at = now();
-    const { move, moving } = cameraHolder(scene, t);
+    const { entry, moving } = holder;
     toolbar = (
       <CameraBar
         onMove={
-          canAddCameraMove(scene, at, false)
+          canAddCameraEntry(scene, at, false)
             ? () => addCamera(false)
             : undefined
         }
         onJump={
-          canAddCameraMove(scene, at, true) ? () => addCamera(true) : undefined
+          canAddCameraEntry(scene, at, true) ? () => addCamera(true) : undefined
         }
         removeLabel={
-          move
-            ? move.length
+          entry
+            ? entry.length
               ? 'camera.removeMove'
               : 'camera.removeJump'
             : 'camera.resetStart'
         }
         onRemove={
-          move
+          entry
             ? () => {
-                editScene((s) => removeCameraMove(s, move.id));
-                if (moving) playback.seek(move.t);
+                editScene((s) => removeCameraEntry(s, entry.id));
+                if (moving) playback.seek(entry.t);
               }
             : scene.camera?.start
               ? () => editScene(resetStartView)
@@ -506,7 +507,10 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
   // its first and last moments, so that the user can work on it.
   const frame =
     bg &&
-    sceneFrame(scene, bg.background, LIBRARY, t, { pop: playback.playing });
+    sceneFrame(scene, bg.background, LIBRARY, t, {
+      pop: playback.playing,
+      ground: true,
+    });
 
   const pane = (
     <PropertiesPane
@@ -678,12 +682,15 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
               }
               onRevert={doc.revert}
               cameraSelected={cameraSelected}
-              cameraMoving={cameraHolder(scene, t).moving}
+              cameraMoving={holder.moving}
+              cameraEntry={holder.entry?.id ?? null}
               onSelectCamera={selectCamera}
-              onCameraView={(view, run) => {
-                const { move } = cameraHolder(scene, t);
-                editScene((s) => setCameraView(s, move?.id ?? null, view), run);
-              }}
+              onCameraView={(entry, view, run) =>
+                editScene(
+                  (s) => setCameraView(s, bg.background, entry, view),
+                  run,
+                )
+              }
               onTouch={() => playback.setPlaying(false)}
               toolbar={toolbar}
             />
@@ -768,10 +775,13 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
           if (at !== undefined) playback.seek(at);
         }}
         onCameraDrag={(id, part, at, run) => {
-          editScene((s) => dragCameraMove(s, id, part, at), run);
-          const moved = dragCameraMove(scene, id, part, at).camera?.moves.find(
-            (m) => m.id === id,
-          );
+          editScene((s) => dragCameraEntry(s, id, part, at), run);
+          const moved = dragCameraEntry(
+            scene,
+            id,
+            part,
+            at,
+          ).camera?.entries.find((m) => m.id === id);
           // The playhead goes to the view that the user is likely to check.
           if (moved)
             playback.seek(

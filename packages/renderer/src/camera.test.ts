@@ -1,13 +1,13 @@
 import type {
   Background,
   CameraEasing,
-  CameraMove,
+  CameraEntry,
   Scene,
 } from '@toonhouse/model';
 import { describe, expect, it } from 'vitest';
 
 import testHills from '../../../assets/fixtures/backgrounds/test-hills/background.json';
-import { wholeBackground } from './background.ts';
+import { MAX_ZOOM, wholeBackground } from './background.ts';
 import {
   cameraAt,
   cameraBetween,
@@ -23,12 +23,12 @@ const whole = wholeBackground(bg);
 const close = { x: 600, y: 400, zoom: 2 };
 const corner = { x: bg.width / 4, y: bg.height / 4, zoom: 2 };
 
-const scene = (moves: CameraMove[], start?: Scene['camera']): Scene => ({
+const scene = (entries: CameraEntry[], start?: Scene['camera']): Scene => ({
   id: 's',
   background: 'test-hills',
   backgroundActions: [],
   actors: [],
-  camera: { ...start, moves },
+  camera: { ...start, entries },
 });
 
 const near = (a: { x: number; y: number; zoom: number }) => ({
@@ -51,7 +51,7 @@ describe('cameraAt', () => {
   it('holds the start view until the first entry', () => {
     const s = scene([{ id: 'j', t: 2, to: close }], {
       start: corner,
-      moves: [],
+      entries: [],
     });
     expect(cameraAt(s, bg, 0)).toEqual(corner);
     expect(cameraAt(s, bg, 1.99)).toEqual(corner);
@@ -76,11 +76,42 @@ describe('cameraAt', () => {
   });
 
   it('keeps the camera inside the background', () => {
-    const s = scene([{ id: 'j', t: 0, to: { x: -500, y: 0, zoom: 9 } }]);
-    const c = cameraAt(s, bg, 1);
+    const s = scene([
+      { id: 'j', t: 0, to: { x: -500, y: 0, zoom: 9 } },
+      { id: 'k', t: 1, to: { x: 9000, y: 9000, zoom: 2 } },
+    ]);
+    const c = cameraAt(s, bg, 0.5);
+    expect(c.zoom).toBe(MAX_ZOOM);
     const b = cameraBounds(bg, c);
     expect(b.x).toBeGreaterThanOrEqual(0);
     expect(b.y).toBeGreaterThanOrEqual(0);
+    const far = cameraBounds(bg, cameraAt(s, bg, 2));
+    expect(far.x + far.width).toBeCloseTo(bg.width);
+    expect(far.y + far.height).toBeCloseTo(bg.height);
+  });
+
+  it('gives the same views when the entries are out of order', () => {
+    const entries: CameraEntry[] = [
+      { id: 'j', t: 1, to: corner },
+      { id: 'm', t: 2, length: 2, to: close, easing: 'linear' },
+      { id: 'k', t: 5, to: whole },
+    ];
+    const sorted = scene(entries);
+    const shuffled = scene([entries[2]!, entries[0]!, entries[1]!]);
+    for (const t of [0, 1, 2.5, 4, 6]) {
+      expect(cameraAt(shuffled, bg, t)).toEqual(cameraAt(sorted, bg, t));
+      expect(cameraHolder(shuffled, t)).toEqual(cameraHolder(sorted, t));
+    }
+  });
+
+  it('starts a move from the view of a jump at the same time', () => {
+    const s = scene([
+      { id: 'm', t: 2, length: 2, to: close, easing: 'linear' },
+      { id: 'j', t: 2, to: corner },
+    ]);
+    expect(cameraAt(s, bg, 2)).toEqual(near(corner));
+    expect(cameraAt(s, bg, 4)).toEqual(close);
+    expect(cameraHolder(s, 2).entry?.id).toBe('j');
   });
 
   it('eases a move', () => {
@@ -133,14 +164,14 @@ describe('cameraHolder', () => {
     { id: 'm', t: 2, length: 2, to: close },
   ]);
   it('gives the entry whose view holds', () => {
-    expect(cameraHolder(s, 0.5)).toEqual({ move: null, moving: false });
-    expect(cameraHolder(s, 1).move?.id).toBe('j');
+    expect(cameraHolder(s, 0.5)).toEqual({ entry: null, moving: false });
+    expect(cameraHolder(s, 1).entry?.id).toBe('j');
     expect(cameraHolder(s, 2)).toMatchObject({ moving: false });
-    expect(cameraHolder(s, 2).move?.id).toBe('j');
-    expect(cameraHolder(s, 1.5).move?.id).toBe('j');
+    expect(cameraHolder(s, 2).entry?.id).toBe('j');
+    expect(cameraHolder(s, 1.5).entry?.id).toBe('j');
     expect(cameraHolder(s, 3)).toMatchObject({ moving: true });
     expect(cameraHolder(s, 4)).toMatchObject({ moving: false });
-    expect(cameraHolder(s, 4).move?.id).toBe('m');
+    expect(cameraHolder(s, 4).entry?.id).toBe('m');
   });
 });
 
