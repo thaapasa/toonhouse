@@ -689,7 +689,13 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
         }
         onRevert={doc.revert}
       />
-      <SaveProblem cartoonId={cartoon.id} state={doc.saveState} />
+      <SaveProblem
+        cartoonId={cartoon.id}
+        state={doc.saveState}
+        onKeepMine={doc.keepMine}
+        onLoadSaved={doc.loadSaved}
+        onRetry={doc.retry}
+      />
       {removing && (
         <Dialog
           title={tr('editor.removeSceneTitle', { n: index + 1 })}

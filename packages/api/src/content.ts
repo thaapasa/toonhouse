@@ -42,7 +42,11 @@ export const CONTENT_LIMITS = {
   bubbleLength: { min: 0.1, max: 86_400 },
   /** The sizes of a bubble, in frame pixels. */
   bubbleWidth: { min: 0, max: 200_000 },
-  fontSize: { min: 0, max: 10_000 },
+  /**
+   * The padding and the outline of a bubble grow with the size of its text,
+   * and the renderer divides by the length of the outline.
+   */
+  fontSize: { min: 1, max: 10_000 },
   borderWidth: { min: 0, max: 10_000 },
   /** The height of a line against the size of the text. */
   lineSpacing: { min: 0, max: 100 },

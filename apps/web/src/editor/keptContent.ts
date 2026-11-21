@@ -1,14 +1,18 @@
-// The edits that the server refused because the login had ended. The editor
-// keeps them in the browser until the user logs in again, and then saves them.
+// The edits that the editor couldn't save, such as after the login ended or
+// when the editor closed before a save. The next editor of the cartoon starts
+// from them and saves them.
 import { SavedContent } from '@toonhouse/api';
 
 const key = (cartoonId: string) => `toonhouse-unsaved-${cartoonId}`;
 
-export function keepContent(cartoonId: string, saved: SavedContent) {
+/** Tells whether the browser could keep the content. */
+export function keepContent(cartoonId: string, saved: SavedContent): boolean {
   try {
     localStorage.setItem(key(cartoonId), JSON.stringify(saved));
+    return true;
   } catch {
-    // The storage is full or turned off. The editor still shows the message.
+    // The storage is full or turned off.
+    return false;
   }
 }
 

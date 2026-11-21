@@ -252,9 +252,10 @@ to the foreground, and saves the edits before it loads the new version.
 Each save also names the revision of the content that it edited, and the
 revision goes up by one with each save. If someone has saved the cartoon after
 that revision, in another window or on another device, the server refuses the
-save with 409 too. The editor then tells the user and offers to load the cartoon
-again. The edits after the last save are lost, but the other save is not
-overwritten without a word.
+save with 409 too. The editor then lets the user keep their version, which it
+saves over the other one, or load the saved version. A 409 can also come from a
+save of the same editor whose answer was lost, so the editor first loads the
+content, and if the server has what the editor sent, it goes on from there.
 
 #### Planned upgrades
 
@@ -356,14 +357,19 @@ to the background. A drag on the stage or on the timeline is one step in the
 history: each move of the drag redoes that step from where the drag started.
 
 The editor loads the content from the server each time it opens, because a save
-of an old revision fails. One save runs at a time. A save that the editor asks
-for while another one runs, such as when the page goes to the background, goes
-right after that one. If a save fails without an answer or with a server error,
-the editor tries again after a while. If the server refuses the content, the
-editor tells the user and tries again only after the next edit. If the login has
-ended, the editor keeps the edits in the `localStorage` of the browser and tells
-the user to log in again. After the login, the editor opens with the kept edits
-and saves them.
+of an old revision fails. The saver in `apps/web/src/editor` does the saving,
+apart from React. One save runs at a time. A save that the editor asks for while
+another one runs, such as when the page goes to the background, goes right after
+that one. If a save fails without an answer or with a server error, the editor
+tries again after a while. If the server refuses the content, the editor tells
+the user and tries again only after the next edit. If the cartoon is gone, or
+the user is no longer its owner, the editor tells the user and stops.
+
+When the editor can't save for now, it keeps the edits in the `localStorage` of
+the browser, and the next editor of the cartoon starts from them and saves them.
+This happens when the login has ended, after a conflict, and when the editor
+closes before its edits are saved. A closed editor sends its edits once more,
+but doesn't try again, so that it can't race the next editor.
 
 The library assets come from `assets/` through `import.meta.glob`, so the build
 bundles them into the web app, as in the studio.

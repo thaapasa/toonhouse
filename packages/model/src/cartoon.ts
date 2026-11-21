@@ -74,8 +74,10 @@ export interface Action {
   id: string;
   /**
    * What the action does, `clip` if not set. Only `clip` exists so far: the
-   * actor plays a clip. Other kinds of actions, such as a change of a setting
-   * in the middle of a scene, can come later without a new format version.
+   * actor plays a clip. The old cartoons stay valid when other kinds of
+   * actions come, such as a change of a setting in the middle of a scene, so
+   * the format version stays. But a web app that knows only `clip` can't open
+   * a cartoon with another kind until it loads the new version of the app.
    */
   type?: 'clip';
   /** When the action starts, in seconds from the start of the scene. */

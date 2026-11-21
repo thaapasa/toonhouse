@@ -21,8 +21,12 @@ parts of its scenes in a row.
 - [x] If the login has ended, the editor tells the user to log in again and
       keeps the edits on the device. After the login, the editor saves them.
 - [x] If the cartoon was saved in another window or on another device after the
-      editor opened it, the editor doesn't overwrite that save. It tells the
-      user and offers to load the cartoon again.
+      editor opened it, the editor doesn't overwrite that save without asking.
+      The user keeps their own version or loads the saved one.
+- [x] If the editor closes before its edits are saved, the next editor of the
+      cartoon on the same device starts from those edits and saves them.
+- [x] If the cartoon has been removed while the user edits it, the editor tells
+      the user and stops saving.
 - [x] User can undo and redo the edits of a scene.
 - [x] User can remove a scene, after confirming it. The removal can be undone.
       If the user removes the last scene, the cartoon gets a new empty scene.

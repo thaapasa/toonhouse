@@ -116,8 +116,14 @@ export const fi: Texts = {
     'Kirjaudu uudelleen, niin muutoksesi tallentuvat. Siihen asti tämä selain säilyttää ne.',
   'save.conflictTitle': 'Piirretty on muuttunut',
   'save.conflictInfo':
-    'Piirretty tallennettiin toisessa ikkunassa tai toisella laitteella. Lataa piirretty uudelleen, niin näet sen version. Tässä viimeisen tallennuksen jälkeen tehdyt muutokset menetetään.',
-  'save.reload': 'Lataa uudelleen',
+    'Piirretty tallennettiin toisessa ikkunassa tai toisella laitteella sen jälkeen, kun aloitit nämä muutokset. Voit pitää oman versiosi ja tallentaa sen toisen päälle, tai ladata tallennetun version, jolloin tässä tehdyt muutokset menetetään.',
+  'save.loggedOutNotKept':
+    'Piirretty on liian suuri tämän selaimen säilytettäväksi, joten pidä tämä sivu auki. Kirjaudu uudelleen toisessa välilehdessä ja yritä sitten täällä uudelleen.',
+  'save.goneInfo':
+    'Palvelin ei enää anna tallentaa tätä piirrettyä. Se on ehkä poistettu, tai sisään on kirjautunut toinen käyttäjä.',
+  'save.keepMine': 'Pidä oma versioni',
+  'save.loadSaved': 'Lataa tallennettu versio',
+  'save.retry': 'Yritä uudelleen',
   'editor.scenes': 'Kohtaukset',
   'editor.scene': 'Kohtaus {n}',
   'editor.addScene': 'Uusi kohtaus',

@@ -28,14 +28,23 @@ export class ApiError extends Error {
 async function request<T>(
   schema: z.ZodType<T>,
   path: string,
-  init?: { method: string; body?: unknown; keepalive?: boolean },
+  init?: {
+    method: string;
+    body?: unknown;
+    /** The body as JSON already, instead of `body`. */
+    json?: string;
+    keepalive?: boolean;
+  },
 ): Promise<T> {
+  const json =
+    init?.json ??
+    (init?.body !== undefined ? JSON.stringify(init.body) : undefined);
   const res = await fetch(`/api/app${path}`, {
     method: init?.method ?? 'GET',
     keepalive: init?.keepalive ?? false,
-    ...(init?.body !== undefined && {
+    ...(json !== undefined && {
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(init.body),
+      body: json,
     }),
   });
   if (!res.ok) {
@@ -98,11 +107,13 @@ export const renameCartoon = (id: string, title: string) =>
   request(Cartoon, `/cartoons/${id}`, { method: 'PATCH', body: { title } });
 
 /** The scenes of a cartoon with their revision. */
+export const fetchContent = (id: string) =>
+  request<SavedContent>(SavedContent, `/cartoons/${id}/content`);
+
 export const contentQuery = (id: string) =>
   queryOptions({
     queryKey: ['cartoons', id, 'content'],
-    queryFn: () =>
-      request<SavedContent>(SavedContent, `/cartoons/${id}/content`),
+    queryFn: () => fetchContent(id),
     // The editor keeps its own copy while the user edits.
     refetchOnWindowFocus: false,
   });
@@ -123,18 +134,19 @@ export async function uploadPreview(id: string, image: Blob): Promise<Cartoon> {
 }
 
 /**
- * Saves the scenes of a cartoon and gives their new revision. With
+ * Saves the scenes of a cartoon, the JSON of a `SavedContent`, and gives their
+ * new revision. With
  * `keepalive`, the save finishes even if the page closes.
  */
 export const saveContent = async (
   id: string,
-  body: SavedContent,
+  json: string,
   keepalive = false,
 ) =>
   (
     await request(SaveContentResponse, `/cartoons/${id}/content`, {
       method: 'PUT',
-      body,
+      json,
       keepalive,
     })
   ).revision;

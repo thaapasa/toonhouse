@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest';
 import { newBubble } from '../editor/bubbles.ts';
 import { BACKGROUNDS, CHARACTERS, PROPS } from '../editor/library.ts';
 import { newId, newScene } from '../editor/sceneEdit.ts';
-import v1 from './v1.json';
+import { v1 } from './v1.ts';
 
 const SEE = 'See "Cartoon format versions" in ARCHITECTURE.md.';
 

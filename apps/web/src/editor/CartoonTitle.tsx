@@ -3,7 +3,7 @@ import type { Cartoon } from '@toonhouse/api';
 import { type FormEvent, useState } from 'react';
 
 import { cartoonQuery, cartoonsQuery, renameCartoon } from '../api.ts';
-import { useI18n } from '../i18n/index.tsx';
+import { type TextKey, useI18n } from '../i18n/index.tsx';
 import type { SaveState } from './useCartoonContent.ts';
 
 const SAVE_TEXTS = {
@@ -12,11 +12,15 @@ const SAVE_TEXTS = {
   saving: 'editor.saving',
   error: 'editor.saveError',
   refused: 'editor.notSaved',
-  tooLarge: 'editor.notSaved',
   loggedOut: 'editor.notSavedLogin',
   conflict: 'editor.notSaved',
-} as const satisfies Record<SaveState, string>;
-const OK_STATES: readonly SaveState[] = ['saved', 'unsaved', 'saving'];
+  gone: 'editor.notSaved',
+} as const satisfies Record<SaveState['status'], TextKey>;
+const OK_STATES: readonly SaveState['status'][] = [
+  'saved',
+  'unsaved',
+  'saving',
+];
 
 /** The title of the cartoon. A tap on it opens a field to rename it. */
 export function CartoonTitle({
@@ -69,11 +73,11 @@ export function CartoonTitle({
         </button>
         <span
           className={
-            OK_STATES.includes(saveState) ? 'muted small' : 'error small'
+            OK_STATES.includes(saveState.status) ? 'muted small' : 'error small'
           }
           role="status"
         >
-          {tr(SAVE_TEXTS[saveState])}
+          {tr(SAVE_TEXTS[saveState.status])}
         </span>
       </div>
     );

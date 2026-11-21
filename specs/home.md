@@ -3,6 +3,9 @@
 The home page lists the cartoons that the user can watch. Each cartoon in the
 list shows a preview image.
 
+- [ ] The owner of a cartoon can delete it, after confirming it. Only the owner
+      can delete a cartoon.
+
 ## Preview image
 
 - [x] In the editor, the user can set the frame on the stage as the preview

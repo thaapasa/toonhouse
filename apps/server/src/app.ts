@@ -55,18 +55,22 @@ app.get('/health', async (c) => {
 });
 
 // Without a limit, a few large requests without a login could use up the memory
-// of the server. The content of a cartoon can be much larger than the other
-// requests, so its save has a limit of its own.
+// of the server. The content of a cartoon and its preview image can be much
+// larger than the other requests, so their saves have limits of their own. A
+// PNG preview from Safari can be over 1 MB.
+const MB = 1024 * 1024;
 const tooLarge = (c: Context) =>
   c.json({ error: 'Request body is too large' }, 413);
-const smallBody = bodyLimit({ maxSize: 1024 * 1024, onError: tooLarge });
-const contentBody = bodyLimit({ maxSize: 10 * 1024 * 1024, onError: tooLarge });
-app.use('/api/*', (c, next) =>
-  c.req.method === 'PUT' &&
-  /^\/api\/app\/cartoons\/[^/]+\/content$/.test(c.req.path)
-    ? contentBody(c, next)
-    : smallBody(c, next),
-);
+const smallBody = bodyLimit({ maxSize: MB, onError: tooLarge });
+const contentBody = bodyLimit({ maxSize: 10 * MB, onError: tooLarge });
+const previewBody = bodyLimit({ maxSize: 3 * MB, onError: tooLarge });
+app.use('/api/*', (c, next) => {
+  const save =
+    c.req.method === 'PUT' &&
+    /^\/api\/app\/cartoons\/[^/]+\/(content|preview)$/.exec(c.req.path);
+  if (!save) return smallBody(c, next);
+  return save[1] === 'content' ? contentBody(c, next) : previewBody(c, next);
+});
 
 // The API of the web app, which authenticates with the session cookie.
 app.use('/api/app/*', csrf(), sessionMiddleware);
