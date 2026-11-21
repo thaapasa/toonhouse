@@ -3,6 +3,7 @@ import {
   type Action,
   type Actor,
   CARTOON_VERSION,
+  type CartoonContent,
   type Scene,
 } from '@toonhouse/model';
 import { describe, expect, it } from 'vitest';
@@ -23,6 +24,8 @@ import {
   setSpeed,
   startAction,
   stepSize,
+  updateActions,
+  updateScene,
 } from './sceneEdit.ts';
 
 const wave = (id: string, t: number): Action => ({ id, t, clip: 'wave' });
@@ -188,5 +191,21 @@ describe('properties', () => {
 
   it('keeps a point inside the limits of the server', () => {
     expect(savedPoint({ x: -1e9, y: 3.14159 })).toEqual({ x: -100000, y: 3.1 });
+  });
+});
+
+describe('updateScene', () => {
+  it('gives the same content when the target is gone', () => {
+    const content: CartoonContent = {
+      version: CARTOON_VERSION,
+      scenes: [newScene()],
+    };
+    const scene = content.scenes[0]!;
+    const edit = (actorId: string | null) =>
+      updateScene(content, scene.id, (s) =>
+        updateActions(s, actorId, (list) => list.map((a) => a)),
+      );
+    expect(updateScene(content, 'gone', (s) => ({ ...s }))).toBe(content);
+    expect(edit('gone')).toBe(content);
   });
 });

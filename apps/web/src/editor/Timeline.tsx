@@ -124,11 +124,21 @@ export function Timeline(props: Props) {
   const [frozen, setFrozen] = useState<{ fit: number; length: number } | null>(
     null,
   );
-  const freeze = () => setFrozen((f) => f ?? { fit, length });
   const unfreeze = () => setFrozen(null);
+  // Where the playhead was when the latest drag started, as the drags of
+  // actions and bubbles move it.
+  const dragStart = useRef<{ run: EditRun; t: number } | null>(null);
+  /** Each move of a drag calls this first. */
+  const dragMove = (run: EditRun) => {
+    setFrozen((f) => f ?? { fit, length });
+    if (dragStart.current?.run !== run) dragStart.current = { run, t };
+  };
+  /** A pinch cancelled the drag, so its edit and its seeks go away. */
   const revert = (run: EditRun) => {
     props.onRevert(run);
     unfreeze();
+    if (dragStart.current?.run === run) props.onSeek(dragStart.current.t);
+    dragStart.current = null;
   };
 
   // Two fingers zoom, in `useTimelineZoom`. So a second finger cancels what
@@ -275,11 +285,11 @@ export function Timeline(props: Props) {
             }}
             onSeek={props.onSeek}
             onMove={(id, at, run) => {
-              freeze();
+              dragMove(run);
               props.onMoveBubble(id, at, run);
             }}
             onLength={(id, v, run) => {
-              freeze();
+              dragMove(run);
               props.onBubbleLength(id, v, run);
             }}
             onDragDone={unfreeze}
@@ -451,7 +461,7 @@ export function Timeline(props: Props) {
                       props.onSeek(at);
                     }}
                     onMove={(actionId, at, run) => {
-                      freeze();
+                      dragMove(run);
                       props.onMoveBlock(row.actorId, actionId, at, run);
                     }}
                     onMoveDone={unfreeze}
@@ -466,11 +476,11 @@ export function Timeline(props: Props) {
                     pps={pps}
                     onSeek={props.onSeek}
                     onLength={(v, run) => {
-                      freeze();
+                      dragMove(run);
                       props.onLength(v, run);
                     }}
                     onMoveStart={(actionId, at, run) => {
-                      freeze();
+                      dragMove(run);
                       props.onMoveStart(row.actorId, actionId, at, run);
                     }}
                     onDragDone={unfreeze}

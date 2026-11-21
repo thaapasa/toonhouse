@@ -22,7 +22,7 @@ import {
 } from '@toonhouse/renderer';
 
 import type { PlacedActor } from './placement.ts';
-import { savedPoint } from './sceneEdit.ts';
+import { savedPoint, updateById } from './sceneEdit.ts';
 
 interface Pack {
   id: string;
@@ -165,10 +165,11 @@ export const updateBubble = (
   scene: Scene,
   id: string,
   fn: (b: Bubble) => Bubble,
-): Scene => ({
-  ...scene,
-  bubbles: (scene.bubbles ?? []).map((b) => (b.id === id ? fn(b) : b)),
-});
+): Scene => {
+  const list = scene.bubbles ?? [];
+  const bubbles = updateById(list, id, fn);
+  return bubbles === list ? scene : { ...scene, bubbles };
+};
 
 export const addBubble = (scene: Scene, bubble: Bubble): Scene => ({
   ...scene,

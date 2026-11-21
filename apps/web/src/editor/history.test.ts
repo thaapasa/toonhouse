@@ -50,6 +50,12 @@ describe('applyEdit', () => {
     expect(h.present).toEqual({ a: 2, b: 1 });
   });
 
+  it('makes no step for an edit that changes nothing', () => {
+    let h = edit(newHistory({}), 'a', 1);
+    h = undoStep(h);
+    expect(applyEdit(h, (c) => c, undefined, 100)).toBe(h);
+  });
+
   it('goes on in a new step after an undo or a redo', () => {
     const run = {};
     let h = edit(newHistory({}), 'b', 1);

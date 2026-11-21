@@ -28,14 +28,35 @@ export const newScene = (): Scene => ({
   actors: [],
 });
 
-export const updateScene = (
+/**
+ * Changes the item of `list` with the id. If the item is gone or `fn` returns
+ * it as it was, it gives `list` itself. Then the edit leaves no undo step,
+ * such as when a typed value is saved to an actor that the user removed.
+ */
+export function updateById<T extends { id: string }>(
+  list: readonly T[],
+  id: string,
+  fn: (item: T) => T,
+): T[] {
+  let changed = false;
+  const next = list.map((item) => {
+    if (item.id !== id) return item;
+    const v = fn(item);
+    if (v !== item) changed = true;
+    return v;
+  });
+  // The callers don't change the lists that they get.
+  return changed ? next : (list as T[]);
+}
+
+export function updateScene(
   content: CartoonContent,
   sceneId: string,
   fn: (scene: Scene) => Scene,
-): CartoonContent => ({
-  ...content,
-  scenes: content.scenes.map((s) => (s.id === sceneId ? fn(s) : s)),
-});
+): CartoonContent {
+  const scenes = updateById(content.scenes, sceneId, fn);
+  return scenes === content.scenes ? content : { ...content, scenes };
+}
 
 /**
  * Removes a scene. A cartoon in the editor always has a scene, so removing
@@ -49,14 +70,14 @@ export function removeScene(
   return { ...content, scenes: scenes.length > 0 ? scenes : [newScene()] };
 }
 
-export const updateActor = (
+export function updateActor(
   scene: Scene,
   actorId: string,
   fn: (actor: Actor) => Actor,
-): Scene => ({
-  ...scene,
-  actors: scene.actors.map((a) => (a.id === actorId ? fn(a) : a)),
-});
+): Scene {
+  const actors = updateById(scene.actors, actorId, fn);
+  return actors === scene.actors ? scene : { ...scene, actors };
+}
 
 /** Removes an actor and the bubbles attached to it. */
 export const removeActor = (scene: Scene, actorId: string): Scene => ({
@@ -83,7 +104,7 @@ export const updateAction = (
   actions: readonly Action[],
   actionId: string,
   fn: (action: Action) => Action,
-): Action[] => actions.map((a) => (a.id === actionId ? fn(a) : a));
+): Action[] => updateById(actions, actionId, fn);
 
 export const removeAction = (
   actions: readonly Action[],
@@ -102,9 +123,16 @@ export function updateActions(
   actorId: string | null,
   fn: (actions: readonly Action[]) => Action[],
 ): Scene {
-  if (actorId === null)
-    return { ...scene, backgroundActions: fn(scene.backgroundActions) };
-  return updateActor(scene, actorId, (a) => ({ ...a, actions: fn(a.actions) }));
+  if (actorId === null) {
+    const backgroundActions = fn(scene.backgroundActions);
+    return backgroundActions === scene.backgroundActions
+      ? scene
+      : { ...scene, backgroundActions };
+  }
+  return updateActor(scene, actorId, (a) => {
+    const actions = fn(a.actions);
+    return actions === a.actions ? a : { ...a, actions };
+  });
 }
 
 /** The shortest time between two actions that the user moves. */

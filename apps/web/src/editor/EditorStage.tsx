@@ -104,6 +104,8 @@ interface Props {
   onMoveActor(actorId: string, d: Pt, run: EditRun): void;
   onAddPoint(at: Pt): void;
   onMovePoint(index: number, at: Pt, run: EditRun): void;
+  /** Takes away the step of a drag that a pinch cancelled. */
+  onRevert(run: EditRun): void;
   /** The user touched the stage, so playback should stop. */
   onTouch(): void;
   /** The toolbar of the selection, placed next to the selected actor. */
@@ -257,6 +259,9 @@ export function EditorStage(props: Props) {
       if (touches.current.size === 2 && !pinch.current) {
         const [a, b] = [...touches.current.entries()];
         e.currentTarget.setPointerCapture(e.pointerId);
+        // A move that the first finger made leaves no undo step.
+        const first = gesture.current?.g;
+        if (first && 'moved' in first && first.moved) props.onRevert(first);
         gesture.current = null;
         pinch.current = {
           ids: [a![0], b![0]],

@@ -609,6 +609,7 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
               onMovePoint={(i, at, run) =>
                 editWalk((path) => path.map((p, j) => (j === i ? at : p)), run)
               }
+              onRevert={doc.revert}
               onTouch={() => playback.setPlaying(false)}
               toolbar={toolbar}
             />

@@ -38,9 +38,12 @@ export function applyEdit<T>(
   const before = h.past.at(-1);
   if (run && h.run === run && before !== undefined)
     return { ...h, present: fn(before), future: [] };
+  const present = fn(h.present);
+  // An edit that changes nothing makes no step, and the redo steps stay.
+  if (present === h.present) return h;
   return {
     past: [...h.past, h.present].slice(-limit),
-    present: fn(h.present),
+    present,
     future: [],
     run: run ?? null,
   };

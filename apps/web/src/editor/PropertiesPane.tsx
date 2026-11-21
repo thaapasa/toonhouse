@@ -343,6 +343,21 @@ function ActionSection(
   );
 }
 
+// Walk points have no ids, so each point object gets a key for its row. The
+// new point of an edit gets the key of the old one, and undo brings back the
+// old points with their keys. So a row, and a value typed in it, stay with
+// their point when a point before it is added or removed.
+const pointKeys = new WeakMap<Pt, number>();
+let nextPointKey = 0;
+function pointKey(p: Pt): number {
+  let key = pointKeys.get(p);
+  if (key === undefined) {
+    key = nextPointKey++;
+    pointKeys.set(p, key);
+  }
+  return key;
+}
+
 function WalkPath(
   props: Props & {
     actor: Actor;
@@ -358,11 +373,21 @@ function WalkPath(
   const start = actorStateAt(actor, kind, bg, action.t).at;
   const arrives = walkTime(actor, kind, bg, action);
   const editPath = (fn: (p: Pt[]) => Pt[]) =>
-    props.onEditAction((a) => ({ ...a, path: fn(a.path ?? []) }));
-  const setPoint = (i: number, p: Partial<Pt>) =>
-    editPath((list) =>
-      list.map((q, j) => (j === i ? savedPoint({ ...q, ...p }) : q)),
-    );
+    props.onEditAction((a) => {
+      const old = a.path ?? [];
+      const next = fn(old);
+      return next === old ? a : { ...a, path: next };
+    });
+  /** Changes the point with the key, if it is still on the path. */
+  const setPoint = (key: number, p: Partial<Pt>) =>
+    editPath((list) => {
+      const i = list.findIndex((q) => pointKeys.get(q) === key);
+      if (i < 0) return list;
+      const moved = savedPoint({ ...list[i]!, ...p });
+      pointKeys.set(moved, key);
+      return list.map((q, j) => (j === i ? moved : q));
+    });
+  const keys = path.map(pointKey);
 
   return (
     <div className="walk-points">
@@ -386,7 +411,8 @@ function WalkPath(
       </div>
       {path.map((p, i) => (
         <div
-          key={i}
+          // The same point object twice on the path would share a key.
+          key={keys.indexOf(keys[i]!) === i ? keys[i] : `${keys[i]}-${i}`}
           className="point-row"
           onFocus={() => props.onFocusPoint(i)}
           onBlur={() => props.onFocusPoint(null)}
@@ -399,14 +425,14 @@ function WalkPath(
             hideLabel
             value={p.x}
             decimals={1}
-            onChange={(x) => setPoint(i, { x })}
+            onChange={(x) => setPoint(keys[i]!, { x })}
           />
           <NumberField
             label={tr('properties.pointY', { n: i + 1 })}
             hideLabel
             value={p.y}
             decimals={1}
-            onChange={(y) => setPoint(i, { y })}
+            onChange={(y) => setPoint(keys[i]!, { y })}
           />
           <button
             type="button"
