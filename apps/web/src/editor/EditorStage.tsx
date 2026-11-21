@@ -30,6 +30,7 @@ import { ZoomFitIcon } from '../components/icons.tsx';
 import { SceneDrawing } from '../components/SceneDrawing.tsx';
 import { useI18n } from '../i18n/index.tsx';
 import { bubbleContext } from './bubbles.ts';
+import type { EditRun } from './history.ts';
 import { type BackgroundAsset, CHARACTERS, PROPS } from './library.ts';
 import { placeActors } from './placement.ts';
 import { released } from './pointer.ts';
@@ -45,7 +46,6 @@ import {
   viewRect,
   wheelAction,
 } from './stageView.ts';
-import type { EditMode } from './useCartoonContent.ts';
 import { useSize } from './useSize.ts';
 
 const PREFIX = 'stage';
@@ -97,13 +97,13 @@ interface Props {
   onEditBubbleText(id: string): void;
   onAddBubble(place: BubblePlace): void;
   /** Moves a bubble to `at`, an offset or a point as `Bubble.at` is given. */
-  onMoveBubble(id: string, at: Pt, mode: EditMode): void;
+  onMoveBubble(id: string, at: Pt, run: EditRun): void;
   /** Moves the tip of the tail of a bubble, given as `Bubble.tailTip`. */
-  onMoveTail(id: string, tip: Pt, mode: EditMode): void;
+  onMoveTail(id: string, tip: Pt, run: EditRun): void;
   /** Moves an actor by `d` from where it was when the drag started. */
-  onMoveActor(actorId: string, d: Pt, mode: EditMode): void;
+  onMoveActor(actorId: string, d: Pt, run: EditRun): void;
   onAddPoint(at: Pt): void;
-  onMovePoint(index: number, at: Pt, mode: EditMode): void;
+  onMovePoint(index: number, at: Pt, run: EditRun): void;
   /** The user touched the stage, so playback should stop. */
   onTouch(): void;
   /** The toolbar of the selection, placed next to the selected actor. */
@@ -407,7 +407,6 @@ export function EditorStage(props: Props) {
     }
     if (!g.moved && !far(g.start, client(e))) return;
     const at = toFrame(e);
-    const mode = g.moved ? 'replace' : 'push';
     g.moved = true;
     if (g.type === 'actor') {
       // From where the drag started, as each move redoes the whole drag. The
@@ -420,18 +419,18 @@ export function EditorStage(props: Props) {
       props.onMoveActor(
         g.id,
         { x: to.x - g.ground.x, y: to.y - g.ground.y },
-        mode,
+        g,
       );
     } else if (g.type === 'bubble') {
       const p = {
         x: g.origin.x + at.x - g.from.x,
         y: g.origin.y + at.y - g.from.y,
       };
-      props.onMoveBubble(g.id, savedPoint(bubbleOffset(p, g.anchor)), mode);
+      props.onMoveBubble(g.id, savedPoint(bubbleOffset(p, g.anchor)), g);
     } else if (g.type === 'tail') {
-      props.onMoveTail(g.id, savedPoint(bubbleOffset(at, g.anchor)), mode);
+      props.onMoveTail(g.id, savedPoint(bubbleOffset(at, g.anchor)), g);
     } else {
-      props.onMovePoint(g.index, insideStage(stage, at), mode);
+      props.onMovePoint(g.index, insideStage(stage, at), g);
     }
   };
 

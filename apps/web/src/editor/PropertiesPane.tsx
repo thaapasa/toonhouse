@@ -31,6 +31,7 @@ import {
 } from '../components/icons.tsx';
 import { useI18n } from '../i18n/index.tsx';
 import { BubbleSection } from './BubbleSection.tsx';
+import type { EditRun } from './history.ts';
 import { type BackgroundAsset, kindOf } from './library.ts';
 import { useNames } from './names.ts';
 import { NumberField } from './NumberField.tsx';
@@ -50,7 +51,6 @@ import {
   updateActor,
 } from './sceneEdit.ts';
 import type { TimelineSelection } from './Timeline.tsx';
-import type { EditMode } from './useCartoonContent.ts';
 
 interface Props {
   scene: Scene;
@@ -62,7 +62,7 @@ interface Props {
   anchors: ReadonlyMap<string, BubbleAnchor>;
   /** Goes up by one each time the text of the bubble should get the focus. */
   textFocus: number;
-  onEditBubble(fn: (b: Bubble) => Bubble, mode?: EditMode): void;
+  onEditBubble(fn: (b: Bubble) => Bubble, run?: EditRun): void;
   /** The length of the scene in seconds. */
   duration: number;
   fps: number;
@@ -97,6 +97,7 @@ export function PropertiesPane(props: Props) {
   else if (props.bubble)
     content = (
       <BubbleSection
+        key={props.bubble.id}
         scene={scene}
         bubble={props.bubble}
         anchors={props.anchors}
@@ -105,16 +106,23 @@ export function PropertiesPane(props: Props) {
         onSeek={props.onSeek}
       />
     );
-  else if (!selection) content = <SceneSection {...props} />;
+  else if (!selection) content = <SceneSection key={scene.id} {...props} />;
   else
     content = (
       <>
         {actor ? (
-          <ActorSection {...props} actor={actor} />
+          <ActorSection key={actor.id} {...props} actor={actor} />
         ) : (
-          <SceneSection {...props} />
+          <SceneSection key={scene.id} {...props} />
         )}
-        {action && <ActionSection {...props} actor={actor} action={action} />}
+        {action && (
+          <ActionSection
+            key={action.id}
+            {...props}
+            actor={actor}
+            action={action}
+          />
+        )}
       </>
     );
 
@@ -265,10 +273,12 @@ function ActionSection(
     editAction(() => changed);
     props.onClipChanged(actorId, changed);
   };
-  const changeStart = (t: number) => {
+  const changeStart = (t: number, closed: boolean) => {
     props.onEdit((s) =>
       updateActions(s, actorId, (list) => moveStart(list, action.id, t)),
     );
+    // The playhead stays with the new selection.
+    if (closed) return;
     const moved = moveStart(actionsOf(scene, actorId), action.id, t);
     props.onSeek(moved.find((a) => a.id === action.id)?.t ?? t);
   };

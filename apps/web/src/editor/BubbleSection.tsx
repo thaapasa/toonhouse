@@ -22,10 +22,10 @@ import {
   backgroundFont,
   setOptional,
 } from './bubbles.ts';
+import type { EditRun } from './history.ts';
 import { useNames } from './names.ts';
 import { NumberField } from './NumberField.tsx';
 import { savedPoint, savedTime } from './sceneEdit.ts';
-import type { EditMode } from './useCartoonContent.ts';
 
 const SHAPES: readonly BubbleShape[] = [
   'speech',
@@ -52,7 +52,7 @@ interface Props {
   anchors: ReadonlyMap<string, BubbleAnchor>;
   /** Goes up by one each time the text field should get the focus. */
   textFocus: number;
-  onEdit(fn: (b: Bubble) => Bubble, mode?: EditMode): void;
+  onEdit(fn: (b: Bubble) => Bubble, run?: EditRun): void;
   onSeek(t: number): void;
 }
 
@@ -65,17 +65,13 @@ export function BubbleSection(props: Props) {
 
   // A run of edits of the same field, such as typing the text or dragging in
   // a color picker, is one undo step.
-  const lastField = useRef<string | null>(null);
-  useEffect(() => {
-    lastField.current = null;
-  }, [bubble.id]);
+  const run = useRef<{ field: string } | null>(null);
   const editRun = (field: string, fn: (b: Bubble) => Bubble) => {
-    const mode = lastField.current === field ? 'replace' : 'push';
-    lastField.current = field;
-    props.onEdit(fn, mode);
+    if (run.current?.field !== field) run.current = { field };
+    props.onEdit(fn, run.current);
   };
   const endRun = () => {
-    lastField.current = null;
+    run.current = null;
   };
   const edit = (fn: (b: Bubble) => Bubble) => {
     endRun();
@@ -119,10 +115,11 @@ export function BubbleSection(props: Props) {
         step={0.1}
         decimals={2}
         unit={tr('properties.seconds')}
-        onChange={(v) => {
+        onChange={(v, closed) => {
           const t = savedTime(Math.max(0, v));
           set('t', t);
-          props.onSeek(t);
+          // The playhead stays with the new selection.
+          if (!closed) props.onSeek(t);
         }}
       />
       <NumberField

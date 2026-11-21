@@ -12,6 +12,15 @@ import {
 } from 'react';
 
 import { ApiError, contentQuery, saveContent } from '../api.ts';
+import {
+  applyEdit,
+  type EditRun,
+  type History,
+  newHistory,
+  redoStep,
+  revertRun,
+  undoStep,
+} from './history.ts';
 
 /** How long to wait after an edit before saving it, in milliseconds. */
 const SAVE_DELAY = 800;
@@ -24,23 +33,12 @@ const HISTORY_LIMIT = 100;
 
 export type SaveState = 'saved' | 'unsaved' | 'saving' | 'error';
 
-/**
- * `push` makes a new step for undo. `replace` makes the latest step again
- * from the state before it, such as for each move of a drag after the first
- * one. So a drag computes every move from where the drag started, and it can
- * pass over other things without changing them.
- */
-export type EditMode = 'push' | 'replace';
-
-interface History {
-  past: CartoonContent[];
-  present: CartoonContent;
-  future: CartoonContent[];
-}
-
 export interface CartoonContentState {
   content: CartoonContent;
-  edit(fn: (c: CartoonContent) => CartoonContent, mode?: EditMode): void;
+  /** Makes an undo step, or with `run`, see `applyEdit`. */
+  edit(fn: (c: CartoonContent) => CartoonContent, run?: EditRun): void;
+  /** Takes away the step of `run`, such as when a pinch cancels a drag. */
+  revert(run: EditRun): void;
   undo(): void;
   redo(): void;
   canUndo: boolean;
@@ -53,11 +51,9 @@ export function useCartoonContent(
   initial: CartoonContent,
 ): CartoonContentState {
   const queryClient = useQueryClient();
-  const [history, setHistory] = useState<History>({
-    past: [],
-    present: initial,
-    future: [],
-  });
+  const [history, setHistory] = useState<History<CartoonContent>>(() =>
+    newHistory(initial),
+  );
   const [saveState, setSaveState] = useState<SaveState>('saved');
   const latest = useRef(initial);
   const saved = useRef(initial);
@@ -126,50 +122,21 @@ export function useCartoonContent(
   }, [save]);
 
   const edit = useCallback(
-    (fn: (c: CartoonContent) => CartoonContent, mode: EditMode = 'push') =>
-      setHistory((h) => {
-        const before = h.past.at(-1);
-        if (mode === 'replace' && before)
-          return { ...h, present: fn(before), future: [] };
-        const present = fn(h.present);
-        return {
-          past: [...h.past, h.present].slice(-HISTORY_LIMIT),
-          present,
-          future: [],
-        };
-      }),
+    (fn: (c: CartoonContent) => CartoonContent, run?: EditRun) =>
+      setHistory((h) => applyEdit(h, fn, run, HISTORY_LIMIT)),
     [],
   );
-  const undo = useCallback(
-    () =>
-      setHistory((h) =>
-        h.past.length === 0
-          ? h
-          : {
-              past: h.past.slice(0, -1),
-              present: h.past.at(-1)!,
-              future: [h.present, ...h.future],
-            },
-      ),
+  const revert = useCallback(
+    (run: EditRun) => setHistory((h) => revertRun(h, run)),
     [],
   );
-  const redo = useCallback(
-    () =>
-      setHistory((h) =>
-        h.future.length === 0
-          ? h
-          : {
-              past: [...h.past, h.present],
-              present: h.future[0]!,
-              future: h.future.slice(1),
-            },
-      ),
-    [],
-  );
+  const undo = useCallback(() => setHistory(undoStep), []);
+  const redo = useCallback(() => setHistory(redoStep), []);
 
   return {
     content: history.present,
     edit,
+    revert,
     undo,
     redo,
     canUndo: history.past.length > 0,

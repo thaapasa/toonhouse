@@ -10,15 +10,15 @@ import {
 import { type PointerEvent, useRef } from 'react';
 
 import { CLIP_COLORS } from './clipIcons.tsx';
+import type { EditRun } from './history.ts';
 import { useNames } from './names.ts';
-import { released } from './pointer.ts';
+import { type PinchCount, released } from './pointer.ts';
 import {
   progressPoints,
   snapTenth,
   TAP_SLOP,
   type TimelineRow,
 } from './timelineMath.ts';
-import type { EditMode } from './useCartoonContent.ts';
 
 /** The height of the progress strip of an action, in CSS pixels. */
 const STRIP = 8;
@@ -31,8 +31,10 @@ export function ActionBlocks(props: {
   pps: number;
   selected: string | null;
   onSelect(actionId: string, t: number): void;
-  onMove(actionId: string, t: number, mode: EditMode): void;
+  onMove(actionId: string, t: number, run: EditRun): void;
   onMoveDone(): void;
+  pinches: PinchCount;
+  onCancel(run: EditRun): void;
 }) {
   const names = useNames();
   const drag = useRef<{
@@ -41,6 +43,7 @@ export function ActionBlocks(props: {
     x: number;
     t: number;
     moved: boolean;
+    pinch: number;
   } | null>(null);
   const actions = sortedActions(props.row.actions);
 
@@ -54,25 +57,30 @@ export function ActionBlocks(props: {
       x: e.clientX,
       t: a.t,
       moved: false,
+      pinch: props.pinches.current,
     };
   };
+  /** A pinch cancels the drag, and the drag leaves no undo step. */
+  const cancel = (d: NonNullable<typeof drag.current>) => {
+    drag.current = null;
+    if (d.moved) props.onCancel(d);
+  };
+
   const move = (e: PointerEvent<HTMLButtonElement>) => {
     const d = drag.current;
     if (d?.pointer !== e.pointerId) return;
+    if (d.pinch !== props.pinches.current) return cancel(d);
     if (released(e)) return up(e);
     const dx = e.clientX - d.x;
     if (!d.moved && Math.abs(dx) < TAP_SLOP) return;
     const t = snapTenth(d.t + dx / props.pps);
-    props.onMove(
-      d.id,
-      Math.min(Math.max(t, 0), props.length),
-      d.moved ? 'replace' : 'push',
-    );
+    props.onMove(d.id, Math.min(Math.max(t, 0), props.length), d);
     d.moved = true;
   };
   const up = (e: PointerEvent<HTMLButtonElement>) => {
     const d = drag.current;
     if (d?.pointer !== e.pointerId) return;
+    if (d.pinch !== props.pinches.current) return cancel(d);
     drag.current = null;
     if (d.moved) props.onMoveDone();
     else if (e.type === 'pointerup') props.onSelect(d.id, d.t);

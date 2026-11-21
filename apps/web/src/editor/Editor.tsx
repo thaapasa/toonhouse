@@ -50,6 +50,7 @@ import {
 } from './bubbles.ts';
 import { CartoonTitle } from './CartoonTitle.tsx';
 import { EditorStage, type WalkEdit } from './EditorStage.tsx';
+import type { EditRun } from './history.ts';
 import { editorCommand, isTyping } from './keys.ts';
 import {
   type BackgroundAsset,
@@ -82,7 +83,7 @@ import {
 } from './sceneEdit.ts';
 import { Timeline, type TimelineSelection } from './Timeline.tsx';
 import { timelineLength } from './timelineMath.ts';
-import { type EditMode, useCartoonContent } from './useCartoonContent.ts';
+import { useCartoonContent } from './useCartoonContent.ts';
 
 const FPS = 30;
 const PANE_KEY = 'toonhouse-properties-open';
@@ -188,13 +189,10 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
       ? walking
       : null;
 
-  const editScene = (fn: (s: Scene) => Scene, mode: EditMode = 'push') =>
-    doc.edit((c) => updateScene(c, scene.id, fn), mode);
-  const editBubble = (
-    id: string,
-    fn: (b: Bubble) => Bubble,
-    mode: EditMode = 'push',
-  ) => editScene((s) => updateBubble(s, id, fn), mode);
+  const editScene = (fn: (s: Scene) => Scene, run?: EditRun) =>
+    doc.edit((c) => updateScene(c, scene.id, fn), run);
+  const editBubble = (id: string, fn: (b: Bubble) => Bubble, run?: EditRun) =>
+    editScene((s) => updateBubble(s, id, fn), run);
   /** Selects an actor or an action, or nothing with null. */
   const select = (sel: TimelineSelection | null) => {
     setSelected(sel);
@@ -277,7 +275,7 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
     );
   };
 
-  const editWalk = (fn: (path: Pt[]) => Pt[], mode: EditMode = 'push') => {
+  const editWalk = (fn: (path: Pt[]) => Pt[], run?: EditRun) => {
     if (!walk) return;
     editScene(
       (s) =>
@@ -287,7 +285,7 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
             path: fn(a.path ?? []),
           })),
         ),
-      mode,
+      run,
     );
   };
   const walkDone = () => {
@@ -434,8 +432,8 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
           : new Map()
       }
       textFocus={textFocus}
-      onEditBubble={(fn, mode) =>
-        selectedBubble && editBubble(selectedBubble.id, fn, mode)
+      onEditBubble={(fn, run) =>
+        selectedBubble && editBubble(selectedBubble.id, fn, run)
       }
       duration={duration}
       fps={FPS}
@@ -576,21 +574,21 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
                 setBubbleTool(false);
                 editBubbleText(bubble.id);
               }}
-              onMoveBubble={(id, at, mode) =>
-                editBubble(id, (b) => ({ ...b, at }), mode)
+              onMoveBubble={(id, at, run) =>
+                editBubble(id, (b) => ({ ...b, at }), run)
               }
-              onMoveTail={(id, tailTip, mode) =>
-                editBubble(id, (b) => ({ ...b, tailTip }), mode)
+              onMoveTail={(id, tailTip, run) =>
+                editBubble(id, (b) => ({ ...b, tailTip }), run)
               }
-              onMoveActor={(id, d, mode) =>
+              onMoveActor={(id, d, run) =>
                 editScene(
                   (s) => updateActor(s, id, (a) => moveActor(a, d)),
-                  mode,
+                  run,
                 )
               }
               onAddPoint={(at) => editWalk((path) => [...path, at])}
-              onMovePoint={(i, at, mode) =>
-                editWalk((path) => path.map((p, j) => (j === i ? at : p)), mode)
+              onMovePoint={(i, at, run) =>
+                editWalk((path) => path.map((p, j) => (j === i ? at : p)), run)
               }
               onTouch={() => playback.setPlaying(false)}
               toolbar={toolbar}
@@ -643,32 +641,33 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
         onStep={playback.step}
         selection={selection}
         onSelect={selectOnTimeline}
-        onMoveBlock={(actorId, actionId, at, mode) => {
+        onMoveBlock={(actorId, actionId, at, run) => {
           // Each move of a drag starts from the scene before the drag.
           editScene(
             (s) => moveBlock(s, actorId, actionId, at, lengthOf(s)).scene,
-            mode,
+            run,
           );
           playback.seek(moveBlock(scene, actorId, actionId, at, duration).t);
         }}
-        onMoveStart={(actorId, actionId, at, mode) => {
+        onMoveStart={(actorId, actionId, at, run) => {
           editScene(
             (s) => updateActions(s, actorId, (a) => moveStart(a, actionId, at)),
-            mode,
+            run,
           );
           const moved = moveStart(actionsOf(scene, actorId), actionId, at);
           playback.seek(moved.find((a) => a.id === actionId)?.t ?? at);
         }}
-        onLength={(v, mode) => editScene((s) => setLength(s, v), mode)}
+        onLength={(v, run) => editScene((s) => setLength(s, v), run)}
         selectedBubble={selectedBubble?.id ?? null}
         onSelectBubble={selectBubble}
-        onMoveBubble={(id, at, mode) => {
-          editBubble(id, (b) => ({ ...b, t: savedTime(at) }), mode);
+        onMoveBubble={(id, at, run) => {
+          editBubble(id, (b) => ({ ...b, t: savedTime(at) }), run);
           playback.seek(at);
         }}
-        onBubbleLength={(id, v, mode) =>
-          editBubble(id, (b) => ({ ...b, length: savedTime(v) }), mode)
+        onBubbleLength={(id, v, run) =>
+          editBubble(id, (b) => ({ ...b, length: savedTime(v) }), run)
         }
+        onRevert={doc.revert}
       />
       {removing && (
         <Dialog

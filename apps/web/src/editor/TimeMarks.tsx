@@ -8,7 +8,8 @@ import { sortedActions } from '@toonhouse/renderer';
 import { type PointerEvent, useRef } from 'react';
 
 import { useI18n } from '../i18n/index.tsx';
-import { released } from './pointer.ts';
+import type { EditRun } from './history.ts';
+import { type PinchCount, released } from './pointer.ts';
 import {
   formatTime,
   midPoints,
@@ -16,7 +17,6 @@ import {
   TAP_SLOP,
   type TimelineRow,
 } from './timelineMath.ts';
-import type { EditMode } from './useCartoonContent.ts';
 
 type Mark =
   | { type: 'start'; t: number; actionId: string }
@@ -37,9 +37,11 @@ export function TimeMarks(props: {
   fps: number;
   pps: number;
   onSeek(t: number): void;
-  onLength(length: number, mode: EditMode): void;
-  onMoveStart(actionId: string, t: number, mode: EditMode): void;
+  onLength(length: number, run: EditRun): void;
+  onMoveStart(actionId: string, t: number, run: EditRun): void;
   onDragDone(): void;
+  pinches: PinchCount;
+  onCancel(run: EditRun): void;
 }) {
   const { tr } = useI18n();
   const drag = useRef<{
@@ -47,6 +49,7 @@ export function TimeMarks(props: {
     mark: Mark;
     x: number;
     moved: boolean;
+    pinch: number;
   } | null>(null);
   // A drag ends with a click, which should not move the playhead.
   const dragged = useRef(false);
@@ -79,24 +82,36 @@ export function TimeMarks(props: {
     const mark = marks[Number(e.currentTarget.dataset.mark)];
     if (drag.current || !mark || mark.type === 'mid') return;
     e.currentTarget.setPointerCapture(e.pointerId);
-    drag.current = { pointer: e.pointerId, mark, x: e.clientX, moved: false };
+    drag.current = {
+      pointer: e.pointerId,
+      mark,
+      x: e.clientX,
+      moved: false,
+      pinch: props.pinches.current,
+    };
   };
+  /** A pinch cancels the drag, and the drag leaves no undo step. */
+  const cancel = (d: NonNullable<typeof drag.current>) => {
+    drag.current = null;
+    if (d.moved) props.onCancel(d);
+  };
+
   const move = (e: PointerEvent<HTMLButtonElement>) => {
     const d = drag.current;
     if (d?.pointer !== e.pointerId) return;
+    if (d.pinch !== props.pinches.current) return cancel(d);
     if (released(e)) return up(e);
     const dx = e.clientX - d.x;
     if (!d.moved && Math.abs(dx) < TAP_SLOP) return;
     const t = snapToTargets(d.mark.t + dx / pps, targets(d.mark), pps, fps);
-    const mode = d.moved ? 'replace' : 'push';
-    if (d.mark.type === 'end') props.onLength(t, mode);
-    else if (d.mark.type === 'start')
-      props.onMoveStart(d.mark.actionId, t, mode);
+    if (d.mark.type === 'end') props.onLength(t, d);
+    else if (d.mark.type === 'start') props.onMoveStart(d.mark.actionId, t, d);
     d.moved = true;
   };
   const up = (e: PointerEvent<HTMLButtonElement>) => {
     const d = drag.current;
     if (d?.pointer !== e.pointerId) return;
+    if (d.pinch !== props.pinches.current) return cancel(d);
     drag.current = null;
     if (d.moved) {
       dragged.current = true;

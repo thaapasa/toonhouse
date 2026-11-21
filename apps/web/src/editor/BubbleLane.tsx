@@ -8,9 +8,9 @@ import { bubbleEnd, bubbleLength, sortedBubbles } from '@toonhouse/renderer';
 import { type PointerEvent, useRef } from 'react';
 
 import { useI18n } from '../i18n/index.tsx';
-import { released } from './pointer.ts';
+import type { EditRun } from './history.ts';
+import { type PinchCount, released } from './pointer.ts';
 import { formatTime, snapTenth, TAP_SLOP } from './timelineMath.ts';
-import type { EditMode } from './useCartoonContent.ts';
 
 /** The height of one line of a bubble lane, in CSS pixels. */
 export const BUBBLE_LINE = 24;
@@ -45,9 +45,11 @@ export function BubbleLane(props: {
   selected: string | null;
   onSelect(id: string, t: number): void;
   onSeek(t: number): void;
-  onMove(id: string, t: number, mode: EditMode): void;
-  onLength(id: string, length: number, mode: EditMode): void;
+  onMove(id: string, t: number, run: EditRun): void;
+  onLength(id: string, length: number, run: EditRun): void;
   onDragDone(): void;
+  pinches: PinchCount;
+  onCancel(run: EditRun): void;
 }) {
   const { tr } = useI18n();
   const { pps } = props;
@@ -57,6 +59,7 @@ export function BubbleLane(props: {
     grab: Grab;
     x: number;
     moved: boolean;
+    pinch: number;
   } | null>(null);
   // A drag ends with a click, which should not move the playhead.
   const dragged = useRef(false);
@@ -73,28 +76,36 @@ export function BubbleLane(props: {
       grab,
       x: e.clientX,
       moved: false,
+      pinch: props.pinches.current,
     };
   };
+  /** A pinch cancels the drag, and the drag leaves no undo step. */
+  const cancel = (d: NonNullable<typeof drag.current>) => {
+    drag.current = null;
+    if (d.moved) props.onCancel(d);
+  };
+
   const move = (e: PointerEvent<HTMLElement>) => {
     const d = drag.current;
     if (d?.pointer !== e.pointerId) return;
+    if (d.pinch !== props.pinches.current) return cancel(d);
     if (released(e)) return up(e);
     const dx = e.clientX - d.x;
     if (!d.moved && Math.abs(dx) < TAP_SLOP) return;
-    const mode = d.moved ? 'replace' : 'push';
     d.moved = true;
     const b = d.bubble;
     if (d.grab === 'move') {
       const t = snapTenth(b.t + dx / pps);
-      props.onMove(b.id, Math.min(Math.max(t, 0), props.length), mode);
+      props.onMove(b.id, Math.min(Math.max(t, 0), props.length), d);
     } else {
       const end = snapTenth(bubbleEnd(b) + dx / pps);
-      props.onLength(b.id, Math.max(end - b.t, MIN_LENGTH), mode);
+      props.onLength(b.id, Math.max(end - b.t, MIN_LENGTH), d);
     }
   };
   const up = (e: PointerEvent<HTMLElement>) => {
     const d = drag.current;
     if (d?.pointer !== e.pointerId) return;
+    if (d.pinch !== props.pinches.current) return cancel(d);
     drag.current = null;
     if (d.moved) {
       dragged.current = true;

@@ -6,3 +6,11 @@ import type { PointerEvent } from 'react';
  * user let go of the mouse outside the browser window. A drag ends then.
  */
 export const released = (e: PointerEvent) => e.buttons === 0;
+
+/**
+ * Counts the pinches on the timeline. A drag keeps the count from when it
+ * started, and a new count means that a second finger came and the drag ends.
+ */
+export interface PinchCount {
+  readonly current: number;
+}

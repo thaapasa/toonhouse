@@ -12,7 +12,13 @@
 // after it.
 import type { Background, Bubble, Scene } from '@toonhouse/model';
 import { sortedActions, walkTime } from '@toonhouse/renderer';
-import { type PointerEvent, type ReactNode, useRef, useState } from 'react';
+import {
+  type PointerEvent,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import {
   BackgroundIcon,
@@ -30,6 +36,7 @@ import {
 import { type TextKey, useI18n } from '../i18n/index.tsx';
 import { ActionBlocks } from './ActionBlocks.tsx';
 import { BUBBLE_LINE, BubbleLane, bubbleLines } from './BubbleLane.tsx';
+import type { EditRun } from './history.ts';
 import { kindOf } from './library.ts';
 import { useNames } from './names.ts';
 import { released } from './pointer.ts';
@@ -41,7 +48,6 @@ import {
   type TimelineRow,
 } from './timelineMath.ts';
 import { TimeMarks } from './TimeMarks.tsx';
-import type { EditMode } from './useCartoonContent.ts';
 import { useSize } from './useSize.ts';
 import { useTimelineZoom } from './useTimelineZoom.ts';
 
@@ -86,23 +92,25 @@ interface Props {
     actorId: string | null,
     actionId: string,
     t: number,
-    mode: EditMode,
+    run: EditRun,
   ): void;
   /** Moves only the start of an action, which is the end of the one before. */
   onMoveStart(
     actorId: string | null,
     actionId: string,
     t: number,
-    mode: EditMode,
+    run: EditRun,
   ): void;
   /** Sets the length of the scene. */
-  onLength(length: number, mode: EditMode): void;
+  onLength(length: number, run: EditRun): void;
   /** The selected speech bubble, if any. */
   selectedBubble: string | null;
   onSelectBubble(id: string): void;
   /** Moves a bubble to start at `t`, and keeps its length. */
-  onMoveBubble(id: string, t: number, mode: EditMode): void;
-  onBubbleLength(id: string, length: number, mode: EditMode): void;
+  onMoveBubble(id: string, t: number, run: EditRun): void;
+  onBubbleLength(id: string, length: number, run: EditRun): void;
+  /** Takes away the step of a drag that a pinch cancelled. */
+  onRevert(run: EditRun): void;
 }
 
 export function Timeline(props: Props) {
@@ -116,10 +124,35 @@ export function Timeline(props: Props) {
   const [frozen, setFrozen] = useState<{ fit: number; length: number } | null>(
     null,
   );
-  const freeze = (mode: EditMode) => {
-    if (mode === 'push') setFrozen({ fit, length });
-  };
+  const freeze = () => setFrozen((f) => f ?? { fit, length });
   const unfreeze = () => setFrozen(null);
+  const revert = (run: EditRun) => {
+    props.onRevert(run);
+    unfreeze();
+  };
+
+  // Two fingers zoom, in `useTimelineZoom`. So a second finger cancels what
+  // the first one did, and it doesn't start anything itself.
+  const touches = useRef(new Set<number>());
+  const pinches = useRef(0);
+  const touchDown = (e: PointerEvent) => {
+    if (e.pointerType !== 'touch') return;
+    touches.current.add(e.pointerId);
+    if (touches.current.size < 2) return;
+    pinches.current++;
+    e.stopPropagation();
+  };
+  useEffect(() => {
+    // On the window, as a finger can lift outside the timeline.
+    const lift = (e: globalThis.PointerEvent) =>
+      touches.current.delete(e.pointerId);
+    window.addEventListener('pointerup', lift, true);
+    window.addEventListener('pointercancel', lift, true);
+    return () => {
+      window.removeEventListener('pointerup', lift, true);
+      window.removeEventListener('pointercancel', lift, true);
+    };
+  }, []);
 
   const length = Math.max(frozen?.length ?? 0, timelineLength(duration));
   // At zoom 1, the whole timeline fits the width.
@@ -141,19 +174,26 @@ export function Timeline(props: Props) {
     return Math.min(Math.max(Math.round(v * props.fps) / props.fps, 0), length);
   };
 
-  const scrub = useRef<number | null>(null);
+  const scrub = useRef<{ pointer: number; from: number; pinch: number } | null>(
+    null,
+  );
   const rulerDown = (e: PointerEvent<HTMLDivElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId);
-    scrub.current = e.pointerId;
+    scrub.current = { pointer: e.pointerId, from: t, pinch: pinches.current };
     props.onSeek(timeAt(e, e.currentTarget));
   };
   const rulerMove = (e: PointerEvent<HTMLDivElement>) => {
-    if (scrub.current !== e.pointerId) return;
-    if (released(e)) rulerUp(e);
+    const s = scrub.current;
+    if (s?.pointer !== e.pointerId) return;
+    if (released(e) || s.pinch !== pinches.current) rulerUp(e);
     else props.onSeek(timeAt(e, e.currentTarget));
   };
   const rulerUp = (e: PointerEvent<HTMLDivElement>) => {
-    if (scrub.current === e.pointerId) scrub.current = null;
+    const s = scrub.current;
+    if (s?.pointer !== e.pointerId) return;
+    scrub.current = null;
+    // A pinch puts the playhead back to where it was.
+    if (s.pinch !== pinches.current) props.onSeek(s.from);
   };
 
   const rows: (TimelineRow & { actorId: string | null; label: ReactNode })[] =
@@ -234,15 +274,17 @@ export function Timeline(props: Props) {
               props.onSeek(at);
             }}
             onSeek={props.onSeek}
-            onMove={(id, at, mode) => {
-              freeze(mode);
-              props.onMoveBubble(id, at, mode);
+            onMove={(id, at, run) => {
+              freeze();
+              props.onMoveBubble(id, at, run);
             }}
-            onLength={(id, v, mode) => {
-              freeze(mode);
-              props.onBubbleLength(id, v, mode);
+            onLength={(id, v, run) => {
+              freeze();
+              props.onBubbleLength(id, v, run);
             }}
             onDragDone={unfreeze}
+            pinches={pinches}
+            onCancel={revert}
           />
         </div>
       </div>
@@ -337,7 +379,7 @@ export function Timeline(props: Props) {
         </TransportButton>
       </div>
 
-      <div className="tracks" ref={ref}>
+      <div className="tracks" ref={ref} onPointerDownCapture={touchDown}>
         <div
           className="tracks-inner"
           style={{ width: LANE_START + width + 16 }}
@@ -408,11 +450,13 @@ export function Timeline(props: Props) {
                       props.onSelect({ actorId: row.actorId, actionId });
                       props.onSeek(at);
                     }}
-                    onMove={(actionId, at, mode) => {
-                      freeze(mode);
-                      props.onMoveBlock(row.actorId, actionId, at, mode);
+                    onMove={(actionId, at, run) => {
+                      freeze();
+                      props.onMoveBlock(row.actorId, actionId, at, run);
                     }}
                     onMoveDone={unfreeze}
+                    pinches={pinches}
+                    onCancel={revert}
                   />
                   <TimeMarks
                     row={row}
@@ -421,15 +465,17 @@ export function Timeline(props: Props) {
                     fps={props.fps}
                     pps={pps}
                     onSeek={props.onSeek}
-                    onLength={(v, mode) => {
-                      freeze(mode);
-                      props.onLength(v, mode);
+                    onLength={(v, run) => {
+                      freeze();
+                      props.onLength(v, run);
                     }}
-                    onMoveStart={(actionId, at, mode) => {
-                      freeze(mode);
-                      props.onMoveStart(row.actorId, actionId, at, mode);
+                    onMoveStart={(actionId, at, run) => {
+                      freeze();
+                      props.onMoveStart(row.actorId, actionId, at, run);
                     }}
                     onDragDone={unfreeze}
+                    pinches={pinches}
+                    onCancel={revert}
                   />
                 </div>
               </div>,
