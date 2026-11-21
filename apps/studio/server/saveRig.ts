@@ -67,7 +67,9 @@ async function save(repoRoot: string, body: string): Promise<void> {
   ) {
     throw new Error(`The rig is not a ${kind} rig`);
   }
-  const text = patchJson(old, rig) ?? JSON.stringify(rig, null, 2);
+  // Without line breaks, Prettier puts each object that fits on one line,
+  // as in the rigs written by hand. It keeps the line breaks that it gets.
+  const text = patchJson(old, rig) ?? JSON.stringify(rig);
   const options = await prettier.resolveConfig(path);
   await writeFile(
     path,
