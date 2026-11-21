@@ -160,7 +160,7 @@
     "armNear",
     "handNear"
   ],
-  "motion": { "hipHeight": 231, "feetOffset": -3, "groundOffset": 18 },
+  "motion": { "hipHeight": 231, "feetOffset": -3, "groundOffset": 20 },
   "colorRoles": { "lid": "skin", "line": "outline", "sleeve": "coat" },
   "colorSettings": [
     {
