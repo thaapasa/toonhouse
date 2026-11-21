@@ -3,7 +3,7 @@
 // background. Each picture shows once the SVG files of its asset have
 // loaded.
 import {
-  drawCharacter,
+  drawRig,
   drawScene,
   partBounds,
   restClip,
@@ -12,6 +12,7 @@ import {
 import { Drawing, PartSymbols } from '@toonhouse/stage';
 import { memo } from 'react';
 
+import { IconButton } from '../components/IconButton.tsx';
 import { CloseIcon } from '../components/icons.tsx';
 import { useI18n } from '../i18n/index.tsx';
 import {
@@ -48,15 +49,9 @@ export function LibraryPanel(props: Props) {
     <section className="library-panel" aria-label={tr('editor.library')}>
       <div className="library-head">
         <h2>{tr(TITLES[props.tab])}</h2>
-        <button
-          type="button"
-          className="icon-button small"
-          aria-label={tr('close')}
-          title={tr('close')}
-          onClick={props.onClose}
-        >
+        <IconButton label="close" small onClick={props.onClose}>
           <CloseIcon />
-        </button>
+        </IconButton>
       </div>
       <div
         className={
@@ -96,7 +91,7 @@ export function LibraryPanel(props: Props) {
 /** A character or a prop standing still. */
 const RigPicture = memo(function RigPicture({ asset }: { asset: RigAsset }) {
   const frame = restClip(asset.rig.kind).frameAt(0);
-  const node = drawCharacter(asset.rig, frame, { facing: 1 }).node;
+  const node = drawRig(asset.rig, frame, { facing: 1 }).node;
   const b = partBounds(node) ?? { x: 0, y: 0, width: 1, height: 1 };
   const prefix = `lib-${asset.kind}-${asset.id}`;
   useSources([asset.files]);

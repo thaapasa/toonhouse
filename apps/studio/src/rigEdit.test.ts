@@ -1,5 +1,5 @@
 import type { Rig } from '@toonhouse/model';
-import { clipsFor, drawCharacter, drawOrder } from '@toonhouse/renderer';
+import { clipsFor, drawOrder, drawRig } from '@toonhouse/renderer';
 import { describe, expect, it } from 'vitest';
 
 import bunny from '../../../assets/characters/bunny/rig.json';
@@ -38,7 +38,7 @@ describe('attachmentMover', () => {
           const p = attachmentAt(rig, a);
           const moved = withAttachment(rig, a, { x: p.x + m.x, y: p.y + m.y });
           const at = (r: Rig) =>
-            drawCharacter(r, frame, { facing }).skeleton.joints.find(
+            drawRig(r, frame, { facing }).rigOutline.pivots.find(
               (j) => j.name === a.joint,
             )!.at;
           expect(at(moved).x - at(rig).x).toBeCloseTo(d.x, 6);

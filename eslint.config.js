@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import { defineConfig } from 'eslint/config';
 import prettier from 'eslint-config-prettier';
 import reactHooks from 'eslint-plugin-react-hooks';
 import simpleImportSort from 'eslint-plugin-simple-import-sort';
@@ -14,11 +15,11 @@ const CLOCKS = [
   'requestAnimationFrame',
 ];
 
-export default tseslint.config(
+export default defineConfig(
   // assets/work/ is git-ignored scratch for the image scripts.
   { ignores: ['**/dist/', '**/coverage/', 'assets/work/'] },
   js.configs.recommended,
-  ...tseslint.configs.recommended,
+  tseslint.configs.recommended,
   {
     languageOptions: {
       globals: { ...globals.browser, ...globals.node },
@@ -45,6 +46,11 @@ export default tseslint.config(
       'no-restricted-properties': [
         'error',
         { object: 'Math', property: 'random', message: PURE },
+        ...['randomUUID', 'getRandomValues'].map((property) => ({
+          object: 'crypto',
+          property,
+          message: PURE,
+        })),
         ...['globalThis', 'window', 'self'].flatMap((object) =>
           [...CLOCKS, 'Date'].map((property) => ({
             object,
@@ -52,6 +58,10 @@ export default tseslint.config(
             message: PURE,
           })),
         ),
+      ],
+      'no-restricted-imports': [
+        'error',
+        ...['crypto', 'node:crypto'].map((name) => ({ name, message: PURE })),
       ],
       'no-restricted-syntax': [
         'error',
@@ -63,6 +73,13 @@ export default tseslint.config(
         },
       ],
     },
+  },
+  {
+    // The rule needs type information, which doubles the time that lint takes,
+    // so it covers only the apps and the packages, where the async code is.
+    files: ['apps/**/*.{ts,tsx}', 'packages/**/*.{ts,tsx}'],
+    languageOptions: { parserOptions: { projectService: true } },
+    rules: { '@typescript-eslint/no-floating-promises': 'error' },
   },
   prettier,
 );

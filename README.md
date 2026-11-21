@@ -120,6 +120,11 @@ The local ports follow the `1AARR` scheme. The app ID is `07`.
 | 10732 | PostgreSQL, development |
 | 10790 | Motion prototypes       |
 
+Each port comes from an environment variable, with the port above as the
+default: `SERVER_PORT`, `WEB_PORT`, `STUDIO_PORT`, `DB_PORT` and
+`PROTOTYPES_PORT`. The Vite dev server reads `SERVER_PORT` too, to send the API
+requests to the server.
+
 ## Asset licenses
 
 The images are generated with Qwen Image 2.1 Turbo. Its license, the Qwen

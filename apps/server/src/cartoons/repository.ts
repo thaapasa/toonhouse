@@ -84,10 +84,10 @@ export async function getCartoon(
 
 /**
  * The most cartoons that one user can have. Each cartoon can hold up to 10 MB
- * of content and 1 MB of preview image, so without a limit one user could fill
+ * of content and 3 MB of preview image, so without a limit one user could fill
  * the disk of the database. The limit is there for disk space only, so it is far
  * above what anyone makes by hand. At the limit, one user can still store about
- * 11 GB in the worst case.
+ * 13 GB in the worst case.
  */
 export const maxCartoonsPerUser = 1000;
 

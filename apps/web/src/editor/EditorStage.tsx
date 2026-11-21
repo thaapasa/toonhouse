@@ -13,7 +13,7 @@ import {
   bubbleOffset,
   bubblePoint,
   clamp,
-  sceneFrame,
+  type SceneFrame,
 } from '@toonhouse/renderer';
 import {
   type CSSProperties,
@@ -27,17 +27,13 @@ import {
   useState,
 } from 'react';
 
+import { IconButton } from '../components/IconButton.tsx';
 import { ZoomFitIcon } from '../components/icons.tsx';
 import { SceneDrawing } from '../components/SceneDrawing.tsx';
 import { useI18n } from '../i18n/index.tsx';
-import {
-  type BackgroundAsset,
-  CHARACTERS,
-  LIBRARY,
-  PROPS,
-} from '../library/index.ts';
+import { type BackgroundAsset, CHARACTERS, PROPS } from '../library/index.ts';
 import type { EditRun } from './history.ts';
-import { released } from './pointer.ts';
+import { released, TAP_SLOP } from './pointer.ts';
 import { savedPoint } from './sceneEdit.ts';
 import {
   bandSize,
@@ -55,8 +51,6 @@ import { useSize } from './useSize.ts';
 const PREFIX = 'stage';
 /** The size of the box of a walk point on the screen, in CSS pixels. */
 const POINT_BOX = 26;
-/** A pointer that moves less than this, in CSS pixels, taps. */
-const TAP_SLOP = 8;
 /** Two taps on a bubble closer than this in milliseconds open its text. */
 const DOUBLE_TAP = 400;
 /** The radius of the handle of the tip of a tail, in CSS pixels. */
@@ -82,13 +76,12 @@ export interface WalkEdit {
 interface Props {
   scene: Scene;
   bg: BackgroundAsset;
-  t: number;
   /** The selected actor, if any. */
   selectedActor: string | null;
   /** The selected bubble, if any. */
   selectedBubble: string | null;
-  /** Whether the cartoon plays, so that the bubbles pop in and out. */
-  playing: boolean;
+  /** The scene at `t`, which the editor computes once for each render. */
+  frame: SceneFrame;
   /** Whether a tap adds a bubble. */
   bubbleTool: boolean;
   walk: WalkEdit | null;
@@ -163,7 +156,7 @@ const middle = (a: Pt, b: Pt): Pt => ({
 });
 
 export function EditorStage(props: Props) {
-  const { scene, bg: asset, t, walk } = props;
+  const { scene, bg: asset, walk } = props;
   const bg = asset.background;
   const { tr } = useI18n();
   const [ref, size] = useSize<HTMLDivElement>();
@@ -203,9 +196,7 @@ export function EditorStage(props: Props) {
     Math.abs(stageView.x - home.x) < 1e-3 &&
     Math.abs(stageView.y - home.y) < 1e-3;
 
-  // While the cartoon doesn't play, a bubble shows at its full size also at
-  // its first and last moments, so that the user can work on it.
-  const frame = sceneFrame(scene, bg, LIBRARY, t, { pop: props.playing });
+  const { frame } = props;
   const { actors: placed, bubbles } = frame;
   const anchorOf = (actorId: string | undefined) =>
     actorId === undefined
@@ -606,15 +597,13 @@ export function EditorStage(props: Props) {
         </svg>
       )}
       {!atHome && (
-        <button
-          type="button"
-          className="icon-button stage-home"
-          aria-label={tr('editor.stageHome')}
-          title={tr('editor.stageHome')}
+        <IconButton
+          label="editor.stageHome"
+          className="stage-home"
           onClick={() => changeView(() => home)}
         >
           <ZoomFitIcon />
-        </button>
+        </IconButton>
       )}
       {/* Always there, so that its size is measured when it gets content. */}
       <div

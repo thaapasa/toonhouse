@@ -23,6 +23,7 @@ import {
 } from '@toonhouse/renderer';
 import type { ReactNode } from 'react';
 
+import { IconButton } from '../components/IconButton.tsx';
 import {
   CloseIcon,
   DeleteIcon,
@@ -135,25 +136,17 @@ export function PropertiesPane(props: Props) {
     >
       <div className="pane-head">
         <h2>{tr('properties.title')}</h2>
-        <button
-          type="button"
-          className="icon-button small"
-          aria-label={tr('properties.attach')}
-          aria-pressed={props.attached}
-          title={tr('properties.attach')}
+        <IconButton
+          label="properties.attach"
+          small
+          pressed={props.attached}
           onClick={() => props.onAttach(!props.attached)}
         >
           <PinIcon filled={props.attached} />
-        </button>
-        <button
-          type="button"
-          className="icon-button small"
-          aria-label={tr('properties.hide')}
-          title={tr('properties.hide')}
-          onClick={props.onClose}
-        >
+        </IconButton>
+        <IconButton label="properties.hide" small onClick={props.onClose}>
           <CloseIcon />
-        </button>
+        </IconButton>
       </div>
       {content}
     </section>
@@ -434,20 +427,18 @@ function WalkPath(
             decimals={1}
             onChange={(y) => setPoint(keys[i]!, { y })}
           />
-          <button
-            type="button"
-            className="icon-button small"
-            aria-label={tr('properties.insertPoint', { n: i + 1 })}
-            title={tr('properties.insertPoint', { n: i + 1 })}
+          <IconButton
+            label="properties.insertPoint"
+            vars={{ n: i + 1 }}
+            small
             onClick={() => editPath((list) => insertPoint(list, i, start))}
           >
             <InsertPointIcon />
-          </button>
-          <button
-            type="button"
-            className="icon-button small"
-            aria-label={tr('properties.removePoint', { n: i + 1 })}
-            title={tr('properties.removePoint', { n: i + 1 })}
+          </IconButton>
+          <IconButton
+            label="properties.removePoint"
+            vars={{ n: i + 1 }}
+            small
             // A walk without points would walk on the spot.
             disabled={path.length <= 1}
             onClick={() => {
@@ -456,7 +447,7 @@ function WalkPath(
             }}
           >
             <DeleteIcon />
-          </button>
+          </IconButton>
         </div>
       ))}
       <p className="muted small">{tr('properties.pathHint')}</p>

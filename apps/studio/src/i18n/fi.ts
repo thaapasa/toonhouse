@@ -31,7 +31,7 @@ export const fi: Texts = {
   'background.harbor': 'Satama',
   viewport: 'Näkymä',
   bones: 'Luut',
-  bonesHint: 'Näytä luut ja nivelet',
+  bonesHint: 'Näytä luut ja kääntöpisteet',
   ground: 'Maa',
   groundHint: 'Näytä maa, joka liikkuu jalkojen alla',
   flip: 'Käännä',
@@ -90,7 +90,7 @@ export const fi: Texts = {
   frameOf: ' / {n} · {fps} r/s',
   speed: 'Nopeus',
   time: 'Aika',
-  inspector: 'Tarkastelu',
+  properties: 'Ominaisuudet',
   rig: 'Rigi',
   selected: 'Valittu',
   pickHint:

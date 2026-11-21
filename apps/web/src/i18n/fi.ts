@@ -139,7 +139,6 @@ export const fi: Texts = {
   'editor.removeSceneConfirm': 'Poista',
   'editor.pause': 'Tauko',
   'editor.libraryHint': 'Lisää kohtaukseen napauttamalla.',
-  'editor.pickBackgroundFirst': 'Valitse ensin tausta.',
   'editor.actions': 'Toiminnot',
   'editor.turn': 'Käännä',
   'editor.smaller': 'Pienemmäksi',

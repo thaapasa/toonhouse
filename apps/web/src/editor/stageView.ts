@@ -10,7 +10,7 @@ import type { Background, Pt } from '@toonhouse/model';
 import {
   type Bounds,
   clamp,
-  drawCharacter,
+  drawRig,
   partBounds,
   restClip,
 } from '@toonhouse/renderer';
@@ -46,7 +46,7 @@ export interface StageView {
 /** The box of a character or a prop in its first clip, in its own pixels. */
 function rigBox(asset: RigAsset): Bounds | null {
   const kind = asset.rig.kind;
-  const { node } = drawCharacter(asset.rig, restClip(kind).frameAt(0), {
+  const { node } = drawRig(asset.rig, restClip(kind).frameAt(0), {
     facing: 1,
   });
   return partBounds(node);

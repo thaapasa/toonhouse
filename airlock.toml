@@ -18,10 +18,13 @@ resolution = "registry"
 
 [vm]
 
-# node_modules and the Yarn cache live on the VM's ext4 disk, not on the
-# VirtioFS project mount. The host is macOS and the sandbox is Linux, so the
-# two must never share installed native binaries.
-# These also survive a change of OCI image.
+# The pnpm store needs no cache entry. pnpm puts it at the root of the mount
+# that holds the project, so it stays on the host between sandboxes. It holds
+# only package files, which macOS and Linux can share.
+
+# node_modules live on the VM's ext4 disk, not on the VirtioFS project mount.
+# The host is macOS and the sandbox is Linux, so the two must never share
+# installed native binaries. These also survive a change of OCI image.
 # airlock takes the paths literally, without globs, so each workspace package
 # in pnpm-workspace.yaml needs its own entry.
 [disk.cache.node-modules]
@@ -36,9 +39,6 @@ paths = [
   "packages/stage/node_modules",
   "prototypes/node_modules",
 ]
-
-[disk.cache.yarn]
-paths = ["~/.yarn/berry/cache", "~/.cache/node/corepack"]
 
 [disk]
 size = "20 GB"

@@ -11,7 +11,7 @@
 // of the scene, so that the end shows and the user can start new actions
 // after it.
 import type { Background, Bubble, Scene } from '@toonhouse/model';
-import { sortedActions, walkTime } from '@toonhouse/renderer';
+import { clamp, sortedActions, walkTime } from '@toonhouse/renderer';
 import {
   type PointerEvent,
   type ReactNode,
@@ -20,6 +20,7 @@ import {
   useState,
 } from 'react';
 
+import { IconButton } from '../components/IconButton.tsx';
 import {
   BackgroundIcon,
   BubbleIcon,
@@ -33,13 +34,12 @@ import {
   ZoomInIcon,
   ZoomOutIcon,
 } from '../components/icons.tsx';
-import { type TextKey, useI18n } from '../i18n/index.tsx';
+import { useI18n } from '../i18n/index.tsx';
 import { kindOf } from '../library/index.ts';
 import { ActionBlocks } from './ActionBlocks.tsx';
 import { BUBBLE_LINE, BubbleLane, bubbleLines } from './BubbleLane.tsx';
 import type { EditRun } from './history.ts';
 import { useNames } from './names.ts';
-import { released } from './pointer.ts';
 import {
   formatTime,
   midPoints,
@@ -48,6 +48,7 @@ import {
   type TimelineRow,
 } from './timelineMath.ts';
 import { TimeMarks } from './TimeMarks.tsx';
+import { useLaneDrag } from './useLaneDrag.ts';
 import { useSize } from './useSize.ts';
 import { useTimelineZoom } from './useTimelineZoom.ts';
 
@@ -181,30 +182,17 @@ export function Timeline(props: Props) {
   const timeAt = (e: { clientX: number }, lane: Element) => {
     const r = lane.getBoundingClientRect();
     const v = (e.clientX - r.left) / pps;
-    return Math.min(Math.max(Math.round(v * props.fps) / props.fps, 0), length);
+    return clamp(Math.round(v * props.fps) / props.fps, 0, length);
   };
 
-  const scrub = useRef<{ pointer: number; from: number; pinch: number } | null>(
-    null,
-  );
-  const rulerDown = (e: PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    scrub.current = { pointer: e.pointerId, from: t, pinch: pinches.current };
-    props.onSeek(timeAt(e, e.currentTarget));
-  };
-  const rulerMove = (e: PointerEvent<HTMLDivElement>) => {
-    const s = scrub.current;
-    if (s?.pointer !== e.pointerId) return;
-    if (released(e) || s.pinch !== pinches.current) rulerUp(e);
-    else props.onSeek(timeAt(e, e.currentTarget));
-  };
-  const rulerUp = (e: PointerEvent<HTMLDivElement>) => {
-    const s = scrub.current;
-    if (s?.pointer !== e.pointerId) return;
-    scrub.current = null;
-    // A pinch puts the playhead back to where it was.
-    if (s.pinch !== pinches.current) props.onSeek(s.from);
-  };
+  // The ruler drag moves the playhead from the first touch, and a pinch puts
+  // the playhead back to `from`, where it was before.
+  const ruler = useLaneDrag<number>({
+    pinches,
+    moveOnDown: true,
+    onMove: (_from, _dx, _run, e) => props.onSeek(timeAt(e, e.currentTarget)),
+    onCancel: (from) => props.onSeek(from),
+  });
 
   const rows: (TimelineRow & { actorId: string | null; label: ReactNode })[] =
     [];
@@ -304,37 +292,41 @@ export function Timeline(props: Props) {
   return (
     <section className="timeline" aria-label={tr('editor.timeline')}>
       <div className="transport">
-        <TransportButton
+        <IconButton
+          small
           label="editor.stepBack"
           shortcut="editor.keyLeft"
           onClick={() => props.onStep(-1)}
         >
           <StepBackIcon />
-        </TransportButton>
+        </IconButton>
         {props.playing ? (
-          <TransportButton
+          <IconButton
+            small
             label="editor.pause"
             shortcut="editor.keySpace"
             onClick={() => props.onPlay(false)}
           >
             <PauseIcon />
-          </TransportButton>
+          </IconButton>
         ) : (
-          <TransportButton
+          <IconButton
+            small
             label="editor.playFromHere"
             shortcut="editor.keySpace"
             onClick={() => props.onPlay(true)}
           >
             <PlayIcon />
-          </TransportButton>
+          </IconButton>
         )}
-        <TransportButton
+        <IconButton
+          small
           label="editor.stepForward"
           shortcut="editor.keyRight"
           onClick={() => props.onStep(1)}
         >
           <StepForwardIcon />
-        </TransportButton>
+        </IconButton>
         <div className="time">
           <strong>{formatTime(t)}</strong>
           <span className="muted"> / {formatTime(duration)}</span>
@@ -378,15 +370,15 @@ export function Timeline(props: Props) {
           </button>
         </div>
         <div className="divider" />
-        <TransportButton label="editor.zoomOut" onClick={zoom.zoomOut}>
+        <IconButton small label="editor.zoomOut" onClick={zoom.zoomOut}>
           <ZoomOutIcon />
-        </TransportButton>
-        <TransportButton label="editor.zoomIn" onClick={zoom.zoomIn}>
+        </IconButton>
+        <IconButton small label="editor.zoomIn" onClick={zoom.zoomIn}>
           <ZoomInIcon />
-        </TransportButton>
-        <TransportButton label="editor.zoomFit" onClick={zoom.zoomFit}>
+        </IconButton>
+        <IconButton small label="editor.zoomFit" onClick={zoom.zoomFit}>
           <ZoomFitIcon />
-        </TransportButton>
+        </IconButton>
       </div>
 
       <div className="tracks" ref={ref} onPointerDownCapture={touchDown}>
@@ -396,15 +388,7 @@ export function Timeline(props: Props) {
         >
           <div className="track ruler-track">
             <div className="track-label" />
-            <div
-              className="ruler"
-              style={{ width }}
-              onPointerDown={rulerDown}
-              onPointerMove={rulerMove}
-              onPointerUp={rulerUp}
-              onPointerCancel={rulerUp}
-              onLostPointerCapture={rulerUp}
-            >
+            <div className="ruler" style={{ width }} {...ruler.handlers(t)}>
               {rulerTicks(length, pps).map((tick) => (
                 <span
                   key={tick.t}
@@ -524,32 +508,5 @@ export function Timeline(props: Props) {
         </div>
       </div>
     </section>
-  );
-}
-
-function TransportButton(props: {
-  label: TextKey;
-  /** The key that does the same, shown in the tooltip. */
-  shortcut?: TextKey;
-  onClick?: (() => void) | undefined;
-  children: ReactNode;
-}) {
-  const { tr } = useI18n();
-  const label = tr(props.label);
-  return (
-    <button
-      type="button"
-      className="icon-button small"
-      aria-label={label}
-      title={
-        props.shortcut
-          ? tr('editor.withKey', { label, key: tr(props.shortcut) })
-          : label
-      }
-      disabled={!props.onClick}
-      onClick={props.onClick}
-    >
-      {props.children}
-    </button>
   );
 }

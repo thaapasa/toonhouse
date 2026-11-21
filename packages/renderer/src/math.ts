@@ -74,7 +74,7 @@ export function twoBoneJoint(
   const reach = Math.min(dist, first + second - 1e-6);
   const cos =
     (first * first + reach * reach - second * second) / (2 * first * reach);
-  const turn = Math.acos(Math.min(Math.max(cos, -1), 1)) * bend;
+  const turn = Math.acos(clamp(cos, -1, 1)) * bend;
   const dir = { x: d.x / dist, y: d.y / dist };
   // Turning the downward direction by a positive angle moves it towards -x.
   return add(a, rotate({ x: dir.x * first, y: dir.y * first }, turn));

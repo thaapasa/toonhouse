@@ -7,6 +7,7 @@ import { sceneFrame } from '@toonhouse/renderer';
 import { useEffect } from 'react';
 
 import { cartoonQuery, cartoonsQuery, uploadPreview } from '../api.ts';
+import { IconButton } from '../components/IconButton.tsx';
 import { PreviewIcon } from '../components/icons.tsx';
 import { useI18n } from '../i18n/index.tsx';
 import { type BackgroundAsset, LIBRARY, sceneFiles } from '../library/index.ts';
@@ -32,7 +33,8 @@ export function PreviewButton(props: {
       if (!files.every(loadedSources)) throw new Error('Missing SVG files');
       const image = await makePreviewImage(
         scene,
-        sceneFrame(scene, bg.background, LIBRARY, t),
+        // The bubbles show at their full size, as on the stage while paused.
+        sceneFrame(scene, bg.background, LIBRARY, t, { pop: false }),
       );
       return uploadPreview(props.cartoonId, image);
     },
@@ -55,16 +57,13 @@ export function PreviewButton(props: {
         {isSuccess && tr('editor.previewSet')}
         {isError && tr('editor.previewError')}
       </span>
-      <button
-        type="button"
-        className="icon-button"
-        aria-label={tr('editor.setPreview')}
-        title={tr('editor.setPreview')}
+      <IconButton
+        label="editor.setPreview"
         disabled={!frame || set.isPending}
         onClick={frame && (() => set.mutate(frame))}
       >
         <PreviewIcon />
-      </button>
+      </IconButton>
     </>
   );
 }

@@ -4,7 +4,7 @@ export const devDatabaseUrl =
 
 export const isProduction = process.env.NODE_ENV === 'production';
 
-export const port = Number(process.env.PORT ?? 10700);
+export const port = Number(process.env.SERVER_PORT ?? 10700);
 
 /** In production, `DATABASE_URL` must be set, so that the server never uses the dev database. */
 export function databaseUrl(): string {

@@ -61,8 +61,16 @@ export function clipOf(kind: ClipKind, id: ClipId): Clip {
   return byKind[kind].find((c) => c.id === id) ?? restClip(kind);
 }
 
+export function restClip(kind: 'cutout'): Clip<CutoutFrame>;
+export function restClip(kind: 'bird'): Clip<BirdFrame>;
+export function restClip(kind: 'rabbit'): Clip<RabbitFrame>;
+export function restClip(kind: 'prop'): Clip<PropFrame>;
+export function restClip(kind: 'background'): Clip<BackgroundFrame>;
+export function restClip(kind: ClipKind): Clip;
 /**
  * The clip that a rig or a background rests in when no action plays: the
  * first clip of its kind, which stands still.
  */
-export const restClip = (kind: ClipKind): Clip => byKind[kind][0]!;
+export function restClip(kind: ClipKind): Clip {
+  return byKind[kind][0]!;
+}

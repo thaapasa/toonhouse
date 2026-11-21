@@ -2,6 +2,7 @@
 // trackpad and two fingers on a touch screen zoom around the pointer, the zoom
 // buttons zoom around the playhead, and the view follows the playhead when it
 // goes out of sight.
+import { clamp } from '@toonhouse/renderer';
 import {
   type RefObject,
   useEffect,
@@ -46,7 +47,7 @@ export function useTimelineZoom({ ref, laneStart, fit, maxZoom, t }: Options) {
   const zoomTo = (next: number, x?: number) => {
     const el = ref.current;
     if (!el) return;
-    next = Math.min(Math.max(next, 1), maxZoom);
+    next = clamp(next, 1, maxZoom);
     const cur = view.current;
     if (Math.abs(next - cur.zoom) < 1e-9) return;
     const scroll = cur.scroll ?? el.scrollLeft;
@@ -56,7 +57,7 @@ export function useTimelineZoom({ ref, laneStart, fit, maxZoom, t }: Options) {
       const head = t * fit * cur.zoom - scroll;
       x = head >= 0 && head <= visible ? head : visible / 2;
     }
-    x = Math.min(Math.max(x, 0), visible);
+    x = clamp(x, 0, visible);
     cur.scroll = anchoredScroll(scroll, x, fit * cur.zoom, fit * next);
     cur.zoom = next;
     setZoom(next);
@@ -84,7 +85,7 @@ export function useTimelineZoom({ ref, laneStart, fit, maxZoom, t }: Options) {
     if (!e.ctrlKey && !e.metaKey) return;
     e.preventDefault();
     const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? 400 : 1;
-    const d = Math.min(Math.max(e.deltaY * unit, -100), 100);
+    const d = clamp(e.deltaY * unit, -100, 100);
     zoomTo(view.current.zoom * Math.exp(-d * WHEEL_ZOOM), laneX(e.clientX));
   });
   const onTouchStart = useEffectEvent((e: TouchEvent) => {

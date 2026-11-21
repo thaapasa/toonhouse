@@ -1,8 +1,8 @@
 import {
-  clipOf,
-  drawCharacter,
+  drawRig,
   drawScene,
   partBounds,
+  restClip,
   wholeBackground,
 } from '@toonhouse/renderer';
 import { Drawing, PartSymbols } from '@toonhouse/stage';
@@ -103,9 +103,9 @@ const THUMB_ABOVE_NECK = 120;
 
 function Thumbnail({ character }: { character: Character }) {
   const prefix = `thumb-${character.id}`;
-  const { node, skeleton } = drawCharacter(
+  const { node, rigOutline } = drawRig(
     character.rig,
-    clipOf(character.rig.kind, 'idle').frameAt(0),
+    restClip(character.rig.kind).frameAt(0),
     { facing: 1 },
   );
   let viewBox;
@@ -116,7 +116,7 @@ function Thumbnail({ character }: { character: Character }) {
     const size = Math.max(b.width, b.height) * 1.05;
     viewBox = `${b.x + b.width / 2 - size / 2} ${b.y + b.height / 2 - size / 2} ${size} ${size}`;
   } else {
-    const neck = skeleton.joints.find((j) => j.name === 'neck')?.at ?? {
+    const neck = rigOutline.pivots.find((j) => j.name === 'neck')?.at ?? {
       x: 0,
       y: -THUMB_SIZE,
     };
@@ -138,7 +138,7 @@ function BackgroundThumbnail({ asset }: { asset: BackgroundAsset }) {
   const bg = asset.background;
   const node = drawScene(
     bg,
-    clipOf('background', 'idle').frameAt(0),
+    restClip('background').frameAt(0),
     wholeBackground(bg),
   );
   return (

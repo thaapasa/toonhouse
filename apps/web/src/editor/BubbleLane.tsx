@@ -5,13 +5,18 @@
 // length. A tap on a mark moves the playhead there.
 import { CONTENT_LIMITS } from '@toonhouse/api';
 import type { Bubble } from '@toonhouse/model';
-import { bubbleEnd, bubbleLength, sortedBubbles } from '@toonhouse/renderer';
-import { type PointerEvent, useRef } from 'react';
+import {
+  bubbleEnd,
+  bubbleLength,
+  clamp,
+  sortedBubbles,
+} from '@toonhouse/renderer';
 
 import { useI18n } from '../i18n/index.tsx';
 import type { EditRun } from './history.ts';
-import { type PinchCount, released } from './pointer.ts';
-import { formatTime, snapTenth, TAP_SLOP } from './timelineMath.ts';
+import type { PinchCount } from './pointer.ts';
+import { formatTime, snapTenth } from './timelineMath.ts';
+import { useLaneDrag } from './useLaneDrag.ts';
 
 /** The height of one line of a bubble lane, in CSS pixels. */
 export const BUBBLE_LINE = 24;
@@ -54,79 +59,28 @@ export function BubbleLane(props: {
 }) {
   const { tr } = useI18n();
   const { pps } = props;
-  const drag = useRef<{
-    pointer: number;
-    bubble: Bubble;
-    grab: Grab;
-    x: number;
-    moved: boolean;
-    pinch: number;
-  } | null>(null);
-  // A drag ends with a click, which should not move the playhead.
-  const dragged = useRef(false);
   const lines = bubbleLines(props.bubbles);
   const frame = (t: number) => Math.round(t * props.fps) / props.fps;
 
-  const down = (e: PointerEvent<HTMLElement>, bubble: Bubble, grab: Grab) => {
-    e.stopPropagation();
-    if (drag.current) return;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    drag.current = {
-      pointer: e.pointerId,
-      bubble,
-      grab,
-      x: e.clientX,
-      moved: false,
-      pinch: props.pinches.current,
-    };
-  };
-  /** A pinch cancels the drag, and the drag leaves no undo step. */
-  const cancel = (d: NonNullable<typeof drag.current>) => {
-    drag.current = null;
-    if (d.moved) props.onCancel(d);
-  };
-
-  const move = (e: PointerEvent<HTMLElement>) => {
-    const d = drag.current;
-    if (d?.pointer !== e.pointerId) return;
-    if (d.pinch !== props.pinches.current) return cancel(d);
-    if (released(e)) return up(e);
-    const dx = e.clientX - d.x;
-    if (!d.moved && Math.abs(dx) < TAP_SLOP) return;
-    d.moved = true;
-    const b = d.bubble;
-    if (d.grab === 'move') {
-      const t = snapTenth(b.t + dx / pps);
-      props.onMove(b.id, Math.min(Math.max(t, 0), props.length), d);
-    } else {
-      const end = snapTenth(bubbleEnd(b) + dx / pps);
-      props.onLength(b.id, Math.max(end - b.t, MIN_LENGTH), d);
-    }
-  };
-  const up = (e: PointerEvent<HTMLElement>) => {
-    const d = drag.current;
-    if (d?.pointer !== e.pointerId) return;
-    if (d.pinch !== props.pinches.current) return cancel(d);
-    drag.current = null;
-    if (d.moved) {
-      dragged.current = true;
-      props.onDragDone();
-    } else if (e.type === 'pointerup' && d.grab === 'move')
-      props.onSelect(d.bubble.id, d.bubble.t);
-  };
-  const handlers = (bubble: Bubble, grab: Grab) => ({
-    onPointerDown: (e: PointerEvent<HTMLElement>) => down(e, bubble, grab),
-    onPointerMove: move,
-    onPointerUp: up,
-    onPointerCancel: up,
-    onLostPointerCapture: up,
+  const drag = useLaneDrag<{ bubble: Bubble; grab: Grab }>({
+    pinches: props.pinches,
+    onMove: ({ bubble: b, grab }, dx, run) => {
+      if (grab === 'move') {
+        const t = snapTenth(b.t + dx / pps);
+        props.onMove(b.id, clamp(t, 0, props.length), run);
+      } else {
+        const end = snapTenth(bubbleEnd(b) + dx / pps);
+        props.onLength(b.id, Math.max(end - b.t, MIN_LENGTH), run);
+      }
+    },
+    onTap: ({ bubble: b, grab }) => {
+      if (grab === 'move') props.onSelect(b.id, b.t);
+    },
+    onDone: props.onDragDone,
+    onCancel: (_, run) => props.onCancel(run),
   });
-  /** A tap on a mark moves the playhead, unless it ends a drag. */
-  const markClick = (t: number) => (e: { stopPropagation(): void }) => {
-    e.stopPropagation();
-    if (dragged.current) dragged.current = false;
-    else props.onSeek(t);
-  };
+  const handlers = (bubble: Bubble, grab: Grab) =>
+    drag.handlers({ bubble, grab });
 
   return sortedBubbles(props.bubbles).map((b) => {
     const top = (lines.get(b.id) ?? 0) * BUBBLE_LINE;
@@ -144,7 +98,7 @@ export function BubbleLane(props: {
             left: b.t * pps,
             width: Math.max(bubbleLength(b) * pps - 2, 6),
           }}
-          onClick={(e) => e.stopPropagation()}
+          onClick={drag.click()}
           {...handlers(b, 'move')}
         >
           {text}
@@ -155,7 +109,7 @@ export function BubbleLane(props: {
           style={{ left: start * pps }}
           aria-label={tr('bubble.start', { time: formatTime(start) })}
           title={formatTime(start)}
-          onClick={markClick(start)}
+          onClick={drag.click(() => props.onSeek(start))}
           {...handlers(b, 'move')}
         />
         <button
@@ -164,7 +118,7 @@ export function BubbleLane(props: {
           style={{ left: end * pps }}
           aria-label={tr('bubble.end', { time: formatTime(end) })}
           title={formatTime(end)}
-          onClick={markClick(end)}
+          onClick={drag.click(() => props.onSeek(end))}
           {...handlers(b, 'end')}
         />
       </div>

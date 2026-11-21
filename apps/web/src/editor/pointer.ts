@@ -2,6 +2,13 @@
 import type { PointerEvent } from 'react';
 
 /**
+ * A pointer that moves less than this, in CSS pixels, taps. A finger on a
+ * touch screen moves a few pixels while it taps, and 8 is the touch slop that
+ * Android uses, in dp.
+ */
+export const TAP_SLOP = 8;
+
+/**
  * True if the buttons are up although no `pointerup` came, such as after the
  * user let go of the mouse outside the browser window. A drag ends then.
  */

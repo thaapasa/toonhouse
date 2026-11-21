@@ -33,10 +33,10 @@ import {
 import { clipOf } from './clips/index.ts';
 import {
   type Bounds,
-  drawCharacter,
   type DrawNode,
+  drawRig,
   partBounds,
-  type Skeleton,
+  type RigOutline,
 } from './draw.ts';
 import { type ActorState, actorStateAt, backgroundStateAt } from './scene.ts';
 
@@ -70,8 +70,8 @@ export interface PlacedActor {
   kind: ClipKind;
   state: ActorState;
   drawing: SceneActor;
-  /** The joints of the drawing, in the pixels of the actor. */
-  skeleton: Skeleton;
+  /** The pivot points of the drawing, in the pixels of the actor. */
+  rigOutline: RigOutline;
   /** The box around the drawing, in the pixels of the background frame. */
   box: Bounds | null;
   /** Where the attached bubbles of the actor go from. */
@@ -107,7 +107,7 @@ function placeActor(
   const state = actorStateAt(actor, kind, bg, t);
   const clip = clipOf(kind, state.clip);
   const frame = clip.frameAt(loop(state.clipT, clip.duration));
-  const { node, skeleton } = drawCharacter(rig, frame, {
+  const { node, rigOutline } = drawRig(rig, frame, {
     facing: state.facing,
   });
   const { at } = state;
@@ -119,14 +119,14 @@ function placeActor(
     width: b.width * s,
     height: b.height * s,
   };
-  const head = headPoint({ node, skeleton });
+  const head = headPoint({ node, rigOutline });
   return {
     actor,
     rig,
     kind,
     state,
     drawing: { id: actor.id, node, x: at.x, y: at.y, scale: actor.scale },
-    skeleton,
+    rigOutline,
     box,
     anchor: {
       at,

@@ -63,7 +63,7 @@ for something else or too vague.
   it moves the playhead.
 - **Playhead**: the line across the timeline at the current time, with a knob on
   the ruler. The stage shows the scene at this time, and a new action starts
-  here. Not: cursor, scrubber.
+  here. Not: cursor.
 - **Time mark**: a dot on a row of the timeline where an action starts or ends,
   where its clip starts a new loop or where a walk gets to its last point. A tap
   moves the playhead there, and a dragged end snaps to the marks of loops and
@@ -143,9 +143,12 @@ for something else or too vague.
 
 ## Apps and tools
 
-- **Web app**: the app that users open in the browser, at
+- **Web app**: the app that users open in the browser. It will run at
   https://piirretyt.pomeranssi.fi. It has the player and the editor.
 - **Player**: the part of the web app that plays a cartoon.
+- **Scrubber**: the slider of the player that shows how far the cartoon has
+  played. The user drags it to move to any point of the cartoon. The editor has
+  a playhead instead.
 - **Editor**: the part of the web app where the user edits scenes and puts the
   cartoon together from shots.
 - **Server**: stores the cartoons and serves the assets and the web app. It
@@ -161,7 +164,8 @@ for something else or too vague.
   time. It has no UI.
 - **Properties pane**: the pane on the right of the editor that shows all the
   data of the selection, such as the points of a walk, and where the user can
-  change it. It floats over the stage, or the user attaches it to the side. Not:
+  change it. It floats over the stage, or the user attaches it to the side. The
+  character studio has a properties pane too, for the rig that it shows. Not:
   inspector, panel.
 - **Stage**: the area where a scene is drawn, in the web app and in the studio.
 - **Band**: the area around the frame on the stage of the editor, where actors

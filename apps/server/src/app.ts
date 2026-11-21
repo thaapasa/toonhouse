@@ -56,8 +56,9 @@ app.get('/health', async (c) => {
 
 // Without a limit, a few large requests without a login could use up the memory
 // of the server. The content of a cartoon and its preview image can be much
-// larger than the other requests, so their saves have limits of their own. A
-// PNG preview from Safari can be over 1 MB.
+// larger than the other requests, so their saves have limits of their own. The
+// preview image can be up to 3 MB, as a PNG preview from Safari can be over
+// 1 MB.
 const MB = 1024 * 1024;
 const tooLarge = (c: Context) =>
   c.json({ error: 'Request body is too large' }, 413);

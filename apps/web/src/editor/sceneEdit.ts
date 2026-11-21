@@ -156,7 +156,7 @@ export function moveStart(
   if (i < 0) return [...actions];
   const lo = i > 0 ? sorted[i - 1]!.t + MIN_GAP : 0;
   const hi = sorted[i + 1] ? sorted[i + 1]!.t - MIN_GAP : Infinity;
-  const at = savedTime(Math.min(Math.max(t, lo), hi));
+  const at = savedTime(clamp(t, lo, hi));
   return updateAction(actions, actionId, (a) => ({ ...a, t: at }));
 }
 
@@ -183,7 +183,7 @@ export function moveBlock(
   const after = sorted[i + 2];
   const lo = (i > 0 ? sorted[i - 1]!.t + MIN_GAP : 0) - action.t;
   const hi = next && after ? after.t - MIN_GAP - next.t : Infinity;
-  const d = Math.min(Math.max(t - action.t, lo), hi);
+  const d = clamp(t - action.t, lo, hi);
   const moved = updateActions(scene, actorId, (actions) =>
     actions.map((a) =>
       a.id === action.id || a.id === next?.id

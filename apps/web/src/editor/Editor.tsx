@@ -34,6 +34,7 @@ import { type ReactNode, useEffect, useEffectEvent, useState } from 'react';
 
 import { contentQuery } from '../api.ts';
 import { Dialog } from '../components/Dialog.tsx';
+import { IconButton } from '../components/IconButton.tsx';
 import {
   BackgroundIcon,
   BackIcon,
@@ -46,7 +47,7 @@ import {
   SoundIcon,
   UndoIcon,
 } from '../components/icons.tsx';
-import { type TextKey, useI18n } from '../i18n/index.tsx';
+import { useI18n } from '../i18n/index.tsx';
 import {
   type BackgroundAsset,
   backgroundAsset,
@@ -436,17 +437,19 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
     }
   }
 
+  // While the cartoon doesn't play, a bubble shows at its full size also at
+  // its first and last moments, so that the user can work on it.
+  const frame =
+    bg &&
+    sceneFrame(scene, bg.background, LIBRARY, t, { pop: playback.playing });
+
   const pane = (
     <PropertiesPane
       scene={scene}
       bg={bg ?? null}
       selection={selection}
       bubble={selectedBubble}
-      anchors={
-        bg
-          ? sceneFrame(scene, bg.background, LIBRARY, t).bubbleContext.anchors
-          : new Map()
-      }
+      anchors={frame?.bubbleContext.anchors ?? new Map()}
       textFocus={textFocus}
       onEditBubble={(fn, run) =>
         selectedBubble && editBubble(selectedBubble.id, fn, run)
@@ -488,18 +491,18 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
         <CartoonTitle cartoon={cartoon} saveState={doc.saveState} />
         <div className="spacer" />
         <PreviewButton cartoonId={cartoon.id} frame={bg && { scene, bg, t }} />
-        <ToolButton
+        <IconButton
           label="editor.undo"
           onClick={doc.canUndo ? doc.undo : undefined}
         >
           <UndoIcon />
-        </ToolButton>
-        <ToolButton
+        </IconButton>
+        <IconButton
           label="editor.redo"
           onClick={doc.canRedo ? doc.redo : undefined}
         >
           <RedoIcon />
-        </ToolButton>
+        </IconButton>
         <div className="divider" />
         <Link
           to="/cartoons/$cartoonId"
@@ -521,28 +524,28 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
 
       <div className="editor-body">
         <nav className="tool-rail" aria-label={tr('editor.library')}>
-          <ToolButton
+          <IconButton
             label="editor.characters"
             pressed={library === 'character'}
             onClick={bg ? () => toggleLibrary('character') : undefined}
           >
             <CharacterIcon />
-          </ToolButton>
-          <ToolButton
+          </IconButton>
+          <IconButton
             label="editor.props"
             pressed={library === 'prop'}
             onClick={bg ? () => toggleLibrary('prop') : undefined}
           >
             <PropIcon />
-          </ToolButton>
-          <ToolButton
+          </IconButton>
+          <IconButton
             label="editor.backgrounds"
             pressed={library === 'background'}
             onClick={() => toggleLibrary('background')}
           >
             <BackgroundIcon />
-          </ToolButton>
-          <ToolButton
+          </IconButton>
+          <IconButton
             label="editor.speechBubble"
             pressed={bubbleTool}
             onClick={
@@ -557,21 +560,20 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
             }
           >
             <BubbleIcon />
-          </ToolButton>
-          <ToolButton label="editor.sounds">
+          </IconButton>
+          <IconButton label="editor.sounds">
             <SoundIcon />
-          </ToolButton>
+          </IconButton>
         </nav>
         <div className="stage-area">
-          {bg ? (
+          {bg && frame ? (
             <EditorStage
               scene={scene}
               bg={bg}
-              t={t}
               selectedActor={selection?.actorId ?? null}
               selectedBubble={selectedBubble?.id ?? null}
               bubbleTool={bubbleTool}
-              playing={playback.playing}
+              frame={frame}
               walk={walk}
               focusPoint={focusPoint}
               onSelect={(actorId) => {
@@ -630,12 +632,12 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
             ? pane
             : !paneOpen && (
                 <div className="pane-toggle">
-                  <ToolButton
+                  <IconButton
                     label="properties.show"
                     onClick={() => setPaneOpen(true)}
                   >
                     <PropertiesIcon />
-                  </ToolButton>
+                  </IconButton>
                 </div>
               )}
         </div>
@@ -719,27 +721,5 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
         </Dialog>
       )}
     </div>
-  );
-}
-
-function ToolButton(props: {
-  label: TextKey;
-  pressed?: boolean;
-  onClick?: (() => void) | undefined;
-  children: ReactNode;
-}) {
-  const { tr } = useI18n();
-  return (
-    <button
-      type="button"
-      className="icon-button"
-      aria-label={tr(props.label)}
-      aria-pressed={props.pressed}
-      title={tr(props.label)}
-      disabled={!props.onClick}
-      onClick={props.onClick}
-    >
-      {props.children}
-    </button>
   );
 }

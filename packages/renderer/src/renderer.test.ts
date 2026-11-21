@@ -20,7 +20,7 @@ import {
   restClip,
   WALK_SPEED,
 } from './clips/index.ts';
-import { drawCharacter, type DrawNode } from './draw.ts';
+import { type DrawNode, drawRig } from './draw.ts';
 import { rotate, sub, twoBoneJoint } from './math.ts';
 import { defaultDrawOrder, drawOrder } from './order.ts';
 import { clearOfGround } from './rabbit.ts';
@@ -61,59 +61,57 @@ describe.each([
   });
 });
 
-describe('drawCharacter', () => {
+describe('drawRig', () => {
   it('draws the mouth patch only while the character talks', () => {
     const talk = clipOf('cutout', 'talk');
     const drawn = (t: number) =>
-      parts(drawCharacter(rig, talk.frameAt(t), { facing: 1 }).node);
+      parts(drawRig(rig, talk.frameAt(t), { facing: 1 }).node);
     // Before the words, and between them with the mouth closed.
     expect(drawn(0)).not.toContain('mouthPatch');
     expect(drawn(1)).toContain('mouthPatch');
     expect(drawn(2.9)).not.toContain('mouthPatch');
     for (const clip of ['idle', 'walk'] as const) {
       const frame = clipOf('cutout', clip).frameAt(0.5);
-      expect(
-        parts(drawCharacter(rig, frame, { facing: 1 }).node),
-      ).not.toContain('mouthPatch');
+      expect(parts(drawRig(rig, frame, { facing: 1 }).node)).not.toContain(
+        'mouthPatch',
+      );
     }
   });
 
   it('opens the hand for the wave', () => {
     const wave = clipOf('cutout', 'wave');
     expect(
-      parts(drawCharacter(rig, wave.frameAt(0), { facing: 1 }).node),
+      parts(drawRig(rig, wave.frameAt(0), { facing: 1 }).node),
     ).not.toContain('handOpen');
     expect(
-      parts(drawCharacter(rig, wave.frameAt(1.5), { facing: 1 }).node),
+      parts(drawRig(rig, wave.frameAt(1.5), { facing: 1 }).node),
     ).toContain('handOpen');
   });
 
   it('keeps the fist on the staff in the wave', () => {
     const wave = clipOf('cutout', 'wave');
-    const drawn = parts(
-      drawCharacter(wizard, wave.frameAt(1.5), { facing: 1 }).node,
-    );
+    const drawn = parts(drawRig(wizard, wave.frameAt(1.5), { facing: 1 }).node);
     expect(drawn).toContain('staff');
     expect(drawn).not.toContain('handOpen');
     expect(
-      parts(drawCharacter(rig, wave.frameAt(1.5), { facing: 1 }).node),
+      parts(drawRig(rig, wave.frameAt(1.5), { facing: 1 }).node),
     ).not.toContain('staff');
   });
 
   it('draws the feet behind a long robe', () => {
     const frame = clipOf('cutout', 'idle').frameAt(0);
     const order = (r: CutoutRig) =>
-      parts(drawCharacter(r, frame, { facing: 1 }).node);
+      parts(drawRig(r, frame, { facing: 1 }).node);
     const robe = order(wizard);
     expect(robe.lastIndexOf('foot')).toBeLessThan(robe.indexOf('torso'));
     const shorts = order(rig);
     expect(shorts.lastIndexOf('foot')).toBeGreaterThan(shorts.indexOf('torso'));
   });
 
-  it('mirrors the skeleton when facing left', () => {
+  it('mirrors the rig outline when facing left', () => {
     const frame = clipOf('cutout', 'idle').frameAt(0);
-    const right = drawCharacter(rig, frame, { facing: 1 }).skeleton.joints;
-    const left = drawCharacter(rig, frame, { facing: -1 }).skeleton.joints;
+    const right = drawRig(rig, frame, { facing: 1 }).rigOutline.pivots;
+    const left = drawRig(rig, frame, { facing: -1 }).rigOutline.pivots;
     right.forEach((j, i) => {
       expect(left[i]!.at.x).toBeCloseTo(-j.at.x, 6);
       expect(left[i]!.at.y).toBeCloseTo(j.at.y, 6);
@@ -126,36 +124,36 @@ describe('motion settings', () => {
   const plain: CutoutRig = { ...rig };
   delete plain.motion;
   const frame = clipOf('cutout', 'walk').frameAt(0.2);
-  const jointsOf = (r: CutoutRig) =>
+  const pivotsOf = (r: CutoutRig) =>
     Object.fromEntries(
-      drawCharacter(r, frame, { facing: 1 }).skeleton.joints.map((j) => [
+      drawRig(r, frame, { facing: 1 }).rigOutline.pivots.map((j) => [
         j.name,
         j.at,
       ]),
     );
-  const base = jointsOf(plain);
+  const base = pivotsOf(plain);
 
   it('changes nothing with the defaults', () => {
-    expect(jointsOf({ ...plain, motion: {} })).toEqual(base);
+    expect(pivotsOf({ ...plain, motion: {} })).toEqual(base);
     expect(
-      jointsOf({ ...plain, scales: { ...plain.scales, torso: 1 } }),
+      pivotsOf({ ...plain, scales: { ...plain.scales, torso: 1 } }),
     ).toEqual(base);
   });
 
   it('lowers the hips but keeps the feet', () => {
-    const j = jointsOf({ ...plain, motion: { hipHeight: 236 } });
+    const j = pivotsOf({ ...plain, motion: { hipHeight: 236 } });
     expect(j.hip!.y).toBeCloseTo(base.hip!.y + 10, 6);
     expect(j.ankleNear).toEqual(base.ankleNear);
   });
 
   it('moves the feet against the hips', () => {
-    const j = jointsOf({ ...plain, motion: { feetOffset: -12 } });
+    const j = pivotsOf({ ...plain, motion: { feetOffset: -12 } });
     expect(j.ankleNear!.x).toBeCloseTo(base.ankleNear!.x - 12, 6);
     expect(j.hip).toEqual(base.hip);
   });
 
   it('moves the whole character up', () => {
-    const j = jointsOf({ ...plain, motion: { groundOffset: 5 } });
+    const j = pivotsOf({ ...plain, motion: { groundOffset: 5 } });
     for (const [name, at] of Object.entries(base)) {
       expect(j[name]!.x).toBeCloseTo(at.x, 6);
       expect(j[name]!.y).toBeCloseTo(at.y - 5, 6);
@@ -171,7 +169,7 @@ describe('motion settings', () => {
           : n.type === 'group'
             ? n.children.map(find).find(Boolean)
             : undefined;
-      const hand = find(drawCharacter(r, wave, { facing: 1 }).node);
+      const hand = find(drawRig(r, wave, { facing: 1 }).node);
       if (hand?.type !== 'part') throw new Error('no open hand');
       return Math.hypot(hand.transform[0], hand.transform[1]);
     };
@@ -181,8 +179,8 @@ describe('motion settings', () => {
     ).toBeCloseTo(0.4, 6);
   });
 
-  it('scales the torso and its joints around the hips', () => {
-    const j = jointsOf({ ...plain, scales: { ...plain.scales, torso: 0.5 } });
+  it('scales the torso and its pivot points around the hips', () => {
+    const j = pivotsOf({ ...plain, scales: { ...plain.scales, torso: 0.5 } });
     expect(j.hip).toEqual(base.hip);
     expect(j.neck!.x - j.hip!.x).toBeCloseTo(
       (base.neck!.x - base.hip!.x) / 2,
@@ -199,11 +197,11 @@ describe('bird', () => {
   it('opens the wings for the flap', () => {
     const flap = clipOf('bird', 'flap');
     expect(
-      parts(drawCharacter(bird, flap.frameAt(0), { facing: 1 }).node),
+      parts(drawRig(bird, flap.frameAt(0), { facing: 1 }).node),
     ).not.toContain('wingOpen');
-    expect(
-      parts(drawCharacter(bird, flap.frameAt(1), { facing: 1 }).node),
-    ).toContain('wingOpen');
+    expect(parts(drawRig(bird, flap.frameAt(1), { facing: 1 }).node)).toContain(
+      'wingOpen',
+    );
   });
 
   it('bends the leg backwards and keeps the bone lengths', () => {
@@ -220,7 +218,7 @@ describe('bird', () => {
   it('paints the thighs in the thigh color if the rig has one', () => {
     const idle = clipOf('bird', 'idle').frameAt(0);
     const strokes = (r: BirdRig) =>
-      JSON.stringify(drawCharacter(r, idle, { facing: 1 }).node);
+      JSON.stringify(drawRig(r, idle, { facing: 1 }).node);
     expect(strokes(bird)).not.toContain('#123456');
     expect(
       strokes({ ...bird, colors: { ...bird.colors, thigh: '#123456' } }),
@@ -229,7 +227,7 @@ describe('bird', () => {
 
   it('refuses a clip of another kind', () => {
     expect(() =>
-      drawCharacter(bird, clipOf('cutout', 'idle').frameAt(0), {
+      drawRig(bird, clipOf('cutout', 'idle').frameAt(0), {
         facing: 1,
       }),
     ).toThrow();
@@ -299,7 +297,7 @@ describe('rabbit', () => {
     const tail = { x: rabbit.parts.body.pivot.x - 150, y: 260 };
     const withTail: RabbitRig = { ...rabbit, groundPoints: [tail] };
     const hip = (r: RabbitRig) =>
-      drawCharacter(r, frame, { facing: 1 }).skeleton.joints.find(
+      drawRig(r, frame, { facing: 1 }).rigOutline.pivots.find(
         (j) => j.name === 'hip',
       )!.at;
     const lifted = clearOfGround(withTail, frame.pose);
@@ -314,7 +312,7 @@ describe('rabbit', () => {
   it('opens the mouth to talk', () => {
     const talk = clipOf('rabbit', 'talk');
     const paths = (t: number) =>
-      JSON.stringify(drawCharacter(rabbit, talk.frameAt(t), { facing: 1 }));
+      JSON.stringify(drawRig(rabbit, talk.frameAt(t), { facing: 1 }));
     expect(paths(0)).not.toContain(rabbit.colors.teeth);
     expect(paths(0.8)).toContain(rabbit.colors.teeth);
   });
@@ -401,7 +399,7 @@ describe('draw order', () => {
   });
 
   it('draws the far side in one shaded group, as before', () => {
-    const node = drawCharacter(rig, idle, { facing: 1 }).node;
+    const node = drawRig(rig, idle, { facing: 1 }).node;
     const character = node.type === 'group' ? node.children[1] : undefined;
     const children = character?.type === 'group' ? character.children : [];
     const far = children[0];
@@ -430,26 +428,24 @@ describe('draw order', () => {
         ...r,
         drawOrder: defaultDrawOrder(r).map((e) => e.id),
       } as Rig;
-      expect(drawCharacter(explicit, frame, { facing: 1 })).toEqual(
-        drawCharacter(r, frame, { facing: 1 }),
+      expect(drawRig(explicit, frame, { facing: 1 })).toEqual(
+        drawRig(r, frame, { facing: 1 }),
       );
     }
   });
 
   it('puts the layers of a part after its main layer by default', () => {
     expect(ids(withHair())).toContain('head.backHair');
-    expect(layers(drawCharacter(withHair(), idle, { facing: 1 }).node)).toEqual(
-      [
-        'hand',
-        'foot',
-        'torso',
-        'foot',
-        'head',
-        'head.backHair',
-        'head.frontHair',
-        'hand',
-      ],
-    );
+    expect(layers(drawRig(withHair(), idle, { facing: 1 }).node)).toEqual([
+      'hand',
+      'foot',
+      'torso',
+      'foot',
+      'head',
+      'head.backHair',
+      'head.frontHair',
+      'hand',
+    ]);
   });
 
   it('draws the front hair over the near hand and the back hair behind the torso', () => {
@@ -462,7 +458,7 @@ describe('draw order', () => {
       ...order,
       'head.frontHair',
     ]);
-    const drawn = layers(drawCharacter(hair, idle, { facing: 1 }).node);
+    const drawn = layers(drawRig(hair, idle, { facing: 1 }).node);
     expect(drawn.indexOf('head.backHair')).toBeLessThan(drawn.indexOf('torso'));
     expect(drawn.at(-1)).toBe('head.frontHair');
     expect(drawn.at(-2)).toBe('hand');
@@ -478,7 +474,7 @@ describe('draw order', () => {
       }
     };
     const order = ['head.frontHair', 'head.backHair'];
-    visit(drawCharacter(withHair(order), idle, { facing: 1 }).node);
+    visit(drawRig(withHair(order), idle, { facing: 1 }).node);
     expect(transforms.backHair).toEqual(transforms.main);
     expect(transforms.frontHair).toEqual(transforms.main);
   });
@@ -497,7 +493,7 @@ describe('draw order', () => {
     const order = ids(rig).filter((id) => id !== 'footNear');
     order.splice(order.indexOf('torso'), 0, 'footNear');
     const drawn = parts(
-      drawCharacter({ ...rig, drawOrder: order }, idle, { facing: 1 }).node,
+      drawRig({ ...rig, drawOrder: order }, idle, { facing: 1 }).node,
     );
     expect(drawn.lastIndexOf('foot')).toBeLessThan(drawn.indexOf('torso'));
   });

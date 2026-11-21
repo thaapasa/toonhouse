@@ -133,7 +133,6 @@ export const en = {
   'editor.removeSceneConfirm': 'Remove',
   'editor.pause': 'Pause',
   'editor.libraryHint': 'Tap to add to the scene.',
-  'editor.pickBackgroundFirst': 'Pick a background first.',
   'editor.actions': 'Actions',
   'editor.turn': 'Turn',
   'editor.smaller': 'Smaller',

@@ -5,9 +5,9 @@
 // smaller further away.
 import type { Bubble, BubbleFontId, Pt } from '@toonhouse/model';
 
-import type { Bounds, CharacterDrawing, DrawNode } from '../draw.ts';
+import type { Bounds, DrawNode, RigDrawing } from '../draw.ts';
 import { partBounds } from '../draw.ts';
-import { easeOutBack, multiply, scaling, translation } from '../math.ts';
+import { clamp, easeOutBack, multiply, scaling, translation } from '../math.ts';
 import {
   circle,
   hash,
@@ -119,13 +119,13 @@ function popScale(b: Bubble, t: number, pop: boolean): number {
 }
 
 /** The point of a drawing that the tail of a bubble points at, in its own pixels. */
-export function headPoint(drawing: CharacterDrawing): Pt {
-  const joint = (name: string) =>
-    drawing.skeleton.joints.find((j) => j.name === name)?.at;
-  const head = joint('head');
+export function headPoint(drawing: RigDrawing): Pt {
+  const pivot = (name: string) =>
+    drawing.rigOutline.pivots.find((j) => j.name === name)?.at;
+  const head = pivot('head');
   if (head) return head;
   const box = partBounds(drawing.node);
-  const neck = joint('neck');
+  const neck = pivot('neck');
   if (neck && box) return { x: neck.x, y: (neck.y + box.y) / 2 };
   if (box) return { x: box.x + box.width / 2, y: box.y + box.height * 0.15 };
   return { x: 0, y: 0 };
@@ -182,7 +182,7 @@ function placeBubble(
   const fit = (v: number, lo: number, hi: number, size: number) =>
     hi - lo + 2 * FRAME_MARGIN > size
       ? size / 2 - (hi + lo) / 2
-      : Math.min(Math.max(v, FRAME_MARGIN - lo), size - FRAME_MARGIN - hi);
+      : clamp(v, FRAME_MARGIN - lo, size - FRAME_MARGIN - hi);
   const center = {
     x: fit(wanted.x, left, right, ctx.width),
     y: fit(wanted.y, top, bottom, ctx.height),

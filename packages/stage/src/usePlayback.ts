@@ -1,3 +1,4 @@
+import { clamp } from '@toonhouse/renderer';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface PlaybackOptions {
@@ -47,7 +48,7 @@ export function usePlayback({
   const seek = useCallback(
     (v: number) => {
       setPlaying(false);
-      tRef.current = Math.min(Math.max(v, 0), Math.max(duration, seekLimit));
+      tRef.current = clamp(v, 0, Math.max(duration, seekLimit));
       setT(tRef.current);
     },
     [duration, seekLimit],

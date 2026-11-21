@@ -4,7 +4,7 @@ import type { Clip } from '@toonhouse/model';
 import {
   backgroundClips,
   clipsFor,
-  drawCharacter,
+  drawRig,
   drawScene,
   restClip,
   wholeBackground,
@@ -40,7 +40,7 @@ describe('library rigs', () => {
   describe.each(rigCases)('%s', (_, rig, clip) => {
     it('draws the same for the same time', () => {
       for (const t of [0, 0.37, clip.duration / 2]) {
-        const draw = () => drawCharacter(rig, clip.frameAt(t), { facing: -1 });
+        const draw = () => drawRig(rig, clip.frameAt(t), { facing: -1 });
         expect(draw()).toEqual(draw());
       }
     });
@@ -57,7 +57,7 @@ describe('library rigs', () => {
 
     it('draws finite numbers at every frame', () => {
       for (const t of frameTimes(clip)) {
-        const drawing = drawCharacter(rig, clip.frameAt(t), { facing: 1 });
+        const drawing = drawRig(rig, clip.frameAt(t), { facing: 1 });
         for (const n of numbers(drawing)) expect(Number.isFinite(n)).toBe(true);
       }
     });
@@ -79,7 +79,7 @@ describe('library backgrounds', () => {
     const { rig } = CHARACTERS[0]!;
     const idle = restClip(rig.kind);
     const draw = (t: number) => {
-      const { node } = drawCharacter(rig, idle.frameAt(t), { facing: 1 });
+      const { node } = drawRig(rig, idle.frameAt(t), { facing: 1 });
       const { x, y } = background.ground.start;
       return drawScene(
         background,

@@ -14,6 +14,7 @@ import {
 } from '../api.ts';
 import { AppHeader } from '../components/AppHeader.tsx';
 import { Dialog } from '../components/Dialog.tsx';
+import { IconButton } from '../components/IconButton.tsx';
 import { CheckIcon, CopyIcon } from '../components/icons.tsx';
 import { PageMessage, RequireUser } from '../components/RequireUser.tsx';
 import { type TextKey, useI18n } from '../i18n/index.tsx';
@@ -212,12 +213,10 @@ function ResetPasswordDialog({ onClose }: { onClose: () => void }) {
 
 /** A read-only field with a copy button. */
 function SecretField({ label, value }: { label: string; value: string }) {
-  const { tr } = useI18n();
   const [copied, setCopied] = useState(false);
   // The clipboard API works only on HTTPS and on localhost. Elsewhere the user
   // selects the text.
   const canCopy = !!navigator.clipboard;
-  const copyLabel = copied ? tr('profile.copied') : tr('profile.copy');
 
   const copy = async () => {
     await navigator.clipboard.writeText(value);
@@ -234,15 +233,12 @@ function SecretField({ label, value }: { label: string; value: string }) {
         onFocus={(e) => e.currentTarget.select()}
       />
       {canCopy && (
-        <button
-          type="button"
-          className="icon-button"
-          aria-label={copyLabel}
-          title={copyLabel}
+        <IconButton
+          label={copied ? 'profile.copied' : 'profile.copy'}
           onClick={() => void copy()}
         >
           {copied ? <CheckIcon /> : <CopyIcon />}
-        </button>
+        </IconButton>
       )}
     </div>
   );

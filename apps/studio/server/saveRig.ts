@@ -7,9 +7,8 @@ import { resolve } from 'node:path';
 import * as prettier from 'prettier';
 import type { Plugin } from 'vite';
 
+import { SAVE_RIG_URL } from './api.ts';
 import { patchJson } from './patchJson.ts';
-
-export const SAVE_RIG_URL = '/api/rig';
 
 const RIG_FILE =
   /^assets\/(characters|props|fixtures\/props)\/[a-z0-9-]+\/rig\.json$/;

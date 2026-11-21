@@ -2,9 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getRouteApi } from '@tanstack/react-router';
 
 import { ApiError, cartoonQuery, contentQuery } from '../api.ts';
-import { AppHeader } from '../components/AppHeader.tsx';
-import { PageMessage } from '../components/RequireUser.tsx';
-import type { TextKey } from '../i18n/index.tsx';
+import { MessagePage } from '../components/MessagePage.tsx';
 import { cartoonFiles } from '../library/index.ts';
 import { useSources } from '../library/sources.ts';
 import { Player } from '../player/Player.tsx';
@@ -28,23 +26,15 @@ export function PlayerPage() {
     (q) => q.error instanceof ApiError && q.error.status === 404,
   );
   if (notFound) return <NotFoundPage />;
-  if (cartoon.isError || content.isError) return <Fallback text="loadError" />;
+  if (cartoon.isError || content.isError)
+    return <MessagePage text="loadError" />;
   if (cartoon.isPending || content.isPending || !loaded)
-    return <Fallback text="loading" />;
+    return <MessagePage text="loading" />;
   return (
     <Player
       key={cartoonId}
       cartoon={cartoon.data}
       content={content.data.content}
     />
-  );
-}
-
-function Fallback({ text }: { text: TextKey }) {
-  return (
-    <div className="page">
-      <AppHeader />
-      <PageMessage text={text} />
-    </div>
   );
 }
