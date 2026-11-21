@@ -1,6 +1,7 @@
 import type { BackgroundFrame, Pt } from '@toonhouse/model';
 import {
   type Camera,
+  clamp,
   clampCamera,
   drawScene,
   groundDepth,
@@ -101,7 +102,7 @@ export function BackgroundView(props: Props) {
    */
   const zoomAround = (zoom: number, at: Pointer, to: Pointer = at) => {
     const c = cameraRef.current;
-    const z = Math.min(Math.max(zoom, 1), MAX_ZOOM);
+    const z = clamp(zoom, 1, MAX_ZOOM);
     const left = c.x - bg.width / c.zoom / 2;
     const top = c.y - bg.height / c.zoom / 2;
     const fx = left + at.x / (k * c.zoom);

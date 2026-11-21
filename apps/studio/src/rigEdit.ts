@@ -5,10 +5,11 @@
 // some pieces and the draw order.
 import type { ClipFrame, PartId, Pt, Rig, RigPart } from '@toonhouse/model';
 import {
+  clamp,
   defaultDrawOrder,
-  drawCharacter,
   type DrawEntry,
   drawOrder,
+  drawRig,
 } from '@toonhouse/renderer';
 
 /** What the rig editor has selected. */
@@ -17,7 +18,7 @@ export type RigTarget =
 
 /** An attachment point, at `rig[group][key]`. */
 export interface Attachment {
-  /** The name of the joint in the skeleton of the drawing. */
+  /** The name of the pivot point in the rig outline of the drawing. */
   joint: string;
   group: 'torso' | 'body' | 'ears' | 'bones';
   /** The key in the group, or the bone id for the bones of a prop. */
@@ -139,7 +140,7 @@ export function attachmentMover(
   a: Attachment,
 ): (d: Pt) => Pt {
   const jointAt = (r: Rig) =>
-    drawCharacter(r, frame, { facing }).skeleton.joints.find(
+    drawRig(r, frame, { facing }).rigOutline.pivots.find(
       (j) => j.name === a.joint,
     )!.at;
   const p = attachmentAt(rig, a);
@@ -273,7 +274,7 @@ export function withAngle(rig: Rig, f: AngleField, deg: number): Rig {
 export function withEntryMoved(rig: Rig, id: string, by: number): Rig {
   const order = drawOrder(rig).map((e) => e.id);
   const from = order.indexOf(id);
-  const to = Math.min(Math.max(from + by, 0), order.length - 1);
+  const to = clamp(from + by, 0, order.length - 1);
   if (from < 0 || to === from) return rig;
   order.splice(from, 1);
   order.splice(to, 0, id);

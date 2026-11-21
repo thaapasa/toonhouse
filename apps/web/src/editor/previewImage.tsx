@@ -2,12 +2,11 @@
 // loads this module only when the user sets the preview, because it pulls in
 // `react-dom/server`.
 import type { Scene } from '@toonhouse/model';
+import type { SceneFrame } from '@toonhouse/renderer';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import { SceneDrawing } from '../components/SceneDrawing.tsx';
 import { fontFaceRule, fontFaces } from '../fonts.ts';
-import type { BackgroundAsset } from './library.ts';
-import type { PlacedActor } from './placement.ts';
 
 /** The size of the image. The cards on the home page are smaller than this. */
 const WIDTH = 960;
@@ -19,22 +18,12 @@ const QUALITY = 0.85;
  * outside the frame, and returns it as a WebP image. A browser that can't make
  * WebP, such as Safari, gives a PNG.
  */
-export async function makePreviewImage(frame: {
-  scene: Scene;
-  bg: BackgroundAsset;
-  t: number;
-  placed: readonly PlacedActor[];
-}): Promise<Blob> {
-  const { width, height } = frame.bg.background;
-  const drawing = (
-    <SceneDrawing
-      scene={frame.scene}
-      bg={frame.bg}
-      t={frame.t}
-      placed={frame.placed}
-      prefix="preview"
-    />
-  );
+export async function makePreviewImage(
+  scene: Scene,
+  frame: SceneFrame,
+): Promise<Blob> {
+  const { width, height } = frame.background;
+  const drawing = <SceneDrawing scene={scene} frame={frame} prefix="preview" />;
   // The drawing renders twice, so that only the fonts that it uses go in.
   const fonts = await embeddedFonts(renderToStaticMarkup(<svg>{drawing}</svg>));
   const svg = renderToStaticMarkup(

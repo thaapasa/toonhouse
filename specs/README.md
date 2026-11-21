@@ -14,6 +14,10 @@ implementation details to the code. Use the terms in
 [GLOSSARY.md](../GLOSSARY.md). When a requirement depends on another area, link
 to that area's file.
 
+A file can have a "Technical notes" section for plans about the code that a
+later feature needs, such as a refactoring to do when that feature starts. The
+notes go after the requirements and before the open questions.
+
 A file can end with an "Open questions" section for decisions that are not made
 yet.
 
@@ -39,3 +43,4 @@ After editing a spec, format it with Prettier: `pnpm format`.
 - [Playback and export](playback-export.md): watching the cartoon and saving it
   as a video.
 - [Character studio](studio.md): the development tool for characters and clips.
+- [Deployment](deployment.md): what running the app on the server needs.

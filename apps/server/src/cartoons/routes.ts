@@ -78,6 +78,7 @@ export const cartoonRoutes = new Hono<AuthEnv>()
     async (c) => {
       const userId = c.var.user.id;
       const id = await createCartoon(userId, c.req.valid('json').title);
+      if (!id) return c.json({ error: 'Too many cartoons' }, 409);
       return c.json(await getCartoon(id, userId), 201);
     },
   )
@@ -128,7 +129,8 @@ export const cartoonRoutes = new Hono<AuthEnv>()
     },
   )
   // A web app that knows an older format gets 409, and it then loads the new
-  // version of the web app.
+  // version of the web app. A save of a revision that is no longer the latest
+  // gets 409 too, so that it doesn't overwrite a newer save.
   .put(
     '/:id/content',
     requireUser,
@@ -138,16 +140,29 @@ export const cartoonRoutes = new Hono<AuthEnv>()
       const { id } = c.req.valid('param');
       const userId = c.var.user.id;
       const body = c.req.valid('json');
-      if (body.version !== CARTOON_VERSION) {
-        return c.json({ error: 'Old version of the cartoon format' }, 409);
+      if (body.content.version !== CARTOON_VERSION) {
+        return c.json(
+          { error: 'Old version of the cartoon format', reason: 'version' },
+          409,
+        );
       }
-      const content = CartoonContent.safeParse(body);
+      const content = CartoonContent.safeParse(body.content);
       if (!content.success) {
         return c.json({ error: 'Invalid content' }, 400);
       }
-      if (!(await setContent(id, userId, content.data)))
-        return refuse(c, id, userId);
-      return c.body(null, 204);
+      const revision = await setContent(id, userId, {
+        revision: body.revision,
+        editor: body.editor,
+        content: content.data,
+      });
+      if (revision === null) return refuse(c, id, userId);
+      if (revision === 'conflict') {
+        return c.json(
+          { error: 'The content has a newer revision', reason: 'revision' },
+          409,
+        );
+      }
+      return c.json({ revision });
     },
   )
   // The web app adds the time of the preview to the URL, so that a new preview

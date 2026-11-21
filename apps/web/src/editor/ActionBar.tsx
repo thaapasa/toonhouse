@@ -2,8 +2,8 @@
 // its clips, which starts the clip at the current time, and the tools for the
 // actor.
 import type { Clip, ClipId, ClipKind } from '@toonhouse/model';
-import type { ReactNode } from 'react';
 
+import { IconButton } from '../components/IconButton.tsx';
 import {
   BiggerIcon,
   DeleteIcon,
@@ -13,7 +13,7 @@ import {
   SmallerIcon,
   TurnIcon,
 } from '../components/icons.tsx';
-import { type TextKey, useI18n } from '../i18n/index.tsx';
+import { useI18n } from '../i18n/index.tsx';
 import { CLIP_ICONS } from './clipIcons.tsx';
 import { useNames } from './names.ts';
 
@@ -63,24 +63,44 @@ export function ActionBar(props: Props) {
       })}
       {(props.actor || props.onRemoveAction) && <div className="divider" />}
       {props.onRemoveAction && (
-        <BarButton label="editor.removeAction" onClick={props.onRemoveAction}>
+        <IconButton
+          className="bar-button"
+          label="editor.removeAction"
+          onClick={props.onRemoveAction}
+        >
           <RemoveActionIcon />
-        </BarButton>
+        </IconButton>
       )}
       {props.actor && (
         <>
-          <BarButton label="editor.turn" onClick={props.actor.onTurn}>
+          <IconButton
+            className="bar-button"
+            label="editor.turn"
+            onClick={props.actor.onTurn}
+          >
             <TurnIcon />
-          </BarButton>
-          <BarButton label="editor.smaller" onClick={props.actor.onSmaller}>
+          </IconButton>
+          <IconButton
+            className="bar-button"
+            label="editor.smaller"
+            onClick={props.actor.onSmaller}
+          >
             <SmallerIcon />
-          </BarButton>
-          <BarButton label="editor.bigger" onClick={props.actor.onBigger}>
+          </IconButton>
+          <IconButton
+            className="bar-button"
+            label="editor.bigger"
+            onClick={props.actor.onBigger}
+          >
             <BiggerIcon />
-          </BarButton>
-          <BarButton label="editor.removeActor" onClick={props.actor.onRemove}>
+          </IconButton>
+          <IconButton
+            className="bar-button"
+            label="editor.removeActor"
+            onClick={props.actor.onRemove}
+          >
             <DeleteIcon />
-          </BarButton>
+          </IconButton>
         </>
       )}
     </div>
@@ -92,12 +112,20 @@ export function BubbleBar(props: { onEditText(): void; onRemove(): void }) {
   const { tr } = useI18n();
   return (
     <div className="action-bar" role="toolbar" aria-label={tr('bubble.title')}>
-      <BarButton label="bubble.editText" onClick={props.onEditText}>
+      <IconButton
+        className="bar-button"
+        label="bubble.editText"
+        onClick={props.onEditText}
+      >
         <EditIcon />
-      </BarButton>
-      <BarButton label="bubble.remove" onClick={props.onRemove}>
+      </IconButton>
+      <IconButton
+        className="bar-button"
+        label="bubble.remove"
+        onClick={props.onRemove}
+      >
         <DeleteIcon />
-      </BarButton>
+      </IconButton>
     </div>
   );
 }
@@ -113,25 +141,5 @@ export function WalkBar({ onDone }: { onDone(): void }) {
         {tr('editor.walkDone')}
       </button>
     </div>
-  );
-}
-
-function BarButton(props: {
-  label: TextKey;
-  onClick?: (() => void) | undefined;
-  children: ReactNode;
-}) {
-  const { tr } = useI18n();
-  return (
-    <button
-      type="button"
-      className="bar-button"
-      aria-label={tr(props.label)}
-      title={tr(props.label)}
-      disabled={!props.onClick}
-      onClick={props.onClick}
-    >
-      {props.children}
-    </button>
   );
 }

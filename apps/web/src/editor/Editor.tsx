@@ -4,7 +4,11 @@
 // action of the same actor.
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from '@tanstack/react-router';
-import type { Cartoon } from '@toonhouse/api';
+import {
+  type Cartoon,
+  CONTENT_LIMITS,
+  type SavedContent,
+} from '@toonhouse/api';
 import type {
   Action,
   Actor,
@@ -19,7 +23,10 @@ import {
   backgroundClips,
   backgroundStateAt,
   clipsFor,
+  FPS,
   isMoving,
+  restClip,
+  sceneFrame,
   sceneLength,
 } from '@toonhouse/renderer';
 import { usePlayback } from '@toonhouse/stage';
@@ -27,6 +34,7 @@ import { type ReactNode, useEffect, useEffectEvent, useState } from 'react';
 
 import { contentQuery } from '../api.ts';
 import { Dialog } from '../components/Dialog.tsx';
+import { IconButton } from '../components/IconButton.tsx';
 import {
   BackgroundIcon,
   BackIcon,
@@ -39,30 +47,29 @@ import {
   SoundIcon,
   UndoIcon,
 } from '../components/icons.tsx';
-import { type TextKey, useI18n } from '../i18n/index.tsx';
-import { ActionBar, BubbleBar, WalkBar } from './ActionBar.tsx';
-import {
-  addBubble,
-  bubbleAnchors,
-  newBubble,
-  removeBubble,
-  updateBubble,
-} from './bubbles.ts';
-import { CartoonTitle } from './CartoonTitle.tsx';
-import { EditorStage, type WalkEdit } from './EditorStage.tsx';
-import { editorCommand, isTyping } from './keys.ts';
+import { useI18n } from '../i18n/index.tsx';
 import {
   type BackgroundAsset,
   backgroundAsset,
   kindOf,
+  LIBRARY,
   type RigAsset,
-} from './library.ts';
+} from '../library/index.ts';
+import { ActionBar, BubbleBar, WalkBar } from './ActionBar.tsx';
+import { addBubble, newBubble, removeBubble, updateBubble } from './bubbles.ts';
+import { CartoonTitle } from './CartoonTitle.tsx';
+import { EditorStage, type WalkEdit } from './EditorStage.tsx';
+import type { EditRun } from './history.ts';
+import { clearKeptContent, keptContent } from './keptContent.ts';
+import { editorCommand, isTyping } from './keys.ts';
 import { LibraryPanel, type LibraryTab } from './LibraryPanel.tsx';
-import { placeActors } from './placement.ts';
 import { PreviewButton } from './PreviewButton.tsx';
 import { PropertiesPane } from './PropertiesPane.tsx';
+import { SaveProblem } from './SaveProblem.tsx';
+import { type SaverStart, startFrom } from './saver.ts';
 import {
   actionsOf,
+  addPoint,
   moveActor,
   moveBlock,
   moveStart,
@@ -82,9 +89,8 @@ import {
 } from './sceneEdit.ts';
 import { Timeline, type TimelineSelection } from './Timeline.tsx';
 import { timelineLength } from './timelineMath.ts';
-import { type EditMode, useCartoonContent } from './useCartoonContent.ts';
+import { useCartoonContent } from './useCartoonContent.ts';
 
-const FPS = 30;
 const PANE_KEY = 'toonhouse-properties-open';
 const ATTACH_KEY = 'toonhouse-properties-attached';
 
@@ -110,12 +116,20 @@ function freeSpot(bg: BackgroundAsset, actors: readonly Actor[]): Pt {
   return start;
 }
 
-export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
+export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
   const { cartoon } = props;
   const { tr } = useI18n();
   const queryClient = useQueryClient();
-  const [initial] = useState(() => withScene(props.initial));
-  const doc = useCartoonContent(cartoon.id, initial);
+  // The edits kept over a login go on from where they were.
+  const [start] = useState((): SaverStart => {
+    const { dropKept, ...start } = startFrom(
+      props.initial,
+      keptContent(cartoon.id),
+    );
+    if (dropKept) clearKeptContent(cartoon.id);
+    return { ...start, content: withScene(start.content) };
+  });
+  const doc = useCartoonContent(cartoon.id, start);
   const scenes = doc.content.scenes;
   const [sceneIndex, setSceneIndex] = useState(0);
   const index = Math.min(sceneIndex, scenes.length - 1);
@@ -163,11 +177,14 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
   });
   const t = playback.t;
 
-  // An undo can take away the selected actor or action.
-  const selectedActor =
+  // An undo can take away the selected actor or action. An actor whose
+  // character or prop isn't in the library can't be selected.
+  const found =
     selected?.actorId == null
-      ? null
-      : (scene.actors.find((a) => a.id === selected.actorId) ?? null);
+      ? undefined
+      : scene.actors.find((a) => a.id === selected.actorId);
+  const selectedKind = found ? kindOf(found.asset) : null;
+  const selectedActor = found && selectedKind ? found : null;
   const selection: TimelineSelection | null =
     !selected || !bg || (selected.actorId !== null && !selectedActor)
       ? null
@@ -188,13 +205,10 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
       ? walking
       : null;
 
-  const editScene = (fn: (s: Scene) => Scene, mode: EditMode = 'push') =>
-    doc.edit((c) => updateScene(c, scene.id, fn), mode);
-  const editBubble = (
-    id: string,
-    fn: (b: Bubble) => Bubble,
-    mode: EditMode = 'push',
-  ) => editScene((s) => updateBubble(s, id, fn), mode);
+  const editScene = (fn: (s: Scene) => Scene, run?: EditRun) =>
+    doc.edit((c) => updateScene(c, scene.id, fn), run);
+  const editBubble = (id: string, fn: (b: Bubble) => Bubble, run?: EditRun) =>
+    editScene((s) => updateBubble(s, id, fn), run);
   /** Selects an actor or an action, or nothing with null. */
   const select = (sel: TimelineSelection | null) => {
     setSelected(sel);
@@ -260,10 +274,11 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
   const startClip = (clip: ClipId) => {
     if (!selection) return;
     const { actorId } = selection;
-    const at = now();
+    // The playhead can go a few seconds past the end of a scene, and so past
+    // the latest time that the server saves.
+    const at = Math.min(now(), CONTENT_LIMITS.time);
     playback.seek(at);
-    const kind = selectedActor && kindOf(selectedActor.asset);
-    const moves = kind !== null && isMoving(kind, clip);
+    const moves = selectedKind !== null && isMoving(selectedKind, clip);
     const action: Action = {
       id: newId(),
       t: at,
@@ -277,7 +292,7 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
     );
   };
 
-  const editWalk = (fn: (path: Pt[]) => Pt[], mode: EditMode = 'push') => {
+  const editWalk = (fn: (path: Pt[]) => Pt[], run?: EditRun) => {
     if (!walk) return;
     editScene(
       (s) =>
@@ -287,7 +302,7 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
             path: fn(a.path ?? []),
           })),
         ),
-      mode,
+      run,
     );
   };
   const walkDone = () => {
@@ -371,8 +386,8 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
           setSelected({ actorId, actionId: null });
         }
       : undefined;
-    if (selectedActor) {
-      const kind = kindOf(selectedActor.asset)!;
+    if (selectedActor && selectedKind) {
+      const kind = selectedKind;
       const state = actorStateAt(selectedActor, kind, bg.background, t);
       const id = selectedActor.id;
       const resize = (step: 1 | -1) => {
@@ -388,7 +403,7 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
         <ActionBar
           kind={kind}
           clips={clipsFor(kind)}
-          current={state.action?.clip ?? clipsFor(kind)[0]!.id}
+          current={state.action?.clip ?? restClip(kind).id}
           onClip={startClip}
           onRemoveAction={onRemoveAction}
           actor={{
@@ -422,29 +437,32 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
     }
   }
 
+  // While the cartoon doesn't play, a bubble shows at its full size also at
+  // its first and last moments, so that the user can work on it.
+  const frame =
+    bg &&
+    sceneFrame(scene, bg.background, LIBRARY, t, { pop: playback.playing });
+
   const pane = (
     <PropertiesPane
       scene={scene}
       bg={bg ?? null}
       selection={selection}
       bubble={selectedBubble}
-      anchors={
-        bg
-          ? bubbleAnchors(bg.background, placeActors(scene, bg.background, t))
-          : new Map()
-      }
+      anchors={frame?.bubbleContext.anchors ?? new Map()}
       textFocus={textFocus}
-      onEditBubble={(fn, mode) =>
-        selectedBubble && editBubble(selectedBubble.id, fn, mode)
+      onEditBubble={(fn, run) =>
+        selectedBubble && editBubble(selectedBubble.id, fn, run)
       }
       duration={duration}
       fps={FPS}
       onEdit={(fn) => editScene(fn)}
       onSeek={playback.seek}
       onClipChanged={(actorId, action) => {
-        const kind = selectedActor && kindOf(selectedActor.asset);
         setWalking(
-          actorId !== null && kind && isMoving(kind, action.clip)
+          actorId !== null &&
+            selectedKind &&
+            isMoving(selectedKind, action.clip)
             ? { actorId, actionId: action.id }
             : null,
         );
@@ -473,18 +491,18 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
         <CartoonTitle cartoon={cartoon} saveState={doc.saveState} />
         <div className="spacer" />
         <PreviewButton cartoonId={cartoon.id} frame={bg && { scene, bg, t }} />
-        <ToolButton
+        <IconButton
           label="editor.undo"
           onClick={doc.canUndo ? doc.undo : undefined}
         >
           <UndoIcon />
-        </ToolButton>
-        <ToolButton
+        </IconButton>
+        <IconButton
           label="editor.redo"
           onClick={doc.canRedo ? doc.redo : undefined}
         >
           <RedoIcon />
-        </ToolButton>
+        </IconButton>
         <div className="divider" />
         <Link
           to="/cartoons/$cartoonId"
@@ -495,7 +513,7 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
           onClick={() =>
             queryClient.setQueryData(
               contentQuery(cartoon.id).queryKey,
-              doc.content,
+              (old) => old && { ...old, content: doc.content },
             )
           }
         >
@@ -506,28 +524,28 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
 
       <div className="editor-body">
         <nav className="tool-rail" aria-label={tr('editor.library')}>
-          <ToolButton
+          <IconButton
             label="editor.characters"
             pressed={library === 'character'}
             onClick={bg ? () => toggleLibrary('character') : undefined}
           >
             <CharacterIcon />
-          </ToolButton>
-          <ToolButton
+          </IconButton>
+          <IconButton
             label="editor.props"
             pressed={library === 'prop'}
             onClick={bg ? () => toggleLibrary('prop') : undefined}
           >
             <PropIcon />
-          </ToolButton>
-          <ToolButton
+          </IconButton>
+          <IconButton
             label="editor.backgrounds"
             pressed={library === 'background'}
             onClick={() => toggleLibrary('background')}
           >
             <BackgroundIcon />
-          </ToolButton>
-          <ToolButton
+          </IconButton>
+          <IconButton
             label="editor.speechBubble"
             pressed={bubbleTool}
             onClick={
@@ -542,21 +560,20 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
             }
           >
             <BubbleIcon />
-          </ToolButton>
-          <ToolButton label="editor.sounds">
+          </IconButton>
+          <IconButton label="editor.sounds">
             <SoundIcon />
-          </ToolButton>
+          </IconButton>
         </nav>
         <div className="stage-area">
-          {bg ? (
+          {bg && frame ? (
             <EditorStage
               scene={scene}
               bg={bg}
-              t={t}
               selectedActor={selection?.actorId ?? null}
               selectedBubble={selectedBubble?.id ?? null}
               bubbleTool={bubbleTool}
-              playing={playback.playing}
+              frame={frame}
               walk={walk}
               focusPoint={focusPoint}
               onSelect={(actorId) => {
@@ -576,22 +593,23 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
                 setBubbleTool(false);
                 editBubbleText(bubble.id);
               }}
-              onMoveBubble={(id, at, mode) =>
-                editBubble(id, (b) => ({ ...b, at }), mode)
+              onMoveBubble={(id, at, run) =>
+                editBubble(id, (b) => ({ ...b, at }), run)
               }
-              onMoveTail={(id, tailTip, mode) =>
-                editBubble(id, (b) => ({ ...b, tailTip }), mode)
+              onMoveTail={(id, tailTip, run) =>
+                editBubble(id, (b) => ({ ...b, tailTip }), run)
               }
-              onMoveActor={(id, d, mode) =>
+              onMoveActor={(id, d, run) =>
                 editScene(
                   (s) => updateActor(s, id, (a) => moveActor(a, d)),
-                  mode,
+                  run,
                 )
               }
-              onAddPoint={(at) => editWalk((path) => [...path, at])}
-              onMovePoint={(i, at, mode) =>
-                editWalk((path) => path.map((p, j) => (j === i ? at : p)), mode)
+              onAddPoint={(at) => editWalk((path) => addPoint(path, at))}
+              onMovePoint={(i, at, run) =>
+                editWalk((path) => path.map((p, j) => (j === i ? at : p)), run)
               }
+              onRevert={doc.revert}
               onTouch={() => playback.setPlaying(false)}
               toolbar={toolbar}
             />
@@ -614,12 +632,12 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
             ? pane
             : !paneOpen && (
                 <div className="pane-toggle">
-                  <ToolButton
+                  <IconButton
                     label="properties.show"
                     onClick={() => setPaneOpen(true)}
                   >
                     <PropertiesIcon />
-                  </ToolButton>
+                  </IconButton>
                 </div>
               )}
         </div>
@@ -643,32 +661,40 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
         onStep={playback.step}
         selection={selection}
         onSelect={selectOnTimeline}
-        onMoveBlock={(actorId, actionId, at, mode) => {
+        onMoveBlock={(actorId, actionId, at, run) => {
           // Each move of a drag starts from the scene before the drag.
           editScene(
             (s) => moveBlock(s, actorId, actionId, at, lengthOf(s)).scene,
-            mode,
+            run,
           );
           playback.seek(moveBlock(scene, actorId, actionId, at, duration).t);
         }}
-        onMoveStart={(actorId, actionId, at, mode) => {
+        onMoveStart={(actorId, actionId, at, run) => {
           editScene(
             (s) => updateActions(s, actorId, (a) => moveStart(a, actionId, at)),
-            mode,
+            run,
           );
           const moved = moveStart(actionsOf(scene, actorId), actionId, at);
           playback.seek(moved.find((a) => a.id === actionId)?.t ?? at);
         }}
-        onLength={(v, mode) => editScene((s) => setLength(s, v), mode)}
+        onLength={(v, run) => editScene((s) => setLength(s, v), run)}
         selectedBubble={selectedBubble?.id ?? null}
         onSelectBubble={selectBubble}
-        onMoveBubble={(id, at, mode) => {
-          editBubble(id, (b) => ({ ...b, t: savedTime(at) }), mode);
+        onMoveBubble={(id, at, run) => {
+          editBubble(id, (b) => ({ ...b, t: savedTime(at) }), run);
           playback.seek(at);
         }}
-        onBubbleLength={(id, v, mode) =>
-          editBubble(id, (b) => ({ ...b, length: savedTime(v) }), mode)
+        onBubbleLength={(id, v, run) =>
+          editBubble(id, (b) => ({ ...b, length: savedTime(v) }), run)
         }
+        onRevert={doc.revert}
+      />
+      <SaveProblem
+        cartoonId={cartoon.id}
+        state={doc.saveState}
+        onKeepMine={doc.keepMine}
+        onLoadSaved={doc.loadSaved}
+        onRetry={doc.retry}
       />
       {removing && (
         <Dialog
@@ -695,27 +721,5 @@ export function Editor(props: { cartoon: Cartoon; initial: CartoonContent }) {
         </Dialog>
       )}
     </div>
-  );
-}
-
-function ToolButton(props: {
-  label: TextKey;
-  pressed?: boolean;
-  onClick?: (() => void) | undefined;
-  children: ReactNode;
-}) {
-  const { tr } = useI18n();
-  return (
-    <button
-      type="button"
-      className="icon-button"
-      aria-label={tr(props.label)}
-      aria-pressed={props.pressed}
-      title={tr(props.label)}
-      disabled={!props.onClick}
-      onClick={props.onClick}
-    >
-      {props.children}
-    </button>
   );
 }

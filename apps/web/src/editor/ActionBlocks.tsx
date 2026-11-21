@@ -3,22 +3,18 @@
 import type { Action } from '@toonhouse/model';
 import {
   actionSpeed,
+  clamp,
   clipOf,
   clipStartOf,
   sortedActions,
 } from '@toonhouse/renderer';
-import { type PointerEvent, useRef } from 'react';
 
 import { CLIP_COLORS } from './clipIcons.tsx';
+import type { EditRun } from './history.ts';
 import { useNames } from './names.ts';
-import { released } from './pointer.ts';
-import {
-  progressPoints,
-  snapTenth,
-  TAP_SLOP,
-  type TimelineRow,
-} from './timelineMath.ts';
-import type { EditMode } from './useCartoonContent.ts';
+import type { PinchCount } from './pointer.ts';
+import { progressPoints, snapTenth, type TimelineRow } from './timelineMath.ts';
+import { useLaneDrag } from './useLaneDrag.ts';
 
 /** The height of the progress strip of an action, in CSS pixels. */
 const STRIP = 8;
@@ -31,52 +27,25 @@ export function ActionBlocks(props: {
   pps: number;
   selected: string | null;
   onSelect(actionId: string, t: number): void;
-  onMove(actionId: string, t: number, mode: EditMode): void;
+  onMove(actionId: string, t: number, run: EditRun): void;
   onMoveDone(): void;
+  pinches: PinchCount;
+  onCancel(run: EditRun): void;
 }) {
   const names = useNames();
-  const drag = useRef<{
-    pointer: number;
-    id: string;
-    x: number;
-    t: number;
-    moved: boolean;
-  } | null>(null);
   const actions = sortedActions(props.row.actions);
-
-  const down = (e: PointerEvent<HTMLButtonElement>, a: Action) => {
-    e.stopPropagation();
-    if (drag.current) return;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    drag.current = {
-      pointer: e.pointerId,
-      id: a.id,
-      x: e.clientX,
-      t: a.t,
-      moved: false,
-    };
-  };
-  const move = (e: PointerEvent<HTMLButtonElement>) => {
-    const d = drag.current;
-    if (d?.pointer !== e.pointerId) return;
-    if (released(e)) return up(e);
-    const dx = e.clientX - d.x;
-    if (!d.moved && Math.abs(dx) < TAP_SLOP) return;
-    const t = snapTenth(d.t + dx / props.pps);
-    props.onMove(
-      d.id,
-      Math.min(Math.max(t, 0), props.length),
-      d.moved ? 'replace' : 'push',
-    );
-    d.moved = true;
-  };
-  const up = (e: PointerEvent<HTMLButtonElement>) => {
-    const d = drag.current;
-    if (d?.pointer !== e.pointerId) return;
-    drag.current = null;
-    if (d.moved) props.onMoveDone();
-    else if (e.type === 'pointerup') props.onSelect(d.id, d.t);
-  };
+  const drag = useLaneDrag<Action>({
+    pinches: props.pinches,
+    onMove: (a, dx, run) =>
+      props.onMove(
+        a.id,
+        clamp(snapTenth(a.t + dx / props.pps), 0, props.length),
+        run,
+      ),
+    onTap: (a) => props.onSelect(a.id, a.t),
+    onDone: props.onMoveDone,
+    onCancel: (_, run) => props.onCancel(run),
+  });
 
   return actions.map((a, i) => {
     const end = Math.min(actions[i + 1]?.t ?? props.duration, props.duration);
@@ -102,12 +71,8 @@ export function ActionBlocks(props: {
           background: color,
           color: a.clip === 'idle' ? 'var(--text)' : 'var(--on-accent)',
         }}
-        onPointerDown={(e) => down(e, a)}
-        onPointerMove={move}
-        onPointerUp={up}
-        onPointerCancel={up}
-        onLostPointerCapture={up}
-        onClick={(e) => e.stopPropagation()}
+        {...drag.handlers(a)}
+        onClick={drag.click()}
       >
         {names.clip(props.row.kind, a.clip)}
         {/* The strip fills up with a darker shade of the clip color as the

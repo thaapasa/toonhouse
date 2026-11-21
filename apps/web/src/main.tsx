@@ -1,3 +1,4 @@
+import './zod-config.ts';
 import './app.css';
 import './fonts.ts';
 import './update-check.ts';

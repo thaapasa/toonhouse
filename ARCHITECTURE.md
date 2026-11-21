@@ -11,8 +11,8 @@ The requirements are in [specs/](specs/README.md), and the UI design is in
 ## Apps
 
 - **Web app** (`apps/web`): the player and the editor, built with React and
-  Vite. The server serves it at https://piirretyt.pomeranssi.fi. The editor
-  works on an iPad.
+  Vite. The server serves it, and it will run at
+  https://piirretyt.pomeranssi.fi. The editor works on an iPad.
 - **Server** (`apps/server`): a Node server that stores the cartoons and serves
   the assets and the web app. It never renders video. See [Server](#server).
 - **Export client** (`apps/export`): a CLI that runs on the user's own computer.
@@ -28,14 +28,17 @@ same web app in a browser.
 
 ## Packages
 
-- `packages/model`: the types and the schemas of the cartoon, rig and clip
-  formats.
+- `packages/model`: the types of the cartoon, rig and clip formats. Their
+  schemas are in `packages/api`.
 - `packages/renderer`: computes what the cartoon looks like at a given time. It
-  has no UI and runs in the browser, in Node and in headless Chromium.
+  has no UI and runs in the browser, in Node and in headless Chromium. See
+  [The frame of a scene](#the-frame-of-a-scene).
 - `packages/api`: the Zod schemas of the API between the server and the web app.
   Both validate the requests and the responses with them.
-- `packages/stage`: the React components that the web app and the studio share,
-  such as the stage that draws the renderer output and the playback controls.
+- `packages/stage`: the React code that the web app and the studio share: the
+  stage that draws the renderer output, the `usePlayback` hook that plays it,
+  and the code that finds the SVG files of a rig or a background. The playback
+  controls are in each app.
 
 ## Deterministic rendering
 
@@ -48,6 +51,24 @@ time and renders each frame at the chosen resolution. The export client runs the
 renderer in headless Chromium through Playwright and pipes the frames to ffmpeg.
 Export in the browser, with WebCodecs and the File System Access API, may come
 later.
+
+### The frame of a scene
+
+The renderer puts together the frame of a scene at time `t` with `sceneFrame`:
+where each actor is, its clip frame and its drawing, its size on the background,
+the bubbles with their fonts and anchors, and the tree to draw. `cartoonTime`
+maps a time of the cartoon to a scene and a time in it. The editor, the player
+and the preview image use both, and export will too.
+
+The renderer doesn't load the library. The app passes it a `Library`, which
+gives the rig of a character or a prop, a background by its id, and the default
+bubble fonts of the asset packs. So the renderer runs anywhere that can give it
+the JSON files, and it never needs the SVG files.
+
+If a scene refers to a character or a prop that the library doesn't have, the
+frame leaves that actor out. The timeline and the properties pane leave it out
+too, and the user can't select it. So a cartoon that refers to a removed asset
+still opens and plays.
 
 ## Assets
 
@@ -226,17 +247,56 @@ way.
 
 The server stores the content of a cartoon, its scenes with their actors and
 actions, as JSON in the `content` column of the cartoon. `packages/model` has
-its types, and `packages/api` the schema that checks a save.
+its types, and `packages/api` the schema that checks a save, with the limits of
+the content. The editor keeps the content inside the same limits, so that a save
+doesn't fail on them.
 
-Each saved cartoon has the version number of its data format. When the format
-changes so that old cartoons no longer fit it, the version goes up by one, and
-`packages/model` gets a converter from the previous version to the new one. The
-converters are pure functions, and they run in a chain, so a cartoon at version
-1 goes through every converter up to the latest version. The tests keep a saved
-cartoon of each old version and check that it upgrades to the latest one.
+Each saved cartoon has the version number of its data format. A change that
+keeps the old cartoons valid, such as a new optional field, keeps the version as
+it is. Each object in the schema keeps the fields that it doesn't know, so a web
+app that is older than the server keeps the new fields when it saves, and the
+server stores them.
 
-A change that keeps the old cartoons valid, such as a new optional field, keeps
-the version as it is.
+The app is not deployed yet, so until the first deploy the format can change in
+ways that break the saved cartoons, without a new version or a converter. The
+tests in `apps/web/src/format` keep a saved cartoon of version 1 that uses every
+field, and a list of the library ids that saved cartoons refer to. They fail
+when a change could break the saved cartoons. Before the first deploy, update
+them to match. After it, the change needs a new version.
+
+Every save from the web app includes the version that the web app knows. If the
+version is older than the latest, the server refuses the save with 409, and the
+web app loads the new version. The unsaved edits can be lost, which is rare
+enough to accept: the web app checks for a new version each time it comes back
+to the foreground, and saves the edits before it loads the new version.
+
+Each save also names the revision of the content that it edited, and the
+revision goes up by one with each save. If someone has saved the cartoon after
+that revision, in another window or on another device, the server refuses the
+save with 409 too. The editor then lets the user keep their version, which it
+saves over the other one, or load the saved version.
+
+A 409 can also come from a save of the same editor whose answer was lost. So
+each time the editor opens, it makes a random editor ID, and each save sends it.
+The server stores the ID of the latest save with the content. On a 409, the
+editor loads the content, and if the ID is its own, it goes on from that
+revision. The edits that an editor keeps in the browser have its ID and revision
+too. The next editor that goes on with them counts only one save of that editor
+as its own: the save of the kept edits as the next revision, which a closing
+editor sends. A later save of that editor may have newer edits, since it may
+still be open in another window.
+
+#### Planned upgrades
+
+After the first deploy, a change that breaks the old cartoons gets a new version
+and an upgrade. None of this is built yet.
+
+When the format changes so that old cartoons no longer fit it, the version goes
+up by one, and `packages/model` gets a converter from the previous version to
+the new one. The converters are pure functions, and they run in a chain, so a
+cartoon at version 1 goes through every converter up to the latest version. The
+tests keep a saved cartoon of each old version and check that it upgrades to the
+latest one.
 
 A change to the library can also need a new version. If a character, a prop, a
 clip or a background is renamed, removed or changes its structure, such as the
@@ -246,17 +306,19 @@ At startup, the server upgrades every cartoon that has an older version and
 saves the result. If a converter fails on a cartoon, the server marks that
 cartoon as broken and goes on with the startup. The web app can't open a broken
 cartoon, so that the developer can fix it by hand. Because of this, the server
-reads and sends only cartoons in the latest format.
-
-Every save from the web app includes the version that the web app knows. If the
-version is older than the latest, the server refuses the save, and the web app
-loads the new version. The unsaved edits can be lost, which is rare enough to
-accept: the web app checks for a new version each time it comes back to the
-foreground. The export client sends its version too, and the server tells an old
-export client to update.
+reads and sends only cartoons in the latest format. The export client sends its
+version too, and the server tells an old export client to update.
 
 The web app calls the API under `/api/app`. The server serves the build of the
 web app from `apps/web/dist`, and every other path gets its `index.html`.
+
+Every response has a Content-Security-Policy that allows only files from the app
+itself, plus `data:` and `blob:` URLs for images and fonts, which the preview
+image needs. The policy has no `unsafe-eval`, so the web app runs Zod without
+its compiled parsers. API answers have `Cache-Control: no-store`, because they
+depend on the session. The built files in `assets/` have a content hash in their
+names, so browsers keep them for a year. `index.html` and `version.json` must
+always come from the server.
 
 ### Users and sessions
 
@@ -271,11 +333,17 @@ cookie, and the database stores only a SHA-256 hash of the token, so a copy of
 the database doesn't let anyone log in. The web app has no other way to
 authenticate, such as personal tokens.
 
-The server counts the login attempts per username and per client address in
-memory, and refuses a login before it checks the password. Each check takes tens
-of milliseconds of Argon2 work, so a flood of logins would slow down the whole
-server. One server process doesn't need the counts to survive a restart. The
-client address is the last entry of `X-Forwarded-For`, which Caddy adds.
+A session lasts 90 days from the last use. The server extends it at most once a
+day, and then sends the cookie again with the new expiry, because the browser
+drops the cookie at the expiry that it got last.
+
+The server counts the login attempts per client address, and per username from
+each address, in memory, and refuses a login before it checks the password.
+Counting the username with the address means that failed logins from elsewhere
+can't lock a user out. Each check takes tens of milliseconds of Argon2 work, so
+a flood of logins would slow down the whole server. One server process doesn't
+need the counts to survive a restart. The client address is the last entry of
+`X-Forwarded-For`, which Caddy adds.
 
 ### Visibility
 
@@ -309,6 +377,16 @@ The player draws the scenes with the same renderer as the editor. Until the
 cartoon has shots, it plays each scene with a background from the start to the
 end, one after another.
 
+The library assets come from `assets/` through `import.meta.glob`, in
+`apps/web/src/library`. The JSON files of the rigs, the backgrounds and the
+asset packs are in the bundle of the web app. The SVG files are separate files
+of the build with a content hash in their names, and the web app fetches them
+when a drawing needs them, so the bundle doesn't grow with each SVG. A drawing
+shows each asset when all its files have loaded, and leaves it out until then.
+The player waits for the files of the whole cartoon before it starts, and the
+preview image waits for the files of its scene. The studio runs only on the Vite
+dev server, so it loads the SVG files with the studio at once.
+
 ### Editor
 
 The editor edits the scenes of one cartoon. It keeps the whole content of the
@@ -317,15 +395,40 @@ content to the server a moment after each edit, and at once when the page goes
 to the background. A drag on the stage or on the timeline is one step in the
 history: each move of the drag redoes that step from where the drag started.
 
-The library assets come from `assets/` through `import.meta.glob`, so the build
-bundles them into the web app, as in the studio.
+The editor loads the content from the server each time it opens, because a save
+of an old revision fails. The saver in `apps/web/src/editor` does the saving,
+apart from React. One save runs at a time. A save that the editor asks for while
+another one runs, such as when the page goes to the background, goes right after
+that one. If a save fails without an answer or with a server error, the editor
+tries again after a while. If the server refuses the content, the editor tells
+the user and tries again only after the next edit. If the cartoon is gone, or
+the user is no longer its owner, the editor tells the user and stops.
+
+When the editor can't save for now, it keeps the edits in the `localStorage` of
+the browser, and the next editor of the cartoon starts from them and saves them.
+This happens when the login has ended, after a conflict, and when the page goes
+to the background or the editor closes before its edits are saved. While the
+editor can't save, it writes them at most once a second, so that a drag doesn't
+write the whole cartoon on each move. A closed editor sends its edits once more,
+but doesn't try again, so that it can't race the next editor.
+
+When the editor opens, it compares the kept edits with the content on the
+server. If the server has the same revision, the editor goes on with the kept
+edits. If the server is one revision ahead from the editor that kept them, that
+editor saved them as it closed, and the editor drops them. Otherwise, the
+cartoon was saved elsewhere after the edits were kept, and the user chooses
+between the kept edits and the saved version.
 
 The stage asks the renderer where each actor is at the current time. The
 renderer goes through the actions of the actor in the order of their times: an
 action plays its clip until the next action starts, and a walk moves the actor
-along its path at the speed of the walk clip, so that the feet don't slide. With
-a perspective, each line of the path uses the mean of the actor sizes at its
-ends, so the feet can slide a little when an actor walks toward the camera.
+along its path as far as the `travel` of the walk clip says, so that the feet
+don't slide. The travel doesn't have to be even: a hop stays in place while the
+rabbit crouches. When a hop gets to the last point in the air, the rabbit
+finishes the hop in place and sits when it lands. The clip's `step` sets when it
+can stop. With a perspective, the actor gets smaller further away, so the same
+travel covers fewer frame pixels there. The size is linear in y, so the renderer
+can work out the distance along a line of the path exactly.
 
 The stage shows the frame and a band around it, wide enough for the largest
 character or prop of the library at the size that the background gives the
@@ -371,9 +474,13 @@ image.
 
 The build writes `version.json` next to `index.html`. When the web app comes
 back to the foreground, it compares the build ID in that file to its own and
-loads the page again if they differ.
+loads the page again if they differ. If the editor has edits that are not saved,
+the web app saves them first. If the save fails, the web app doesn't load the
+page and checks again the next time.
 
 ## Hosting
 
-The app runs at https://piirretyt.pomeranssi.fi, on the pomeranssi.fi server
-next to the other services. An English host name may come later.
+The app is not deployed yet. It will run at https://piirretyt.pomeranssi.fi, on
+the pomeranssi.fi server next to the other services. An English host name may
+come later. [specs/deployment.md](specs/deployment.md) lists what the deployment
+needs.

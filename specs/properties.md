@@ -15,8 +15,9 @@ buttons don't have, or a point of a walk to the pixel.
 - [x] When nothing is selected, the pane shows the background of the scene and
       the length of the scene, which the user can change.
 - [x] When the user selects an actor, the pane shows where it starts, which way
-      it faces and its size. The user can set the size to any value, not only
-      the steps of the size buttons.
+      it faces and its size. The user can set the size to any value from 1% to
+      100,000%, not only the steps of the size buttons. An actor of size zero
+      would have nothing to select.
 - [x] When the user selects an action on the timeline, the pane also shows its
       clip, its start time, when it ends, its speed and the point of the clip
       where it starts. The user can change all but the end.

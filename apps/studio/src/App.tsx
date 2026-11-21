@@ -1,16 +1,19 @@
 import type { ClipId, Pt, Rig } from '@toonhouse/model';
 import {
-  BACKGROUND_CLIPS,
   backgroundClips,
   type Camera,
+  clipOf,
   clipsFor,
-  drawCharacter,
+  drawRig,
+  FPS,
   partBounds,
+  restClip,
   wholeBackground,
 } from '@toonhouse/renderer';
 import { usePlayback } from '@toonhouse/stage';
 import { useEffect, useState } from 'react';
 
+import { SAVE_RIG_URL } from '../server/api.ts';
 import { BACKGROUNDS } from './backgrounds.ts';
 import { CHARACTERS, PROPS, RIGS } from './characters.ts';
 import { AssetList, type Selection } from './components/AssetList.tsx';
@@ -37,10 +40,6 @@ import {
   withTarget,
 } from './rigEdit.ts';
 import { useRigNames } from './rigNames.ts';
-
-const FPS = 30;
-/** The dev server saves rigs here, see server/saveRig.ts. */
-const SAVE_RIG_URL = '/api/rig';
 
 const KNOWN = {
   characters: CHARACTERS.map((c) => c.id),
@@ -105,8 +104,8 @@ export function App() {
 
   const background = BACKGROUNDS.find((b) => b.id === backgroundId) ?? null;
   const clips = clipsFor(rig.kind);
-  // Another kind of character may not have the clip; then play its first.
-  const clip = clips.find((c) => c.id === clipId) ?? clips[0]!;
+  // Another kind of character may not have the clip, and then it rests.
+  const clip = clipOf(rig.kind, clipId);
   const bgClips = background ? backgroundClips(background.background) : [];
   const bgClip = bgClips.find((c) => c.id === backgroundClipId) ?? bgClips[0];
   const activeClip = background && bgClip ? bgClip : clip;
@@ -117,7 +116,7 @@ export function App() {
     speed,
   });
   const frame = clip.frameAt(playback.t);
-  const drawing = drawCharacter(rig, frame, { facing: view.facing });
+  const drawing = drawRig(rig, frame, { facing: view.facing });
 
   const pickClip = (id: ClipId) => {
     if (background) setBackgroundClipId(id);
@@ -151,7 +150,7 @@ export function App() {
     guest = {
       actor: {
         id: guestAsset.id,
-        node: drawCharacter(guestRig, gFrame, { facing: view.facing }).node,
+        node: drawRig(guestRig, gFrame, { facing: view.facing }).node,
         ...(guestAt ?? background.background.ground.start),
       },
       parts: guestAsset.parts,
@@ -231,7 +230,7 @@ export function App() {
     <DragHandles
       handles={attachments(rig).map((a) => ({
         id: a.joint,
-        at: drawing.skeleton.joints.find((j) => j.name === a.joint)!.at,
+        at: drawing.rigOutline.pivots.find((j) => j.name === a.joint)!.at,
         label: names.joint(a.joint),
       }))}
       selected={selected?.type === 'attachment' ? selected.joint : null}
@@ -281,7 +280,9 @@ export function App() {
   // A prop is drawn to fit its own height instead of that of a character.
   const propBounds =
     rig.kind === 'prop'
-      ? partBounds(drawCharacter(rig, clips[0]!.frameAt(0), { facing: 1 }).node)
+      ? partBounds(
+          drawRig(rig, restClip(rig.kind).frameAt(0), { facing: 1 }).node,
+        )
       : null;
   const clipBar = (
     <ClipBar
@@ -313,7 +314,7 @@ export function App() {
           <main className="main">
             <BackgroundView
               asset={background}
-              frame={(bgClip ?? BACKGROUND_CLIPS[0]!).frameAt(playback.t)}
+              frame={(bgClip ?? restClip('background')).frameAt(playback.t)}
               camera={cam}
               onCamera={setCamera}
               horizon={horizon}

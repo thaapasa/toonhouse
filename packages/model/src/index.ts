@@ -17,7 +17,7 @@ export type {
   CartoonContent,
   Scene,
 } from './cartoon.ts';
-export { CARTOON_VERSION } from './cartoon.ts';
+export { CARTOON_VERSION, emptyContent } from './cartoon.ts';
 export type { Matrix, Pt } from './geometry.ts';
 export type {
   BackgroundFrame,
@@ -37,6 +37,7 @@ export type {
   RabbitFrame,
   RabbitPose,
 } from './pose.ts';
+export { CLIP_IDS } from './pose.ts';
 export type {
   BirdHead,
   BirdPartId,

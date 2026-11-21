@@ -16,6 +16,9 @@ export const fi: Texts = {
   'home.noPublicCartoons': 'Julkisia piirrettyjä ei ole vielä.',
   'home.newCartoon': 'Uusi piirretty',
   'home.newCartoonTitle': 'Uusi piirretty',
+  'home.newCartoonError': 'Piirretyn luonti epäonnistui.',
+  'home.tooManyCartoons':
+    'Sinulla on niin monta piirrettyä kuin yhdellä käyttäjällä voi olla. Poista jokin piirretty, niin voit tehdä uuden.',
   'home.edit': 'Muokkaa: {title}',
   'home.watch': 'Katso: {title}',
   'home.byOwner': 'Tekijä: {name}',
@@ -49,6 +52,8 @@ export const fi: Texts = {
   'profile.currentPassword': 'Nykyinen salasana',
   'profile.wrongPassword': 'Salasana on väärä.',
   'profile.resetError': 'Salasanan vaihto epäonnistui.',
+  'profile.tooManyAttempts':
+    'Liian monta yritystä. Yritä muutaman minuutin päästä uudelleen.',
   'profile.newPassword': 'Uusi salasana',
   'profile.newPasswordInfo':
     'Kopioi salasana ja pidä se tallessa. Se näkyy vain tämän kerran.',
@@ -99,6 +104,31 @@ export const fi: Texts = {
   'editor.saving': 'Tallennetaan…',
   'editor.unsaved': 'Ei vielä tallennettu',
   'editor.saveError': 'Tallennus epäonnistui. Yritetään pian uudelleen.',
+  'editor.notSaved': 'Ei tallennettu',
+  'editor.notSavedLogin': 'Ei tallennettu. Kirjaudu uudelleen.',
+  'save.refusedTitle': 'Piirrettyä ei ole tallennettu',
+  'save.refusedInfo':
+    'Palvelin ei hyväksy viimeisintä muutosta. Peru se, niin editori tallentaa piirretyn taas.',
+  'save.tooLargeInfo':
+    'Piirretty on liian suuri tallennettavaksi. Poista siitä jotain, esimerkiksi kohtaus, niin editori tallentaa sen taas.',
+  'save.loggedOutTitle': 'Kirjautumisesi on päättynyt',
+  'save.loggedOutInfo':
+    'Kirjaudu uudelleen, niin muutoksesi tallentuvat. Siihen asti tämä selain säilyttää ne.',
+  'save.conflictTitle': 'Piirretty on muuttunut',
+  'save.conflictInfo':
+    'Piirretty tallennettiin toisessa ikkunassa tai toisella laitteella sen jälkeen, kun aloitit nämä muutokset. Voit pitää oman versiosi ja tallentaa sen toisen päälle, tai ladata tallennetun version, jolloin tässä tehdyt muutokset menetetään.',
+  'save.loggedOutNotKept':
+    'Piirretty on liian suuri tämän selaimen säilytettäväksi, joten pidä tämä sivu auki. Kirjaudu uudelleen toisessa välilehdessä ja yritä sitten täällä uudelleen.',
+  'save.goneInfo':
+    'Palvelin ei enää anna tallentaa tätä piirrettyä. Se on ehkä poistettu, tai sisään on kirjautunut toinen käyttäjä.',
+  'save.keepMine': 'Pidä oma versioni',
+  'save.loadSaved': 'Lataa tallennettu versio',
+  'save.keptTitle': 'Tallentamattomia muutoksia tällä laitteella',
+  'save.keptInfo':
+    'Tällä laitteella on piirretyn muutoksia, joita ei tallennettu, ja piirretty on sen jälkeen tallennettu muualla. Käytetäänkö tämän laitteen tallentamattomia muutoksia vai tallennettua versiota?',
+  'save.useKept': 'Käytä tallentamattomia muutoksia',
+  'save.useSaved': 'Käytä tallennettua versiota',
+  'save.retry': 'Yritä uudelleen',
   'editor.scenes': 'Kohtaukset',
   'editor.scene': 'Kohtaus {n}',
   'editor.addScene': 'Uusi kohtaus',
@@ -109,7 +139,6 @@ export const fi: Texts = {
   'editor.removeSceneConfirm': 'Poista',
   'editor.pause': 'Tauko',
   'editor.libraryHint': 'Lisää kohtaukseen napauttamalla.',
-  'editor.pickBackgroundFirst': 'Valitse ensin tausta.',
   'editor.actions': 'Toiminnot',
   'editor.turn': 'Käännä',
   'editor.smaller': 'Pienemmäksi',

@@ -86,6 +86,24 @@ describe('text layout', () => {
     expect(text.lines.length).toBeGreaterThan(1);
   });
 
+  it('keeps a letter of several code points whole', () => {
+    // A family emoji is 7 code points but one letter of 1.2 em. A narrow line
+    // fits only one of them.
+    const family = '\u{1F468}\u200D\u{1F469}\u200D\u{1F467}\u200D\u{1F466}';
+    const text = layoutText(
+      bubble({ text: family.repeat(3), width: 60, fontSize: 40 }),
+      'comic-relief',
+    );
+    expect(text.lines.map((l) => l.text)).toEqual([family, family, family]);
+    expect(text.lines[0]!.width).toBeCloseTo(48);
+  });
+
+  it('measures a letter with a combining accent as the composed letter', () => {
+    const composed = layoutText(bubble({ text: '\u00e4' }), 'comic-relief');
+    const combined = layoutText(bubble({ text: 'a\u0308' }), 'comic-relief');
+    expect(combined.width).toBeCloseTo(composed.width);
+  });
+
   it('shows the text in capitals when the bubble says so', () => {
     expect(layoutText(bubble({ caps: true }), 'chewy').lines[0]!.text).toBe(
       'HEI',

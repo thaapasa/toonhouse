@@ -31,7 +31,7 @@ export function BackgroundInspector({ asset, camera }: Props) {
         : tr('motionNone');
 
   return (
-    <aside className="inspector" aria-label={tr('inspector')}>
+    <aside className="inspector" aria-label={tr('properties')}>
       <div className="inspector-body">
         <section className="inspector-section">
           <div className="section-title">{tr('background')}</div>

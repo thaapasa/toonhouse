@@ -1,4 +1,4 @@
-import type { CharacterDrawing } from '@toonhouse/renderer';
+import type { RigDrawing } from '@toonhouse/renderer';
 import { Drawing, type PartSources, PartSymbols } from '@toonhouse/stage';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 
@@ -31,7 +31,7 @@ export interface ViewOptions {
 interface Props {
   prefix: string;
   parts: PartSources;
-  drawing: CharacterDrawing;
+  drawing: RigDrawing;
   /** How far the character has walked, to move the ground. */
   travel: number;
   view: ViewOptions;
@@ -197,14 +197,14 @@ export function Viewport({
           <Drawing node={drawing.node} prefix={prefix} />
           {view.bones && (
             <g className="bones">
-              {drawing.skeleton.bones.map((chain, i) => (
+              {drawing.rigOutline.bones.map((chain, i) => (
                 <polyline
                   key={i}
                   points={chain.map((p) => `${p.x},${p.y}`).join(' ')}
                   strokeWidth={2 * px}
                 />
               ))}
-              {drawing.skeleton.joints.map((j) => (
+              {drawing.rigOutline.pivots.map((j) => (
                 <circle
                   key={j.name}
                   cx={j.at.x}

@@ -3,6 +3,14 @@
 import { Link } from '@tanstack/react-router';
 import type { Cartoon } from '@toonhouse/api';
 import type { CartoonContent } from '@toonhouse/model';
+import {
+  cartoonTime,
+  type CartoonTimeline,
+  cartoonTimeline,
+  clamp,
+  FPS,
+  sceneFrame,
+} from '@toonhouse/renderer';
 import { usePlayback } from '@toonhouse/stage';
 import {
   type KeyboardEvent,
@@ -22,12 +30,10 @@ import {
   PlayIcon,
 } from '../components/icons.tsx';
 import { SceneDrawing } from '../components/SceneDrawing.tsx';
-import { placeActors } from '../editor/placement.ts';
 import { useI18n } from '../i18n/index.tsx';
-import { entryAt, type Sequence, sequenceOf } from './sequence.ts';
+import { LIBRARY } from '../library/index.ts';
 import { useFullscreen } from './useFullscreen.ts';
 
-const FPS = 30;
 /** How far the arrow keys move on the scrubber, in seconds. */
 const KEY_STEP = 5;
 
@@ -40,13 +46,16 @@ function formatTime(t: number) {
 export function Player(props: { cartoon: Cartoon; content: CartoonContent }) {
   const { cartoon } = props;
   const { tr } = useI18n();
-  const sequence = useMemo(() => sequenceOf(props.content), [props.content]);
+  const timeline = useMemo(
+    () => cartoonTimeline(props.content, LIBRARY),
+    [props.content],
+  );
   const playback = usePlayback({
-    duration: sequence.duration,
+    duration: timeline.duration,
     fps: FPS,
     loop: false,
     speed: 1,
-    autoplay: sequence.duration > 0,
+    autoplay: timeline.duration > 0,
   });
   const ref = useRef<HTMLDivElement>(null);
   const fullscreen = useFullscreen(ref);
@@ -91,7 +100,7 @@ export function Player(props: { cartoon: Cartoon; content: CartoonContent }) {
       </header>
 
       <div className="player-stage-area">
-        <PlayerStage sequence={sequence} t={playback.t} onTap={toggle} />
+        <PlayerStage timeline={timeline} t={playback.t} onTap={toggle} />
       </div>
 
       <div className="player-controls">
@@ -100,20 +109,20 @@ export function Player(props: { cartoon: Cartoon; content: CartoonContent }) {
           className="player-play"
           aria-label={tr(playback.playing ? 'player.pause' : 'player.play')}
           title={tr(playback.playing ? 'player.pause' : 'player.play')}
-          disabled={sequence.duration === 0}
+          disabled={timeline.duration === 0}
           onClick={toggle}
         >
           {playback.playing ? <PauseIcon size={26} /> : <PlayIcon size={26} />}
         </button>
         <Scrubber
           t={playback.t}
-          duration={sequence.duration}
+          duration={timeline.duration}
           playing={playback.playing}
           onSeek={playback.seek}
           onPlay={playback.setPlaying}
         />
         <div className="player-time">
-          {formatTime(playback.t)} / {formatTime(sequence.duration)}
+          {formatTime(playback.t)} / {formatTime(timeline.duration)}
         </div>
         {fullscreen.supported && (
           <button
@@ -135,9 +144,13 @@ export function Player(props: { cartoon: Cartoon; content: CartoonContent }) {
   );
 }
 
-function PlayerStage(props: { sequence: Sequence; t: number; onTap(): void }) {
+function PlayerStage(props: {
+  timeline: CartoonTimeline;
+  t: number;
+  onTap(): void;
+}) {
   const { tr } = useI18n();
-  const at = entryAt(props.sequence, props.t);
+  const at = cartoonTime(props.timeline, props.t);
   if (!at) {
     return (
       <div className="stage player-stage">
@@ -146,13 +159,13 @@ function PlayerStage(props: { sequence: Sequence; t: number; onTap(): void }) {
       </div>
     );
   }
-  const { scene, bg } = at.entry;
-  const placed = placeActors(scene, bg.background, at.t);
+  const { scene, background: bg } = at.entry;
+  const frame = sceneFrame(scene, bg, LIBRARY, at.t);
   return (
     <div className="stage player-stage">
       <svg
         className="stage-svg"
-        viewBox={`0 0 ${bg.background.width} ${bg.background.height}`}
+        viewBox={`0 0 ${bg.width} ${bg.height}`}
         onClick={props.onTap}
         aria-label={tr('player.stage')}
       >
@@ -161,9 +174,7 @@ function PlayerStage(props: { sequence: Sequence; t: number; onTap(): void }) {
           // have the same ids.
           key={scene.id}
           scene={scene}
-          bg={bg}
-          t={at.t}
-          placed={placed}
+          frame={frame}
           prefix="player"
         />
       </svg>
@@ -189,7 +200,7 @@ function Scrubber(props: {
 
   const timeAt = (e: PointerEvent<HTMLDivElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
-    const x = Math.min(Math.max((e.clientX - r.left) / r.width, 0), 1);
+    const x = clamp((e.clientX - r.left) / r.width, 0, 1);
     return Math.round(x * duration * FPS) / FPS;
   };
   const down = (e: PointerEvent<HTMLDivElement>) => {

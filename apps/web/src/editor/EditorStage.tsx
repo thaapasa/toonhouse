@@ -12,7 +12,8 @@ import {
   type BubbleAnchor,
   bubbleOffset,
   bubblePoint,
-  placeBubbles,
+  clamp,
+  type SceneFrame,
 } from '@toonhouse/renderer';
 import {
   type CSSProperties,
@@ -26,14 +27,14 @@ import {
   useState,
 } from 'react';
 
+import { IconButton } from '../components/IconButton.tsx';
 import { ZoomFitIcon } from '../components/icons.tsx';
 import { SceneDrawing } from '../components/SceneDrawing.tsx';
 import { useI18n } from '../i18n/index.tsx';
-import { bubbleContext } from './bubbles.ts';
-import { type BackgroundAsset, CHARACTERS, PROPS } from './library.ts';
-import { placeActors } from './placement.ts';
-import { released } from './pointer.ts';
-import { roundPoint, savedPoint } from './sceneEdit.ts';
+import { type BackgroundAsset, CHARACTERS, PROPS } from '../library/index.ts';
+import type { EditRun } from './history.ts';
+import { released, TAP_SLOP } from './pointer.ts';
+import { savedPoint } from './sceneEdit.ts';
 import {
   bandSize,
   clampView,
@@ -45,14 +46,11 @@ import {
   viewRect,
   wheelAction,
 } from './stageView.ts';
-import type { EditMode } from './useCartoonContent.ts';
 import { useSize } from './useSize.ts';
 
 const PREFIX = 'stage';
 /** The size of the box of a walk point on the screen, in CSS pixels. */
 const POINT_BOX = 26;
-/** A pointer that moves less than this, in CSS pixels, taps. */
-const TAP_SLOP = 8;
 /** Two taps on a bubble closer than this in milliseconds open its text. */
 const DOUBLE_TAP = 400;
 /** The radius of the handle of the tip of a tail, in CSS pixels. */
@@ -78,13 +76,12 @@ export interface WalkEdit {
 interface Props {
   scene: Scene;
   bg: BackgroundAsset;
-  t: number;
   /** The selected actor, if any. */
   selectedActor: string | null;
   /** The selected bubble, if any. */
   selectedBubble: string | null;
-  /** Whether the cartoon plays, so that the bubbles pop in and out. */
-  playing: boolean;
+  /** The scene at `t`, which the editor computes once for each render. */
+  frame: SceneFrame;
   /** Whether a tap adds a bubble. */
   bubbleTool: boolean;
   walk: WalkEdit | null;
@@ -97,13 +94,15 @@ interface Props {
   onEditBubbleText(id: string): void;
   onAddBubble(place: BubblePlace): void;
   /** Moves a bubble to `at`, an offset or a point as `Bubble.at` is given. */
-  onMoveBubble(id: string, at: Pt, mode: EditMode): void;
+  onMoveBubble(id: string, at: Pt, run: EditRun): void;
   /** Moves the tip of the tail of a bubble, given as `Bubble.tailTip`. */
-  onMoveTail(id: string, tip: Pt, mode: EditMode): void;
+  onMoveTail(id: string, tip: Pt, run: EditRun): void;
   /** Moves an actor by `d` from where it was when the drag started. */
-  onMoveActor(actorId: string, d: Pt, mode: EditMode): void;
+  onMoveActor(actorId: string, d: Pt, run: EditRun): void;
   onAddPoint(at: Pt): void;
-  onMovePoint(index: number, at: Pt, mode: EditMode): void;
+  onMovePoint(index: number, at: Pt, run: EditRun): void;
+  /** Takes away the step of a drag that a pinch cancelled. */
+  onRevert(run: EditRun): void;
   /** The user touched the stage, so playback should stop. */
   onTouch(): void;
   /** The toolbar of the selection, placed next to the selected actor. */
@@ -155,11 +154,9 @@ const middle = (a: Pt, b: Pt): Pt => ({
   x: (a.x + b.x) / 2,
   y: (a.y + b.y) / 2,
 });
-const clamp = (v: number, lo: number, hi: number) =>
-  Math.min(Math.max(v, lo), hi);
 
 export function EditorStage(props: Props) {
-  const { scene, bg: asset, t, walk } = props;
+  const { scene, bg: asset, walk } = props;
   const bg = asset.background;
   const { tr } = useI18n();
   const [ref, size] = useSize<HTMLDivElement>();
@@ -199,18 +196,12 @@ export function EditorStage(props: Props) {
     Math.abs(stageView.x - home.x) < 1e-3 &&
     Math.abs(stageView.y - home.y) < 1e-3;
 
-  const placed = placeActors(scene, bg, t);
-  const bubbleCtx = bubbleContext(scene, bg, placed);
-  // While the cartoon doesn't play, a bubble shows at its full size also at
-  // its first and last moments, so that the user can work on it.
-  const bubbles = placeBubbles(
-    scene.bubbles ?? [],
-    t,
-    bubbleCtx,
-    props.playing,
-  );
+  const { frame } = props;
+  const { actors: placed, bubbles } = frame;
   const anchorOf = (actorId: string | undefined) =>
-    actorId === undefined ? null : (bubbleCtx.anchors.get(actorId) ?? null);
+    actorId === undefined
+      ? null
+      : (frame.bubbleContext.anchors.get(actorId) ?? null);
   // The part of the frame coordinates that the stage shows.
   const view = viewRect(area, stageView);
   const { stage } = area;
@@ -237,7 +228,7 @@ export function EditorStage(props: Props) {
     const ctm = svgRef.current?.getScreenCTM();
     if (!ctm) return { x: 0, y: 0 };
     const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
-    return roundPoint(p);
+    return savedPoint(p);
   };
   const client = (e: { clientX: number; clientY: number }): Pt => ({
     x: e.clientX,
@@ -257,6 +248,9 @@ export function EditorStage(props: Props) {
       if (touches.current.size === 2 && !pinch.current) {
         const [a, b] = [...touches.current.entries()];
         e.currentTarget.setPointerCapture(e.pointerId);
+        // A move that the first finger made leaves no undo step.
+        const first = gesture.current?.g;
+        if (first && 'moved' in first && first.moved) props.onRevert(first);
         gesture.current = null;
         pinch.current = {
           ids: [a![0], b![0]],
@@ -407,7 +401,6 @@ export function EditorStage(props: Props) {
     }
     if (!g.moved && !far(g.start, client(e))) return;
     const at = toFrame(e);
-    const mode = g.moved ? 'replace' : 'push';
     g.moved = true;
     if (g.type === 'actor') {
       // From where the drag started, as each move redoes the whole drag. The
@@ -420,18 +413,18 @@ export function EditorStage(props: Props) {
       props.onMoveActor(
         g.id,
         { x: to.x - g.ground.x, y: to.y - g.ground.y },
-        mode,
+        g,
       );
     } else if (g.type === 'bubble') {
       const p = {
         x: g.origin.x + at.x - g.from.x,
         y: g.origin.y + at.y - g.from.y,
       };
-      props.onMoveBubble(g.id, savedPoint(bubbleOffset(p, g.anchor)), mode);
+      props.onMoveBubble(g.id, savedPoint(bubbleOffset(p, g.anchor)), g);
     } else if (g.type === 'tail') {
-      props.onMoveTail(g.id, savedPoint(bubbleOffset(at, g.anchor)), mode);
+      props.onMoveTail(g.id, savedPoint(bubbleOffset(at, g.anchor)), g);
     } else {
-      props.onMovePoint(g.index, insideStage(stage, at), mode);
+      props.onMovePoint(g.index, insideStage(stage, at), g);
     }
   };
 
@@ -534,10 +527,7 @@ export function EditorStage(props: Props) {
           />
           <SceneDrawing
             scene={scene}
-            bg={asset}
-            t={t}
-            placed={placed}
-            bubbles={bubbles}
+            frame={frame}
             prefix={PREFIX}
             offstage={stage}
           />
@@ -607,15 +597,13 @@ export function EditorStage(props: Props) {
         </svg>
       )}
       {!atHome && (
-        <button
-          type="button"
-          className="icon-button stage-home"
-          aria-label={tr('editor.stageHome')}
-          title={tr('editor.stageHome')}
+        <IconButton
+          label="editor.stageHome"
+          className="stage-home"
           onClick={() => changeView(() => home)}
         >
           <ZoomFitIcon />
-        </button>
+        </IconButton>
       )}
       {/* Always there, so that its size is measured when it gets content. */}
       <div

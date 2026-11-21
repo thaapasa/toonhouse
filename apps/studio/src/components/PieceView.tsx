@@ -1,5 +1,5 @@
 import type { PartId, Pt, Rig } from '@toonhouse/model';
-import { type CharacterDrawing, partBounds } from '@toonhouse/renderer';
+import { partBounds, type RigDrawing } from '@toonhouse/renderer';
 import {
   Drawing,
   partId,
@@ -43,7 +43,7 @@ interface Props {
   mode: AngleField | null;
   onMode(mode: AngleField | null): void;
   /** The whole character, for the preview. */
-  drawing: CharacterDrawing;
+  drawing: RigDrawing;
   zoom: number;
   onZoom(zoom: number): void;
   onBack(): void;

@@ -1,22 +1,26 @@
 import { queryOptions } from '@tanstack/react-query';
 import {
   Cartoon,
-  CartoonContent,
   Group,
   type LoginRequest,
   MeResponse,
   Profile,
   ResetPasswordResponse,
+  SaveContentResponse,
+  SavedContent,
   User,
 } from '@toonhouse/api';
 import { z } from 'zod';
 
 export class ApiError extends Error {
   readonly status: number;
+  /** The JSON body of the response, if it had one. */
+  readonly body: unknown;
 
-  constructor(status: number) {
+  constructor(status: number, body?: unknown) {
     super(`Request failed with status ${status}`);
     this.status = status;
+    this.body = body;
   }
 }
 
@@ -24,17 +28,29 @@ export class ApiError extends Error {
 async function request<T>(
   schema: z.ZodType<T>,
   path: string,
-  init?: { method: string; body?: unknown; keepalive?: boolean },
+  init?: {
+    method: string;
+    body?: unknown;
+    /** The body as JSON already, instead of `body`. */
+    json?: string;
+    keepalive?: boolean;
+  },
 ): Promise<T> {
+  const json =
+    init?.json ??
+    (init?.body !== undefined ? JSON.stringify(init.body) : undefined);
   const res = await fetch(`/api/app${path}`, {
     method: init?.method ?? 'GET',
     keepalive: init?.keepalive ?? false,
-    ...(init?.body !== undefined && {
+    ...(json !== undefined && {
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(init.body),
+      body: json,
     }),
   });
-  if (!res.ok) throw new ApiError(res.status);
+  if (!res.ok) {
+    const body: unknown = await res.json().catch(() => undefined);
+    throw new ApiError(res.status, body);
+  }
   return schema.parse(res.status === 204 ? undefined : await res.json());
 }
 
@@ -90,12 +106,15 @@ export const createCartoon = (title: string) =>
 export const renameCartoon = (id: string, title: string) =>
   request(Cartoon, `/cartoons/${id}`, { method: 'PATCH', body: { title } });
 
+/** The scenes of a cartoon with their revision. */
+export const fetchContent = (id: string) =>
+  request<SavedContent>(SavedContent, `/cartoons/${id}/content`);
+
 export const contentQuery = (id: string) =>
   queryOptions({
     queryKey: ['cartoons', id, 'content'],
-    queryFn: () => request(CartoonContent, `/cartoons/${id}/content`),
+    queryFn: () => fetchContent(id),
     // The editor keeps its own copy while the user edits.
-    staleTime: Infinity,
     refetchOnWindowFocus: false,
   });
 
@@ -115,16 +134,19 @@ export async function uploadPreview(id: string, image: Blob): Promise<Cartoon> {
 }
 
 /**
- * Saves the scenes of a cartoon. With `keepalive`, the save finishes even if
- * the page closes.
+ * Saves the scenes of a cartoon, the JSON of a `SavedContent`, and gives their
+ * new revision. With
+ * `keepalive`, the save finishes even if the page closes.
  */
-export const saveContent = (
+export const saveContent = async (
   id: string,
-  content: CartoonContent,
+  json: string,
   keepalive = false,
 ) =>
-  request(NoContent, `/cartoons/${id}/content`, {
-    method: 'PUT',
-    body: content,
-    keepalive,
-  });
+  (
+    await request(SaveContentResponse, `/cartoons/${id}/content`, {
+      method: 'PUT',
+      json,
+      keepalive,
+    })
+  ).revision;

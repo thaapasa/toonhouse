@@ -21,6 +21,9 @@ The profile page only changes the user who is logged in. See
       20 letters and digits and saves it. The page then shows it once, with a
       button that copies it. The user cannot choose the password.
 - [x] User must enter their current password to reset the password.
+- [x] After 10 wrong current passwords, the server refuses to check the current
+      password of the user for up to 15 minutes. Each check takes a lot of
+      server work, and the limit also slows down guessing with a stolen session.
 - [x] Resetting the password ends the user's other sessions. The current session
       stays.
 

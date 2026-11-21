@@ -11,6 +11,7 @@ import type {
 
 import type { Bounds, DrawNode } from './draw.ts';
 import {
+  clamp,
   clamp01,
   IDENTITY,
   lerp,
@@ -46,12 +47,12 @@ export const wholeBackground = (bg: Background): Camera => ({
  * than the whole background or show anything past its edges.
  */
 export function clampCamera(bg: Background, camera: Camera): Camera {
-  const zoom = Math.min(Math.max(camera.zoom, 1), MAX_ZOOM);
+  const zoom = clamp(camera.zoom, 1, MAX_ZOOM);
   const halfW = bg.width / zoom / 2;
   const halfH = bg.height / zoom / 2;
   return {
-    x: Math.min(Math.max(camera.x, halfW), bg.width - halfW),
-    y: Math.min(Math.max(camera.y, halfH), bg.height - halfH),
+    x: clamp(camera.x, halfW, bg.width - halfW),
+    y: clamp(camera.y, halfH, bg.height - halfH),
     zoom,
   };
 }
@@ -191,6 +192,20 @@ export function actorScaleAt(
   if (!perspective || fixedSize) return actorScale;
   const f = (y - perspective.horizon) / (perspective.y - perspective.horizon);
   return actorScale * Math.max(f, MIN_PERSPECTIVE);
+}
+
+/**
+ * The height of the frame where `actorScaleAt` stops making actors smaller.
+ * Between it and the bottom of the frame, the size is linear in y. Null if
+ * the size is the same at every height.
+ */
+export function minScaleY(bg: Background): number | null {
+  const { perspective } = bg.ground;
+  if (!perspective) return null;
+  return (
+    perspective.horizon +
+    MIN_PERSPECTIVE * (perspective.y - perspective.horizon)
+  );
 }
 
 /**

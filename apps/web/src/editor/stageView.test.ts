@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { BACKGROUNDS, CHARACTERS, PROPS } from './library.ts';
+import { BACKGROUNDS, CHARACTERS, PROPS } from '../library/index.ts';
 import {
   bandSize,
   clampView,

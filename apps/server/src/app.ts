@@ -1,9 +1,10 @@
 import path from 'node:path';
 
 import { serveStatic } from '@hono/node-server/serve-static';
-import { Hono, type MiddlewareHandler } from 'hono';
+import { type Context, Hono, type MiddlewareHandler } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { csrf } from 'hono/csrf';
+import { secureHeaders } from 'hono/secure-headers';
 
 import { type AuthEnv, authRoutes, sessionMiddleware } from './auth/routes.ts';
 import { cartoonRoutes } from './cartoons/routes.ts';
@@ -17,20 +18,60 @@ const webDir =
 
 export const app = new Hono<AuthEnv>();
 
+// The web app draws inline SVG with style attributes, adds the `@font-face`
+// rules in a `<style>` element, and makes the preview image from a `blob:` URL
+// with the fonts as `data:` URLs. Browsers ignore HSTS over plain HTTP, so it
+// does no harm in development.
+app.use(
+  secureHeaders({
+    contentSecurityPolicy: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:', 'blob:'],
+      fontSrc: ["'self'", 'data:'],
+      connectSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
+      frameAncestors: ["'none'"],
+    },
+    xFrameOptions: 'DENY',
+  }),
+);
+
+// The API answers depend on the session, and a cartoon can stop being public at
+// any time, so no cache may keep them. A route can set its own value, as the
+// preview image does.
+app.use('/api/*', async (c, next) => {
+  await next();
+  if (!c.res.headers.has('cache-control'))
+    c.header('cache-control', 'no-store');
+});
+
 app.get('/health', async (c) => {
   await sql`SELECT 1`;
   return c.json({ status: 'ok' });
 });
 
 // Without a limit, a few large requests without a login could use up the memory
-// of the server.
-app.use(
-  '/api/*',
-  bodyLimit({
-    maxSize: 1024 * 1024,
-    onError: (c) => c.json({ error: 'Request body is too large' }, 413),
-  }),
-);
+// of the server. The content of a cartoon and its preview image can be much
+// larger than the other requests, so their saves have limits of their own. The
+// preview image can be up to 3 MB, as a PNG preview from Safari can be over
+// 1 MB.
+const MB = 1024 * 1024;
+const tooLarge = (c: Context) =>
+  c.json({ error: 'Request body is too large' }, 413);
+const smallBody = bodyLimit({ maxSize: MB, onError: tooLarge });
+const contentBody = bodyLimit({ maxSize: 10 * MB, onError: tooLarge });
+const previewBody = bodyLimit({ maxSize: 3 * MB, onError: tooLarge });
+app.use('/api/*', (c, next) => {
+  const save =
+    c.req.method === 'PUT' &&
+    /^\/api\/app\/cartoons\/[^/]+\/(content|preview)$/.exec(c.req.path);
+  if (!save) return smallBody(c, next);
+  return save[1] === 'content' ? contentBody(c, next) : previewBody(c, next);
+});
 
 // The API of the web app, which authenticates with the session cookie.
 app.use('/api/app/*', csrf(), sessionMiddleware);

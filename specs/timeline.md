@@ -21,8 +21,8 @@ The speech bubbles on the timeline are in [Speech bubbles](bubbles.md).
 - [x] A character can walk in any direction on the ground layer, also toward the
       camera and away from it.
 - [x] User can pick the clip of a walk, such as a walk or a run, and set the
-      speed of the walk to any number. The clip plays faster or slower to match
-      the speed, so the feet don't slide on the ground.
+      speed of the walk to any number from 0.01 to 1000. The clip plays faster
+      or slower to match the speed, so the feet don't slide on the ground.
 - [x] If the user changes the speed of a walk, only the walk gets faster or
       slower. The other actions stay where they are on the timeline.
 - [x] When the user picks the points of a walk, the stage shows a box around the
@@ -76,8 +76,9 @@ The speech bubbles on the timeline are in [Speech bubbles](bubbles.md).
 - [x] User can start the clip of an action from any point of the clip, such as a
       day with the sun already high on the sky. The timeline shows the first
       loop of the clip as shorter.
-- [x] The speed of an action defaults to 1. The speed is between 0.05 and 20,
-      because the server doesn't save other values.
+- [x] The speed of an action defaults to 1. The speed is between 0.01 and 1000.
+      A walk at speed zero would never get anywhere, and at the top speed a walk
+      crosses the frame in less than one frame of the video.
 
 ## Changes in the middle of a scene
 

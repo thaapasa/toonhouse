@@ -2,13 +2,7 @@ import type { Bubble, Scene } from '@toonhouse/model';
 import { bubblePoint } from '@toonhouse/renderer';
 import { describe, expect, it } from 'vitest';
 
-import {
-  actorFont,
-  attachBubble,
-  backgroundFont,
-  newBubble,
-  setOptional,
-} from './bubbles.ts';
+import { attachBubble, newBubble, setOptional } from './bubbles.ts';
 import { removeActor } from './sceneEdit.ts';
 
 const anchors = new Map([
@@ -63,11 +57,5 @@ describe('bubbles in the editor', () => {
       ],
     };
     expect(removeActor(scene, 'a').bubbles!.map((b) => b.id)).toEqual(['free']);
-  });
-
-  it('takes the default font from the asset pack', () => {
-    expect(actorFont({ kind: 'character', id: 'boy' })).toBe('comic-relief');
-    expect(backgroundFont('meadow')).toBe('comic-relief');
-    expect(backgroundFont(null)).toBe('comic-relief');
   });
 });

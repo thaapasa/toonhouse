@@ -13,6 +13,9 @@ export const en = {
   'home.noPublicCartoons': 'There are no public cartoons yet.',
   'home.newCartoon': 'New cartoon',
   'home.newCartoonTitle': 'New cartoon',
+  'home.newCartoonError': 'Making the cartoon failed.',
+  'home.tooManyCartoons':
+    'You have as many cartoons as one user can have. Delete a cartoon to make a new one.',
   'home.edit': 'Edit: {title}',
   'home.watch': 'Watch: {title}',
   'home.byOwner': 'By {name}',
@@ -45,6 +48,7 @@ export const en = {
   'profile.currentPassword': 'Current password',
   'profile.wrongPassword': 'The password is wrong.',
   'profile.resetError': 'Resetting the password failed.',
+  'profile.tooManyAttempts': 'Too many attempts. Try again in a few minutes.',
   'profile.newPassword': 'New password',
   'profile.newPasswordInfo':
     'Copy the password and keep it safe. It shows only this once.',
@@ -94,6 +98,31 @@ export const en = {
   'editor.saving': 'Saving…',
   'editor.unsaved': 'Not saved yet',
   'editor.saveError': 'Saving failed. Trying again soon.',
+  'editor.notSaved': 'Not saved',
+  'editor.notSavedLogin': 'Not saved. Log in again.',
+  'save.refusedTitle': 'The cartoon is not saved',
+  'save.refusedInfo':
+    'The server does not accept the latest edit. Undo it, and the editor saves the cartoon again.',
+  'save.tooLargeInfo':
+    'The cartoon is too large to save. Remove something from it, such as a scene, and the editor saves it again.',
+  'save.loggedOutTitle': 'Your login has ended',
+  'save.loggedOutInfo':
+    'Log in again to save your edits. Until then, this browser keeps them.',
+  'save.conflictTitle': 'The cartoon has changed',
+  'save.conflictInfo':
+    'The cartoon was saved in another window or on another device after you started these edits. You can keep your version and save it over that one, or load the saved version and lose the edits made here.',
+  'save.loggedOutNotKept':
+    'The cartoon is too large for this browser to keep, so keep this page open. Log in again in another tab, and then try again here.',
+  'save.goneInfo':
+    'The server no longer lets you save this cartoon. It may have been removed, or another user has logged in.',
+  'save.keepMine': 'Keep my version',
+  'save.loadSaved': 'Load the saved version',
+  'save.keptTitle': 'Unsaved edits on this device',
+  'save.keptInfo':
+    'This device has edits to the cartoon that were not saved, and the cartoon has been saved elsewhere since. Use the unsaved edits from this device, or the saved version?',
+  'save.useKept': 'Use the unsaved edits',
+  'save.useSaved': 'Use the saved version',
+  'save.retry': 'Try again',
   'editor.scenes': 'Scenes',
   'editor.scene': 'Scene {n}',
   'editor.addScene': 'New scene',
@@ -104,7 +133,6 @@ export const en = {
   'editor.removeSceneConfirm': 'Remove',
   'editor.pause': 'Pause',
   'editor.libraryHint': 'Tap to add to the scene.',
-  'editor.pickBackgroundFirst': 'Pick a background first.',
   'editor.actions': 'Actions',
   'editor.turn': 'Turn',
   'editor.smaller': 'Smaller',

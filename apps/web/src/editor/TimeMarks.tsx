@@ -5,18 +5,17 @@
 // scene changes the length of the scene. A dragged end snaps to the smaller
 // marks of the action that ends there.
 import { sortedActions } from '@toonhouse/renderer';
-import { type PointerEvent, useRef } from 'react';
 
 import { useI18n } from '../i18n/index.tsx';
-import { released } from './pointer.ts';
+import type { EditRun } from './history.ts';
+import type { PinchCount } from './pointer.ts';
 import {
   formatTime,
   midPoints,
   snapToTargets,
-  TAP_SLOP,
   type TimelineRow,
 } from './timelineMath.ts';
-import type { EditMode } from './useCartoonContent.ts';
+import { useLaneDrag } from './useLaneDrag.ts';
 
 type Mark =
   | { type: 'start'; t: number; actionId: string }
@@ -37,20 +36,13 @@ export function TimeMarks(props: {
   fps: number;
   pps: number;
   onSeek(t: number): void;
-  onLength(length: number, mode: EditMode): void;
-  onMoveStart(actionId: string, t: number, mode: EditMode): void;
+  onLength(length: number, run: EditRun): void;
+  onMoveStart(actionId: string, t: number, run: EditRun): void;
   onDragDone(): void;
+  pinches: PinchCount;
+  onCancel(run: EditRun): void;
 }) {
   const { tr } = useI18n();
-  const drag = useRef<{
-    pointer: number;
-    mark: Mark;
-    x: number;
-    moved: boolean;
-  } | null>(null);
-  // A drag ends with a click, which should not move the playhead.
-  const dragged = useRef(false);
-
   const { row, pps, fps } = props;
   const actions = sortedActions(row.actions);
   const frame = (t: number) => Math.round(t * fps) / fps;
@@ -75,36 +67,19 @@ export function TimeMarks(props: {
     return before ? midPoints(before, row, Infinity, pps) : [];
   };
 
-  const down = (e: PointerEvent<HTMLButtonElement>) => {
-    const mark = marks[Number(e.currentTarget.dataset.mark)];
-    if (drag.current || !mark || mark.type === 'mid') return;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    drag.current = { pointer: e.pointerId, mark, x: e.clientX, moved: false };
-  };
-  const move = (e: PointerEvent<HTMLButtonElement>) => {
-    const d = drag.current;
-    if (d?.pointer !== e.pointerId) return;
-    if (released(e)) return up(e);
-    const dx = e.clientX - d.x;
-    if (!d.moved && Math.abs(dx) < TAP_SLOP) return;
-    const t = snapToTargets(d.mark.t + dx / pps, targets(d.mark), pps, fps);
-    const mode = d.moved ? 'replace' : 'push';
-    if (d.mark.type === 'end') props.onLength(t, mode);
-    else if (d.mark.type === 'start')
-      props.onMoveStart(d.mark.actionId, t, mode);
-    d.moved = true;
-  };
-  const up = (e: PointerEvent<HTMLButtonElement>) => {
-    const d = drag.current;
-    if (d?.pointer !== e.pointerId) return;
-    drag.current = null;
-    if (d.moved) {
-      dragged.current = true;
-      props.onDragDone();
-    }
-  };
+  const drag = useLaneDrag<Mark>({
+    pinches: props.pinches,
+    canDrag: (mark) => mark.type !== 'mid',
+    onMove: (mark, dx, run) => {
+      const t = snapToTargets(mark.t + dx / pps, targets(mark), pps, fps);
+      if (mark.type === 'end') props.onLength(t, run);
+      else if (mark.type === 'start') props.onMoveStart(mark.actionId, t, run);
+    },
+    onDone: props.onDragDone,
+    onCancel: (_, run) => props.onCancel(run),
+  });
 
-  return marks.map((mark, i) => (
+  return marks.map((mark) => (
     <button
       // A mark keeps its key while it moves, so that the drag goes on.
       key={
@@ -119,17 +94,8 @@ export function TimeMarks(props: {
       style={{ left: mark.t * pps }}
       aria-label={tr(LABELS[mark.type], { time: formatTime(mark.t) })}
       title={formatTime(mark.t)}
-      onClick={(e) => {
-        e.stopPropagation();
-        if (dragged.current) dragged.current = false;
-        else props.onSeek(mark.t);
-      }}
-      data-mark={i}
-      onPointerDown={down}
-      onPointerMove={move}
-      onPointerUp={up}
-      onPointerCancel={up}
-      onLostPointerCapture={up}
+      onClick={drag.click(() => props.onSeek(mark.t))}
+      {...drag.handlers(mark)}
     />
   ));
 }

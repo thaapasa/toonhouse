@@ -1,5 +1,7 @@
 import type { Background, BackgroundFrame, Clip } from '@toonhouse/model';
 
+import { clamp01 } from '../../math.ts';
+
 /** Everything where it rests. */
 export const idle: Clip<BackgroundFrame> = {
   id: 'idle',
@@ -22,7 +24,7 @@ export const day: Clip<BackgroundFrame> = {
   loops: true,
   frameAt: (t) => ({
     kind: 'background',
-    arc: Math.min(Math.max(t / DAY, 0), 1),
+    arc: clamp01(t / DAY),
     drift: null,
   }),
 };

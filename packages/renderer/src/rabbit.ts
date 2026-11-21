@@ -8,8 +8,17 @@ import type {
   RabbitRig,
 } from '@toonhouse/model';
 
-import type { CharacterDrawing, DrawNode, DrawOptions } from './draw.ts';
-import { placed, skeleton } from './draw.ts';
+import type { DrawNode, DrawOptions, RigDrawing } from './draw.ts';
+import {
+  curve,
+  fmt,
+  line,
+  outlinedStroke,
+  partNode,
+  partSlot,
+  placed,
+  rigOutline,
+} from './drawKit.ts';
 import { eyeLids } from './face.ts';
 import {
   add,
@@ -21,12 +30,6 @@ import {
   twoBoneJoint,
 } from './math.ts';
 import { arrange, layered, type SlotDrawing } from './order.ts';
-
-const fmt = (n: number) => Math.round(n * 100) / 100;
-const line = (...pts: Pt[]) =>
-  pts.map((p, i) => `${i ? 'L' : 'M'}${fmt(p.x)} ${fmt(p.y)}`).join('');
-const curve = (a: Pt, c: Pt, b: Pt) =>
-  `M${fmt(a.x)} ${fmt(a.y)}Q${fmt(c.x)} ${fmt(c.y)} ${fmt(b.x)} ${fmt(b.y)}`;
 
 /**
  * The pose with the hip lifted so that no ground point of the body is below
@@ -48,44 +51,23 @@ export function drawRabbit(
   rig: RabbitRig,
   frame: RabbitFrame,
   { facing }: DrawOptions,
-): CharacterDrawing {
+): RigDrawing {
   const pose = clearOfGround(rig, frame.pose);
   const { parts, colors, legs, scales } = rig;
   const ow = rig.outlineWidth;
-  const part = (
-    id: RabbitPartId,
-    transform: Matrix,
-    layer?: string,
-  ): DrawNode => ({
-    type: 'part',
-    part: id,
-    ...(layer === undefined ? {} : { layer }),
-    width: parts[id].width,
-    height: parts[id].height,
-    transform,
-  });
-  /** A part with all its layers, placed with one transform. */
-  const piece = (id: RabbitPartId, transform: Matrix): SlotDrawing =>
-    layered(parts[id], (layer) => [part(id, transform, layer)]);
-  /** A thick line with an outline: a stroke under a narrower stroke. */
-  const tube = (d: string, width: number): DrawNode[] => [
-    {
-      type: 'path',
+  const part = (id: RabbitPartId, transform: Matrix, layer?: string) =>
+    partNode(id, parts[id], transform, layer);
+  const piece = (id: RabbitPartId, transform: Matrix) =>
+    partSlot(id, parts[id], transform);
+  /** A thick line with an outline, in the color of the fur. */
+  const tube = (d: string, width: number) =>
+    outlinedStroke(
       d,
-      stroke: colors.outline,
-      strokeWidth: width + 2 * ow,
-      lineCap: 'round',
-      lineJoin: 'round',
-    },
-    {
-      type: 'path',
-      d,
-      stroke: colors.fur,
-      strokeWidth: width,
-      lineCap: 'round',
-      lineJoin: 'round',
-    },
-  ];
+      width,
+      colors.fur,
+      { color: colors.outline, width: ow },
+      { lineJoin: 'round' },
+    );
 
   const b0 = parts.body;
   const onBody = (p: Pt) =>
@@ -203,7 +185,7 @@ export function drawRabbit(
   };
   return {
     node: placed(rig.shadow, facing, character),
-    skeleton: skeleton(
+    rigOutline: rigOutline(
       j,
       [
         [j.hip, j.neck, j.earNear],

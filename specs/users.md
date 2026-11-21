@@ -13,14 +13,22 @@ with them, and the public cartoons can be watched without logging in. See
       [profile page](profile.md).
 - [x] Passwords are stored as Argon2id hashes (Node's built-in `crypto.argon2`)
       in PHC string format.
+- [x] The command that adds a user generates the password, or accepts any
+      password that the developer types, with no rules on length or characters.
 
 ## Login
 
 - [x] Users log in with a username and a password.
-- [x] A login lasts 90 days from the last use. Logging out ends the session.
-- [x] After 10 failed logins with one username, or 30 from one address, the
-      server refuses further logins from them for up to 15 minutes. Successful
-      logins do not count.
+- [x] A login lasts 90 days from the last use. Each use starts the 90 days
+      again, so a login that is used at least once in 90 days never ends. This
+      is intended: the login has no absolute lifetime. Logging out or resetting
+      the password ends it.
+- [x] After 30 failed logins from one address, or 10 with one username from one
+      address, the server refuses further logins from that address, or with that
+      username from that address, for up to 15 minutes. Successful logins do not
+      count. Failed logins from other addresses don't lock the user out.
+- [x] While a flood of logins fills the memory of the login counter, the server
+      refuses new logins until the counts expire, instead of slowing down.
 - [x] If the username or the password is wrong, the error doesn't tell which
       one, and the response takes as long for an unknown username as for a known
       one.
@@ -30,9 +38,14 @@ with them, and the public cartoons can be watched without logging in. See
 
 ## Access
 
-- [ ] A user who is not logged in can watch the public cartoons.
+- [x] A user who is not logged in can watch the public cartoons.
 - [x] Only a logged-in user can open the editor, make a cartoon or change one.
 - [x] A user can edit only their own cartoons.
+- [x] A user can have at most 1000 cartoons. The limit protects the disk space
+      of the server, because each cartoon can hold up to 10 MB of content and 3
+      MB of preview image. Even at the limit, one user can store about 13 GB in
+      the worst case. When the user has 1000, the app tells them to delete a
+      cartoon before making a new one.
 
 ## Groups
 

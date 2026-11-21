@@ -7,7 +7,14 @@ export {
   UpdateCartoonRequest,
   Visibility,
 } from './cartoons.ts';
-export { CartoonContent, SaveContentRequest } from './content.ts';
+export {
+  CartoonContent,
+  CONTENT_LIMITS,
+  ContentConflict,
+  SaveContentRequest,
+  SaveContentResponse,
+  SavedContent,
+} from './content.ts';
 export { Group } from './groups.ts';
 export {
   Profile,

@@ -2,7 +2,11 @@
 // background.json and the SVG files of its layers and parts. The parts can
 // come from assets/backgrounds/shared/.
 import type { Background } from '@toonhouse/model';
-import type { PartSources } from '@toonhouse/stage';
+import {
+  assetFolder,
+  backgroundSources,
+  type PartSources,
+} from '@toonhouse/stage';
 
 import { repoPath } from './characters.ts';
 
@@ -25,28 +29,9 @@ export interface BackgroundAsset {
   sources: PartSources;
 }
 
-/** `file` relative to the folder `dir`, with `..` resolved. */
-function resolve(dir: string, file: string): string {
-  const out = dir.split('/').slice(0, -1);
-  for (const s of file.split('/')) {
-    if (s === '..' && out.length > 0 && out.at(-1) !== '..') out.pop();
-    else if (s !== '.') out.push(s);
-  }
-  return out.join('/');
-}
-
 function load(path: string, background: Background): BackgroundAsset {
-  const dir = path.slice(0, path.lastIndexOf('/') + 1);
-  const id = dir.split('/').at(-2)!;
-  const sources: PartSources = {};
-  const add = (key: string, svg: string) => {
-    const file = resolve(dir, svg);
-    const text = svgs[file];
-    if (text === undefined) throw new Error(`Missing ${file}`);
-    sources[key] = text;
-  };
-  for (const l of background.layers) add(l.id, l.svg);
-  for (const [id, p] of Object.entries(background.parts ?? {})) add(id, p.svg);
+  const { dir, id } = assetFolder(path);
+  const sources = backgroundSources(background, dir, svgs);
   return { id, file: repoPath(path), background, sources };
 }
 

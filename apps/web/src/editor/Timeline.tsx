@@ -11,9 +11,16 @@
 // of the scene, so that the end shows and the user can start new actions
 // after it.
 import type { Background, Bubble, Scene } from '@toonhouse/model';
-import { sortedActions, walkTime } from '@toonhouse/renderer';
-import { type PointerEvent, type ReactNode, useRef, useState } from 'react';
+import { clamp, sortedActions, walkTime } from '@toonhouse/renderer';
+import {
+  type PointerEvent,
+  type ReactNode,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
+import { IconButton } from '../components/IconButton.tsx';
 import {
   BackgroundIcon,
   BubbleIcon,
@@ -27,12 +34,12 @@ import {
   ZoomInIcon,
   ZoomOutIcon,
 } from '../components/icons.tsx';
-import { type TextKey, useI18n } from '../i18n/index.tsx';
+import { useI18n } from '../i18n/index.tsx';
+import { kindOf } from '../library/index.ts';
 import { ActionBlocks } from './ActionBlocks.tsx';
 import { BUBBLE_LINE, BubbleLane, bubbleLines } from './BubbleLane.tsx';
-import { kindOf } from './library.ts';
+import type { EditRun } from './history.ts';
 import { useNames } from './names.ts';
-import { released } from './pointer.ts';
 import {
   formatTime,
   midPoints,
@@ -41,7 +48,7 @@ import {
   type TimelineRow,
 } from './timelineMath.ts';
 import { TimeMarks } from './TimeMarks.tsx';
-import type { EditMode } from './useCartoonContent.ts';
+import { useLaneDrag } from './useLaneDrag.ts';
 import { useSize } from './useSize.ts';
 import { useTimelineZoom } from './useTimelineZoom.ts';
 
@@ -86,23 +93,25 @@ interface Props {
     actorId: string | null,
     actionId: string,
     t: number,
-    mode: EditMode,
+    run: EditRun,
   ): void;
   /** Moves only the start of an action, which is the end of the one before. */
   onMoveStart(
     actorId: string | null,
     actionId: string,
     t: number,
-    mode: EditMode,
+    run: EditRun,
   ): void;
   /** Sets the length of the scene. */
-  onLength(length: number, mode: EditMode): void;
+  onLength(length: number, run: EditRun): void;
   /** The selected speech bubble, if any. */
   selectedBubble: string | null;
   onSelectBubble(id: string): void;
   /** Moves a bubble to start at `t`, and keeps its length. */
-  onMoveBubble(id: string, t: number, mode: EditMode): void;
-  onBubbleLength(id: string, length: number, mode: EditMode): void;
+  onMoveBubble(id: string, t: number, run: EditRun): void;
+  onBubbleLength(id: string, length: number, run: EditRun): void;
+  /** Takes away the step of a drag that a pinch cancelled. */
+  onRevert(run: EditRun): void;
 }
 
 export function Timeline(props: Props) {
@@ -116,10 +125,45 @@ export function Timeline(props: Props) {
   const [frozen, setFrozen] = useState<{ fit: number; length: number } | null>(
     null,
   );
-  const freeze = (mode: EditMode) => {
-    if (mode === 'push') setFrozen({ fit, length });
-  };
   const unfreeze = () => setFrozen(null);
+  // Where the playhead was when the latest drag started, as the drags of
+  // actions and bubbles move it.
+  const dragStart = useRef<{ run: EditRun; t: number } | null>(null);
+  /** Each move of a drag calls this first. */
+  const dragMove = (run: EditRun) => {
+    setFrozen((f) => f ?? { fit, length });
+    if (dragStart.current?.run !== run) dragStart.current = { run, t };
+  };
+  /** A pinch cancelled the drag, so its edit and its seeks go away. */
+  const revert = (run: EditRun) => {
+    props.onRevert(run);
+    unfreeze();
+    if (dragStart.current?.run === run) props.onSeek(dragStart.current.t);
+    dragStart.current = null;
+  };
+
+  // Two fingers zoom, in `useTimelineZoom`. So a second finger cancels what
+  // the first one did, and it doesn't start anything itself.
+  const touches = useRef(new Set<number>());
+  const pinches = useRef(0);
+  const touchDown = (e: PointerEvent) => {
+    if (e.pointerType !== 'touch') return;
+    touches.current.add(e.pointerId);
+    if (touches.current.size < 2) return;
+    pinches.current++;
+    e.stopPropagation();
+  };
+  useEffect(() => {
+    // On the window, as a finger can lift outside the timeline.
+    const lift = (e: globalThis.PointerEvent) =>
+      touches.current.delete(e.pointerId);
+    window.addEventListener('pointerup', lift, true);
+    window.addEventListener('pointercancel', lift, true);
+    return () => {
+      window.removeEventListener('pointerup', lift, true);
+      window.removeEventListener('pointercancel', lift, true);
+    };
+  }, []);
 
   const length = Math.max(frozen?.length ?? 0, timelineLength(duration));
   // At zoom 1, the whole timeline fits the width.
@@ -138,23 +182,17 @@ export function Timeline(props: Props) {
   const timeAt = (e: { clientX: number }, lane: Element) => {
     const r = lane.getBoundingClientRect();
     const v = (e.clientX - r.left) / pps;
-    return Math.min(Math.max(Math.round(v * props.fps) / props.fps, 0), length);
+    return clamp(Math.round(v * props.fps) / props.fps, 0, length);
   };
 
-  const scrub = useRef<number | null>(null);
-  const rulerDown = (e: PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    scrub.current = e.pointerId;
-    props.onSeek(timeAt(e, e.currentTarget));
-  };
-  const rulerMove = (e: PointerEvent<HTMLDivElement>) => {
-    if (scrub.current !== e.pointerId) return;
-    if (released(e)) rulerUp(e);
-    else props.onSeek(timeAt(e, e.currentTarget));
-  };
-  const rulerUp = (e: PointerEvent<HTMLDivElement>) => {
-    if (scrub.current === e.pointerId) scrub.current = null;
-  };
+  // The ruler drag moves the playhead from the first touch, and a pinch puts
+  // the playhead back to `from`, where it was before.
+  const ruler = useLaneDrag<number>({
+    pinches,
+    moveOnDown: true,
+    onMove: (_from, _dx, _run, e) => props.onSeek(timeAt(e, e.currentTarget)),
+    onCancel: (from) => props.onSeek(from),
+  });
 
   const rows: (TimelineRow & { actorId: string | null; label: ReactNode })[] =
     [];
@@ -234,15 +272,17 @@ export function Timeline(props: Props) {
               props.onSeek(at);
             }}
             onSeek={props.onSeek}
-            onMove={(id, at, mode) => {
-              freeze(mode);
-              props.onMoveBubble(id, at, mode);
+            onMove={(id, at, run) => {
+              dragMove(run);
+              props.onMoveBubble(id, at, run);
             }}
-            onLength={(id, v, mode) => {
-              freeze(mode);
-              props.onBubbleLength(id, v, mode);
+            onLength={(id, v, run) => {
+              dragMove(run);
+              props.onBubbleLength(id, v, run);
             }}
             onDragDone={unfreeze}
+            pinches={pinches}
+            onCancel={revert}
           />
         </div>
       </div>
@@ -252,37 +292,41 @@ export function Timeline(props: Props) {
   return (
     <section className="timeline" aria-label={tr('editor.timeline')}>
       <div className="transport">
-        <TransportButton
+        <IconButton
+          small
           label="editor.stepBack"
           shortcut="editor.keyLeft"
           onClick={() => props.onStep(-1)}
         >
           <StepBackIcon />
-        </TransportButton>
+        </IconButton>
         {props.playing ? (
-          <TransportButton
+          <IconButton
+            small
             label="editor.pause"
             shortcut="editor.keySpace"
             onClick={() => props.onPlay(false)}
           >
             <PauseIcon />
-          </TransportButton>
+          </IconButton>
         ) : (
-          <TransportButton
+          <IconButton
+            small
             label="editor.playFromHere"
             shortcut="editor.keySpace"
             onClick={() => props.onPlay(true)}
           >
             <PlayIcon />
-          </TransportButton>
+          </IconButton>
         )}
-        <TransportButton
+        <IconButton
+          small
           label="editor.stepForward"
           shortcut="editor.keyRight"
           onClick={() => props.onStep(1)}
         >
           <StepForwardIcon />
-        </TransportButton>
+        </IconButton>
         <div className="time">
           <strong>{formatTime(t)}</strong>
           <span className="muted"> / {formatTime(duration)}</span>
@@ -326,33 +370,25 @@ export function Timeline(props: Props) {
           </button>
         </div>
         <div className="divider" />
-        <TransportButton label="editor.zoomOut" onClick={zoom.zoomOut}>
+        <IconButton small label="editor.zoomOut" onClick={zoom.zoomOut}>
           <ZoomOutIcon />
-        </TransportButton>
-        <TransportButton label="editor.zoomIn" onClick={zoom.zoomIn}>
+        </IconButton>
+        <IconButton small label="editor.zoomIn" onClick={zoom.zoomIn}>
           <ZoomInIcon />
-        </TransportButton>
-        <TransportButton label="editor.zoomFit" onClick={zoom.zoomFit}>
+        </IconButton>
+        <IconButton small label="editor.zoomFit" onClick={zoom.zoomFit}>
           <ZoomFitIcon />
-        </TransportButton>
+        </IconButton>
       </div>
 
-      <div className="tracks" ref={ref}>
+      <div className="tracks" ref={ref} onPointerDownCapture={touchDown}>
         <div
           className="tracks-inner"
           style={{ width: LANE_START + width + 16 }}
         >
           <div className="track ruler-track">
             <div className="track-label" />
-            <div
-              className="ruler"
-              style={{ width }}
-              onPointerDown={rulerDown}
-              onPointerMove={rulerMove}
-              onPointerUp={rulerUp}
-              onPointerCancel={rulerUp}
-              onLostPointerCapture={rulerUp}
-            >
+            <div className="ruler" style={{ width }} {...ruler.handlers(t)}>
               {rulerTicks(length, pps).map((tick) => (
                 <span
                   key={tick.t}
@@ -408,11 +444,13 @@ export function Timeline(props: Props) {
                       props.onSelect({ actorId: row.actorId, actionId });
                       props.onSeek(at);
                     }}
-                    onMove={(actionId, at, mode) => {
-                      freeze(mode);
-                      props.onMoveBlock(row.actorId, actionId, at, mode);
+                    onMove={(actionId, at, run) => {
+                      dragMove(run);
+                      props.onMoveBlock(row.actorId, actionId, at, run);
                     }}
                     onMoveDone={unfreeze}
+                    pinches={pinches}
+                    onCancel={revert}
                   />
                   <TimeMarks
                     row={row}
@@ -421,15 +459,17 @@ export function Timeline(props: Props) {
                     fps={props.fps}
                     pps={pps}
                     onSeek={props.onSeek}
-                    onLength={(v, mode) => {
-                      freeze(mode);
-                      props.onLength(v, mode);
+                    onLength={(v, run) => {
+                      dragMove(run);
+                      props.onLength(v, run);
                     }}
-                    onMoveStart={(actionId, at, mode) => {
-                      freeze(mode);
-                      props.onMoveStart(row.actorId, actionId, at, mode);
+                    onMoveStart={(actionId, at, run) => {
+                      dragMove(run);
+                      props.onMoveStart(row.actorId, actionId, at, run);
                     }}
                     onDragDone={unfreeze}
+                    pinches={pinches}
+                    onCancel={revert}
                   />
                 </div>
               </div>,
@@ -468,32 +508,5 @@ export function Timeline(props: Props) {
         </div>
       </div>
     </section>
-  );
-}
-
-function TransportButton(props: {
-  label: TextKey;
-  /** The key that does the same, shown in the tooltip. */
-  shortcut?: TextKey;
-  onClick?: (() => void) | undefined;
-  children: ReactNode;
-}) {
-  const { tr } = useI18n();
-  const label = tr(props.label);
-  return (
-    <button
-      type="button"
-      className="icon-button small"
-      aria-label={label}
-      title={
-        props.shortcut
-          ? tr('editor.withKey', { label, key: tr(props.shortcut) })
-          : label
-      }
-      disabled={!props.onClick}
-      onClick={props.onClick}
-    >
-      {props.children}
-    </button>
   );
 }

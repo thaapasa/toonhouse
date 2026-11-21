@@ -2,14 +2,10 @@
 // wind of its clip.
 import type { Matrix, PropFrame, PropRig, Pt } from '@toonhouse/model';
 
-import {
-  type CharacterDrawing,
-  type DrawNode,
-  placed,
-  skeleton,
-} from './draw.ts';
+import type { RigDrawing } from './draw.ts';
+import { partSlot, placed, rigOutline } from './drawKit.ts';
 import { deg, hash, multiply, rotation, scaling, translation } from './math.ts';
-import { arrange, layered, type SlotDrawing } from './order.ts';
+import { arrange, type SlotDrawing } from './order.ts';
 
 /** Sways of the main motion in one cycle of the wind. */
 const SWAYS = 3;
@@ -45,12 +41,12 @@ export function drawProp(
   rig: PropRig,
   frame: PropFrame,
   { facing }: { facing: 1 | -1 },
-): CharacterDrawing {
+): RigDrawing {
   // The transform of each bone from its pivot, in the pixels of its part
   // times its scale, to the drawing.
   const boneAt = new Map<string, Matrix>();
   const slots: Record<string, SlotDrawing> = {};
-  const joints: Record<string, Pt> = {};
+  const pivots: Record<string, Pt> = {};
   const chains: Pt[][] = [];
   rig.bones.forEach((bone, i) => {
     const part = rig.parts[bone.part];
@@ -82,23 +78,14 @@ export function drawProp(
         translation(-part.pivot.x, -part.pivot.y),
       ),
     );
-    slots[bone.id] = layered(part, (layer): DrawNode[] => [
-      {
-        type: 'part',
-        part: bone.part,
-        ...(layer === undefined ? {} : { layer }),
-        width: part.width,
-        height: part.height,
-        transform: drawn,
-      },
-    ]);
-    const joint = { x: m[4], y: m[5] };
-    joints[bone.id] = joint;
-    if (parent) chains.push([joints[parent.id]!, joint]);
+    slots[bone.id] = partSlot(bone.part, part, drawn);
+    const pivot = { x: m[4], y: m[5] };
+    pivots[bone.id] = pivot;
+    if (parent) chains.push([pivots[parent.id]!, pivot]);
   });
 
   return {
     node: placed(rig.shadow, facing, arrange(rig, slots)),
-    skeleton: skeleton(joints, chains, facing),
+    rigOutline: rigOutline(pivots, chains, facing),
   };
 }

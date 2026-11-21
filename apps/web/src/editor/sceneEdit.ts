@@ -1,5 +1,6 @@
 // Pure edits of the scenes of a cartoon. Each returns a new value and leaves
 // the old one as it was, so that undo can keep the old values.
+import { CONTENT_LIMITS } from '@toonhouse/api';
 import type {
   Action,
   Actor,
@@ -7,7 +8,10 @@ import type {
   Pt,
   Scene,
 } from '@toonhouse/model';
-import { minSceneLength, sortedActions } from '@toonhouse/renderer';
+import { clamp, minSceneLength, sortedActions } from '@toonhouse/renderer';
+
+// The edits keep the content inside the limits that the server saves.
+const L = CONTENT_LIMITS;
 
 /** Two actions closer than this in seconds start at the same time. */
 const SAME_TIME = 1e-6;
@@ -21,14 +25,35 @@ export const newScene = (): Scene => ({
   actors: [],
 });
 
-export const updateScene = (
+/**
+ * Changes the item of `list` with the id. If the item is gone or `fn` returns
+ * it as it was, it gives `list` itself. Then the edit leaves no undo step,
+ * such as when a typed value is saved to an actor that the user removed.
+ */
+export function updateById<T extends { id: string }>(
+  list: readonly T[],
+  id: string,
+  fn: (item: T) => T,
+): T[] {
+  let changed = false;
+  const next = list.map((item) => {
+    if (item.id !== id) return item;
+    const v = fn(item);
+    if (v !== item) changed = true;
+    return v;
+  });
+  // The callers don't change the lists that they get.
+  return changed ? next : (list as T[]);
+}
+
+export function updateScene(
   content: CartoonContent,
   sceneId: string,
   fn: (scene: Scene) => Scene,
-): CartoonContent => ({
-  ...content,
-  scenes: content.scenes.map((s) => (s.id === sceneId ? fn(s) : s)),
-});
+): CartoonContent {
+  const scenes = updateById(content.scenes, sceneId, fn);
+  return scenes === content.scenes ? content : { ...content, scenes };
+}
 
 /**
  * Removes a scene. A cartoon in the editor always has a scene, so removing
@@ -42,14 +67,14 @@ export function removeScene(
   return { ...content, scenes: scenes.length > 0 ? scenes : [newScene()] };
 }
 
-export const updateActor = (
+export function updateActor(
   scene: Scene,
   actorId: string,
   fn: (actor: Actor) => Actor,
-): Scene => ({
-  ...scene,
-  actors: scene.actors.map((a) => (a.id === actorId ? fn(a) : a)),
-});
+): Scene {
+  const actors = updateById(scene.actors, actorId, fn);
+  return actors === scene.actors ? scene : { ...scene, actors };
+}
 
 /** Removes an actor and the bubbles attached to it. */
 export const removeActor = (scene: Scene, actorId: string): Scene => ({
@@ -76,7 +101,7 @@ export const updateAction = (
   actions: readonly Action[],
   actionId: string,
   fn: (action: Action) => Action,
-): Action[] => actions.map((a) => (a.id === actionId ? fn(a) : a));
+): Action[] => updateById(actions, actionId, fn);
 
 export const removeAction = (
   actions: readonly Action[],
@@ -95,15 +120,26 @@ export function updateActions(
   actorId: string | null,
   fn: (actions: readonly Action[]) => Action[],
 ): Scene {
-  if (actorId === null)
-    return { ...scene, backgroundActions: fn(scene.backgroundActions) };
-  return updateActor(scene, actorId, (a) => ({ ...a, actions: fn(a.actions) }));
+  if (actorId === null) {
+    const backgroundActions = fn(scene.backgroundActions);
+    return backgroundActions === scene.backgroundActions
+      ? scene
+      : { ...scene, backgroundActions };
+  }
+  return updateActor(scene, actorId, (a) => {
+    const actions = fn(a.actions);
+    return actions === a.actions ? a : { ...a, actions };
+  });
 }
 
 /** The shortest time between two actions that the user moves. */
 const MIN_GAP = 0.1;
-/** A time to a ten-thousandth of a second, which keeps the saved data short. */
-export const savedTime = (t: number) => Math.round(t * 1e4) / 1e4;
+/**
+ * A time inside the limits that the server saves, to a ten-thousandth of a
+ * second, which keeps the saved data short.
+ */
+export const savedTime = (t: number) =>
+  Math.round(clamp(t, 0, L.time) * 1e4) / 1e4;
 
 /**
  * Moves the start of an action to `t`, between the actions before and after
@@ -120,7 +156,7 @@ export function moveStart(
   if (i < 0) return [...actions];
   const lo = i > 0 ? sorted[i - 1]!.t + MIN_GAP : 0;
   const hi = sorted[i + 1] ? sorted[i + 1]!.t - MIN_GAP : Infinity;
-  const at = savedTime(Math.min(Math.max(t, lo), hi));
+  const at = savedTime(clamp(t, lo, hi));
   return updateAction(actions, actionId, (a) => ({ ...a, t: at }));
 }
 
@@ -147,7 +183,7 @@ export function moveBlock(
   const after = sorted[i + 2];
   const lo = (i > 0 ? sorted[i - 1]!.t + MIN_GAP : 0) - action.t;
   const hi = next && after ? after.t - MIN_GAP - next.t : Infinity;
-  const d = Math.min(Math.max(t - action.t, lo), hi);
+  const d = clamp(t - action.t, lo, hi);
   const moved = updateActions(scene, actorId, (actions) =>
     actions.map((a) =>
       a.id === action.id || a.id === next?.id
@@ -178,7 +214,14 @@ export const roundPoint = (p: Pt): Pt => ({
   y: Math.round(p.y * 10) / 10,
 });
 
-const shift = (p: Pt, d: Pt): Pt => roundPoint({ x: p.x + d.x, y: p.y + d.y });
+/** A point inside the limits that the server saves, to a tenth of a pixel. */
+export const savedPoint = (p: Pt): Pt =>
+  roundPoint({
+    x: clamp(p.x, -L.coordinate, L.coordinate),
+    y: clamp(p.y, -L.coordinate, L.coordinate),
+  });
+
+const shift = (p: Pt, d: Pt): Pt => savedPoint({ x: p.x + d.x, y: p.y + d.y });
 
 /**
  * Moves an actor and all of its walks by `d`, so that it stays under the
@@ -201,35 +244,14 @@ export function stepSize(scale: number, step: 1 | -1): number {
   return SIZES.findLast((s) => s < scale - 1e-6) ?? scale;
 }
 
-/**
- * The limits of the size of an actor and the speed of an action. The server
- * doesn't save values outside them.
- */
-export const SCALE_LIMITS = { min: 0.05, max: 20 } as const;
-export const SPEED_LIMITS = { min: 0.05, max: 20 } as const;
-/** The server doesn't save a point further away than this from the frame. */
-const COORDINATE_LIMIT = 100_000;
-
-const clamp = (v: number, lo: number, hi: number) =>
-  Math.min(Math.max(v, lo), hi);
-
-/** A point inside the limits that the server saves, to a tenth of a pixel. */
-export const savedPoint = (p: Pt): Pt =>
-  roundPoint({
-    x: clamp(p.x, -COORDINATE_LIMIT, COORDINATE_LIMIT),
-    y: clamp(p.y, -COORDINATE_LIMIT, COORDINATE_LIMIT),
-  });
-
 export const setScale = (actor: Actor, scale: number): Actor => ({
   ...actor,
-  scale:
-    Math.round(clamp(scale, SCALE_LIMITS.min, SCALE_LIMITS.max) * 1e4) / 1e4,
+  scale: Math.round(clamp(scale, L.scale.min, L.scale.max) * 1e4) / 1e4,
 });
 
 /** Sets the speed of an action. The normal speed 1 leaves the field out. */
 export function setSpeed(action: Action, speed: number): Action {
-  const v =
-    Math.round(clamp(speed, SPEED_LIMITS.min, SPEED_LIMITS.max) * 1e4) / 1e4;
+  const v = Math.round(clamp(speed, L.speed.min, L.speed.max) * 1e4) / 1e4;
   const rest = { ...action };
   delete rest.speed;
   return v === 1 ? rest : { ...rest, speed: v };
@@ -246,13 +268,17 @@ export const setClip = (
   ...(moves && !action.path && { path: [] }),
 });
 
+/** Adds a point to the end of a path, unless the path is as long as the server saves. */
+export const addPoint = (path: readonly Pt[], at: Pt): Pt[] =>
+  path.length < L.pathPoints ? [...path, savedPoint(at)] : [...path];
+
 /**
  * Adds a point to a path halfway between point `i` and the point before it,
  * which is `start` for the first point.
  */
 export function insertPoint(path: readonly Pt[], i: number, start: Pt): Pt[] {
   const to = path[i];
-  if (!to) return [...path];
+  if (!to || path.length >= L.pathPoints) return [...path];
   const from = i > 0 ? path[i - 1]! : start;
   const mid = roundPoint({ x: (from.x + to.x) / 2, y: (from.y + to.y) / 2 });
   return [...path.slice(0, i), mid, ...path.slice(i)];

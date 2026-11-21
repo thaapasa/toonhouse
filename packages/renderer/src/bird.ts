@@ -7,15 +7,19 @@ import type {
   Pt,
 } from '@toonhouse/model';
 
-import type { CharacterDrawing, DrawNode, DrawOptions } from './draw.ts';
-import { placed, skeleton } from './draw.ts';
+import type { DrawNode, DrawOptions, RigDrawing } from './draw.ts';
+import {
+  fmt,
+  line,
+  outlinedStroke,
+  partNode,
+  partSlot,
+  placed,
+  rigOutline,
+} from './drawKit.ts';
 import { eyeLids } from './face.ts';
 import { add, deg, pinned, rotate, sub, twoBoneJoint } from './math.ts';
-import { arrange, layered, type SlotDrawing } from './order.ts';
-
-const fmt = (n: number) => Math.round(n * 100) / 100;
-const line = (...pts: Pt[]) =>
-  pts.map((p, i) => `${i ? 'L' : 'M'}${fmt(p.x)} ${fmt(p.y)}`).join('');
+import { arrange, layered } from './order.ts';
 
 /**
  * The joint of a two-bone leg from the hip to the ankle. The joint bends
@@ -30,44 +34,23 @@ export function drawBird(
   rig: BirdRig,
   frame: BirdFrame,
   { facing }: DrawOptions,
-): CharacterDrawing {
+): RigDrawing {
   const { pose } = frame;
   const { parts, colors, legs } = rig;
   const ow = rig.outlineWidth;
-  const part = (
-    id: BirdPartId,
-    transform: Matrix,
-    layer?: string,
-  ): DrawNode => ({
-    type: 'part',
-    part: id,
-    ...(layer === undefined ? {} : { layer }),
-    width: parts[id].width,
-    height: parts[id].height,
-    transform,
-  });
-  /** A part with all its layers, placed with one transform. */
-  const piece = (id: BirdPartId, transform: Matrix): SlotDrawing =>
-    layered(parts[id], (layer) => [part(id, transform, layer)]);
-  /** A thick line with an outline: a stroke under a narrower stroke. */
-  const tube = (d: string, width: number, color: string): DrawNode[] => [
-    {
-      type: 'path',
+  const part = (id: BirdPartId, transform: Matrix, layer?: string) =>
+    partNode(id, parts[id], transform, layer);
+  const piece = (id: BirdPartId, transform: Matrix) =>
+    partSlot(id, parts[id], transform);
+  /** A thick line with an outline. */
+  const tube = (d: string, width: number, color: string) =>
+    outlinedStroke(
       d,
-      stroke: colors.outline,
-      strokeWidth: width + 2 * ow,
-      lineCap: 'round',
-      lineJoin: 'round',
-    },
-    {
-      type: 'path',
-      d,
-      stroke: color,
-      strokeWidth: width,
-      lineCap: 'round',
-      lineJoin: 'round',
-    },
-  ];
+      width,
+      color,
+      { color: colors.outline, width: ow },
+      { lineJoin: 'round' },
+    );
 
   const b0 = parts.body;
   const onBody = (p: Pt) =>
@@ -168,7 +151,7 @@ export function drawBird(
   };
   return {
     node: placed(rig.shadow, facing, character),
-    skeleton: skeleton(
+    rigOutline: rigOutline(
       j,
       [
         [j.hip, j.neck, j.head],

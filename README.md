@@ -83,6 +83,9 @@ The server reads its settings from the environment, and in development also from
 `apps/server/.env`. [apps/server/.env.example](apps/server/.env.example) lists
 them. In production, `DATABASE_URL` must be set.
 
+The studio saves files in the repo, so it listens only on `localhost`. To open
+it from another device, start it with `STUDIO_HOST=0.0.0.0 pnpm studio`.
+
 ### Users and groups
 
 The app can't add users or groups. Add them with these commands:
@@ -116,6 +119,11 @@ The local ports follow the `1AARR` scheme. The app ID is `07`.
 | 10711 | Character studio        |
 | 10732 | PostgreSQL, development |
 | 10790 | Motion prototypes       |
+
+Each port comes from an environment variable, with the port above as the
+default: `SERVER_PORT`, `WEB_PORT`, `STUDIO_PORT`, `DB_PORT` and
+`PROTOTYPES_PORT`. The Vite dev server reads `SERVER_PORT` too, to send the API
+requests to the server.
 
 ## Asset licenses
 

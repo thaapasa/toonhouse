@@ -23,6 +23,7 @@ import {
 } from '@toonhouse/renderer';
 import type { ReactNode } from 'react';
 
+import { IconButton } from '../components/IconButton.tsx';
 import {
   CloseIcon,
   DeleteIcon,
@@ -30,8 +31,9 @@ import {
   PinIcon,
 } from '../components/icons.tsx';
 import { useI18n } from '../i18n/index.tsx';
+import { type BackgroundAsset, kindOf } from '../library/index.ts';
 import { BubbleSection } from './BubbleSection.tsx';
-import { type BackgroundAsset, kindOf } from './library.ts';
+import type { EditRun } from './history.ts';
 import { useNames } from './names.ts';
 import { NumberField } from './NumberField.tsx';
 import {
@@ -50,7 +52,6 @@ import {
   updateActor,
 } from './sceneEdit.ts';
 import type { TimelineSelection } from './Timeline.tsx';
-import type { EditMode } from './useCartoonContent.ts';
 
 interface Props {
   scene: Scene;
@@ -62,7 +63,7 @@ interface Props {
   anchors: ReadonlyMap<string, BubbleAnchor>;
   /** Goes up by one each time the text of the bubble should get the focus. */
   textFocus: number;
-  onEditBubble(fn: (b: Bubble) => Bubble, mode?: EditMode): void;
+  onEditBubble(fn: (b: Bubble) => Bubble, run?: EditRun): void;
   /** The length of the scene in seconds. */
   duration: number;
   fps: number;
@@ -97,6 +98,7 @@ export function PropertiesPane(props: Props) {
   else if (props.bubble)
     content = (
       <BubbleSection
+        key={props.bubble.id}
         scene={scene}
         bubble={props.bubble}
         anchors={props.anchors}
@@ -105,16 +107,23 @@ export function PropertiesPane(props: Props) {
         onSeek={props.onSeek}
       />
     );
-  else if (!selection) content = <SceneSection {...props} />;
+  else if (!selection) content = <SceneSection key={scene.id} {...props} />;
   else
     content = (
       <>
         {actor ? (
-          <ActorSection {...props} actor={actor} />
+          <ActorSection key={actor.id} {...props} actor={actor} />
         ) : (
-          <SceneSection {...props} />
+          <SceneSection key={scene.id} {...props} />
         )}
-        {action && <ActionSection {...props} actor={actor} action={action} />}
+        {action && (
+          <ActionSection
+            key={action.id}
+            {...props}
+            actor={actor}
+            action={action}
+          />
+        )}
       </>
     );
 
@@ -127,25 +136,17 @@ export function PropertiesPane(props: Props) {
     >
       <div className="pane-head">
         <h2>{tr('properties.title')}</h2>
-        <button
-          type="button"
-          className="icon-button small"
-          aria-label={tr('properties.attach')}
-          aria-pressed={props.attached}
-          title={tr('properties.attach')}
+        <IconButton
+          label="properties.attach"
+          small
+          pressed={props.attached}
           onClick={() => props.onAttach(!props.attached)}
         >
           <PinIcon filled={props.attached} />
-        </button>
-        <button
-          type="button"
-          className="icon-button small"
-          aria-label={tr('properties.hide')}
-          title={tr('properties.hide')}
-          onClick={props.onClose}
-        >
+        </IconButton>
+        <IconButton label="properties.hide" small onClick={props.onClose}>
           <CloseIcon />
-        </button>
+        </IconButton>
       </div>
       {content}
     </section>
@@ -265,10 +266,12 @@ function ActionSection(
     editAction(() => changed);
     props.onClipChanged(actorId, changed);
   };
-  const changeStart = (t: number) => {
+  const changeStart = (t: number, closed: boolean) => {
     props.onEdit((s) =>
       updateActions(s, actorId, (list) => moveStart(list, action.id, t)),
     );
+    // The playhead stays with the new selection.
+    if (closed) return;
     const moved = moveStart(actionsOf(scene, actorId), action.id, t);
     props.onSeek(moved.find((a) => a.id === action.id)?.t ?? t);
   };
@@ -333,6 +336,21 @@ function ActionSection(
   );
 }
 
+// Walk points have no ids, so each point object gets a key for its row. The
+// new point of an edit gets the key of the old one, and undo brings back the
+// old points with their keys. So a row, and a value typed in it, stay with
+// their point when a point before it is added or removed.
+const pointKeys = new WeakMap<Pt, number>();
+let nextPointKey = 0;
+function pointKey(p: Pt): number {
+  let key = pointKeys.get(p);
+  if (key === undefined) {
+    key = nextPointKey++;
+    pointKeys.set(p, key);
+  }
+  return key;
+}
+
 function WalkPath(
   props: Props & {
     actor: Actor;
@@ -348,11 +366,21 @@ function WalkPath(
   const start = actorStateAt(actor, kind, bg, action.t).at;
   const arrives = walkTime(actor, kind, bg, action);
   const editPath = (fn: (p: Pt[]) => Pt[]) =>
-    props.onEditAction((a) => ({ ...a, path: fn(a.path ?? []) }));
-  const setPoint = (i: number, p: Partial<Pt>) =>
-    editPath((list) =>
-      list.map((q, j) => (j === i ? savedPoint({ ...q, ...p }) : q)),
-    );
+    props.onEditAction((a) => {
+      const old = a.path ?? [];
+      const next = fn(old);
+      return next === old ? a : { ...a, path: next };
+    });
+  /** Changes the point with the key, if it is still on the path. */
+  const setPoint = (key: number, p: Partial<Pt>) =>
+    editPath((list) => {
+      const i = list.findIndex((q) => pointKeys.get(q) === key);
+      if (i < 0) return list;
+      const moved = savedPoint({ ...list[i]!, ...p });
+      pointKeys.set(moved, key);
+      return list.map((q, j) => (j === i ? moved : q));
+    });
+  const keys = path.map(pointKey);
 
   return (
     <div className="walk-points">
@@ -376,7 +404,8 @@ function WalkPath(
       </div>
       {path.map((p, i) => (
         <div
-          key={i}
+          // The same point object twice on the path would share a key.
+          key={keys.indexOf(keys[i]!) === i ? keys[i] : `${keys[i]}-${i}`}
           className="point-row"
           onFocus={() => props.onFocusPoint(i)}
           onBlur={() => props.onFocusPoint(null)}
@@ -389,29 +418,27 @@ function WalkPath(
             hideLabel
             value={p.x}
             decimals={1}
-            onChange={(x) => setPoint(i, { x })}
+            onChange={(x) => setPoint(keys[i]!, { x })}
           />
           <NumberField
             label={tr('properties.pointY', { n: i + 1 })}
             hideLabel
             value={p.y}
             decimals={1}
-            onChange={(y) => setPoint(i, { y })}
+            onChange={(y) => setPoint(keys[i]!, { y })}
           />
-          <button
-            type="button"
-            className="icon-button small"
-            aria-label={tr('properties.insertPoint', { n: i + 1 })}
-            title={tr('properties.insertPoint', { n: i + 1 })}
+          <IconButton
+            label="properties.insertPoint"
+            vars={{ n: i + 1 }}
+            small
             onClick={() => editPath((list) => insertPoint(list, i, start))}
           >
             <InsertPointIcon />
-          </button>
-          <button
-            type="button"
-            className="icon-button small"
-            aria-label={tr('properties.removePoint', { n: i + 1 })}
-            title={tr('properties.removePoint', { n: i + 1 })}
+          </IconButton>
+          <IconButton
+            label="properties.removePoint"
+            vars={{ n: i + 1 }}
+            small
             // A walk without points would walk on the spot.
             disabled={path.length <= 1}
             onClick={() => {
@@ -420,7 +447,7 @@ function WalkPath(
             }}
           >
             <DeleteIcon />
-          </button>
+          </IconButton>
         </div>
       ))}
       <p className="muted small">{tr('properties.pathHint')}</p>

@@ -94,7 +94,7 @@ export function Inspector(props: Props) {
   else if (status.state === 'saved') statusText = tr('saved');
 
   return (
-    <aside className="inspector" aria-label={tr('inspector')}>
+    <aside className="inspector" aria-label={tr('properties')}>
       <div className="tabs" role="tablist">
         {(['rig', 'tuning', 'drawOrder'] as const).map((id) => (
           <button

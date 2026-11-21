@@ -47,16 +47,26 @@ describe('POST /api/app/auth/login', () => {
 });
 
 describe('login attempt limits', () => {
-  it('blocks a username after 10 failed logins, also with the right password', async () => {
+  it('blocks a username from one address after 10 failed logins, but not from another', async () => {
     for (let i = 0; i < 10; i++) {
-      expect(
-        (await postLogin({ username: 'artist', password: 'wrong' })).status,
-      ).toBe(401);
+      const res = await postLogin(
+        { username: 'artist', password: 'wrong' },
+        '203.0.113.1',
+      );
+      expect(res.status).toBe(401);
     }
-    const res = await postLogin({ username: 'artist', password: 'secret' });
+    const res = await postLogin(
+      { username: 'artist', password: 'secret' },
+      '203.0.113.1',
+    );
     expect(res.status).toBe(429);
     expect(res.headers.get('retry-after')).toBe('900');
     expect(res.headers.get('set-cookie')).toBeNull();
+    const other = await postLogin(
+      { username: 'artist', password: 'secret' },
+      '203.0.113.2',
+    );
+    expect(other.status).toBe(200);
   });
 
   it('does not count successful logins', async () => {
@@ -98,6 +108,18 @@ describe('login attempt limits', () => {
       '192.0.2.1, 203.0.113.1',
     );
     expect(res.status).toBe(429);
+  });
+});
+
+describe('response headers', () => {
+  it('sets the security headers and keeps API answers out of caches', async () => {
+    const res = await request('/api/app/auth/me');
+    expect(res.headers.get('content-security-policy')).toContain(
+      "frame-ancestors 'none'",
+    );
+    expect(res.headers.get('x-content-type-options')).toBe('nosniff');
+    expect(res.headers.get('referrer-policy')).toBe('no-referrer');
+    expect(res.headers.get('cache-control')).toBe('no-store');
   });
 });
 

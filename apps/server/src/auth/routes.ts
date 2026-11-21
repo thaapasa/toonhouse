@@ -16,7 +16,7 @@ import { hashPassword, verifyPassword } from './password.ts';
 import {
   createSession,
   deleteSession,
-  getSessionUser,
+  getSession,
   sessionDays,
 } from './sessions.ts';
 
@@ -34,10 +34,16 @@ export function getSessionToken(c: Context): string | undefined {
   return getCookie(c, cookieName);
 }
 
-/** Sets `c.var.user` from the session cookie. */
+/**
+ * Sets `c.var.user` from the session cookie. When the server extends the
+ * session, it sends the cookie again with the new expiry, because the browser
+ * would otherwise drop the cookie 90 days after the login.
+ */
 export const sessionMiddleware = createMiddleware<AuthEnv>(async (c, next) => {
   const token = getSessionToken(c);
-  c.set('user', token ? await getSessionUser(token) : null);
+  const session = token ? await getSession(token) : null;
+  c.set('user', session?.user ?? null);
+  if (token && session?.extended) setSessionCookie(c, token);
   await next();
 });
 

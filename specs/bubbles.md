@@ -38,6 +38,7 @@ adds bubbles in the [editor](scenes.md), and they show on the
       the stage at the playhead, and its offset changes to match.
 - [x] Bubbles are drawn in front of all actors. If bubbles overlap, the one that
       starts later is in front.
+- [x] User can remove a bubble. Undo brings it back.
 - [x] A drag of a bubble or of its tail is one step of undo, as is each change
       in the properties pane.
 

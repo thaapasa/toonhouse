@@ -2,8 +2,6 @@
 import type { Action, ClipKind } from '@toonhouse/model';
 import { actionSpeed, clipOf, clipStartOf } from '@toonhouse/renderer';
 
-/** A pointer that moves less than this, in CSS pixels, taps. */
-export const TAP_SLOP = 6;
 /** The zoom levels of the zoom buttons, as times the zoom that fits. */
 const ZOOM_LEVELS = [1, 1.5, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128];
 /** The steps of the ruler in seconds. */

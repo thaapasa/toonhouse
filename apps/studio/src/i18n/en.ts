@@ -29,7 +29,7 @@ export const en = {
   'background.harbor': 'Harbor',
   viewport: 'Viewport',
   bones: 'Bones',
-  bonesHint: 'Show the bones and the joints',
+  bonesHint: 'Show the bones and the pivot points',
   ground: 'Ground',
   groundHint: 'Show the ground moving under the feet',
   flip: 'Flip',
@@ -89,7 +89,7 @@ export const en = {
   frameOf: ' / {n} · {fps} fps',
   speed: 'Speed',
   time: 'Time',
-  inspector: 'Inspector',
+  properties: 'Properties',
   rig: 'Rig',
   selected: 'Selected',
   pickHint:

@@ -2,6 +2,7 @@
 import type { CutoutFace, EyeFace } from '@toonhouse/model';
 
 import type { DrawNode } from './draw.ts';
+import { fmt } from './drawKit.ts';
 import { hash, lerp, smoothstep } from './math.ts';
 
 /**
@@ -32,8 +33,6 @@ export function talking(t: number) {
   };
   return lerp(target(k), target(k + 1), u);
 }
-
-const fmt = (n: number) => Math.round(n * 100) / 100;
 
 /** The upper edge of the mouth: a slight smile curve. */
 export function upperLip(face: CutoutFace) {

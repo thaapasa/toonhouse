@@ -7,9 +7,8 @@ import { resolve } from 'node:path';
 import * as prettier from 'prettier';
 import type { Plugin } from 'vite';
 
+import { SAVE_RIG_URL } from './api.ts';
 import { patchJson } from './patchJson.ts';
-
-export const SAVE_RIG_URL = '/api/rig';
 
 const RIG_FILE =
   /^assets\/(characters|props|fixtures\/props)\/[a-z0-9-]+\/rig\.json$/;
@@ -37,10 +36,14 @@ function reply(res: ServerResponse, status: number, body: object) {
   res.end(JSON.stringify(body));
 }
 
-/** Requests from a page on another host would change files on this one. */
+/**
+ * Requests from a page on another host would change files on this one. The
+ * browser always sends `Origin` with a POST, so a request without it doesn't
+ * come from the studio.
+ */
 function sameOrigin(req: IncomingMessage): boolean {
   const { origin, host } = req.headers;
-  if (!origin) return true;
+  if (!origin) return false;
   try {
     return new URL(origin).host === host;
   } catch {

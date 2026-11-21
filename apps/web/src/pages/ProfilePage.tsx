@@ -14,9 +14,10 @@ import {
 } from '../api.ts';
 import { AppHeader } from '../components/AppHeader.tsx';
 import { Dialog } from '../components/Dialog.tsx';
+import { IconButton } from '../components/IconButton.tsx';
 import { CheckIcon, CopyIcon } from '../components/icons.tsx';
 import { PageMessage, RequireUser } from '../components/RequireUser.tsx';
-import { useI18n } from '../i18n/index.tsx';
+import { type TextKey, useI18n } from '../i18n/index.tsx';
 
 export function ProfilePage() {
   return (
@@ -134,6 +135,14 @@ function PasswordCard({ profile }: { profile: Profile }) {
   );
 }
 
+function resetErrorKey(error: Error): TextKey {
+  if (error instanceof ApiError && error.status === 403)
+    return 'profile.wrongPassword';
+  if (error instanceof ApiError && error.status === 429)
+    return 'profile.tooManyAttempts';
+  return 'profile.resetError';
+}
+
 /**
  * Asks for the current password, and then shows the new password that the
  * server made. The password shows only once, so closing the dialog forgets it.
@@ -182,9 +191,7 @@ function ResetPasswordDialog({ onClose }: { onClose: () => void }) {
         </label>
         {reset.isError && (
           <p role="alert" className="error">
-            {reset.error instanceof ApiError && reset.error.status === 403
-              ? tr('profile.wrongPassword')
-              : tr('profile.resetError')}
+            {tr(resetErrorKey(reset.error))}
           </p>
         )}
         <div className="row end">
@@ -206,12 +213,10 @@ function ResetPasswordDialog({ onClose }: { onClose: () => void }) {
 
 /** A read-only field with a copy button. */
 function SecretField({ label, value }: { label: string; value: string }) {
-  const { tr } = useI18n();
   const [copied, setCopied] = useState(false);
   // The clipboard API works only on HTTPS and on localhost. Elsewhere the user
   // selects the text.
   const canCopy = !!navigator.clipboard;
-  const copyLabel = copied ? tr('profile.copied') : tr('profile.copy');
 
   const copy = async () => {
     await navigator.clipboard.writeText(value);
@@ -228,15 +233,12 @@ function SecretField({ label, value }: { label: string; value: string }) {
         onFocus={(e) => e.currentTarget.select()}
       />
       {canCopy && (
-        <button
-          type="button"
-          className="icon-button"
-          aria-label={copyLabel}
-          title={copyLabel}
+        <IconButton
+          label={copied ? 'profile.copied' : 'profile.copy'}
           onClick={() => void copy()}
         >
           {copied ? <CheckIcon /> : <CopyIcon />}
-        </button>
+        </IconButton>
       )}
     </div>
   );

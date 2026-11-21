@@ -187,18 +187,22 @@ export type ClipFrame =
 /** The kinds of things that clips work on: the rig kinds and backgrounds. */
 export type ClipKind = ClipFrame['kind'];
 
-export type ClipId =
-  | 'idle'
-  | 'walk'
-  | 'wave'
-  | 'talk'
-  | 'peck'
-  | 'flap'
-  | 'hop'
-  | 'lookout'
-  | 'rustle'
-  | 'day'
-  | 'drift';
+/** The ids of all clips, of every rig kind and of backgrounds. */
+export const CLIP_IDS = [
+  'idle',
+  'walk',
+  'wave',
+  'talk',
+  'peck',
+  'flap',
+  'hop',
+  'lookout',
+  'rustle',
+  'day',
+  'drift',
+] as const;
+
+export type ClipId = (typeof CLIP_IDS)[number];
 
 /**
  * A motion for the rigs of one kind, or for backgrounds. The frame at `t`
@@ -210,5 +214,12 @@ export interface Clip<F extends ClipFrame = ClipFrame> {
   /** Length in seconds. A looping clip ends where it starts. */
   duration: number;
   loops: boolean;
+  /**
+   * For a clip that moves, the seconds between the moments when the rig is
+   * back on the ground, from the start of the clip. A walk that gets to its
+   * last point plays on in place until the next of these. Without it, the
+   * actor stops at once.
+   */
+  step?: number;
   frameAt(t: number): F;
 }

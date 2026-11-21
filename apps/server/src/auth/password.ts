@@ -1,7 +1,29 @@
 import { argon2, randomBytes, randomInt, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
 
-const argon2Async = promisify(argon2);
+const argon2Raw = promisify(argon2);
+
+// Node runs Argon2 on the libuv thread pool, which has 4 threads and also reads
+// the static files. Without a limit, a burst of password checks filled the pool
+// and the web app loaded slowly for everyone. The other checks wait in a queue.
+const maxParallelHashes = 2;
+let runningHashes = 0;
+const waitingHashes: (() => void)[] = [];
+
+async function argon2Async(
+  ...args: Parameters<typeof argon2Raw>
+): Promise<Buffer> {
+  if (runningHashes < maxParallelHashes) runningHashes++;
+  else await new Promise<void>((start) => waitingHashes.push(start));
+  try {
+    return await argon2Raw(...args);
+  } finally {
+    // The next check takes over the slot.
+    const next = waitingHashes.shift();
+    if (next) next();
+    else runningHashes--;
+  }
+}
 
 // RFC 9106 second recommended option: 64 MiB, 3 passes, 4 lanes.
 const params = { memory: 65536, passes: 3, parallelism: 4 };

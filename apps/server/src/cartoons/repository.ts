@@ -1,9 +1,11 @@
 import type {
   Cartoon,
   CartoonContent,
+  SavedContent,
   Sharing,
   Visibility,
 } from '@toonhouse/api';
+import { emptyContent } from '@toonhouse/model';
 
 import { sql } from '../db.ts';
 
@@ -80,15 +82,32 @@ export async function getCartoon(
   return row ? toCartoon(row, userId) : null;
 }
 
-/** Creates a private cartoon and returns its id. */
+/**
+ * The most cartoons that one user can have. Each cartoon can hold up to 10 MB
+ * of content and 3 MB of preview image, so without a limit one user could fill
+ * the disk of the database. The limit is there for disk space only, so it is far
+ * above what anyone makes by hand. At the limit, one user can still store about
+ * 13 GB in the worst case.
+ */
+export const maxCartoonsPerUser = 1000;
+
+/**
+ * Creates a private cartoon and returns its ID, or `null` if the user has too
+ * many.
+ */
 export async function createCartoon(
   ownerId: string,
   title: string,
-): Promise<string> {
+): Promise<string | null> {
+  // Parallel requests can go a few over the limit, which doesn't matter for
+  // disk space.
   const [row] = await sql<{ id: string }[]>`
-    INSERT INTO cartoons (owner_id, title) VALUES (${ownerId}, ${title}) RETURNING id
+    INSERT INTO cartoons (owner_id, title, content)
+    SELECT ${ownerId}, ${title}, ${sql.json(emptyContent())}
+    WHERE (SELECT count(*) FROM cartoons WHERE owner_id = ${ownerId}) < ${maxCartoonsPerUser}
+    RETURNING id
   `;
-  return row!.id;
+  return row?.id ?? null;
 }
 
 /** The changes below match the owner too, so that only the owner can make them. */
@@ -131,23 +150,49 @@ export async function deleteCartoon(
 export async function getContent(
   id: string,
   userId: string | null,
-): Promise<CartoonContent | null> {
-  const [row] = await sql<{ content: CartoonContent }[]>`
-    SELECT c.content FROM cartoons c WHERE c.id = ${id} AND ${canWatch(userId)}
+): Promise<SavedContent | null> {
+  const [row] = await sql<
+    {
+      content: CartoonContent;
+      contentRevision: number;
+      contentEditor: string | null;
+    }[]
+  >`
+    SELECT c.content, c.content_revision, c.content_editor FROM cartoons c
+    WHERE c.id = ${id} AND ${canWatch(userId)}
   `;
-  return row?.content ?? null;
+  return row
+    ? {
+        revision: row.contentRevision,
+        editor: row.contentEditor,
+        content: row.content,
+      }
+    : null;
 }
 
+/**
+ * Saves the scenes of a cartoon if they still have the revision that the save
+ * edited. Gives the new revision, `'conflict'` if the revision has changed,
+ * or `null` if the user doesn't own the cartoon.
+ */
 export async function setContent(
   id: string,
   ownerId: string,
-  content: CartoonContent,
-): Promise<boolean> {
-  const rows = await sql`
-    UPDATE cartoons SET content = ${sql.json(content)}, updated_at = now()
+  save: { revision: number; editor: string; content: CartoonContent },
+): Promise<number | 'conflict' | null> {
+  const [row] = await sql<{ contentRevision: number }[]>`
+    UPDATE cartoons SET content = ${sql.json(save.content)},
+      content_revision = content_revision + 1,
+      content_editor = ${save.editor}, updated_at = now()
     WHERE id = ${id} AND owner_id = ${ownerId}
+      AND content_revision = ${save.revision}
+    RETURNING content_revision
   `;
-  return rows.count > 0;
+  if (row) return row.contentRevision;
+  const [owned] = await sql`
+    SELECT 1 FROM cartoons WHERE id = ${id} AND owner_id = ${ownerId}
+  `;
+  return owned ? 'conflict' : null;
 }
 
 export type PreviewType = 'image/webp' | 'image/png';

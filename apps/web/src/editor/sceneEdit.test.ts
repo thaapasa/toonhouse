@@ -1,7 +1,9 @@
+import { CONTENT_LIMITS } from '@toonhouse/api';
 import {
   type Action,
   type Actor,
   CARTOON_VERSION,
+  type CartoonContent,
   type Scene,
 } from '@toonhouse/model';
 import { describe, expect, it } from 'vitest';
@@ -16,13 +18,14 @@ import {
   removePoint,
   removeScene,
   savedPoint,
-  SCALE_LIMITS,
   setClip,
   setLength,
   setScale,
   setSpeed,
   startAction,
   stepSize,
+  updateActions,
+  updateScene,
 } from './sceneEdit.ts';
 
 const wave = (id: string, t: number): Action => ({ id, t, clip: 'wave' });
@@ -153,8 +156,8 @@ describe('properties', () => {
 
   it('keeps the size inside the limits of the server', () => {
     const actor = { scale: 1 } as Actor;
-    expect(setScale(actor, 0).scale).toBe(SCALE_LIMITS.min);
-    expect(setScale(actor, 99).scale).toBe(SCALE_LIMITS.max);
+    expect(setScale(actor, 0).scale).toBe(CONTENT_LIMITS.scale.min);
+    expect(setScale(actor, 5000).scale).toBe(CONTENT_LIMITS.scale.max);
     expect(setScale(actor, 1.23456).scale).toBe(1.2346);
   });
 
@@ -188,5 +191,21 @@ describe('properties', () => {
 
   it('keeps a point inside the limits of the server', () => {
     expect(savedPoint({ x: -1e9, y: 3.14159 })).toEqual({ x: -100000, y: 3.1 });
+  });
+});
+
+describe('updateScene', () => {
+  it('gives the same content when the target is gone', () => {
+    const content: CartoonContent = {
+      version: CARTOON_VERSION,
+      scenes: [newScene()],
+    };
+    const scene = content.scenes[0]!;
+    const edit = (actorId: string | null) =>
+      updateScene(content, scene.id, (s) =>
+        updateActions(s, actorId, (list) => list.map((a) => a)),
+      );
+    expect(updateScene(content, 'gone', (s) => ({ ...s }))).toBe(content);
+    expect(edit('gone')).toBe(content);
   });
 });

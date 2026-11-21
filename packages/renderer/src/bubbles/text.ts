@@ -78,17 +78,40 @@ const styleOf = (bubble: Bubble): FontStyle =>
       : 'regular';
 
 /**
+ * Splits text into the letters that a reader sees, so that an emoji made of
+ * several code points or a letter with a combining accent stays whole. The
+ * fixed locale keeps the result the same on every device. Grapheme rules
+ * don't depend on the locale anyway.
+ */
+const graphemes = new Intl.Segmenter('en', { granularity: 'grapheme' });
+const lettersOf = (s: string) =>
+  Array.from(graphemes.segment(s), (g) => g.segment);
+
+/**
+ * The width of a letter that the fonts don't have, such as an emoji, in ems.
+ * An emoji is a bit wider than 1 em.
+ */
+const UNKNOWN_WIDTH = 1.2;
+
+/**
  * Breaks the text of the bubble into lines of at most `bubble.width`. A word
  * that is wider than that breaks between its letters.
  */
 export function layoutText(bubble: Bubble, font: BubbleFontId): TextLayout {
   const m = styleMetrics(font, styleOf(bubble));
   const size = bubble.fontSize;
-  const measure = (s: string) => {
+  // The composed form finds the width of a letter typed with a combining
+  // accent.
+  const widthOf = (letter: string) =>
+    m.widths.get(letter) ??
+    m.widths.get(letter.normalize('NFC')) ??
+    UNKNOWN_WIDTH;
+  const measureLetters = (letters: readonly string[]) => {
     let w = 0;
-    for (const c of s) w += m.widths.get(c) ?? 1;
+    for (const l of letters) w += widthOf(l);
     return w * size;
   };
+  const measure = (s: string) => measureLetters(lettersOf(s));
   const max = Math.max(bubble.width, size);
   const lines: { text: string; width: number }[] = [];
   const push = (text: string) => lines.push({ text, width: measure(text) });
@@ -103,19 +126,18 @@ export function layoutText(bubble: Bubble, font: BubbleFontId): TextLayout {
       }
       if (line) push(line);
       // A word that doesn't fit on a line of its own breaks between letters.
-      let rest = word;
-      while (measure(rest) > max) {
+      let rest = lettersOf(word);
+      while (measureLetters(rest) > max) {
         let cut = 1;
-        const letters = [...rest];
         while (
-          cut < letters.length &&
-          measure(letters.slice(0, cut + 1).join('')) <= max
+          cut < rest.length &&
+          measureLetters(rest.slice(0, cut + 1)) <= max
         )
           cut++;
-        push(letters.slice(0, cut).join(''));
-        rest = letters.slice(cut).join('');
+        push(rest.slice(0, cut).join(''));
+        rest = rest.slice(cut);
       }
-      line = rest;
+      line = rest.join('');
     }
     push(line.trimEnd());
   }
