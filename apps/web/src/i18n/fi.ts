@@ -97,7 +97,7 @@ export const fi: Texts = {
   'editor.actionStart':
     'Toiminto alkaa kohdassa {time}. Vedä siirtääksesi alkua.',
   'editor.zoomFit': 'Näytä koko kohtaus',
-  'editor.stageHome': 'Näytä koko kuva-ala',
+  'editor.stageHome': 'Näytä koko tausta',
   'editor.emptyTimeline': 'Hahmojen toiminnot näkyvät tässä.',
   'editor.notOwner': 'Vain piirretyn tekijä voi muokata sitä.',
 
@@ -150,6 +150,39 @@ export const fi: Texts = {
   'editor.walkDone': 'Valmis',
   'editor.background': 'Tausta',
   'editor.actorNumber': '{name} {n}',
+  'editor.camera': 'Kamera',
+  'editor.stageCamera': 'Näytä kameran kuva-ala',
+  'camera.startMark': 'Kameran alkunäkymä',
+  'camera.jumpMark': 'Kameran hyppy kohdassa {time}. Siirrä vetämällä.',
+  'camera.moveBlock': 'Kameran liike {start}–{end}',
+  'camera.moveStart':
+    'Kameran liike alkaa kohdassa {time}. Muuta nopeutta vetämällä.',
+  'camera.moveEnd':
+    'Kameran liike päättyy kohdassa {time}. Muuta nopeutta vetämällä.',
+  'camera.addMove': 'Uusi kameran liike tähän',
+  'camera.addJump': 'Uusi kameran hyppy tähän',
+  'camera.removeMove': 'Poista kameran liike',
+  'camera.removeJump': 'Poista kameran hyppy',
+  'camera.resetStart': 'Näytä alussa koko tausta',
+  'camera.startView': 'Kameran alkunäkymä',
+  'camera.move': 'Kameran liike',
+  'camera.jump': 'Kameran hyppy',
+  'camera.length': 'Kesto',
+  'camera.easing': 'Nopeus',
+  'camera.linear': 'Tasainen',
+  'camera.easeIn': 'Kiihtyvä',
+  'camera.easeOut': 'Hidastuva',
+  'camera.easeInOut': 'Kiihtyy ja hidastuu',
+  'camera.moveTo': 'Mihin liike menee',
+  'camera.view': 'Näkymä',
+  'camera.movingHint':
+    'Kamera liikkuu tässä. Siirry liikkeen loppuun, niin voit muuttaa, mihin se menee.',
+  'camera.goToEnd': 'Siirry loppuun',
+  'camera.zoom': 'Zoomaus',
+  'camera.wholeBackground': 'Koko tausta',
+  'camera.hint':
+    'Siirrä kameraa vetämällä sen laatikkoa näyttämöllä, ja zoomaa vetämällä kulmasta. Alt-näppäimen kanssa keskikohta pysyy paikallaan.',
+
   'properties.title': 'Ominaisuudet',
   'properties.show': 'Näytä ominaisuudet',
   'properties.hide': 'Piilota ominaisuudet',

@@ -35,8 +35,20 @@ for something else or too vague.
 - **Camera**: the view of the scene that the cartoon shows. By default it shows
   the whole background, and it can zoom and pan inside it. It is the view of the
   ground layer.
-- **Camera move**: a zoom or a pan of the camera on the timeline. Not: camera
-  action.
+- **Camera view**: where the camera looks: its middle point and its zoom. Not:
+  shot, which is an entry in a cartoon.
+- **Start view**: the camera view at the start of a scene. By default, the whole
+  background.
+- **Camera move**: a zoom or a pan of the camera on the timeline. It goes from
+  the view where the camera is to a new view over a time, with an easing. Not:
+  camera action, transition.
+- **Camera jump**: a change of the camera to a new view at once, at a point on
+  the timeline. Not: cut, which sounds like a shot.
+- **Easing**: how a camera move speeds up and slows down: linear, ease in, ease
+  out, or ease in and out.
+- **Camera box**: the box on the stage of the editor that shows the camera view
+  at the playhead. The user drags it to pan the camera and drags its corners to
+  zoom.
 - **Actor**: a character, a prop or a background that the user has placed in a
   scene. An actor uses either a cast member or a library character or prop.
 - **Locked actor**: an actor that the user can't select or move on the stage.

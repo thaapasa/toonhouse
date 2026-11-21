@@ -1,13 +1,24 @@
-// The frame of a scene, as the camera of the whole background sees it. It
-// goes inside an `<svg>` with the viewBox of the background frame. In the
-// editor, the viewBox can be larger than the frame, and then what is outside
-// the frame shows dimmer.
+// The frame of a scene, as its camera sees it. It goes inside an `<svg>` with
+// the viewBox of the background frame.
+//
+// In the editor, the drawing stays on the ground layer instead: the actors and
+// the ground layer keep their places, and the far layers move with the camera.
+// The viewBox can be larger than the view of the camera, and then what is
+// outside it shows dimmer.
 //
 // Each asset shows once its SVG files have loaded. Until then, the drawing
 // leaves it out, so that the user doesn't see the limbs of a character
 // without its body.
 import type { Scene } from '@toonhouse/model';
-import type { Bounds, DrawNode, SceneFrame } from '@toonhouse/renderer';
+import {
+  type Bounds,
+  cameraBounds,
+  type DrawNode,
+  groundDepth,
+  layerTransform,
+  pictureToGround,
+  type SceneFrame,
+} from '@toonhouse/renderer';
 import {
   actorPrefix,
   Drawing,
@@ -39,9 +50,9 @@ export function SceneDrawing(props: {
   /** Makes the ids of the symbols unique on the page. */
   prefix: string;
   /**
-   * Draws what is outside the frame too, dimmer, as far as these bounds go,
-   * so that the user can place actors there before they come in. The player
-   * leaves it out.
+   * Draws the scene on the ground layer, with what is outside the view of the
+   * camera too, dimmer, as far as these bounds go. So the user can place
+   * actors there before they come in. The player leaves it out.
    */
   offstage?: Bounds;
 }) {
@@ -58,6 +69,25 @@ export function SceneDrawing(props: {
     if (sources) actors.push({ id: actor.id, sources });
     else waiting.add(actor.id);
   }
+  const { camera } = frame;
+  const node = leaveOut(frame.node, waiting);
+  const scene: DrawNode = props.offstage
+    ? {
+        type: 'group',
+        transform: pictureToGround(bg, camera),
+        children: [node],
+      }
+    : node;
+  const bubbles: DrawNode = props.offstage
+    ? frame.bubbleNode
+    : {
+        type: 'group',
+        transform: layerTransform(bg, camera, groundDepth(bg)),
+        children: [frame.bubbleNode],
+      };
+  const view = props.offstage
+    ? cameraBounds(bg, camera)
+    : { x: 0, y: 0, width: bg.width, height: bg.height };
   return (
     <>
       {bgSources && <PartSymbols prefix={prefix} sources={bgSources} />}
@@ -76,7 +106,7 @@ export function SceneDrawing(props: {
           {...props.offstage}
         >
           <rect {...props.offstage} fill={OFFSTAGE_SHADE} />
-          <rect width={bg.width} height={bg.height} fill="white" />
+          <rect {...view} fill="white" />
         </mask>
       ) : (
         <clipPath id={`${prefix}-frame`}>
@@ -87,9 +117,9 @@ export function SceneDrawing(props: {
         clipPath={props.offstage ? undefined : `url(#${prefix}-frame)`}
         mask={props.offstage ? `url(#${prefix}-frame)` : undefined}
       >
-        <Drawing node={leaveOut(frame.node, waiting)} prefix={prefix} />
+        <Drawing node={scene} prefix={prefix} />
       </g>
-      <Drawing node={frame.bubbleNode} prefix={prefix} />
+      <Drawing node={bubbles} prefix={prefix} />
     </>
   );
 }

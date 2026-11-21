@@ -18,9 +18,9 @@ import type {
 
 import {
   actorScaleAt,
+  type Camera,
   drawScene,
   type SceneActor,
-  wholeBackground,
 } from './background.ts';
 import {
   type BubbleAnchor,
@@ -30,6 +30,7 @@ import {
   placeBubbles,
   type PlacedBubble,
 } from './bubbles/bubble.ts';
+import { cameraAt } from './camera.ts';
 import { clipOf } from './clips/index.ts';
 import {
   type Bounds,
@@ -87,9 +88,14 @@ export interface SceneFrame {
   bubbleContext: BubbleContext;
   /** The bubbles that show, in their draw order. */
   bubbles: PlacedBubble[];
-  /** The background with the actors, in the pixels of the frame. */
+  /** The view of the camera at the time of the frame. */
+  camera: Camera;
+  /** The background with the actors as the camera sees them, in the pixels of the frame. */
   node: DrawNode;
-  /** The bubbles, to draw on top of `node`. */
+  /**
+   * The bubbles, to draw on top of `node`. They are placed on the ground
+   * layer, so they need the transform of the ground layer to go on the picture.
+   */
   bubbleNode: DrawNode;
 }
 
@@ -177,16 +183,18 @@ export function sceneFrame(
     options.pop ?? true,
   );
   const frame = backgroundFrame(scene, t);
+  const camera = cameraAt(scene, bg, t);
   return {
     background: bg,
     backgroundFrame: frame,
     actors,
     bubbleContext,
     bubbles,
+    camera,
     node: drawScene(
       bg,
       frame,
-      wholeBackground(bg),
+      camera,
       actors.map((p) => p.drawing),
     ),
     bubbleNode: drawBubbles(bubbles),

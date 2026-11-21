@@ -26,6 +26,21 @@ export {
   fontByFamily,
   fontFamily,
 } from './bubbles/text.ts';
+export {
+  CAMERA_EASINGS,
+  cameraAt,
+  cameraBetween,
+  cameraBounds,
+  cameraFromBounds,
+  cameraHolder,
+  cameraMoveEnd,
+  DEFAULT_EASING,
+  ease,
+  isJump,
+  pictureToGround,
+  sortedCameraMoves,
+  startView,
+} from './camera.ts';
 export type { CartoonEntry, CartoonTimeline } from './cartoon.ts';
 export { cartoonTime, cartoonTimeline } from './cartoon.ts';
 export {

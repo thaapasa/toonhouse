@@ -6,12 +6,19 @@
 //
 // The user zooms and pans the stage with the mouse wheel, the wheel button, a
 // trackpad or two fingers. See `stageView.ts`.
-import type { Pt, Scene } from '@toonhouse/model';
+//
+// The stage shows the view of the camera at the current time as a box. When
+// the camera is selected, a drag inside the box pans the camera, and a drag on
+// a corner zooms it. The opposite corner stays in place, or the middle with
+// Alt. While a camera move plays, the camera has no view of its own, so the
+// box can't be changed.
+import type { CameraView, Pt, Scene } from '@toonhouse/model';
 import {
   actorStateAt,
   type BubbleAnchor,
   bubbleOffset,
   bubblePoint,
+  cameraBounds,
   clamp,
   type SceneFrame,
 } from '@toonhouse/renderer';
@@ -28,16 +35,18 @@ import {
 } from 'react';
 
 import { IconButton } from '../components/IconButton.tsx';
-import { ZoomFitIcon } from '../components/icons.tsx';
+import { CameraFitIcon, ZoomFitIcon } from '../components/icons.tsx';
 import { SceneDrawing } from '../components/SceneDrawing.tsx';
 import { useI18n } from '../i18n/index.tsx';
 import { type BackgroundAsset, CHARACTERS, PROPS } from '../library/index.ts';
+import { type Corner, cornersOf, panCamera, zoomCamera } from './cameraEdit.ts';
 import type { EditRun } from './history.ts';
 import { released, TAP_SLOP } from './pointer.ts';
 import { savedPoint } from './sceneEdit.ts';
 import {
   bandSize,
   clampView,
+  fitView,
   homeView,
   insideStage,
   moveView,
@@ -59,6 +68,10 @@ const TIP_HANDLE = 14;
 const WHEEL_ZOOM = 0.002;
 /** How much a pixel of a pinch on a trackpad zooms. */
 const PINCH_ZOOM = 0.01;
+/** The size of a corner handle of the camera on the screen, in CSS pixels. */
+const CORNER_BOX = 18;
+/** How far from a corner of the camera a finger still grabs it, in CSS pixels. */
+const CORNER_REACH = 24;
 
 /** Where a new bubble goes: on an actor, or free at a point. */
 export interface BubblePlace {
@@ -103,6 +116,16 @@ interface Props {
   onMovePoint(index: number, at: Pt, run: EditRun): void;
   /** Takes away the step of a drag that a pinch cancelled. */
   onRevert(run: EditRun): void;
+  /** Whether the camera is selected, so that the user can change its view. */
+  cameraSelected: boolean;
+  /**
+   * Whether a camera move plays at the current time. The camera then holds no
+   * view of its own that the user could change.
+   */
+  cameraMoving: boolean;
+  onSelectCamera(): void;
+  /** Changes the view that the camera holds at the current time. */
+  onCameraView(view: CameraView, run: EditRun): void;
   /** The user touched the stage, so playback should stop. */
   onTouch(): void;
   /** The toolbar of the selection, placed next to the selected actor. */
@@ -135,6 +158,20 @@ type Gesture =
       id: string;
       start: Pt;
       anchor: BubbleAnchor | null;
+      moved: boolean;
+    }
+  | {
+      type: 'camera';
+      start: Pt;
+      from: Pt;
+      view: CameraView;
+      moved: boolean;
+    }
+  | {
+      type: 'corner';
+      corner: Corner;
+      start: Pt;
+      view: CameraView;
       moved: boolean;
     }
   | { type: 'tap'; start: Pt; onTap: (at: Pt) => void }
@@ -197,7 +234,14 @@ export function EditorStage(props: Props) {
     Math.abs(stageView.y - home.y) < 1e-3;
 
   const { frame } = props;
-  const { actors: placed, bubbles } = frame;
+  const { actors: placed, bubbles, camera } = frame;
+  const cameraBox = cameraBounds(bg, camera);
+  const cameraEditable = props.cameraSelected && !walk && !props.cameraMoving;
+  const cameraHome = fitView(area, cameraBox);
+  const atCamera =
+    Math.abs(stageView.zoom - cameraHome.zoom) < 1e-6 &&
+    Math.abs(stageView.x - cameraHome.x) < 1e-3 &&
+    Math.abs(stageView.y - cameraHome.y) < 1e-3;
   const anchorOf = (actorId: string | undefined) =>
     actorId === undefined
       ? null
@@ -223,13 +267,16 @@ export function EditorStage(props: Props) {
     actorStateAt(walkActor.actor, walkActor.kind, bg, walkAction.t).at;
   const walkPoints = walkStart ? [walkStart, ...(walkAction.path ?? [])] : [];
 
-  /** The point of the background frame under the pointer. */
-  const toFrame = (e: { clientX: number; clientY: number }): Pt => {
+  /** The point of the background frame under the pointer, not rounded. */
+  const exactFrame = (e: { clientX: number; clientY: number }): Pt => {
     const ctm = svgRef.current?.getScreenCTM();
     if (!ctm) return { x: 0, y: 0 };
     const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(ctm.inverse());
-    return savedPoint(p);
+    return { x: p.x, y: p.y };
   };
+  /** The point of the background frame under the pointer. */
+  const toFrame = (e: { clientX: number; clientY: number }): Pt =>
+    savedPoint(exactFrame(e));
   const client = (e: { clientX: number; clientY: number }): Pt => ({
     x: e.clientX,
     y: e.clientY,
@@ -279,6 +326,9 @@ export function EditorStage(props: Props) {
     const actor = target?.closest('[data-actor]');
     const bubbleEl = target?.closest('[data-bubble]');
     const tailEl = target?.closest('[data-tail]');
+    const cornerEl = target?.closest('[data-camera-corner]');
+    const cameraEl = target?.closest('[data-camera]');
+    const cameraTab = target?.closest('[data-camera-tab]');
     const bubble =
       bubbleEl &&
       bubbles.find((b) => b.bubble.id === bubbleEl.getAttribute('data-bubble'));
@@ -302,6 +352,24 @@ export function EditorStage(props: Props) {
                   }
                 : null,
           }),
+      };
+    } else if (cameraEditable && cornerEl) {
+      g = {
+        type: 'corner',
+        corner: Number(cornerEl.getAttribute('data-camera-corner')) as Corner,
+        start: client(e),
+        view: camera,
+        moved: false,
+      };
+    } else if (!walk && cameraTab) {
+      g = { type: 'tap', start: client(e), onTap: props.onSelectCamera };
+    } else if (cameraEditable && cameraEl) {
+      g = {
+        type: 'camera',
+        start: client(e),
+        from: exactFrame(e),
+        view: camera,
+        moved: false,
       };
     } else if (!walk && tailEl && selectedBubble) {
       g = {
@@ -402,7 +470,18 @@ export function EditorStage(props: Props) {
     if (!g.moved && !far(g.start, client(e))) return;
     const at = toFrame(e);
     g.moved = true;
-    if (g.type === 'actor') {
+    if (g.type === 'camera') {
+      const p = exactFrame(e);
+      props.onCameraView(
+        panCamera(bg, g.view, { x: p.x - g.from.x, y: p.y - g.from.y }),
+        g,
+      );
+    } else if (g.type === 'corner') {
+      props.onCameraView(
+        zoomCamera(bg, g.view, g.corner, exactFrame(e), e.altKey),
+        g,
+      );
+    } else if (g.type === 'actor') {
       // From where the drag started, as each move redoes the whole drag. The
       // actor stays on the stage, so that the user can find it again.
       const to = insideStage(
@@ -548,6 +627,56 @@ export function EditorStage(props: Props) {
             height={bg.height}
             strokeWidth={1.5 * unit}
           />
+          {cameraEditable && (
+            <rect data-camera className="camera-hit" {...cameraBox} />
+          )}
+          <rect
+            className={
+              props.cameraSelected ? 'camera-edge selected' : 'camera-edge'
+            }
+            {...cameraBox}
+            strokeWidth={(props.cameraSelected ? 3 : 2) * unit}
+            strokeDasharray={
+              props.cameraSelected && !cameraEditable
+                ? `${10 * unit} ${8 * unit}`
+                : undefined
+            }
+          />
+          {!walk && (
+            <g
+              data-camera-tab
+              className={
+                props.cameraSelected ? 'camera-tab selected' : 'camera-tab'
+              }
+              transform={`translate(${cameraBox.x} ${cameraBox.y}) scale(${unit})`}
+            >
+              <title>{tr('editor.camera')}</title>
+              <rect x={0} y={-30} width={40} height={30} rx={6} />
+              <path
+                d="M10 -20h14a2 2 0 0 1 2 2v2l5-3v12l-5-3v2a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2v-10a2 2 0 0 1 2-2z"
+                strokeWidth={1.8}
+              />
+            </g>
+          )}
+          {cameraEditable &&
+            cornersOf(cameraBox).map((p, i) => (
+              <g
+                key={i}
+                data-camera-corner={i}
+                className="camera-corner"
+                style={{ cursor: i % 2 ? 'nesw-resize' : 'nwse-resize' }}
+              >
+                <circle cx={p.x} cy={p.y} r={CORNER_REACH * unit} />
+                <rect
+                  x={p.x - (CORNER_BOX / 2) * unit}
+                  y={p.y - (CORNER_BOX / 2) * unit}
+                  width={CORNER_BOX * unit}
+                  height={CORNER_BOX * unit}
+                  rx={3 * unit}
+                  strokeWidth={2 * unit}
+                />
+              </g>
+            ))}
           {box && (
             <rect
               className="selection-box"
@@ -596,15 +725,24 @@ export function EditorStage(props: Props) {
           )}
         </svg>
       )}
-      {!atHome && (
-        <IconButton
-          label="editor.stageHome"
-          className="stage-home"
-          onClick={() => changeView(() => home)}
-        >
-          <ZoomFitIcon />
-        </IconButton>
-      )}
+      <div className="stage-home">
+        {!atHome && (
+          <IconButton
+            label="editor.stageHome"
+            onClick={() => changeView(() => home)}
+          >
+            <ZoomFitIcon />
+          </IconButton>
+        )}
+        {camera.zoom > 1 && !atCamera && (
+          <IconButton
+            label="editor.stageCamera"
+            onClick={() => changeView(() => cameraHome)}
+          >
+            <CameraFitIcon />
+          </IconButton>
+        )}
+      </div>
       {/* Always there, so that its size is measured when it gets content. */}
       <div
         ref={barRef}

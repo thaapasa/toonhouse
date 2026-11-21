@@ -5,6 +5,7 @@ import type {
   Background,
   BackgroundFrame,
   BackgroundPart,
+  CameraView,
   Matrix,
   Pt,
 } from '@toonhouse/model';
@@ -24,13 +25,7 @@ import {
  * The view of the camera on the ground layer. The view has the shape of the
  * frame, so the zoom and the middle point set it.
  */
-export interface Camera {
-  /** The middle of the view, in the pixels of the frame. */
-  x: number;
-  y: number;
-  /** 1 shows the whole background, 2 a view half as wide. */
-  zoom: number;
-}
+export type Camera = CameraView;
 
 /** How far the camera can zoom in. */
 export const MAX_ZOOM = 4;
