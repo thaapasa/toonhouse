@@ -1,0 +1,38 @@
+{
+  "src": "assets/work/raincoat/pieces/torso-prep.png",
+  "out": "assets/packs/sunny/characters/raincoat-girl/torso.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#2a1202",
+      "also": ["#351e01", "#6d5303"]
+    },
+    {
+      "name": "coat",
+      "color": "#fddc01",
+      "also": ["#fcdd0b", "#edca09"]
+    },
+    {
+      "name": "coat-seam",
+      "color": "#c9a702",
+      "also": ["#d3b20e", "#b59505"]
+    },
+    {
+      "name": "coat-lining",
+      "color": "#c7d895",
+      "also": ["#b7d28c", "#cfd559"]
+    },
+    {
+      "name": "button-rim",
+      "color": "#51c2d8",
+      "covers": ["button"]
+    },
+    {
+      "name": "button",
+      "color": "#85f1fe",
+      "also": ["#7aedfb"]
+    }
+  ],
+  "lines": {},
+  "smooth": 1.25
+}

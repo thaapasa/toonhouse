@@ -1,0 +1,20 @@
+{
+  "src": "assets/work/farm/traced/ground-prep.svg",
+  "out": "assets/packs/sunny/backgrounds/farm/ground.svg",
+  "layers": [
+    { "name": "outline", "color": "#4c2914", "also": ["#3a1a0b", "#3c230d"] },
+    { "name": "grass", "color": "#41ad10" },
+    { "name": "grass-dark", "color": "#338c11", "also": ["#366616"] },
+    {
+      "name": "fence",
+      "color": "#c09162",
+      "also": ["#c49462", "#bb8d5d", "#bf9163", "#bf915e", "#c0905f", "#bf905e"]
+    },
+    { "name": "fence-grain", "color": "#8a603b" },
+    { "name": "flower", "color": "#e8db01" },
+    { "name": "flower-alt", "color": "#e32414" }
+  ],
+  "openEdges": ["left", "right", "bottom"],
+  "lines": {},
+  "minLine": 0.8
+}

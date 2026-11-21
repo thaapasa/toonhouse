@@ -107,8 +107,11 @@ describe('library backgrounds', () => {
 describe('library packs', () => {
   it('gives the default bubble font of the asset pack', () => {
     const { actorFont, backgroundFont } = LIBRARY;
-    expect(actorFont({ kind: 'character', id: 'boy' })).toBe('comic-relief');
-    expect(backgroundFont('meadow')).toBe('comic-relief');
+    expect(actorFont({ kind: 'character', id: 'sunny/blond-boy' })).toBe(
+      'comic-relief',
+    );
+    expect(backgroundFont('sunny/meadow')).toBe('comic-relief');
+    expect(backgroundFont('adventure/harbor')).toBe('indie-flower');
     expect(backgroundFont(null)).toBe('comic-relief');
   });
 });

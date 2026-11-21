@@ -11,7 +11,7 @@ export const v1 = {
   scenes: [
     {
       id: '6f1c2b9e-1d4a-4c1e-9a51-0d1f6c2a7b10',
-      background: 'meadow',
+      background: 'sunny/meadow',
       backgroundActions: [
         {
           id: 'b6a7f0d2-2b1c-4f0e-8a3d-5c9e1f2a3b41',
@@ -37,7 +37,7 @@ export const v1 = {
           id: 'e3f4a5b6-5e4f-4a3b-9d6a-8f2b4c5d6e74',
           asset: {
             kind: 'character',
-            id: 'boy',
+            id: 'sunny/blond-boy',
           },
           at: {
             x: 420.5,
@@ -85,7 +85,7 @@ export const v1 = {
           id: 'd8e9fa0b-ad9e-4f8a-8cbf-3e7a9bacbdc9',
           asset: {
             kind: 'character',
-            id: 'chicken',
+            id: 'sunny/hen',
           },
           at: {
             x: 1600,
@@ -111,7 +111,7 @@ export const v1 = {
           id: '0b1c2d3e-d0c1-4cbd-9fe2-6bad0cedf0fc',
           asset: {
             kind: 'character',
-            id: 'bunny',
+            id: 'sunny/bunny',
           },
           at: {
             x: 200,
@@ -142,7 +142,7 @@ export const v1 = {
           id: '3e4f5a6b-a3f4-4fe0-8c15-9ed03f0123cf',
           asset: {
             kind: 'prop',
-            id: 'oak',
+            id: 'sunny/oak',
           },
           at: {
             x: 1850,

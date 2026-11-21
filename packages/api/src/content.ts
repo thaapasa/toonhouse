@@ -91,11 +91,14 @@ const Action = z.looseObject({
   clipStart: range({ min: 0, max: 1 }).exactOptional(),
 });
 
+/** The id of a library asset: its pack and its name, such as `sunny/oak`. */
+const AssetId = z.string().regex(/^[a-z0-9-]{1,32}\/[a-z0-9-]{1,64}$/);
+
 const Actor = z.looseObject({
   id: Id,
   asset: z.looseObject({
     kind: z.enum(['character', 'prop']),
-    id: z.string().regex(/^[a-z0-9-]{1,64}$/),
+    id: AssetId,
   }),
   at: Point,
   facing: z.union([z.literal(1), z.literal(-1)]),
@@ -160,10 +163,7 @@ const CameraEntry = z.looseObject({
 
 const Scene = z.looseObject({
   id: Id,
-  background: z
-    .string()
-    .regex(/^[a-z0-9-]{1,64}$/)
-    .nullable(),
+  background: AssetId.nullable(),
   backgroundActions: z.array(Action).max(L.actions),
   actors: z.array(Actor).max(L.actors),
   bubbles: z.array(Bubble).max(L.bubbles).exactOptional(),

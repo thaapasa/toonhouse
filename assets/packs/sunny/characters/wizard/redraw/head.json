@@ -1,0 +1,31 @@
+{
+  "src": "assets/work/wizard/redraw/head-prep.png",
+  "out": "assets/packs/sunny/characters/wizard/head.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#403228",
+      "also": ["#2e1e17", "#3f3024", "#46494a", "#684929"]
+    },
+    {
+      "name": "skin",
+      "color": "#f6bf7a",
+      "also": ["#f6bc72", "#dea25b", "#a27748"]
+    },
+    {
+      "name": "hair",
+      "color": "#dad9cc",
+      "also": ["#dddcd0", "#ddddd1", "#cbcdc4", "#a08a6c"]
+    },
+    {
+      "name": "hat",
+      "color": "#8fa1a9",
+      "also": ["#5e7179", "#4f5e65"]
+    },
+    {
+      "name": "eye",
+      "color": "#fdfdfd"
+    }
+  ],
+  "lines": {}
+}

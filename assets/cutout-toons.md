@@ -33,11 +33,11 @@ The character is a few traced pieces with the arms and legs drawn in code:
 Only the side view exists. A character that turns towards the camera needs
 another set of pieces for each view.
 
-The app uses a copy of the boy in `characters/boy/`. Its `rig.json` has the
-pivots of the prototype rig, and also the values that the prototype had in code:
-the face coordinates, the colors and the sleeve. The steps below still work in
-`prototypes/`. When the character is done, add it to the app as described in
-"Adding the character to the app" at the end.
+The app uses a copy of the boy in `packs/sunny/characters/blond-boy/`. Its
+`rig.json` has the pivots of the prototype rig, and also the values that the
+prototype had in code: the face coordinates, the colors and the sleeve. The
+steps below still work in `prototypes/`. When the character is done, add it to
+the app as described in "Adding the character to the app" at the end.
 
 ## Steps
 
@@ -117,7 +117,7 @@ then rename them to `head.png`, `torso.png`, `hand.png`, `hand-open.png` and
 Redraw each piece as described in "Redrawing" in [CLAUDE.md](CLAUDE.md). Keep
 the config of each piece in `assets/work/<name>/pieces/`, next to the piece,
 while you work. When you add the character to the app, move the configs to
-`assets/characters/<name>/redraw/`:
+`assets/packs/<pack>/characters/<name>/redraw/`:
 
 ```sh
 MISE_ENV=art mise run redraw-image -- init assets/work/<name>/pieces/head.png assets/work/<name>/pieces/head.json
@@ -345,7 +345,7 @@ studio, add it to the translation files of the studio.
 ## Holding a staff
 
 A cutout rig can have a staff in the near hand. The wizard is the example, and
-his [log](characters/wizard/LOG.md) describes how it was set up:
+his [log](packs/sunny/characters/wizard/LOG.md) describes how it was set up:
 
 - Ask for the staff as a sixth piece on the parts sheet, and for the relaxed
   hand as a closed fist.
@@ -357,13 +357,14 @@ his [log](characters/wizard/LOG.md) describes how it was set up:
 
 ## Adding the character to the app
 
-1. Make a folder `assets/characters/<name>/` and copy the SVG pieces, the mouth
-   patch and the `.prompt.json` of the parts sheet there.
+1. Make a folder `assets/packs/<pack>/characters/<name>/` and copy the SVG
+   pieces, the mouth patch and the `.prompt.json` of the parts sheet there. See
+   "Asset packs" in [CLAUDE.md](CLAUDE.md) for how to pick the name.
 2. Write `rig.json` in the same shape as the boy's. The type `CutoutRig` in
    `packages/model` describes each field. Take the pivots from the rig that
    `build-rig-2d.ts` wrote, and the face coordinates from step 5.
-3. Add the name of the character in Finnish and English to the studio
-   translations, under `character.<name>`.
+3. Add the name of the character in Finnish and English to the translations of
+   the web app and the studio, under `character.<pack>/<name>`.
 
 The studio finds the folder by itself. Start it with `pnpm studio` and play each
 clip on the new character.

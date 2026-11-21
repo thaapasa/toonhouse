@@ -1,24 +1,3 @@
 {
-  "id": "sunny",
-  "bubbleFont": "Comic Relief",
-  "characters": [
-    "boy",
-    "bunny",
-    "chicken",
-    "duck",
-    "emo",
-    "grandma",
-    "raincoat",
-    "squirrel",
-    "wizard"
-  ],
-  "props": [
-    "apple-tree",
-    "flowering-bush",
-    "hedge",
-    "oak",
-    "round-bush",
-    "spruce"
-  ],
-  "backgrounds": ["farm", "meadow", "village"]
+  "bubbleFont": "Comic Relief"
 }

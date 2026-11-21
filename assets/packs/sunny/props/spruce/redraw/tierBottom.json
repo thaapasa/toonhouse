@@ -1,0 +1,14 @@
+{
+  "src": "assets/work/trees-redraw/spruce/traced/tierBottom.svg",
+  "out": "assets/packs/sunny/props/spruce/tierBottom.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#241004"
+    },
+    {
+      "name": "needles-dark",
+      "color": "#04541e"
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "width": 2048,
+  "height": 1152,
+  "layers": [
+    { "id": "sky", "svg": "sky.svg", "depth": 0 },
+    { "id": "trees", "svg": "trees.svg", "depth": 0.25 },
+    { "id": "houses", "svg": "houses.svg", "depth": 0.45 },
+    { "id": "ground", "svg": "ground.svg", "depth": 1 }
+  ],
+  "ground": {
+    "layer": "ground",
+    "start": { "x": 1024, "y": 920 },
+    "actorScale": 0.4
+  },
+  "parts": {
+    "sun": {
+      "svg": "../../shared/sun.svg",
+      "width": 956,
+      "height": 954,
+      "pivot": { "x": 478, "y": 477 },
+      "layer": "sky",
+      "at": { "x": 1560, "y": 200 },
+      "scale": 0.2,
+      "arc": {
+        "from": { "x": 240, "y": 560 },
+        "top": { "x": 1024, "y": 140 },
+        "to": { "x": 1810, "y": 560 }
+      }
+    },
+    "cloudBig": {
+      "svg": "../../shared/cloud-2.svg",
+      "width": 610,
+      "height": 323,
+      "pivot": { "x": 305, "y": 323 },
+      "layer": "sky",
+      "at": { "x": 380, "y": 220 },
+      "scale": 0.48,
+      "drift": { "speed": 40 }
+    },
+    "cloudMiddle": {
+      "svg": "../../shared/cloud-1.svg",
+      "width": 656,
+      "height": 374,
+      "pivot": { "x": 328, "y": 374 },
+      "layer": "sky",
+      "at": { "x": 1400, "y": 140 },
+      "scale": 0.36,
+      "drift": { "speed": 20 }
+    },
+    "cloudSmall": {
+      "svg": "../../shared/cloud-4.svg",
+      "width": 605,
+      "height": 322,
+      "pivot": { "x": 302, "y": 322 },
+      "layer": "sky",
+      "at": { "x": 1780, "y": 230 },
+      "scale": 0.26,
+      "drift": { "speed": 60 }
+    }
+  }
+}

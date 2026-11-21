@@ -1,0 +1,35 @@
+{
+  "src": "assets/work/wizard/pieces/hand.png",
+  "out": "assets/packs/sunny/characters/wizard/hand.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#403228",
+      "also": [
+        "#30190b",
+        "#361e0e",
+        "#3e210b",
+        "#46270c",
+        "#4f3013",
+        "#5d3a17",
+        "#6c4923",
+        "#815a30"
+      ]
+    },
+    {
+      "name": "skin",
+      "color": "#f6bf7a",
+      "also": [
+        "#f9c37e",
+        "#f8c27b",
+        "#f3be7b",
+        "#e3b376",
+        "#cfa168",
+        "#bc8e5b",
+        "#a57a49",
+        "#926a3f"
+      ]
+    }
+  ],
+  "lines": {}
+}

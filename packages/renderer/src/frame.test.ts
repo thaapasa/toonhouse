@@ -1,8 +1,8 @@
 import type { Actor, Background, CutoutRig, Scene } from '@toonhouse/model';
 import { describe, expect, it } from 'vitest';
 
-import boy from '../../../assets/characters/boy/rig.json';
 import testHills from '../../../assets/fixtures/backgrounds/test-hills/background.json';
+import boy from '../../../assets/packs/sunny/characters/blond-boy/rig.json';
 import { actorScaleAt } from './background.ts';
 import { cameraBounds } from './camera.ts';
 import { clipOf } from './clips/index.ts';

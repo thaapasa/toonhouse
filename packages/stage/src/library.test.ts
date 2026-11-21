@@ -4,28 +4,30 @@ import { describe, expect, it } from 'vitest';
 import {
   assetFolder,
   backgroundSources,
+  packOf,
   resolve,
   rigSources,
 } from './library.ts';
 
 describe('library files', () => {
   it('finds the folder and the id of an asset', () => {
-    expect(assetFolder('../../assets/props/oak/rig.json')).toEqual({
-      dir: '../../assets/props/oak/',
-      id: 'oak',
+    expect(assetFolder('../../assets/packs/sunny/props/oak/rig.json')).toEqual({
+      dir: '../../assets/packs/sunny/props/oak/',
+      id: 'sunny/oak',
     });
+    expect(packOf('sunny/oak')).toBe('sunny');
   });
 
   it('resolves a file against a folder', () => {
-    const dir = '../../assets/backgrounds/farm/';
+    const dir = '../../assets/packs/sunny/backgrounds/farm/';
     expect(resolve(dir, 'sky.svg')).toBe(
-      '../../assets/backgrounds/farm/sky.svg',
+      '../../assets/packs/sunny/backgrounds/farm/sky.svg',
     );
     expect(resolve(dir, './sky.svg')).toBe(
-      '../../assets/backgrounds/farm/sky.svg',
+      '../../assets/packs/sunny/backgrounds/farm/sky.svg',
     );
-    expect(resolve(dir, '../shared/sun.svg')).toBe(
-      '../../assets/backgrounds/shared/sun.svg',
+    expect(resolve(dir, '../../shared/sun.svg')).toBe(
+      '../../assets/packs/sunny/shared/sun.svg',
     );
   });
 

@@ -1,0 +1,24 @@
+{
+  "src": "assets/work/farm/traced/far-prep.svg",
+  "out": "assets/packs/sunny/backgrounds/farm/far.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#757560",
+      "also": ["#7e7f64", "#99a473"]
+    },
+    { "name": "field-wheat", "color": "#dae286", "also": ["#dae47d"] },
+    { "name": "field-ploughed", "color": "#dad599" },
+    {
+      "name": "furrow",
+      "color": "#d3cd86",
+      "also": ["#cfca83", "#d8d18a", "#d8ce86"]
+    },
+    { "name": "field", "color": "#b2d58a", "also": ["#b1d58b"] },
+    { "name": "field-light", "color": "#bfda8d" },
+    { "name": "field-pale", "color": "#bed59e" },
+    { "name": "leaves-far", "color": "#a9d095", "also": ["#a7bf84"] }
+  ],
+  "openEdges": ["left", "right", "bottom"],
+  "lines": {}
+}

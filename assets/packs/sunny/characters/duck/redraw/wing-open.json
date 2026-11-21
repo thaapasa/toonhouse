@@ -1,0 +1,32 @@
+{
+  "src": "assets/work/duck/traced/wing-open.svg",
+  "out": "assets/packs/sunny/characters/duck/wing-open.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#392a20",
+      "also": ["#402f21", "#513d28", "#5a4a39"]
+    },
+    {
+      "name": "wing",
+      "color": "#968772",
+      "also": [
+        "#978773",
+        "#75695a",
+        "#928470",
+        "#958774",
+        "#8f7e6a",
+        "#978873",
+        "#8e816f",
+        "#8a7f70",
+        "#6f7b88"
+      ]
+    },
+    {
+      "name": "wing-patch",
+      "color": "#0666c3",
+      "also": ["#0368dd", "#0971db", "#3276b5"]
+    }
+  ],
+  "lines": {}
+}

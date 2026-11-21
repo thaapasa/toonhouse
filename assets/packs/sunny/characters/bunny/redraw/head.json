@@ -1,0 +1,37 @@
+{
+  "src": "assets/work/bunny/redraw/head-prep.png",
+  "out": "assets/packs/sunny/characters/bunny/head.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#442113",
+      "also": ["#3e1b0d", "#6c4128"]
+    },
+    {
+      "name": "fur",
+      "color": "#e7a862",
+      "also": ["#e7aa65", "#d69658", "#9e7150"]
+    },
+    {
+      "name": "belly",
+      "color": "#fcf0da",
+      "also": ["#fdf4e2", "#eeddc5"]
+    },
+    {
+      "name": "eye",
+      "color": "#ffffff",
+      "also": ["#f7f8fa"]
+    },
+    {
+      "name": "pupil",
+      "color": "#130602"
+    },
+    {
+      "name": "nose",
+      "color": "#f16f86",
+      "also": ["#ddb0ae", "#fd98ad"]
+    }
+  ],
+  "lines": {},
+  "smooth": 1.1
+}

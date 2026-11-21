@@ -7,13 +7,18 @@ import type { Background, Rig } from '@toonhouse/model';
 import { layerKey } from './Drawing.tsx';
 
 /**
- * The folder of a file, with the slash at the end, and the name of the
- * folder, which is the id of the asset.
+ * The folder of a file in `packs/<pack>/<kind>/<name>/`, with the slash at the
+ * end, and the id of the asset, `<pack>/<name>`. The pack is part of the id so
+ * that each pack can name its assets without looking at the other packs.
  */
 export function assetFolder(path: string): { dir: string; id: string } {
   const dir = path.slice(0, path.lastIndexOf('/') + 1);
-  return { dir, id: dir.split('/').at(-2)! };
+  const parts = dir.split('/');
+  return { dir, id: `${parts.at(-4)!}/${parts.at(-2)!}` };
 }
+
+/** The asset pack of an asset id. */
+export const packOf = (id: string): string => id.slice(0, id.indexOf('/'));
 
 /** `file` relative to the folder `dir`, with `.` and `..` resolved. */
 export function resolve(dir: string, file: string): string {

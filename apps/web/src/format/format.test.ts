@@ -2,7 +2,7 @@
 // fail when a change could break the cartoons that users have saved. See
 // "Cartoon format versions" in ARCHITECTURE.md for what such a change needs.
 import { CartoonContent } from '@toonhouse/api';
-import type { ClipKind } from '@toonhouse/model';
+import type { Actor, ActorAsset, ClipKind } from '@toonhouse/model';
 import { backgroundClips, clipsFor } from '@toonhouse/renderer';
 import { describe, expect, it } from 'vitest';
 
@@ -22,10 +22,39 @@ describe('cartoon format', () => {
     expect(parsed.data, SEE).toEqual(v1);
   });
 
+  // The library takes any folder as an asset, but a save accepts only the ids
+  // that the schema allows, so a cartoon with a badly named asset can't be saved.
+  it('accepts the id of every asset in the library', () => {
+    const scene = (background: string | null, actors: Actor[] = []) => ({
+      ...newScene(),
+      background,
+      actors,
+    });
+    const actor = (kind: ActorAsset['kind'], id: string): Actor => ({
+      id: newId(),
+      asset: { kind, id },
+      at: { x: 0, y: 0 },
+      facing: 1,
+      scale: 1,
+      actions: [],
+    });
+    const content = {
+      version: 1,
+      scenes: [
+        ...BACKGROUNDS.map((b) => scene(b.id)),
+        scene(null, [
+          ...CHARACTERS.map((c) => actor('character', c.id)),
+          ...PROPS.map((p) => actor('prop', p.id)),
+        ]),
+      ],
+    };
+    expect(CartoonContent.safeParse(content).error).toBeUndefined();
+  });
+
   it('accepts what the editor makes for a new scene and a new bubble', () => {
     const scene = {
       ...newScene(),
-      background: 'meadow',
+      background: 'sunny/meadow',
       bubbles: [newBubble(newId(), 1, { x: 100, y: 100 }, null)],
     };
     const parsed = CartoonContent.safeParse({ version: 1, scenes: [scene] });
@@ -35,31 +64,31 @@ describe('cartoon format', () => {
 
 /** The library ids that saved cartoons can refer to, with their rig kinds. */
 const characters: Record<string, ClipKind> = {
-  boy: 'cutout',
-  bunny: 'rabbit',
-  captain: 'cutout',
-  chicken: 'bird',
-  duck: 'bird',
-  emo: 'cutout',
-  grandma: 'cutout',
-  quartermaster: 'cutout',
-  raincoat: 'cutout',
-  squirrel: 'rabbit',
-  wizard: 'cutout',
+  'sunny/blond-boy': 'cutout',
+  'sunny/bunny': 'rabbit',
+  'adventure/captain': 'cutout',
+  'sunny/hen': 'bird',
+  'sunny/duck': 'bird',
+  'sunny/emo-girl': 'cutout',
+  'sunny/grandma': 'cutout',
+  'adventure/quartermaster': 'cutout',
+  'sunny/raincoat-girl': 'cutout',
+  'sunny/squirrel': 'rabbit',
+  'sunny/wizard': 'cutout',
 };
 const props = [
-  'apple-tree',
-  'flowering-bush',
-  'hedge',
-  'oak',
-  'round-bush',
-  'spruce',
+  'sunny/apple-tree',
+  'sunny/flowering-bush',
+  'sunny/hedge',
+  'sunny/oak',
+  'sunny/round-bush',
+  'sunny/spruce',
 ];
 const backgrounds: Record<string, string[]> = {
-  farm: ['idle', 'day', 'drift'],
-  harbor: ['idle'],
-  meadow: ['idle', 'day', 'drift'],
-  village: ['idle', 'day', 'drift'],
+  'sunny/farm': ['idle', 'day', 'drift'],
+  'adventure/harbor': ['idle'],
+  'sunny/meadow': ['idle', 'day', 'drift'],
+  'sunny/village': ['idle', 'day', 'drift'],
 };
 const clips: Record<Exclude<ClipKind, 'background'>, string[]> = {
   cutout: ['idle', 'walk', 'wave', 'talk'],

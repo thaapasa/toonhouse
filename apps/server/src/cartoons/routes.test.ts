@@ -252,12 +252,12 @@ describe('content', () => {
     scenes: [
       {
         id: 's1',
-        background: 'meadow',
+        background: 'sunny/meadow',
         backgroundActions: [{ id: 'b1', t: 0, clip: 'day' }],
         actors: [
           {
             id: 'a1',
-            asset: { kind: 'character', id: 'boy' },
+            asset: { kind: 'character', id: 'sunny/blond-boy' },
             at: { x: 100, y: 900 },
             facing: 1,
             scale: 1,

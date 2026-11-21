@@ -1,0 +1,44 @@
+{
+  "src": "assets/work/captain/traced/head-back.svg",
+  "out": "assets/packs/adventure/characters/captain/head-back.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#080401",
+      "also": [
+        "#060400",
+        "#310f02",
+        "#130702",
+        "#3f1702",
+        "#370f02",
+        "#290e02",
+        "#200d01",
+        "#410e02",
+        "#382214",
+        "#50311d",
+        "#4a220c"
+      ]
+    },
+    {
+      "name": "hair",
+      "color": "#702c03",
+      "also": [
+        "#702a02",
+        "#632402",
+        "#692903",
+        "#5a2202",
+        "#511d03",
+        "#471502",
+        "#531002",
+        "#99683e",
+        "#d08f56"
+      ]
+    },
+    {
+      "name": "bandana",
+      "color": "#8f1e0d",
+      "also": ["#740e06", "#80180a", "#631206"]
+    }
+  ],
+  "lines": {}
+}

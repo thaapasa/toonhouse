@@ -1,0 +1,29 @@
+{
+  "src": "assets/work/chicken/traced/foot.svg",
+  "out": "assets/packs/sunny/characters/hen/foot.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#4f382e",
+      "also": [
+        "#583317",
+        "#5b3721",
+        "#633d1d",
+        "#664026",
+        "#6a4d40",
+        "#6c3e0b",
+        "#734625",
+        "#735035",
+        "#794809",
+        "#895402",
+        "#966419"
+      ]
+    },
+    {
+      "name": "leg",
+      "color": "#fbaf00",
+      "also": ["#efa500", "#eb9c00", "#e9a101"]
+    }
+  ],
+  "lines": {}
+}

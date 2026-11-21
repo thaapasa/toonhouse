@@ -1,0 +1,23 @@
+{
+  "src": "assets/work/bunny/pieces/paw.png",
+  "out": "assets/packs/sunny/characters/bunny/paw.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#442113",
+      "also": ["#3b180d", "#451b0c", "#64371c", "#865632"]
+    },
+    {
+      "name": "fur",
+      "color": "#e7a862",
+      "also": ["#e7a962", "#d69658", "#a87853"]
+    },
+    {
+      "name": "belly",
+      "color": "#fcf0da",
+      "also": ["#fcf5e0", "#f1e0c5", "#e1c19c"]
+    }
+  ],
+  "scale": 6,
+  "smooth": 2
+}

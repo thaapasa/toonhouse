@@ -1,0 +1,36 @@
+{
+  "src": "assets/work/grandma/traced/foot.svg",
+  "out": "assets/packs/sunny/characters/grandma/foot.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#533121",
+      "also": [
+        "#3f2728",
+        "#422c2b",
+        "#2b1423",
+        "#43283a",
+        "#553d45",
+        "#c4bbbf",
+        "#bcb1b4"
+      ]
+    },
+    {
+      "name": "slipper",
+      "color": "#b04ced",
+      "also": ["#7f17c3", "#8827c9"]
+    },
+    {
+      "name": "slipper-inside",
+      "color": "#7111ac",
+      "also": ["#8c1ad2", "#671397"]
+    },
+    {
+      "name": "slipper-sole",
+      "color": "#eedcf8",
+      "also": ["#d1bfd8", "#d0c0d8"]
+    }
+  ],
+  "lines": {},
+  "minArea": 250
+}

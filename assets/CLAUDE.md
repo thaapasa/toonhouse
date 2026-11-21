@@ -13,16 +13,42 @@ builds on the steps below.
 
 ## Asset packs
 
-Every character, prop and background belongs to one asset pack. The folder of a
-pack in `packs/` has two files:
+Every character, prop and background belongs to one asset pack, and it lives in
+the folder of its pack:
 
-- `pack.json` lists the characters, props and backgrounds of the pack by their
-  folder names. The assets stay in `characters/`, `props/` and `backgrounds/`,
-  so that saved cartoons keep finding them.
-- `bubbleFont` in `pack.json` is the family of the default font of the speech
+```
+packs/<pack>/
+  pack.json
+  style.txt
+  characters/<name>/
+  props/<name>/
+  backgrounds/<name>/
+  shared/
+```
+
+- `pack.json` has `bubbleFont`, the family of the default font of the speech
   bubbles. It must be one of the fonts in `fonts/`.
 - `style.txt` is the style prompt of the pack. Put it in every prompt for an
   image of the pack, so that the assets of the pack look alike.
+- `shared/` has the pieces that several assets of the pack use, such as the sun
+  and the clouds of the backgrounds.
+- Each asset folder has the files of one asset. The app finds the folders by
+  themselves, so a new asset needs no list to add it to.
+
+The id of an asset is `<pack>/<name>`, such as `sunny/raincoat-girl`. Saved
+cartoons refer to the assets by this id, so a name can't change later without a
+converter. See "Cartoon format versions" in
+[ARCHITECTURE.md](../ARCHITECTURE.md).
+
+A name has to be unique among the characters and the props of its pack, because
+the studio finds them by the id alone. A background can have the same name as a
+character or a prop. Pick a name that still fits when the pack gets more assets
+of the same kind. If the pack could get a second one of the same figure, add
+what tells them apart, such as `raincoat-girl` and `emo-girl`, or `blond-boy`
+instead of `boy`. If a second one is unlikely, the plain name is enough, such as
+`duck` or `oak`. Use lowercase English words joined with hyphens. The users
+never see the name. They see the name in the translation files, under keys such
+as `character.sunny/raincoat-girl`.
 
 In every pack, keep the art simple: a few large shapes, flat fills and an
 outline. Simple art keeps the SVG files small, and fine detail looks wrong when
@@ -91,10 +117,10 @@ These rules come from testing with Qwen Image 2.1 Turbo.
 
 ## Backgrounds
 
-A background is a stack of layers in `backgrounds/<name>/`, one SVG for each
-depth, all with the same 2048×1152 frame. The `LOG.md` of each background lists
-its layers, their depths and how they were made. These rules come from making
-the meadow, the farm and the village.
+A background is a stack of layers in `packs/<pack>/backgrounds/<name>/`, one SVG
+for each depth, all with the same 2048×1152 frame. The `LOG.md` of each
+background lists its layers, their depths and how they were made. These rules
+come from making the meadow, the farm and the village.
 
 - Generate each layer except the sky as a wide strip, such as 2048×768, with the
   transparent background sentence. Ask for a "wide panoramic background layer
@@ -121,14 +147,14 @@ the meadow, the farm and the village.
   tracing. The far fields of the farm came out almost as bright as the near
   layers, even though the prompt asked for pale colors.
 - Draw the sky as a flat rectangle in the SVG. The sun and the clouds are
-  separate pieces in `backgrounds/shared/`.
+  separate pieces in `packs/<pack>/shared/`.
 
 ## Props
 
-A prop that rustles, such as a tree or a bush, is in `props/<name>/`, with its
-crown in separate pieces on separate bones. The `LOG.md` of each prop has its
-prompt, its seed and how its rig is set up. These rules come from making the
-trees and the bushes.
+A prop that rustles, such as a tree or a bush, is in
+`packs/<pack>/props/<name>/`, with its crown in separate pieces on separate
+bones. The `LOG.md` of each prop has its prompt, its seed and how its rig is set
+up. These rules come from making the trees and the bushes.
 
 - Generate the pieces as a parts sheet at 1280×1024, as for a character: the
   trunk and two to four leaf clumps, or only the clumps for a bush. The pieces

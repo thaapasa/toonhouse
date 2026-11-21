@@ -7,11 +7,11 @@ import type {
 } from '@toonhouse/model';
 import { describe, expect, it } from 'vitest';
 
-import boy from '../../../assets/characters/boy/rig.json';
-import bunny from '../../../assets/characters/bunny/rig.json';
-import chicken from '../../../assets/characters/chicken/rig.json';
-import wizardRig from '../../../assets/characters/wizard/rig.json';
 import testTree from '../../../assets/fixtures/props/test-tree/rig.json';
+import boy from '../../../assets/packs/sunny/characters/blond-boy/rig.json';
+import bunny from '../../../assets/packs/sunny/characters/bunny/rig.json';
+import chicken from '../../../assets/packs/sunny/characters/hen/rig.json';
+import wizardRig from '../../../assets/packs/sunny/characters/wizard/rig.json';
 import { legJoint } from './bird.ts';
 import {
   BIRD_WALK_SPEED,

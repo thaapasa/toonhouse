@@ -89,7 +89,7 @@ The first characters are cutouts, as in the 2D motion prototype in
 `prototypes/`. Traced pieces make the head, the torso, the hands and the feet.
 The renderer draws the arms and the legs between them as rubber hoses, which
 bend to reach the hands and the feet. Each character has a folder in
-`assets/characters/` with a `rig.json` and its SVG pieces.
+`assets/packs/<pack>/characters/` with a `rig.json` and its SVG pieces.
 
 Birds have a rig of their own kind. Traced pieces make the head, the body with
 the tail, a folded and an open wing, and the feet. The renderer draws the neck
@@ -105,14 +105,14 @@ hoses, and each hind leg has two straight bones from the hip to the heel with
 the knee bending forwards.
 
 Props have a rig kind of their own, `prop`, for scenery such as trees and
-bushes. A prop rig is a small tree of bones in `assets/props/`, each with a
-part, such as a trunk with a few clumps of leaves for the crown. Several bones
-can carry the same part. The pivot of the part of the root bone is the ground
-point of the prop. A prop has two clips: `idle` stands still, and `rustle` sways
-each bone and squashes its part a little, as far as the `sway` of the bone in
-the rig sets. Each bone sways in its own phase, from its place in the rig, so
-that the clumps of a crown don't move together. The clip gives only the strength
-of the wind and where the gusts are, so it works on every prop.
+bushes. A prop rig is a small tree of bones in `assets/packs/<pack>/props/`,
+each with a part, such as a trunk with a few clumps of leaves for the crown.
+Several bones can carry the same part. The pivot of the part of the root bone is
+the ground point of the prop. A prop has two clips: `idle` stands still, and
+`rustle` sways each bone and squashes its part a little, as far as the `sway` of
+the bone in the rig sets. Each bone sways in its own phase, from its place in
+the rig, so that the clumps of a crown don't move together. The clip gives only
+the strength of the wind and where the gusts are, so it works on every prop.
 
 A clip works on the rigs of one kind only.
 
@@ -143,8 +143,9 @@ the character studio.
 
 ### Backgrounds
 
-Each background has a folder in `assets/backgrounds/` with a `background.json`
-and its SVG files. The frame of a background is 16:9, in its own pixels.
+Each background has a folder in `assets/packs/<pack>/backgrounds/` with a
+`background.json` and its SVG files. The frame of a background is 16:9, in its
+own pixels.
 
 - The **layers** go from the far to the near, which is also the draw order. Each
   layer is an SVG of the whole frame with a depth from 0 to 1. A layer at depth
@@ -166,8 +167,8 @@ and its SVG files. The frame of a background is 16:9, in its own pixels.
   fixed size by turning off "follow the background".
 - The **parts** of a background are drawings on a layer that clips move, such as
   the sun and the clouds. A part moves with its layer when the camera moves.
-  Parts that several backgrounds use, such as the sun, can come from
-  `assets/backgrounds/shared/`.
+  Parts that several backgrounds of a pack use, such as the sun, can come from
+  the `shared/` folder of the pack.
 
 A background is not a rig kind. It has no bones and no ground point, and the
 camera moves its layers, which no rig has. Its parts still have the fields of a
@@ -242,10 +243,13 @@ the picture, not only inside the background.
 The graphics are generated with AI and traced to SVG, as described in
 [assets/CLAUDE.md](assets/CLAUDE.md). Rigs and backgrounds are JSON files. The
 built-in characters, props, clips and backgrounds live in `assets/` and are
-committed to the repo. `assets/packs/` lists which asset pack each of them
-belongs to. The test art in `assets/fixtures/`, a background and two props made
-of simple shapes, is not part of the library. Only the tests use it. The server
-stores the cartoons that users make.
+committed to the repo. The characters, the props and the backgrounds are in the
+folders of their asset packs in `assets/packs/`, and the id of each one is
+`<pack>/<name>`, such as `sunny/oak`. The pack is part of the id, so a new pack
+can use any name without checking the other packs. The test art in
+`assets/fixtures/`, a background and two props made of simple shapes, is not
+part of the library. Only the tests use it. The server stores the cartoons that
+users make.
 
 ## Server
 

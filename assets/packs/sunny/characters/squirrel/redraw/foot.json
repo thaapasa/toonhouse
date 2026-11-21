@@ -1,0 +1,22 @@
+{
+  "src": "assets/work/squirrel/pieces/foot.png",
+  "out": "assets/packs/sunny/characters/squirrel/foot.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#3b0603",
+      "also": ["#450800", "#5f0f05", "#8e1902", "#835f4a"]
+    },
+    {
+      "name": "fur",
+      "color": "#f23c06",
+      "also": ["#f33d06", "#c53009", "#f27947"]
+    },
+    {
+      "name": "belly",
+      "color": "#fceac6",
+      "also": ["#fcecc9", "#fbbb91", "#bda38b"]
+    }
+  ],
+  "lines": {}
+}

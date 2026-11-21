@@ -1,0 +1,40 @@
+{
+  "src": "assets/work/chicken/traced/head.svg",
+  "out": "assets/packs/sunny/characters/hen/head.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#4f382e",
+      "also": [
+        "#6d2d2a",
+        "#5c453c",
+        "#583e32",
+        "#733a22",
+        "#685550",
+        "#623021",
+        "#6f4f46",
+        "#694825",
+        "#8e6628",
+        "#7b777b"
+      ]
+    },
+    {
+      "name": "feathers",
+      "color": "#fbf9f4"
+    },
+    {
+      "name": "comb",
+      "color": "#e90e12"
+    },
+    {
+      "name": "beak",
+      "color": "#f9af01",
+      "also": ["#f6a701"]
+    },
+    {
+      "name": "eye",
+      "color": "#f5f6f5"
+    }
+  ],
+  "lines": {}
+}

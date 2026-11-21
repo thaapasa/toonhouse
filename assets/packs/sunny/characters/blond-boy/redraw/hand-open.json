@@ -1,0 +1,26 @@
+{
+  "src": "assets/work/boy-traced/hand-open.svg",
+  "out": "assets/packs/sunny/characters/blond-boy/hand-open.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#422517",
+      "also": [
+        "#482712",
+        "#4b2b19",
+        "#4e2b15",
+        "#4e2d1a",
+        "#4f3c32",
+        "#52382c",
+        "#5a2f13",
+        "#9b683c"
+      ]
+    },
+    {
+      "name": "skin",
+      "color": "#fbc688",
+      "also": ["#f8c386", "#fac689"]
+    }
+  ],
+  "lines": {}
+}

@@ -1,0 +1,24 @@
+{
+  "src": "assets/work/round-bush/traced/clumpLight.svg",
+  "out": "assets/packs/sunny/props/round-bush/clumpLight.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#4d3a1a",
+      "also": [
+        "#513d1c",
+        "#4d3a1c",
+        "#3e340b",
+        "#3f340b",
+        "#55422a",
+        "#46360a",
+        "#49360c",
+        "#41340c",
+        "#3e310a",
+        "#3c5411"
+      ]
+    },
+    { "name": "leaves-light", "color": "#81c639", "also": ["#82b43d"] }
+  ],
+  "lines": {}
+}

@@ -1,0 +1,30 @@
+{
+  "src": "assets/work/boy-traced/head.svg",
+  "out": "assets/packs/sunny/characters/blond-boy/head.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#422517",
+      "also": ["#442507", "#4c2e1c", "#4d2e14", "#572e11", "#5c330e", "#45270f"]
+    },
+    {
+      "name": "skin",
+      "color": "#fbc688",
+      "also": ["#e29f63", "#c7854e", "#fbc78c"]
+    },
+    {
+      "name": "hair",
+      "color": "#f9c900",
+      "also": ["#daa300"]
+    },
+    {
+      "name": "eye",
+      "color": "#f7f7f5"
+    },
+    {
+      "name": "pupil",
+      "color": "#0a0704"
+    }
+  ],
+  "lines": {}
+}

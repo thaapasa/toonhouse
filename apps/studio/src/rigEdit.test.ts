@@ -2,11 +2,11 @@ import type { Rig } from '@toonhouse/model';
 import { clipsFor, drawOrder, drawRig } from '@toonhouse/renderer';
 import { describe, expect, it } from 'vitest';
 
-import bunny from '../../../assets/characters/bunny/rig.json';
-import chicken from '../../../assets/characters/chicken/rig.json';
-import emo from '../../../assets/characters/emo/rig.json';
-import wizard from '../../../assets/characters/wizard/rig.json';
 import testTree from '../../../assets/fixtures/props/test-tree/rig.json';
+import bunny from '../../../assets/packs/sunny/characters/bunny/rig.json';
+import emo from '../../../assets/packs/sunny/characters/emo-girl/rig.json';
+import chicken from '../../../assets/packs/sunny/characters/hen/rig.json';
+import wizard from '../../../assets/packs/sunny/characters/wizard/rig.json';
 import {
   angleFields,
   angleOf,

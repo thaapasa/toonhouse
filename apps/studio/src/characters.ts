@@ -1,18 +1,21 @@
-// The characters in assets/characters/ and the props in assets/props/, one
-// folder each, with a rig.json and the SVG layers of the parts that it names.
+// The characters and the props of the asset packs in assets/packs/, one folder
+// each, with a rig.json and the SVG layers of the parts that it names.
 import type { Rig } from '@toonhouse/model';
 import { assetFolder, type PartSources, rigSources } from '@toonhouse/stage';
 
 const characterRigs = import.meta.glob<Rig>(
-  '../../../assets/characters/*/rig.json',
+  '../../../assets/packs/*/characters/*/rig.json',
   { eager: true, import: 'default' },
 );
-const propRigs = import.meta.glob<Rig>('../../../assets/props/*/rig.json', {
-  eager: true,
-  import: 'default',
-});
+const propRigs = import.meta.glob<Rig>(
+  '../../../assets/packs/*/props/*/rig.json',
+  { eager: true, import: 'default' },
+);
 const svgs = import.meta.glob<string>(
-  ['../../../assets/characters/*/*.svg', '../../../assets/props/*/*.svg'],
+  [
+    '../../../assets/packs/*/characters/*/*.svg',
+    '../../../assets/packs/*/props/*/*.svg',
+  ],
   { eager: true, query: '?raw', import: 'default' },
 );
 

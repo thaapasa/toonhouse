@@ -3,6 +3,7 @@ export { actorPrefix, Drawing, layerKey, partId } from './Drawing.tsx';
 export {
   assetFolder,
   backgroundSources,
+  packOf,
   resolve,
   rigSources,
 } from './library.ts';

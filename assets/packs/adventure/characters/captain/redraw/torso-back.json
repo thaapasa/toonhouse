@@ -1,0 +1,44 @@
+{
+  "src": "assets/work/captain/traced/torso-back.svg",
+  "out": "assets/packs/adventure/characters/captain/torso-back.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#080401",
+      "also": ["#010506", "#011118", "#30332f", "#21211f"]
+    },
+    {
+      "name": "jacket",
+      "color": "#002e42",
+      "also": [
+        "#002d42",
+        "#001e2c",
+        "#022939",
+        "#042332",
+        "#001a26",
+        "#193640",
+        "#3a4c50"
+      ]
+    },
+    {
+      "name": "shirt",
+      "color": "#e5e4d0",
+      "also": [
+        "#e3e2ce",
+        "#d5d6c5",
+        "#c6c6b6",
+        "#838a83",
+        "#70807e",
+        "#92988d",
+        "#b7bbae",
+        "#a0a59a",
+        "#667571",
+        "#65675f",
+        "#a8b0a4",
+        "#53686a",
+        "#505957"
+      ]
+    }
+  ],
+  "lines": {}
+}

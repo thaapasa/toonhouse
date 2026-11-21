@@ -44,7 +44,7 @@ export interface Scene {
 /** The library character or prop that an actor uses. */
 export interface ActorAsset {
   kind: 'character' | 'prop';
-  /** The name of the folder of the asset, such as `boy` or `oak`. */
+  /** The id of the library asset, `<pack>/<name>`, such as `sunny/oak`. */
   id: string;
 }
 

@@ -1,5 +1,5 @@
 // The selection of the studio in the query of the URL, such as
-// `?character=captain&background=harbor`, so that a reload keeps it.
+// `?character=adventure%2Fcaptain`, so that a reload keeps it.
 
 export interface Location {
   /** The character or the prop that the rig views show. */

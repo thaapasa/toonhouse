@@ -1,0 +1,22 @@
+{
+  "src": "assets/work/squirrel/pieces/ear.png",
+  "out": "assets/packs/sunny/characters/squirrel/ear.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#3b0603",
+      "also": ["#430602", "#560702", "#751207", "#9a4b4c"]
+    },
+    {
+      "name": "fur",
+      "color": "#f23c06",
+      "also": ["#ef3906", "#db3207", "#bb2606", "#9b1904"]
+    },
+    { "name": "ear-inner", "color": "#faa4a4", "also": ["#da7975"] }
+  ],
+  "lines": {},
+  "scale": 8,
+  "smooth": 1.5,
+  "minArea": 120,
+  "edge": 2.5
+}

@@ -1,0 +1,39 @@
+{
+  "src": "assets/work/village/traced/ground.svg",
+  "out": "assets/packs/sunny/backgrounds/village/ground.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#393e0e",
+      "also": ["#45490e", "#4b5f0f", "#395804", "#867c36"]
+    },
+    {
+      "name": "road",
+      "color": "#e1cd8b"
+    },
+    {
+      "name": "road-dark",
+      "color": "#c2ab6c",
+      "also": ["#bda667", "#a79154"]
+    },
+    {
+      "name": "pebble",
+      "color": "#a3936b"
+    },
+    {
+      "name": "grass-dark",
+      "color": "#3e9600",
+      "also": ["#4d9003", "#4e870a", "#55890b"]
+    },
+    {
+      "name": "grass",
+      "color": "#61db00",
+      "also": ["#56b002"]
+    }
+  ],
+  "lines": {},
+  "minArea": 12,
+  "smooth": 1,
+  "openEdges": ["left", "right", "bottom"],
+  "minLine": 1
+}

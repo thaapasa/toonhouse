@@ -2,9 +2,9 @@ import type { CutoutRig, Rig } from '@toonhouse/model';
 import { HIP_HEIGHT } from '@toonhouse/renderer';
 import { describe, expect, it } from 'vitest';
 
-import boy from '../../../assets/characters/boy/rig.json';
-import chicken from '../../../assets/characters/chicken/rig.json';
 import testTree from '../../../assets/fixtures/props/test-tree/rig.json';
+import boy from '../../../assets/packs/sunny/characters/blond-boy/rig.json';
+import chicken from '../../../assets/packs/sunny/characters/hen/rig.json';
 import { isTuned, tuneFields, tuneValue, withTune } from './tuning.ts';
 
 // The boy without the motion settings and the torso scale of his rig file.

@@ -1,0 +1,24 @@
+{
+  "src": "assets/work/grandma/traced/hand.svg",
+  "out": "assets/packs/sunny/characters/grandma/hand.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#533121",
+      "also": [
+        "#4f2d1a",
+        "#502d1a",
+        "#472619",
+        "#5c3a28",
+        "#5d3d2d",
+        "#604538",
+        "#745a4d",
+        "#d68850",
+        "#d58953",
+        "#e69c65"
+      ]
+    },
+    { "name": "skin", "color": "#fbc08c", "also": ["#fabf8b"] }
+  ],
+  "lines": {}
+}

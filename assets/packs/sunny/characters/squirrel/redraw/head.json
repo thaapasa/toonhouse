@@ -1,0 +1,15 @@
+{
+  "src": "assets/work/squirrel/pieces/head.png",
+  "out": "assets/packs/sunny/characters/squirrel/head.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#3b0603",
+      "also": ["#240402", "#470a02", "#5e1409", "#951d04", "#83685d"]
+    },
+    { "name": "fur", "color": "#f23c06", "also": ["#f23f0a", "#cd340c"] },
+    { "name": "belly", "color": "#fceac6", "also": ["#feedc8", "#dead90"] },
+    { "name": "eye", "color": "#fefefe" }
+  ],
+  "lines": {}
+}

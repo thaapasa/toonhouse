@@ -1,0 +1,35 @@
+{
+  "src": "assets/work/captain/traced/foot-front.svg",
+  "out": "assets/packs/adventure/characters/captain/foot-front.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#080401",
+      "also": [
+        "#020202",
+        "#471011",
+        "#170505",
+        "#4a1113",
+        "#3b0a0f",
+        "#120606",
+        "#0c0a05",
+        "#390e0d",
+        "#3b0d0e",
+        "#220b08",
+        "#220d0a",
+        "#080203"
+      ]
+    },
+    {
+      "name": "boot",
+      "color": "#611d20",
+      "also": ["#662023", "#601c1f", "#5c1b1f", "#5c1d20"]
+    },
+    {
+      "name": "boot-sole",
+      "color": "#23201e",
+      "also": ["#221f1d"]
+    }
+  ],
+  "lines": {}
+}

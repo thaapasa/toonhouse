@@ -1,0 +1,69 @@
+{
+  "src": "assets/work/flowering-bush/traced/clumpSmall.svg",
+  "out": "assets/packs/sunny/props/flowering-bush/clumpSmall.svg",
+  "layers": [
+    {
+      "name": "outline",
+      "color": "#3f2f10",
+      "also": ["#402f12", "#402e13", "#372f0a"]
+    },
+    {
+      "name": "leaves",
+      "color": "#22c400",
+      "also": ["#22c300", "#22c600", "#c7eebf", "#b69c81", "#c6eac4"]
+    },
+    {
+      "name": "leaves-dark",
+      "color": "#08a800",
+      "also": [
+        "#079f00",
+        "#08af00",
+        "#0aa200",
+        "#18b300",
+        "#109500",
+        "#169200",
+        "#19a000"
+      ]
+    },
+    {
+      "name": "flower",
+      "color": "#ec92b2",
+      "also": ["#ea92b0", "#ed92b4", "#f090b3", "#e790ac", "#e693ad", "#e991b1"]
+    },
+    {
+      "name": "flower-alt",
+      "color": "#f0f3ec",
+      "also": [
+        "#f0f4ee",
+        "#f1f3ee",
+        "#f0f3ee",
+        "#eff2ec",
+        "#eaeae3",
+        "#ecf0ea",
+        "#ebf0e8",
+        "#e8ece3",
+        "#e7efe4",
+        "#eceee7",
+        "#f3efee"
+      ]
+    },
+    {
+      "name": "flower-center",
+      "color": "#e2755e",
+      "also": [
+        "#cd7460",
+        "#cc7457",
+        "#df7257",
+        "#e4765b",
+        "#e1715c",
+        "#e1705d",
+        "#d1795d",
+        "#cb775b",
+        "#eb8063",
+        "#cd865f",
+        "#eb8360"
+      ]
+    }
+  ],
+  "lines": {}
+}

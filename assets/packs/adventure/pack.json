@@ -1,7 +1,3 @@
 {
-  "id": "adventure",
-  "bubbleFont": "Indie Flower",
-  "characters": ["captain", "quartermaster"],
-  "props": [],
-  "backgrounds": ["harbor"]
+  "bubbleFont": "Indie Flower"
 }

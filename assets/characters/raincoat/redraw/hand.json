@@ -1,9 +1,0 @@
-{
-  "src": "assets/work/raincoat/traced/hand.svg",
-  "out": "assets/characters/raincoat/hand.svg",
-  "layers": [
-    { "name": "outline", "color": "#2a1202" },
-    { "name": "skin", "color": "#bc6b26" }
-  ],
-  "lines": {}
-}
