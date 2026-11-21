@@ -26,6 +26,8 @@ export function keptContent(cartoonId: string): SavedContent | null {
   }
 }
 
-export function clearKeptContent(cartoonId: string) {
+/** With `by`, removes the kept edits only if one of these editors kept them. */
+export function clearKeptContent(cartoonId: string, by?: string[]) {
+  if (by && !by.includes(keptContent(cartoonId)?.editor ?? '')) return;
   localStorage.removeItem(key(cartoonId));
 }

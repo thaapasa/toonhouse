@@ -420,18 +420,22 @@ the user is no longer its owner, the editor tells the user and stops.
 
 When the editor can't save for now, it keeps the edits in the `localStorage` of
 the browser, and the next editor of the cartoon starts from them and saves them.
-This happens when the login has ended, after a conflict, and when the page goes
-to the background or the editor closes before its edits are saved. While the
-editor can't save, it writes them at most once a second, so that a drag doesn't
-write the whole cartoon on each move. A closed editor sends its edits once more,
-but doesn't try again, so that it can't race the next editor.
+This happens when the login has ended, after a conflict, before the editor loads
+a new version of the app, and when the page goes to the background or the editor
+closes before its edits are saved. While the editor can't save, it writes them
+at most once a second, so that a drag doesn't write the whole cartoon on each
+move. A closed editor sends its edits once more, but doesn't try again, so that
+it can't race the next editor. After a save, the editor removes the kept edits
+only if it kept them or started from them, because another editor of the cartoon
+may have kept its own since.
 
 When the editor opens, it compares the kept edits with the content on the
 server. If the server has the same revision, the editor goes on with the kept
-edits. If the server is one revision ahead from the editor that kept them, that
-editor saved them as it closed, and the editor drops them. Otherwise, the
-cartoon was saved elsewhere after the edits were kept, and the user chooses
-between the kept edits and the saved version.
+edits. If the server is one revision ahead from the editor that kept them, and
+its content is the same as the kept edits, that editor saved them as it closed,
+and the editor drops them. Otherwise, the cartoon was saved elsewhere after the
+edits were kept, and the user chooses between the kept edits and the saved
+version.
 
 The stage asks the renderer where each actor is at the current time. The
 renderer goes through the actions of the actor in the order of their times: an

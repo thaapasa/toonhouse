@@ -42,3 +42,20 @@ deploy, the format can change without upgrading the saved cartoons.
       version. The edits that were not saved can be lost.
 - [ ] If an old version of the export client downloads a cartoon, it tells the
       user to update the export client.
+
+## Cases the saver doesn't cover
+
+The editor saves the edits by itself, as [Scenes](scenes.md) describes. It keeps
+the edits through the common failures: a save that fails or whose answer is
+lost, going offline, closing the page or switching to another app, a lost login,
+and a conflict with a save from another window or device.
+
+The saver doesn't guard against rare cases, and this is a decision, not a gap.
+Code that handles them would be harder to read and to maintain, and simple code
+matters more here. In these cases, the user can lose edits:
+
+- The user edits the same cartoon in several windows or on several devices at
+  the same time.
+- A new version of the app is deployed while the user edits. This includes edits
+  that the browser kept in an older format.
+- The browser tab crashes while it is in view.
