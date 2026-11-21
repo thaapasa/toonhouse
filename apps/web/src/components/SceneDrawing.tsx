@@ -1,32 +1,41 @@
-// The scene at time `t`, as the camera of the whole background sees it. It
+// The frame of a scene, as the camera of the whole background sees it. It
 // goes inside an `<svg>` with the viewBox of the background frame. In the
 // editor, the viewBox can be larger than the frame, and then what is outside
 // the frame shows dimmer.
+//
+// Each asset shows once its SVG files have loaded. Until then, the drawing
+// leaves it out, so that the user doesn't see the limbs of a character
+// without its body.
 import type { Scene } from '@toonhouse/model';
+import type { Bounds, DrawNode, SceneFrame } from '@toonhouse/renderer';
 import {
-  type Bounds,
-  drawBubbles,
-  drawScene,
-  type PlacedBubble,
-  wholeBackground,
-} from '@toonhouse/renderer';
-import { actorPrefix, Drawing, PartSymbols } from '@toonhouse/stage';
+  actorPrefix,
+  Drawing,
+  type PartSources,
+  PartSymbols,
+} from '@toonhouse/stage';
 
-import { placeSceneBubbles } from '../editor/bubbles.ts';
-import type { BackgroundAsset } from '../editor/library.ts';
-import { backgroundFrame, type PlacedActor } from '../editor/placement.ts';
+import { backgroundAsset, rigAsset, sceneFiles } from '../library/index.ts';
+import { loadedSources, useSources } from '../library/sources.ts';
 
 /** How much of what is outside the frame shows through the mask. */
 const OFFSTAGE_SHADE = '#666';
 
+/** The drawing without the groups of the actors in `ids`. */
+function leaveOut(node: DrawNode, ids: ReadonlySet<string>): DrawNode {
+  if (node.type !== 'group' || ids.size === 0) return node;
+  return {
+    ...node,
+    children: node.children
+      .filter((c) => !(c.type === 'group' && c.actor && ids.has(c.actor)))
+      .map((c) => leaveOut(c, ids)),
+  };
+}
+
 export function SceneDrawing(props: {
   scene: Scene;
-  bg: BackgroundAsset;
-  t: number;
-  /** The actors at time `t`, from `placeActors`. */
-  placed: readonly PlacedActor[];
-  /** The bubbles at time `t`, if already placed, such as by the editor. */
-  bubbles?: readonly PlacedBubble[];
+  /** The frame to draw, from `sceneFrame`. */
+  frame: SceneFrame;
   /** Makes the ids of the symbols unique on the page. */
   prefix: string;
   /**
@@ -36,25 +45,27 @@ export function SceneDrawing(props: {
    */
   offstage?: Bounds;
 }) {
-  const { bg: asset, prefix } = props;
-  const bg = asset.background;
-  const node = drawScene(
-    bg,
-    backgroundFrame(props.scene, props.t),
-    wholeBackground(bg),
-    props.placed.map((p) => p.drawing),
-  );
-  const bubbles = drawBubbles(
-    props.bubbles ?? placeSceneBubbles(props.scene, bg, props.placed, props.t),
-  );
+  const { frame, prefix } = props;
+  const bg = frame.background;
+  useSources(sceneFiles(props.scene));
+  const bgAsset = backgroundAsset(props.scene.background);
+  const bgSources = bgAsset && loadedSources(bgAsset.files);
+  const actors: { id: string; sources: PartSources }[] = [];
+  const waiting = new Set<string>();
+  for (const { actor } of frame.actors) {
+    const asset = rigAsset(actor.asset);
+    const sources = asset && loadedSources(asset.files);
+    if (sources) actors.push({ id: actor.id, sources });
+    else waiting.add(actor.id);
+  }
   return (
     <>
-      <PartSymbols prefix={prefix} sources={asset.sources} />
-      {props.placed.map((p) => (
+      {bgSources && <PartSymbols prefix={prefix} sources={bgSources} />}
+      {actors.map(({ id, sources }) => (
         <PartSymbols
-          key={p.actor.id}
-          prefix={actorPrefix(prefix, p.actor.id)}
-          sources={p.asset.parts}
+          key={id}
+          prefix={actorPrefix(prefix, id)}
+          sources={sources}
         />
       ))}
       {props.offstage ? (
@@ -76,9 +87,9 @@ export function SceneDrawing(props: {
         clipPath={props.offstage ? undefined : `url(#${prefix}-frame)`}
         mask={props.offstage ? `url(#${prefix}-frame)` : undefined}
       >
-        <Drawing node={node} prefix={prefix} />
+        <Drawing node={leaveOut(frame.node, waiting)} prefix={prefix} />
       </g>
-      <Drawing node={bubbles} prefix={prefix} />
+      <Drawing node={frame.bubbleNode} prefix={prefix} />
     </>
   );
 }

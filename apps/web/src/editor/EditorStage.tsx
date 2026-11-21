@@ -12,7 +12,8 @@ import {
   type BubbleAnchor,
   bubbleOffset,
   bubblePoint,
-  placeBubbles,
+  clamp,
+  sceneFrame,
 } from '@toonhouse/renderer';
 import {
   type CSSProperties,
@@ -29,10 +30,13 @@ import {
 import { ZoomFitIcon } from '../components/icons.tsx';
 import { SceneDrawing } from '../components/SceneDrawing.tsx';
 import { useI18n } from '../i18n/index.tsx';
-import { bubbleContext } from './bubbles.ts';
+import {
+  type BackgroundAsset,
+  CHARACTERS,
+  LIBRARY,
+  PROPS,
+} from '../library/index.ts';
 import type { EditRun } from './history.ts';
-import { type BackgroundAsset, CHARACTERS, PROPS } from './library.ts';
-import { placeActors } from './placement.ts';
 import { released } from './pointer.ts';
 import { savedPoint } from './sceneEdit.ts';
 import {
@@ -157,8 +161,6 @@ const middle = (a: Pt, b: Pt): Pt => ({
   x: (a.x + b.x) / 2,
   y: (a.y + b.y) / 2,
 });
-const clamp = (v: number, lo: number, hi: number) =>
-  Math.min(Math.max(v, lo), hi);
 
 export function EditorStage(props: Props) {
   const { scene, bg: asset, t, walk } = props;
@@ -201,18 +203,14 @@ export function EditorStage(props: Props) {
     Math.abs(stageView.x - home.x) < 1e-3 &&
     Math.abs(stageView.y - home.y) < 1e-3;
 
-  const placed = placeActors(scene, bg, t);
-  const bubbleCtx = bubbleContext(scene, bg, placed);
   // While the cartoon doesn't play, a bubble shows at its full size also at
   // its first and last moments, so that the user can work on it.
-  const bubbles = placeBubbles(
-    scene.bubbles ?? [],
-    t,
-    bubbleCtx,
-    props.playing,
-  );
+  const frame = sceneFrame(scene, bg, LIBRARY, t, { pop: props.playing });
+  const { actors: placed, bubbles } = frame;
   const anchorOf = (actorId: string | undefined) =>
-    actorId === undefined ? null : (bubbleCtx.anchors.get(actorId) ?? null);
+    actorId === undefined
+      ? null
+      : (frame.bubbleContext.anchors.get(actorId) ?? null);
   // The part of the frame coordinates that the stage shows.
   const view = viewRect(area, stageView);
   const { stage } = area;
@@ -538,10 +536,7 @@ export function EditorStage(props: Props) {
           />
           <SceneDrawing
             scene={scene}
-            bg={asset}
-            t={t}
-            placed={placed}
-            bubbles={bubbles}
+            frame={frame}
             prefix={PREFIX}
             offstage={stage}
           />

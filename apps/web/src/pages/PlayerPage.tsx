@@ -5,6 +5,8 @@ import { ApiError, cartoonQuery, contentQuery } from '../api.ts';
 import { AppHeader } from '../components/AppHeader.tsx';
 import { PageMessage } from '../components/RequireUser.tsx';
 import type { TextKey } from '../i18n/index.tsx';
+import { cartoonFiles } from '../library/index.ts';
+import { useSources } from '../library/sources.ts';
 import { Player } from '../player/Player.tsx';
 import { NotFoundPage } from './NotFoundPage.tsx';
 
@@ -16,13 +18,18 @@ export function PlayerPage() {
   const cartoon = useQuery(cartoonQuery(cartoonId));
   // The owner may have changed the cartoon since it was last loaded.
   const content = useQuery(contentQuery(cartoonId));
+  // The player starts when the SVG files of every scene have loaded, so that
+  // the actors don't pop in while the cartoon plays.
+  const loaded = useSources(
+    content.data ? cartoonFiles(content.data.content) : [],
+  );
 
   const notFound = [cartoon, content].some(
     (q) => q.error instanceof ApiError && q.error.status === 404,
   );
   if (notFound) return <NotFoundPage />;
   if (cartoon.isError || content.isError) return <Fallback text="loadError" />;
-  if (cartoon.isPending || content.isPending)
+  if (cartoon.isPending || content.isPending || !loaded)
     return <Fallback text="loading" />;
   return (
     <Player

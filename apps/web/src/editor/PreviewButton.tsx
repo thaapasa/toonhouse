@@ -3,13 +3,14 @@
 // changes.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { Scene } from '@toonhouse/model';
+import { sceneFrame } from '@toonhouse/renderer';
 import { useEffect } from 'react';
 
 import { cartoonQuery, cartoonsQuery, uploadPreview } from '../api.ts';
 import { PreviewIcon } from '../components/icons.tsx';
 import { useI18n } from '../i18n/index.tsx';
-import type { BackgroundAsset } from './library.ts';
-import { placeActors } from './placement.ts';
+import { type BackgroundAsset, LIBRARY, sceneFiles } from '../library/index.ts';
+import { loadAllSources, loadedSources } from '../library/sources.ts';
 
 /** How long the result shows next to the button. */
 const STATUS_MS = 3000;
@@ -24,8 +25,15 @@ export function PreviewButton(props: {
   const set = useMutation({
     mutationFn: async (frame: NonNullable<typeof props.frame>) => {
       const { makePreviewImage } = await import('./previewImage.tsx');
-      const placed = placeActors(frame.scene, frame.bg.background, frame.t);
-      const image = await makePreviewImage({ ...frame, placed });
+      const { scene, bg, t } = frame;
+      // The image draws the scene once, so its SVG files must be there.
+      const files = sceneFiles(scene);
+      await loadAllSources(files);
+      if (!files.every(loadedSources)) throw new Error('Missing SVG files');
+      const image = await makePreviewImage(
+        scene,
+        sceneFrame(scene, bg.background, LIBRARY, t),
+      );
       return uploadPreview(props.cartoonId, image);
     },
     onSuccess: async (cartoon) => {

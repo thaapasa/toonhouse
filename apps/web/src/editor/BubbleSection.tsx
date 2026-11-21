@@ -12,17 +12,14 @@ import {
   BUBBLE_FONTS,
   type BubbleAnchor,
   bubbleLength,
+  clamp,
   fontFamily,
 } from '@toonhouse/renderer';
 import { type ReactNode, useEffect, useId, useRef } from 'react';
 
 import { type TextKey, useI18n } from '../i18n/index.tsx';
-import {
-  actorFont,
-  attachBubble,
-  backgroundFont,
-  setOptional,
-} from './bubbles.ts';
+import { LIBRARY } from '../library/index.ts';
+import { attachBubble, setOptional } from './bubbles.ts';
 import type { EditRun } from './history.ts';
 import { useNames } from './names.ts';
 import { NumberField } from './NumberField.tsx';
@@ -44,9 +41,6 @@ const BORDERS: readonly BubbleBorder[] = [
 const ALIGNS = ['left', 'center', 'right'] as const;
 
 const L = CONTENT_LIMITS;
-
-const clamp = (v: number, r: { min: number; max: number }) =>
-  Math.min(Math.max(v, r.min), r.max);
 
 interface Props {
   scene: Scene;
@@ -90,8 +84,8 @@ export function BubbleSection(props: Props) {
   const actorNames = names.actors(scene);
   const actor = scene.actors.find((a) => a.id === bubble.actorId);
   const packFont = actor
-    ? actorFont(actor.asset)
-    : backgroundFont(scene.background);
+    ? LIBRARY.actorFont(actor.asset)
+    : LIBRARY.backgroundFont(scene.background);
 
   return (
     <div className="pane-section bubble-section">
@@ -132,7 +126,12 @@ export function BubbleSection(props: Props) {
         step={0.5}
         decimals={2}
         unit={tr('properties.seconds')}
-        onChange={(v) => set('length', savedTime(clamp(v, L.bubbleLength)))}
+        onChange={(v) =>
+          set(
+            'length',
+            savedTime(clamp(v, L.bubbleLength.min, L.bubbleLength.max)),
+          )
+        }
       />
       {bubble.length === undefined ? (
         <p className="muted small">{tr('bubble.lengthAuto')}</p>
@@ -211,7 +210,12 @@ export function BubbleSection(props: Props) {
         value={bubble.width}
         step={20}
         decimals={0}
-        onChange={(v) => set('width', Math.round(clamp(v, L.bubbleWidth)))}
+        onChange={(v) =>
+          set(
+            'width',
+            Math.round(clamp(v, L.bubbleWidth.min, L.bubbleWidth.max)),
+          )
+        }
       />
       <ColorField
         label="bubble.fill"
@@ -249,7 +253,9 @@ export function BubbleSection(props: Props) {
             value={bubble.borderWidth}
             step={1}
             decimals={1}
-            onChange={(v) => set('borderWidth', clamp(v, L.borderWidth))}
+            onChange={(v) =>
+              set('borderWidth', clamp(v, L.borderWidth.min, L.borderWidth.max))
+            }
           />
         </>
       )}
@@ -293,7 +299,9 @@ export function BubbleSection(props: Props) {
         value={bubble.fontSize}
         step={4}
         decimals={0}
-        onChange={(v) => set('fontSize', Math.round(clamp(v, L.fontSize)))}
+        onChange={(v) =>
+          set('fontSize', Math.round(clamp(v, L.fontSize.min, L.fontSize.max)))
+        }
       />
       <ColorField
         label="bubble.color"
@@ -333,7 +341,11 @@ export function BubbleSection(props: Props) {
         decimals={2}
         unit="×"
         onChange={(v) =>
-          set('lineSpacing', Math.round(clamp(v, L.lineSpacing) * 100) / 100)
+          set(
+            'lineSpacing',
+            Math.round(clamp(v, L.lineSpacing.min, L.lineSpacing.max) * 100) /
+              100,
+          )
         }
       />
     </div>

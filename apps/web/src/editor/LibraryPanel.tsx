@@ -1,11 +1,12 @@
 // The library: the characters, the props or the backgrounds, with a picture
 // of each. A tap adds a character or a prop to the scene, or sets the
-// background.
+// background. Each picture shows once the SVG files of its asset have
+// loaded.
 import {
-  clipsFor,
   drawCharacter,
   drawScene,
   partBounds,
+  restClip,
   wholeBackground,
 } from '@toonhouse/renderer';
 import { Drawing, PartSymbols } from '@toonhouse/stage';
@@ -19,7 +20,8 @@ import {
   CHARACTERS,
   PROPS,
   type RigAsset,
-} from './library.ts';
+} from '../library/index.ts';
+import { loadedSources, useSources } from '../library/sources.ts';
 import { useNames } from './names.ts';
 
 export type LibraryTab = 'character' | 'prop' | 'background';
@@ -93,18 +95,24 @@ export function LibraryPanel(props: Props) {
 
 /** A character or a prop standing still. */
 const RigPicture = memo(function RigPicture({ asset }: { asset: RigAsset }) {
-  const clip = clipsFor(asset.rig.kind)[0]!;
-  const node = drawCharacter(asset.rig, clip.frameAt(0), { facing: 1 }).node;
+  const frame = restClip(asset.rig.kind).frameAt(0);
+  const node = drawCharacter(asset.rig, frame, { facing: 1 }).node;
   const b = partBounds(node) ?? { x: 0, y: 0, width: 1, height: 1 };
   const prefix = `lib-${asset.kind}-${asset.id}`;
+  useSources([asset.files]);
+  const sources = loadedSources(asset.files);
   return (
     <svg
       className="library-picture"
       viewBox={`${b.x} ${b.y} ${b.width} ${b.height}`}
       aria-hidden
     >
-      <PartSymbols prefix={prefix} sources={asset.parts} />
-      <Drawing node={node} prefix={prefix} />
+      {sources && (
+        <>
+          <PartSymbols prefix={prefix} sources={sources} />
+          <Drawing node={node} prefix={prefix} />
+        </>
+      )}
     </svg>
   );
 });
@@ -121,14 +129,20 @@ const BackgroundPicture = memo(function BackgroundPicture({
     wholeBackground(bg),
   );
   const prefix = `lib-background-${asset.id}`;
+  useSources([asset.files]);
+  const sources = loadedSources(asset.files);
   return (
     <svg
       className="library-picture background"
       viewBox={`0 0 ${bg.width} ${bg.height}`}
       aria-hidden
     >
-      <PartSymbols prefix={prefix} sources={asset.sources} />
-      <Drawing node={node} prefix={prefix} />
+      {sources && (
+        <>
+          <PartSymbols prefix={prefix} sources={sources} />
+          <Drawing node={node} prefix={prefix} />
+        </>
+      )}
     </svg>
   );
 });

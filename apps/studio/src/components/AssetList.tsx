@@ -1,5 +1,5 @@
 import {
-  clipById,
+  clipOf,
   drawCharacter,
   drawScene,
   partBounds,
@@ -105,7 +105,7 @@ function Thumbnail({ character }: { character: Character }) {
   const prefix = `thumb-${character.id}`;
   const { node, skeleton } = drawCharacter(
     character.rig,
-    clipById(character.rig.kind, 'idle').frameAt(0),
+    clipOf(character.rig.kind, 'idle').frameAt(0),
     { facing: 1 },
   );
   let viewBox;
@@ -138,7 +138,7 @@ function BackgroundThumbnail({ asset }: { asset: BackgroundAsset }) {
   const bg = asset.background;
   const node = drawScene(
     bg,
-    clipById('background', 'idle').frameAt(0),
+    clipOf('background', 'idle').frameAt(0),
     wholeBackground(bg),
   );
   return (

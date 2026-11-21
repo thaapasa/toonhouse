@@ -28,14 +28,16 @@ same web app in a browser.
 
 ## Packages
 
-- `packages/model`: the types and the schemas of the cartoon, rig and clip
-  formats.
+- `packages/model`: the types of the cartoon, rig and clip formats. Their
+  schemas are in `packages/api`.
 - `packages/renderer`: computes what the cartoon looks like at a given time. It
-  has no UI and runs in the browser, in Node and in headless Chromium.
+  has no UI and runs in the browser, in Node and in headless Chromium. See
+  [The frame of a scene](#the-frame-of-a-scene).
 - `packages/api`: the Zod schemas of the API between the server and the web app.
   Both validate the requests and the responses with them.
 - `packages/stage`: the React components that the web app and the studio share,
-  such as the stage that draws the renderer output and the playback controls.
+  such as the stage that draws the renderer output and the playback controls,
+  and the code that finds the SVG files of a rig or a background.
 
 ## Deterministic rendering
 
@@ -48,6 +50,24 @@ time and renders each frame at the chosen resolution. The export client runs the
 renderer in headless Chromium through Playwright and pipes the frames to ffmpeg.
 Export in the browser, with WebCodecs and the File System Access API, may come
 later.
+
+### The frame of a scene
+
+The renderer puts together the frame of a scene at time `t` with `sceneFrame`:
+where each actor is, its clip frame and its drawing, its size on the background,
+the bubbles with their fonts and anchors, and the tree to draw. `cartoonTime`
+maps a time of the cartoon to a scene and a time in it. The editor, the player
+and the preview image use both, and export will too.
+
+The renderer doesn't load the library. The app passes it a `Library`, which
+gives the rig of a character or a prop, a background by its id, and the default
+bubble fonts of the asset packs. So the renderer runs anywhere that can give it
+the JSON files, and it never needs the SVG files.
+
+If a scene refers to a character or a prop that the library doesn't have, the
+frame leaves that actor out. The timeline and the properties pane leave it out
+too, and the user can't select it. So a cartoon that refers to a removed asset
+still opens and plays.
 
 ## Assets
 
@@ -353,6 +373,16 @@ The player draws the scenes with the same renderer as the editor. Until the
 cartoon has shots, it plays each scene with a background from the start to the
 end, one after another.
 
+The library assets come from `assets/` through `import.meta.glob`, in
+`apps/web/src/library`. The JSON files of the rigs, the backgrounds and the
+asset packs are in the bundle of the web app. The SVG files are separate files
+of the build with a content hash in their names, and the web app fetches them
+when a drawing needs them, so the bundle doesn't grow with each SVG. A drawing
+shows each asset when all its files have loaded, and leaves it out until then.
+The player waits for the files of the whole cartoon before it starts, and the
+preview image waits for the files of its scene. The studio runs only on the Vite
+dev server, so it loads the SVG files with the studio at once.
+
 ### Editor
 
 The editor edits the scenes of one cartoon. It keeps the whole content of the
@@ -377,9 +407,6 @@ to the background or the editor closes before its edits are saved. While the
 editor can't save, it writes them at most once a second, so that a drag doesn't
 write the whole cartoon on each move. A closed editor sends its edits once more,
 but doesn't try again, so that it can't race the next editor.
-
-The library assets come from `assets/` through `import.meta.glob`, so the build
-bundles them into the web app, as in the studio.
 
 The stage asks the renderer where each actor is at the current time. The
 renderer goes through the actions of the actor in the order of their times: an

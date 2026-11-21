@@ -9,13 +9,13 @@
 import type { Background, Pt } from '@toonhouse/model';
 import {
   type Bounds,
-  clipOf,
-  clipsFor,
+  clamp,
   drawCharacter,
   partBounds,
+  restClip,
 } from '@toonhouse/renderer';
 
-import type { RigAsset } from './library.ts';
+import type { RigAsset } from '../library/index.ts';
 
 /** How far the user can zoom in from the home view. */
 export const MAX_ZOOM = 8;
@@ -43,14 +43,12 @@ export interface StageView {
   y: number;
 }
 
-const clamp = (v: number, lo: number, hi: number) =>
-  Math.min(Math.max(v, lo), hi);
-
 /** The box of a character or a prop in its first clip, in its own pixels. */
 function rigBox(asset: RigAsset): Bounds | null {
   const kind = asset.rig.kind;
-  const clip = clipOf(kind, clipsFor(kind)[0]!.id);
-  const { node } = drawCharacter(asset.rig, clip.frameAt(0), { facing: 1 });
+  const { node } = drawCharacter(asset.rig, restClip(kind).frameAt(0), {
+    facing: 1,
+  });
   return partBounds(node);
 }
 

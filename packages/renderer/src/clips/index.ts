@@ -47,14 +47,22 @@ export function clipsFor(kind: ClipKind): readonly Clip[] {
   return byKind[kind];
 }
 
-export function clipById(kind: 'cutout', id: ClipId): Clip<CutoutFrame>;
-export function clipById(kind: 'bird', id: ClipId): Clip<BirdFrame>;
-export function clipById(kind: 'rabbit', id: ClipId): Clip<RabbitFrame>;
-export function clipById(kind: 'prop', id: ClipId): Clip<PropFrame>;
-export function clipById(kind: 'background', id: ClipId): Clip<BackgroundFrame>;
-export function clipById(kind: ClipKind, id: ClipId): Clip;
-export function clipById(kind: ClipKind, id: ClipId): Clip {
-  const clip = byKind[kind].find((c) => c.id === id);
-  if (!clip) throw new Error(`Unknown ${kind} clip: ${id}`);
-  return clip;
+export function clipOf(kind: 'cutout', id: ClipId): Clip<CutoutFrame>;
+export function clipOf(kind: 'bird', id: ClipId): Clip<BirdFrame>;
+export function clipOf(kind: 'rabbit', id: ClipId): Clip<RabbitFrame>;
+export function clipOf(kind: 'prop', id: ClipId): Clip<PropFrame>;
+export function clipOf(kind: 'background', id: ClipId): Clip<BackgroundFrame>;
+export function clipOf(kind: ClipKind, id: ClipId): Clip;
+/**
+ * The clip of a kind with the id. A kind that doesn't have the clip gets its
+ * rest clip, so that a saved action with an unknown clip still plays.
+ */
+export function clipOf(kind: ClipKind, id: ClipId): Clip {
+  return byKind[kind].find((c) => c.id === id) ?? restClip(kind);
 }
+
+/**
+ * The clip that a rig or a background rests in when no action plays: the
+ * first clip of its kind, which stands still.
+ */
+export const restClip = (kind: ClipKind): Clip => byKind[kind][0]!;

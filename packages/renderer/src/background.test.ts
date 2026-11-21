@@ -13,15 +13,15 @@ import {
   partPosition,
   wholeBackground,
 } from './background.ts';
-import { backgroundClips, clipById } from './clips/index.ts';
+import { backgroundClips, clipOf } from './clips/index.ts';
 import type { DrawNode } from './draw.ts';
 
 const bg = testHills as Background;
 const sun = bg.parts!.sun!;
 const cloud = bg.parts!.cloudBig!;
-const day = clipById('background', 'day');
-const drift = clipById('background', 'drift');
-const idle = clipById('background', 'idle');
+const day = clipOf('background', 'day');
+const drift = clipOf('background', 'drift');
+const idle = clipOf('background', 'idle');
 
 /** Where a point of a layer at `depth` shows in the picture. */
 function seen(depth: number, camera: Parameters<typeof layerView>[1]) {

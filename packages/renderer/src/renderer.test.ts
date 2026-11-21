@@ -15,9 +15,9 @@ import testTree from '../../../assets/fixtures/props/test-tree/rig.json';
 import { legJoint } from './bird.ts';
 import {
   BIRD_WALK_SPEED,
-  clipById,
-  clipsFor,
+  clipOf,
   RABBIT_HOP_SPEED,
+  restClip,
   WALK_SPEED,
 } from './clips/index.ts';
 import { drawCharacter, type DrawNode } from './draw.ts';
@@ -38,8 +38,8 @@ function parts(node: DrawNode): string[] {
 }
 
 describe.each([
-  ['cutout', clipById('cutout', 'walk'), WALK_SPEED],
-  ['bird', clipById('bird', 'walk'), BIRD_WALK_SPEED],
+  ['cutout', clipOf('cutout', 'walk'), WALK_SPEED],
+  ['bird', clipOf('bird', 'walk'), BIRD_WALK_SPEED],
 ] as const)('%s walk', (_, walk, speed) => {
   it('keeps a planted foot still against the ground', () => {
     // When the near foot is on the ground, its position plus the distance
@@ -63,7 +63,7 @@ describe.each([
 
 describe('drawCharacter', () => {
   it('draws the mouth patch only while the character talks', () => {
-    const talk = clipById('cutout', 'talk');
+    const talk = clipOf('cutout', 'talk');
     const drawn = (t: number) =>
       parts(drawCharacter(rig, talk.frameAt(t), { facing: 1 }).node);
     // Before the words, and between them with the mouth closed.
@@ -71,7 +71,7 @@ describe('drawCharacter', () => {
     expect(drawn(1)).toContain('mouthPatch');
     expect(drawn(2.9)).not.toContain('mouthPatch');
     for (const clip of ['idle', 'walk'] as const) {
-      const frame = clipById('cutout', clip).frameAt(0.5);
+      const frame = clipOf('cutout', clip).frameAt(0.5);
       expect(
         parts(drawCharacter(rig, frame, { facing: 1 }).node),
       ).not.toContain('mouthPatch');
@@ -79,7 +79,7 @@ describe('drawCharacter', () => {
   });
 
   it('opens the hand for the wave', () => {
-    const wave = clipById('cutout', 'wave');
+    const wave = clipOf('cutout', 'wave');
     expect(
       parts(drawCharacter(rig, wave.frameAt(0), { facing: 1 }).node),
     ).not.toContain('handOpen');
@@ -89,7 +89,7 @@ describe('drawCharacter', () => {
   });
 
   it('keeps the fist on the staff in the wave', () => {
-    const wave = clipById('cutout', 'wave');
+    const wave = clipOf('cutout', 'wave');
     const drawn = parts(
       drawCharacter(wizard, wave.frameAt(1.5), { facing: 1 }).node,
     );
@@ -101,7 +101,7 @@ describe('drawCharacter', () => {
   });
 
   it('draws the feet behind a long robe', () => {
-    const frame = clipById('cutout', 'idle').frameAt(0);
+    const frame = clipOf('cutout', 'idle').frameAt(0);
     const order = (r: CutoutRig) =>
       parts(drawCharacter(r, frame, { facing: 1 }).node);
     const robe = order(wizard);
@@ -111,7 +111,7 @@ describe('drawCharacter', () => {
   });
 
   it('mirrors the skeleton when facing left', () => {
-    const frame = clipById('cutout', 'idle').frameAt(0);
+    const frame = clipOf('cutout', 'idle').frameAt(0);
     const right = drawCharacter(rig, frame, { facing: 1 }).skeleton.joints;
     const left = drawCharacter(rig, frame, { facing: -1 }).skeleton.joints;
     right.forEach((j, i) => {
@@ -125,7 +125,7 @@ describe('motion settings', () => {
   // The boy without the motion settings of his rig file.
   const plain: CutoutRig = { ...rig };
   delete plain.motion;
-  const frame = clipById('cutout', 'walk').frameAt(0.2);
+  const frame = clipOf('cutout', 'walk').frameAt(0.2);
   const jointsOf = (r: CutoutRig) =>
     Object.fromEntries(
       drawCharacter(r, frame, { facing: 1 }).skeleton.joints.map((j) => [
@@ -163,7 +163,7 @@ describe('motion settings', () => {
   });
 
   it('scales the open hand on its own', () => {
-    const wave = clipById('cutout', 'wave').frameAt(1.5);
+    const wave = clipOf('cutout', 'wave').frameAt(1.5);
     const handScale = (r: CutoutRig) => {
       const find = (n: DrawNode): DrawNode | undefined =>
         n.type === 'part' && n.part === 'handOpen'
@@ -197,7 +197,7 @@ describe('motion settings', () => {
 
 describe('bird', () => {
   it('opens the wings for the flap', () => {
-    const flap = clipById('bird', 'flap');
+    const flap = clipOf('bird', 'flap');
     expect(
       parts(drawCharacter(bird, flap.frameAt(0), { facing: 1 }).node),
     ).not.toContain('wingOpen');
@@ -218,7 +218,7 @@ describe('bird', () => {
   });
 
   it('paints the thighs in the thigh color if the rig has one', () => {
-    const idle = clipById('bird', 'idle').frameAt(0);
+    const idle = clipOf('bird', 'idle').frameAt(0);
     const strokes = (r: BirdRig) =>
       JSON.stringify(drawCharacter(r, idle, { facing: 1 }).node);
     expect(strokes(bird)).not.toContain('#123456');
@@ -229,7 +229,7 @@ describe('bird', () => {
 
   it('refuses a clip of another kind', () => {
     expect(() =>
-      drawCharacter(bird, clipById('cutout', 'idle').frameAt(0), {
+      drawCharacter(bird, clipOf('cutout', 'idle').frameAt(0), {
         facing: 1,
       }),
     ).toThrow();
@@ -237,7 +237,7 @@ describe('bird', () => {
 });
 
 describe('rabbit', () => {
-  const hop = clipById('rabbit', 'hop');
+  const hop = clipOf('rabbit', 'hop');
 
   /**
    * The positions plus the distance travelled, in each run of frames where
@@ -292,7 +292,7 @@ describe('rabbit', () => {
   });
 
   it('lifts the body so that its ground points stay above the ground', () => {
-    const lookout = clipById('rabbit', 'lookout');
+    const lookout = clipOf('rabbit', 'lookout');
     const frame = lookout.frameAt(2);
     // A point far back at the bottom of the body, which goes down when the
     // body tips back to sit up.
@@ -307,12 +307,12 @@ describe('rabbit', () => {
     expect(lifted.hip.y + p.y).toBeCloseTo(0, 6);
     expect(hip(withTail).y).toBeLessThan(hip(rabbit).y);
     // Standing points that are already above the ground change nothing.
-    const sitting = clipById('rabbit', 'idle').frameAt(0);
+    const sitting = clipOf('rabbit', 'idle').frameAt(0);
     expect(clearOfGround(withTail, sitting.pose)).toBe(sitting.pose);
   });
 
   it('opens the mouth to talk', () => {
-    const talk = clipById('rabbit', 'talk');
+    const talk = clipOf('rabbit', 'talk');
     const paths = (t: number) =>
       JSON.stringify(drawCharacter(rabbit, talk.frameAt(t), { facing: 1 }));
     expect(paths(0)).not.toContain(rabbit.colors.teeth);
@@ -321,7 +321,7 @@ describe('rabbit', () => {
 });
 
 describe('draw order', () => {
-  const idle = clipById('cutout', 'idle').frameAt(0);
+  const idle = clipOf('cutout', 'idle').frameAt(0);
   const ids = (r: Rig) => drawOrder(r).map((e) => e.id);
   /** The parts and layers in the order they are drawn, as `part.layer`. */
   function layers(node: DrawNode): string[] {
@@ -424,7 +424,7 @@ describe('draw order', () => {
     const plainTree: PropRig = { ...tree };
     delete plainTree.drawOrder;
     for (const r of [rig, wizard, bird, rabbit, plainTree]) {
-      const clip = clipsFor(r.kind)[0]!;
+      const clip = restClip(r.kind);
       const frame = clip.frameAt(0.4);
       const explicit = {
         ...r,

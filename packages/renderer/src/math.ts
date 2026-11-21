@@ -1,6 +1,9 @@
 import type { Matrix, Pt } from '@toonhouse/model';
 
-export const clamp01 = (v: number) => Math.min(Math.max(v, 0), 1);
+/** `v` limited to the range from `lo` to `hi`. */
+export const clamp = (v: number, lo: number, hi: number) =>
+  Math.min(Math.max(v, lo), hi);
+export const clamp01 = (v: number) => clamp(v, 0, 1);
 export const lerp = (a: number, b: number, u: number) => a + (b - a) * u;
 export const smoothstep = (a: number, b: number, v: number) => {
   const u = clamp01((v - a) / (b - a));

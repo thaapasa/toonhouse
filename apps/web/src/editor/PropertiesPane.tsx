@@ -30,9 +30,9 @@ import {
   PinIcon,
 } from '../components/icons.tsx';
 import { useI18n } from '../i18n/index.tsx';
+import { type BackgroundAsset, kindOf } from '../library/index.ts';
 import { BubbleSection } from './BubbleSection.tsx';
 import type { EditRun } from './history.ts';
-import { type BackgroundAsset, kindOf } from './library.ts';
 import { useNames } from './names.ts';
 import { NumberField } from './NumberField.tsx';
 import {

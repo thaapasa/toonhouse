@@ -33,18 +33,21 @@ export {
   fontByFamily,
   fontFamily,
 } from './bubbles/text.ts';
+export type { CartoonEntry, CartoonTimeline } from './cartoon.ts';
+export { cartoonTime, cartoonTimeline } from './cartoon.ts';
 export {
   BACKGROUND_CLIPS,
   backgroundClips,
   BIRD_CLIPS,
   BIRD_WALK_SPEED,
-  clipById,
+  clipOf,
   clipsFor,
   CUTOUT_CLIPS,
   HIP_HEIGHT,
   PROP_CLIPS,
   RABBIT_CLIPS,
   RABBIT_HOP_SPEED,
+  restClip,
   WALK_SPEED,
 } from './clips/index.ts';
 export type {
@@ -57,7 +60,9 @@ export type {
   Skeleton,
 } from './draw.ts';
 export { drawCharacter, fittedPose, partBounds } from './draw.ts';
-export { IDENTITY, multiply } from './math.ts';
+export type { Library, PlacedActor, SceneFrame } from './frame.ts';
+export { actorKind, sceneFrame } from './frame.ts';
+export { clamp, IDENTITY, multiply } from './math.ts';
 export type { DrawEntry, FarGroup } from './order.ts';
 export { defaultDrawOrder, drawOrder } from './order.ts';
 export type { ActorState } from './scene.ts';
@@ -66,9 +71,9 @@ export {
   actorEnd,
   actorStateAt,
   backgroundStateAt,
-  clipOf,
   clipSpeed,
   clipStartOf,
+  FPS,
   isMoving,
   MIN_SCENE_LENGTH,
   minSceneLength,

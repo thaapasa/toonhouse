@@ -6,11 +6,12 @@ import {
   clipsFor,
   drawCharacter,
   drawScene,
+  restClip,
   wholeBackground,
 } from '@toonhouse/renderer';
 import { describe, expect, it } from 'vitest';
 
-import { BACKGROUNDS, CHARACTERS, PROPS } from './library.ts';
+import { BACKGROUNDS, CHARACTERS, LIBRARY, PROPS } from './index.ts';
 
 /** Every number in a value, in a fixed order. */
 function numbers(v: unknown): number[] {
@@ -76,7 +77,7 @@ describe('library backgrounds', () => {
 
   describe.each(backgroundCases)('%s', (_, background, clip) => {
     const { rig } = CHARACTERS[0]!;
-    const idle = clipsFor(rig.kind)[0]!;
+    const idle = restClip(rig.kind);
     const draw = (t: number) => {
       const { node } = drawCharacter(rig, idle.frameAt(t), { facing: 1 });
       const { x, y } = background.ground.start;
@@ -100,5 +101,14 @@ describe('library backgrounds', () => {
         for (const n of numbers(draw(t))) expect(Number.isFinite(n)).toBe(true);
       }
     });
+  });
+});
+
+describe('library packs', () => {
+  it('gives the default bubble font of the asset pack', () => {
+    const { actorFont, backgroundFont } = LIBRARY;
+    expect(actorFont({ kind: 'character', id: 'boy' })).toBe('comic-relief');
+    expect(backgroundFont('meadow')).toBe('comic-relief');
+    expect(backgroundFont(null)).toBe('comic-relief');
   });
 });

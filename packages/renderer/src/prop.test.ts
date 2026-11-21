@@ -3,15 +3,15 @@ import { describe, expect, it } from 'vitest';
 
 import testBush from '../../../assets/fixtures/props/test-bush/rig.json';
 import testTree from '../../../assets/fixtures/props/test-tree/rig.json';
-import { clipById } from './clips/index.ts';
+import { clipOf } from './clips/index.ts';
 import { drawCharacter, type DrawNode } from './draw.ts';
 import { drawOrder } from './order.ts';
 import { swayOf } from './prop.ts';
 
 const tree = testTree as PropRig;
 const bush = testBush as PropRig;
-const rustle = clipById('prop', 'rustle');
-const idle = clipById('prop', 'idle');
+const rustle = clipOf('prop', 'rustle');
+const idle = clipOf('prop', 'idle');
 
 function layers(node: DrawNode): string[] {
   if (node.type === 'part') {

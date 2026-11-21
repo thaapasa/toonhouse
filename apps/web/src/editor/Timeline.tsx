@@ -34,10 +34,10 @@ import {
   ZoomOutIcon,
 } from '../components/icons.tsx';
 import { type TextKey, useI18n } from '../i18n/index.tsx';
+import { kindOf } from '../library/index.ts';
 import { ActionBlocks } from './ActionBlocks.tsx';
 import { BUBBLE_LINE, BubbleLane, bubbleLines } from './BubbleLane.tsx';
 import type { EditRun } from './history.ts';
-import { kindOf } from './library.ts';
 import { useNames } from './names.ts';
 import { released } from './pointer.ts';
 import {

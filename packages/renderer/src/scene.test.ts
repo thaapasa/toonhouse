@@ -2,7 +2,7 @@ import type { Actor, Background, ClipKind, Scene } from '@toonhouse/model';
 import { describe, expect, it } from 'vitest';
 
 import {
-  clipById,
+  clipOf,
   clipsFor,
   RABBIT_HOP_SPEED,
   WALK_SPEED,
@@ -38,10 +38,10 @@ const actor = (actions: Actor['actions'], at = { x: 0, y: 700 }): Actor => ({
 
 describe('clip speed', () => {
   it('is the speed of the walk for a walk and 0 for clips in place', () => {
-    expect(clipSpeed(clipById('cutout', 'walk'))).toBeCloseTo(WALK_SPEED);
-    expect(clipSpeed(clipById('rabbit', 'hop'))).toBeCloseTo(RABBIT_HOP_SPEED);
-    expect(clipSpeed(clipById('cutout', 'wave'))).toBe(0);
-    expect(clipSpeed(clipById('background', 'day'))).toBe(0);
+    expect(clipSpeed(clipOf('cutout', 'walk'))).toBeCloseTo(WALK_SPEED);
+    expect(clipSpeed(clipOf('rabbit', 'hop'))).toBeCloseTo(RABBIT_HOP_SPEED);
+    expect(clipSpeed(clipOf('cutout', 'wave'))).toBe(0);
+    expect(clipSpeed(clipOf('background', 'day'))).toBe(0);
     expect(isMoving('bird', 'walk')).toBe(true);
     expect(isMoving('prop', 'rustle')).toBe(false);
   });
@@ -103,7 +103,7 @@ describe('actor state', () => {
 
   it('starts the clip from the middle', () => {
     const a = actor([{ id: '1', t: 1, clip: 'wave', clipStart: 0.5 }]);
-    const { duration } = clipById('cutout', 'wave');
+    const { duration } = clipOf('cutout', 'wave');
     expect(actorStateAt(a, 'cutout', flat, 2).clipT).toBeCloseTo(
       duration / 2 + 1,
     );
@@ -248,7 +248,7 @@ describe('a walk on the ground', () => {
   );
 
   it('keeps the rabbit in place while it crouches before a hop', () => {
-    const hop = clipById('rabbit', 'hop');
+    const hop = clipOf('rabbit', 'hop');
     const a = actor([{ id: '1', t: 0, clip: 'hop', path: [far] }]);
     // The first hop crouches before it jumps, so the rabbit doesn't move yet.
     expect(actorStateAt(a, 'rabbit', flat, 0.1).at.x).toBe(0);
@@ -260,7 +260,7 @@ describe('a walk on the ground', () => {
   });
 
   it('finishes the hop at the last point and sits when it lands', () => {
-    const hop = clipById('rabbit', 'hop');
+    const hop = clipOf('rabbit', 'hop');
     const period = hop.duration / 3;
     // 250 rig pixels is in the jump of the second hop.
     const a = actor([
@@ -280,7 +280,7 @@ describe('a walk on the ground', () => {
   });
 
   it('lands on a whole hop of the clip when the hop starts in the middle', () => {
-    const hop = clipById('rabbit', 'hop');
+    const hop = clipOf('rabbit', 'hop');
     const period = hop.duration / 3;
     const action = {
       id: '1',
@@ -321,7 +321,7 @@ describe('background state', () => {
 
   it('starts a day with the sun in the middle of the sky', () => {
     const actions = [{ id: '1', t: 2, clip: 'day' as const, clipStart: 0.5 }];
-    const { duration } = clipById('background', 'day');
+    const { duration } = clipOf('background', 'day');
     expect(backgroundStateAt(actions, 2).clipT).toBeCloseTo(duration / 2);
   });
 });

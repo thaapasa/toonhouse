@@ -8,13 +8,10 @@ import type {
   Pt,
   Scene,
 } from '@toonhouse/model';
-import { minSceneLength, sortedActions } from '@toonhouse/renderer';
+import { clamp, minSceneLength, sortedActions } from '@toonhouse/renderer';
 
 // The edits keep the content inside the limits that the server saves.
 const L = CONTENT_LIMITS;
-
-const clamp = (v: number, lo: number, hi: number) =>
-  Math.min(Math.max(v, lo), hi);
 
 /** Two actions closer than this in seconds start at the same time. */
 const SAME_TIME = 1e-6;

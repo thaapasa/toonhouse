@@ -23,7 +23,10 @@ import {
   backgroundClips,
   backgroundStateAt,
   clipsFor,
+  FPS,
   isMoving,
+  restClip,
+  sceneFrame,
   sceneLength,
 } from '@toonhouse/renderer';
 import { usePlayback } from '@toonhouse/stage';
@@ -44,27 +47,21 @@ import {
   UndoIcon,
 } from '../components/icons.tsx';
 import { type TextKey, useI18n } from '../i18n/index.tsx';
-import { ActionBar, BubbleBar, WalkBar } from './ActionBar.tsx';
 import {
-  addBubble,
-  bubbleAnchors,
-  newBubble,
-  removeBubble,
-  updateBubble,
-} from './bubbles.ts';
+  type BackgroundAsset,
+  backgroundAsset,
+  kindOf,
+  LIBRARY,
+  type RigAsset,
+} from '../library/index.ts';
+import { ActionBar, BubbleBar, WalkBar } from './ActionBar.tsx';
+import { addBubble, newBubble, removeBubble, updateBubble } from './bubbles.ts';
 import { CartoonTitle } from './CartoonTitle.tsx';
 import { EditorStage, type WalkEdit } from './EditorStage.tsx';
 import type { EditRun } from './history.ts';
 import { keptContent } from './keptContent.ts';
 import { editorCommand, isTyping } from './keys.ts';
-import {
-  type BackgroundAsset,
-  backgroundAsset,
-  kindOf,
-  type RigAsset,
-} from './library.ts';
 import { LibraryPanel, type LibraryTab } from './LibraryPanel.tsx';
-import { placeActors } from './placement.ts';
 import { PreviewButton } from './PreviewButton.tsx';
 import { PropertiesPane } from './PropertiesPane.tsx';
 import { SaveProblem } from './SaveProblem.tsx';
@@ -93,7 +90,6 @@ import { Timeline, type TimelineSelection } from './Timeline.tsx';
 import { timelineLength } from './timelineMath.ts';
 import { useCartoonContent } from './useCartoonContent.ts';
 
-const FPS = 30;
 const PANE_KEY = 'toonhouse-properties-open';
 const ATTACH_KEY = 'toonhouse-properties-attached';
 
@@ -182,11 +178,14 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
   });
   const t = playback.t;
 
-  // An undo can take away the selected actor or action.
-  const selectedActor =
+  // An undo can take away the selected actor or action. An actor whose
+  // character or prop isn't in the library can't be selected.
+  const found =
     selected?.actorId == null
-      ? null
-      : (scene.actors.find((a) => a.id === selected.actorId) ?? null);
+      ? undefined
+      : scene.actors.find((a) => a.id === selected.actorId);
+  const selectedKind = found ? kindOf(found.asset) : null;
+  const selectedActor = found && selectedKind ? found : null;
   const selection: TimelineSelection | null =
     !selected || !bg || (selected.actorId !== null && !selectedActor)
       ? null
@@ -280,8 +279,7 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
     // the latest time that the server saves.
     const at = Math.min(now(), CONTENT_LIMITS.time);
     playback.seek(at);
-    const kind = selectedActor && kindOf(selectedActor.asset);
-    const moves = kind !== null && isMoving(kind, clip);
+    const moves = selectedKind !== null && isMoving(selectedKind, clip);
     const action: Action = {
       id: newId(),
       t: at,
@@ -389,8 +387,8 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
           setSelected({ actorId, actionId: null });
         }
       : undefined;
-    if (selectedActor) {
-      const kind = kindOf(selectedActor.asset)!;
+    if (selectedActor && selectedKind) {
+      const kind = selectedKind;
       const state = actorStateAt(selectedActor, kind, bg.background, t);
       const id = selectedActor.id;
       const resize = (step: 1 | -1) => {
@@ -406,7 +404,7 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
         <ActionBar
           kind={kind}
           clips={clipsFor(kind)}
-          current={state.action?.clip ?? clipsFor(kind)[0]!.id}
+          current={state.action?.clip ?? restClip(kind).id}
           onClip={startClip}
           onRemoveAction={onRemoveAction}
           actor={{
@@ -448,7 +446,7 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
       bubble={selectedBubble}
       anchors={
         bg
-          ? bubbleAnchors(bg.background, placeActors(scene, bg.background, t))
+          ? sceneFrame(scene, bg.background, LIBRARY, t).bubbleContext.anchors
           : new Map()
       }
       textFocus={textFocus}
@@ -460,9 +458,10 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
       onEdit={(fn) => editScene(fn)}
       onSeek={playback.seek}
       onClipChanged={(actorId, action) => {
-        const kind = selectedActor && kindOf(selectedActor.asset);
         setWalking(
-          actorId !== null && kind && isMoving(kind, action.clip)
+          actorId !== null &&
+            selectedKind &&
+            isMoving(selectedKind, action.clip)
             ? { actorId, actionId: action.id }
             : null,
         );

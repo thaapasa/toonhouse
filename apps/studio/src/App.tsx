@@ -5,6 +5,7 @@ import {
   type Camera,
   clipsFor,
   drawCharacter,
+  FPS,
   partBounds,
   wholeBackground,
 } from '@toonhouse/renderer';
@@ -38,7 +39,6 @@ import {
 } from './rigEdit.ts';
 import { useRigNames } from './rigNames.ts';
 
-const FPS = 30;
 /** The dev server saves rigs here, see server/saveRig.ts. */
 const SAVE_RIG_URL = '/api/rig';
 

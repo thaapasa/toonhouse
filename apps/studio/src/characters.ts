@@ -1,7 +1,7 @@
 // The characters in assets/characters/ and the props in assets/props/, one
 // folder each, with a rig.json and the SVG layers of the parts that it names.
 import type { Rig } from '@toonhouse/model';
-import { layerKey, type PartSources } from '@toonhouse/stage';
+import { assetFolder, type PartSources, rigSources } from '@toonhouse/stage';
 
 const characterRigs = import.meta.glob<Rig>(
   '../../../assets/characters/*/rig.json',
@@ -28,19 +28,8 @@ export interface Character {
 export const repoPath = (path: string) => path.replace(/^(\.\.\/)+/, '');
 
 function load(path: string, rig: Rig): Character {
-  const dir = path.slice(0, path.lastIndexOf('/') + 1);
-  const id = dir.split('/').at(-2)!;
-  const parts: PartSources = {};
-  const add = (key: string, svg: string) => {
-    const text = svgs[dir + svg];
-    if (text === undefined) throw new Error(`Missing ${dir}${svg}`);
-    parts[key] = text;
-  };
-  for (const [part, p] of Object.entries(rig.parts)) {
-    add(part, p.svg);
-    for (const l of p.layers ?? []) add(layerKey(part, l.id), l.svg);
-  }
-  return { id, file: repoPath(path), rig, parts };
+  const { dir, id } = assetFolder(path);
+  return { id, file: repoPath(path), rig, parts: rigSources(rig, dir, svgs) };
 }
 
 const loadAll = (rigs: Record<string, Rig>) =>

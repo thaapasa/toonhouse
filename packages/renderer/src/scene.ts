@@ -16,18 +16,14 @@ import type {
 
 import { actorScaleAt, minScaleY } from './background.ts';
 import { bubbleEnd } from './bubbles/bubble.ts';
-import { clipsFor } from './clips/index.ts';
+import { clipOf, restClip } from './clips/index.ts';
 
+/** The frames a second that the editor, the player and export step by. */
+export const FPS = 30;
 /** A scene is at least this long, in seconds. */
 export const MIN_SCENE_LENGTH = 10;
 /** The time after the last action of a scene, in seconds. */
 const SCENE_TAIL = 4;
-
-/** The clip of a kind with the id, or its first clip, the idle one. */
-export function clipOf(kind: ClipKind, id: ClipId): Clip {
-  const clips = clipsFor(kind);
-  return clips.find((c) => c.id === id) ?? clips[0]!;
-}
 
 /** Whether an action with the clip walks along a path. */
 export const isMoving = (kind: ClipKind, id: ClipId) =>
@@ -291,7 +287,7 @@ export function actorStateAt(
         return {
           at,
           facing,
-          clip: clipsFor(kind)[0]!.id,
+          clip: restClip(kind).id,
           clipT: elapsed - arrived,
           action,
         };
@@ -301,7 +297,7 @@ export function actorStateAt(
       return { at, facing, clip: clip.id, clipT, action };
     }
   }
-  return { at, facing, clip: clipsFor(kind)[0]!.id, clipT: t, action: null };
+  return { at, facing, clip: restClip(kind).id, clipT: t, action: null };
 }
 
 /**
