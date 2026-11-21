@@ -2,7 +2,7 @@ import type { CutoutRig, PropRig } from '@toonhouse/model';
 import { describe, expect, it } from 'vitest';
 
 import testTree from '../../../assets/fixtures/props/test-tree/rig.json';
-import { colorRig, presetColors } from './colors.ts';
+import { colorRig, presetColors, presetPatterns } from './colors.ts';
 
 const rig: CutoutRig = {
   kind: 'cutout',
@@ -20,6 +20,11 @@ const rig: CutoutRig = {
       presets: [
         { id: 'red', colors: { shirt: '#e80000', 'shirt-pattern': '#000' } },
         { id: 'blue', colors: { shirt: '#2f6fe0', 'shirt-pattern': '#fff' } },
+        {
+          id: 'stars',
+          colors: { shirt: '#24306e' },
+          patterns: { shirt: { kind: 'stars', color: '#f9d000' } },
+        },
       ],
     },
   ],
@@ -52,6 +57,13 @@ describe('color presets', () => {
 
   it('uses the first preset if the choice names an unknown preset', () => {
     expect(presetColors(rig, { skin: 'green' }).skin).toBe('#fbc688');
+  });
+
+  it('gives the patterns of the picked presets', () => {
+    expect(presetPatterns(rig, { shirt: 'stars' })).toEqual({
+      shirt: { kind: 'stars', color: '#f9d000' },
+    });
+    expect(presetPatterns(rig, { shirt: 'blue' })).toEqual({});
   });
 
   it('gives a rig without color settings no colors', () => {

@@ -1036,6 +1036,15 @@ button:disabled {
   border-radius: 50%;
 }
 
+.swatch-colors {
+  position: relative;
+}
+
 .swatch-colors > span {
   flex: 1;
+}
+
+.swatch-pattern {
+  position: absolute;
+  inset: 3px;
 }

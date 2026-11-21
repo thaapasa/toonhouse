@@ -1,4 +1,4 @@
-import type { Rig } from '@toonhouse/model';
+import type { CutoutRig, Rig } from '@toonhouse/model';
 import { clipsFor, drawOrder, drawRig } from '@toonhouse/renderer';
 import { describe, expect, it } from 'vitest';
 
@@ -98,9 +98,15 @@ describe('angles', () => {
   });
 });
 
-// The wizard has no layers and no draw order of its own.
+// The wizard without the layers of its feet and its own draw order.
 describe('withEntryMoved', () => {
-  const rig = wizard as unknown as Rig;
+  const rig = (() => {
+    const w = wizard as unknown as CutoutRig;
+    const r = { ...w, parts: { ...w.parts, foot: { ...w.parts.foot } } };
+    delete r.drawOrder;
+    delete r.parts.foot.layers;
+    return r as Rig;
+  })();
   const ids = (r: Rig) => drawOrder(r).map((e) => e.id);
 
   it('moves an entry towards the front or the back', () => {

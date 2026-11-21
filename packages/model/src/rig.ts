@@ -72,7 +72,28 @@ export interface ColorPreset {
   /** A kebab-case name, unique within the setting, such as `dark-brown`. */
   id: string;
   colors: RoleColors;
+  /**
+   * Patterns that the app draws over the roles, such as stars on a robe.
+   * The role keeps its color under the pattern.
+   */
+  patterns?: RolePatterns;
 }
+
+/** The patterns of a rig by color role. */
+export type RolePatterns = Record<string, RolePattern>;
+
+/** A pattern that the app draws in code over the paths of a role. */
+export interface RolePattern {
+  kind: PatternKind;
+  color: string;
+  /**
+   * The size of the pattern against its default size. A part that the rig
+   * draws smaller, such as the head, needs a larger scale to match.
+   */
+  scale?: number;
+}
+
+export type PatternKind = 'stars';
 
 export type RigPartId =
   'head' | 'mouthPatch' | 'torso' | 'hand' | 'handOpen' | 'foot' | 'staff';

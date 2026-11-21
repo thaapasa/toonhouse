@@ -313,6 +313,15 @@ export const en = {
   'colorSetting.coat': 'Coat',
   'colorSetting.buttons': 'Buttons',
   'color.cyan': 'Cyan',
+  'colorSetting.outfit': 'Outfit',
+  'colorSetting.rope': 'Rope',
+  'colorSetting.staff': 'Staff',
+  'color.gold': 'Gold',
+  'color.silver': 'Silver',
+  'color.blue-stars': 'Blue with stars',
+  'color.purple-stars': 'Purple with stars',
+  'color.gray-stars': 'Gray with stars',
+  'color.red-stars': 'Red with stars',
 };
 
 export type TextKey = keyof typeof en;

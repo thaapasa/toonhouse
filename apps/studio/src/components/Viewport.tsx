@@ -1,4 +1,4 @@
-import type { RoleColors } from '@toonhouse/model';
+import type { RoleColors, RolePatterns } from '@toonhouse/model';
 import type { RigDrawing } from '@toonhouse/renderer';
 import { Drawing, type PartSources, PartSymbols } from '@toonhouse/stage';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
@@ -34,6 +34,7 @@ interface Props {
   parts: PartSources;
   /** The colors of the color roles, to preview a color preset. */
   colors: RoleColors;
+  patterns: RolePatterns;
   drawing: RigDrawing;
   /** How far the character has walked, to move the ground. */
   travel: number;
@@ -73,6 +74,7 @@ export function Viewport({
   prefix,
   parts,
   colors,
+  patterns,
   drawing,
   travel,
   view,
@@ -176,7 +178,12 @@ export function Viewport({
           viewBox={viewBox}
           aria-hidden="true"
         >
-          <PartSymbols prefix={prefix} sources={parts} colors={colors} />
+          <PartSymbols
+            prefix={prefix}
+            sources={parts}
+            colors={colors}
+            patterns={patterns}
+          />
           <line
             className="ground-line"
             x1={-vw}

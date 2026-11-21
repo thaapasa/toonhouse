@@ -148,3 +148,34 @@ I rendered frames of the idle, the walk, the wave and the talk with
 pivots, the grip of the staff and the face points did not change, because the
 redrawn parts have the same frames as the traced ones. The closed lids cover the
 eye, and the mouth patch matches the beard.
+
+## Legs inside the boots
+
+The legs go into the boots, so the foot has two layers, as the captain's has.
+`foot-back.svg` is the boot behind the leg and the main layer of the part, and
+`foot-front.svg` is the front of the shaft and the toe, as the `front` layer.
+Both were drawn by hand in Affinity in the frame of the old `foot.svg`, so the
+pivot stays the same. They got the role classes of the foot, `outline` and
+`boot`, with the paths of the drawing unchanged.
+
+The rig has its own draw order now, with each leg between the two layers of its
+foot. The near foot stays behind the robe, as `feetBehindTorso` had it. The old
+`foot.svg` is gone. `redraw/foot.json` made it and is no longer part of the
+asset.
+
+## Color presets
+
+The wizard has color settings for the skin, the hair, the outfit, the rope, the
+staff, the boots and the outline. The hair setting colors the beard, the brows
+and the mouth patch, which got the class `c-hair`. The outfit setting colors the
+robe and the hat together, and the sleeves and the legs follow the robe through
+`colorRoles`.
+
+Four outfit presets draw stars over the robe and the hat: blue with gold stars,
+purple with silver stars, dark red with gold stars, and the gray of the drawings
+with white stars. The hat is on the head, which the rig draws at 0.77, so its
+stars have the scale 1.3 to look the same size as those on the robe. The sleeves
+are drawn by the renderer, so they get the color of the robe but no stars.
+
+A staff preset colors the wood and the crystal, and is named after the crystal.
+The pupil is part of the outline paths, so the wizard has no eye setting.

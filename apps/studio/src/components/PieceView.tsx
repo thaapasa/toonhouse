@@ -1,4 +1,10 @@
-import type { PartId, Pt, Rig, RoleColors } from '@toonhouse/model';
+import type {
+  PartId,
+  Pt,
+  Rig,
+  RoleColors,
+  RolePatterns,
+} from '@toonhouse/model';
 import { partBounds, type RigDrawing } from '@toonhouse/renderer';
 import {
   Drawing,
@@ -37,6 +43,7 @@ interface Props {
   parts: PartSources;
   /** The colors of the color roles, to preview a color preset. */
   colors: RoleColors;
+  patterns: RolePatterns;
   rig: Rig;
   part: PartId;
   /** The rest angles of the piece. */
@@ -281,7 +288,12 @@ export function PieceView(props: Props) {
           viewBox={`${box.x} ${box.y} ${box.width} ${box.height}`}
           aria-hidden="true"
         >
-          <PartSymbols prefix={prefix} sources={parts} colors={props.colors} />
+          <PartSymbols
+            prefix={prefix}
+            sources={parts}
+            colors={props.colors}
+            patterns={props.patterns}
+          />
           {content}
         </svg>
       )}
@@ -292,6 +304,7 @@ export function PieceView(props: Props) {
             prefix={`${prefix}-preview`}
             sources={parts}
             colors={props.colors}
+            patterns={props.patterns}
           />
           <Drawing node={props.drawing.node} prefix={`${prefix}-preview`} />
         </svg>

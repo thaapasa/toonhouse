@@ -1,5 +1,6 @@
 import type { ColorPreset, Rig } from '@toonhouse/model';
 import type { ColorChoice } from '@toonhouse/renderer';
+import { starPath } from '@toonhouse/stage';
 
 import { isTextKey, useI18n } from '../i18n/index.tsx';
 
@@ -9,14 +10,23 @@ interface Props {
   onChoice(choice: ColorChoice): void;
 }
 
-/** A swatch with a stripe for each color of the preset. */
+/**
+ * A swatch with a stripe for each color of the preset, and a star in the
+ * color of its pattern, if it has one.
+ */
 function Swatch({ preset }: { preset: ColorPreset }) {
   const colors = Object.values(preset.colors);
+  const pattern = Object.values(preset.patterns ?? {})[0];
   return (
     <span className="swatch-colors">
       {colors.map((c, i) => (
         <span key={i} style={{ background: c }} />
       ))}
+      {pattern && (
+        <svg className="swatch-pattern" viewBox="0 0 20 20" aria-hidden>
+          <path d={starPath(10, 10.5, 7)} fill={pattern.color} />
+        </svg>
+      )}
     </span>
   );
 }

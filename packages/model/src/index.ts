@@ -53,6 +53,7 @@ export type {
   CutoutRig,
   EyeFace,
   PartId,
+  PatternKind,
   PropBone,
   PropRig,
   PropSway,
@@ -65,5 +66,7 @@ export type {
   RigPart,
   RigPartId,
   RoleColors,
+  RolePattern,
+  RolePatterns,
   StaffHold,
 } from './rig.ts';

@@ -29,6 +29,19 @@ const rig = boy as CutoutRig;
 const bird = chicken as BirdRig;
 const rabbit = bunny as RabbitRig;
 const wizard = wizardRig as CutoutRig;
+/**
+ * The wizard without the layers of its feet and its own draw order, to test
+ * the default order of a rig with a long robe.
+ */
+const robed: CutoutRig = (() => {
+  const r = {
+    ...wizard,
+    parts: { ...wizard.parts, foot: { ...wizard.parts.foot } },
+  };
+  delete r.drawOrder;
+  delete r.parts.foot.layers;
+  return r;
+})();
 const tree = testTree as PropRig;
 
 function parts(node: DrawNode): string[] {
@@ -102,7 +115,7 @@ describe('drawRig', () => {
     const frame = clipOf('cutout', 'idle').frameAt(0);
     const order = (r: CutoutRig) =>
       parts(drawRig(r, frame, { facing: 1 }).node);
-    const robe = order(wizard);
+    const robe = order(robed);
     expect(robe.lastIndexOf('foot')).toBeLessThan(robe.indexOf('torso'));
     const shorts = order(rig);
     expect(shorts.lastIndexOf('foot')).toBeGreaterThan(shorts.indexOf('torso'));
@@ -358,7 +371,7 @@ describe('draw order', () => {
       'armNear',
       'handNear',
     ]);
-    expect(ids(wizard)).toEqual([
+    expect(ids(robed)).toEqual([
       'armFar',
       'handFar',
       'legFar',
@@ -421,7 +434,7 @@ describe('draw order', () => {
   it('draws the same with the default order written out', () => {
     const plainTree: PropRig = { ...tree };
     delete plainTree.drawOrder;
-    for (const r of [rig, wizard, bird, rabbit, plainTree]) {
+    for (const r of [rig, robed, bird, rabbit, plainTree]) {
       const clip = restClip(r.kind);
       const frame = clip.frameAt(0.4);
       const explicit = {

@@ -10,6 +10,7 @@ import {
   FPS,
   partBounds,
   presetColors,
+  presetPatterns,
   restClip,
   wholeBackground,
 } from '@toonhouse/renderer';
@@ -131,6 +132,10 @@ export function App() {
     () => presetColors(rig, colorChoice),
     [rig, colorChoice],
   );
+  const rolePatterns = useMemo(
+    () => presetPatterns(rig, colorChoice),
+    [rig, colorChoice],
+  );
   const drawing = drawRig(colorRig(rig, roleColors), frame, {
     facing: view.facing,
   });
@@ -165,6 +170,10 @@ export function App() {
     () => (guestRig ? presetColors(guestRig, guestChoice) : {}),
     [guestRig, guestChoice],
   );
+  const guestPatterns = useMemo(
+    () => (guestRig ? presetPatterns(guestRig, guestChoice) : {}),
+    [guestRig, guestChoice],
+  );
   if (background && guestAsset && guestRig) {
     const gClips = clipsFor(guestRig.kind);
     const gClip = gClips.find((c) => c.id === clipId) ?? gClips[0]!;
@@ -179,6 +188,7 @@ export function App() {
       },
       parts: guestAsset.parts,
       colors: guestColors,
+      patterns: guestPatterns,
     };
   }
   const rigName = (c: (typeof RIGS)[number]) => {
@@ -374,6 +384,7 @@ export function App() {
               prefix={prefix}
               parts={character.parts}
               colors={roleColors}
+              patterns={rolePatterns}
               rig={rig}
               part={selected.part}
               drawing={drawing}
@@ -391,6 +402,7 @@ export function App() {
               prefix={prefix}
               parts={character.parts}
               colors={roleColors}
+              patterns={rolePatterns}
               drawing={drawing}
               travel={'travel' in frame ? frame.travel : 0}
               view={view}

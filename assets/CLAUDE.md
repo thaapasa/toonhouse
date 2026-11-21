@@ -469,6 +469,22 @@ the iris if the eye has one.
 - Pick each color in the saturation and the lightness of the drawings, so that a
   preset looks drawn in the same style.
 
+### Patterns
+
+A preset can draw a pattern over a role, such as stars on the robe and the hat
+of the wizard, in `patterns` of the preset. The role keeps the color of the
+preset under the pattern. The kinds of pattern are in `packages/stage`, and so
+far there is `stars`. Use patterns for a few presets of a setting, next to the
+plain colors.
+
+- Put the same pattern on every role of the setting that shows it, such as the
+  robe and the hat, so that they match.
+- The pattern is in the pixels of each part. If the rig draws a part at a
+  smaller scale, such as the head at 0.77, give its pattern the inverse scale,
+  1.3, so that the stars look the same size on the hat and on the robe.
+- The limbs that the renderer draws, such as the sleeves, get the color but not
+  the pattern.
+
 ### The outline
 
 Every character and prop has one outline setting with one color for all its

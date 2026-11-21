@@ -314,4 +314,13 @@ export const fi: Texts = {
   'colorSetting.coat': 'Takki',
   'colorSetting.buttons': 'Napit',
   'color.cyan': 'Turkoosi',
+  'colorSetting.outfit': 'Asu',
+  'colorSetting.rope': 'Köysi',
+  'colorSetting.staff': 'Sauva',
+  'color.gold': 'Kulta',
+  'color.silver': 'Hopea',
+  'color.blue-stars': 'Sininen tähdillä',
+  'color.purple-stars': 'Violetti tähdillä',
+  'color.gray-stars': 'Harmaa tähdillä',
+  'color.red-stars': 'Punainen tähdillä',
 };

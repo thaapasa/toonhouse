@@ -56,6 +56,10 @@ describe.each(cases)('color settings of %s', (_, asset) => {
           const known = drawn.has(role) || rendered.has(role);
           expect(known, `${s.id}.${p.id}: ${role}`).toBe(true);
         }
+        // The app draws a pattern over the paths of a role in the SVGs.
+        for (const role of Object.keys(p.patterns ?? {})) {
+          expect(drawn.has(role), `${s.id}.${p.id}: ${role}`).toBe(true);
+        }
       }
     }
   });
