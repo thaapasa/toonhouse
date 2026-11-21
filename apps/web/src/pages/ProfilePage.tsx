@@ -16,7 +16,7 @@ import { AppHeader } from '../components/AppHeader.tsx';
 import { Dialog } from '../components/Dialog.tsx';
 import { CheckIcon, CopyIcon } from '../components/icons.tsx';
 import { PageMessage, RequireUser } from '../components/RequireUser.tsx';
-import { useI18n } from '../i18n/index.tsx';
+import { type TextKey, useI18n } from '../i18n/index.tsx';
 
 export function ProfilePage() {
   return (
@@ -134,6 +134,14 @@ function PasswordCard({ profile }: { profile: Profile }) {
   );
 }
 
+function resetErrorKey(error: Error): TextKey {
+  if (error instanceof ApiError && error.status === 403)
+    return 'profile.wrongPassword';
+  if (error instanceof ApiError && error.status === 429)
+    return 'profile.tooManyAttempts';
+  return 'profile.resetError';
+}
+
 /**
  * Asks for the current password, and then shows the new password that the
  * server made. The password shows only once, so closing the dialog forgets it.
@@ -182,9 +190,7 @@ function ResetPasswordDialog({ onClose }: { onClose: () => void }) {
         </label>
         {reset.isError && (
           <p role="alert" className="error">
-            {reset.error instanceof ApiError && reset.error.status === 403
-              ? tr('profile.wrongPassword')
-              : tr('profile.resetError')}
+            {tr(resetErrorKey(reset.error))}
           </p>
         )}
         <div className="row end">

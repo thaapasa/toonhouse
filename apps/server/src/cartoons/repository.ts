@@ -81,14 +81,28 @@ export async function getCartoon(
 }
 
 /** Creates a private cartoon and returns its id. */
+/**
+ * The most cartoons that one user can have. Each cartoon can hold up to a
+ * megabyte of content and a megabyte of preview image, so without a limit one
+ * user could fill the disk of the database. The limit is there for disk space
+ * only, so it is far above what anyone makes by hand.
+ */
+export const maxCartoonsPerUser = 1000;
+
+/** Returns the ID of the new cartoon, or `null` if the user has too many. */
 export async function createCartoon(
   ownerId: string,
   title: string,
-): Promise<string> {
+): Promise<string | null> {
+  // Parallel requests can go a few over the limit, which doesn't matter for
+  // disk space.
   const [row] = await sql<{ id: string }[]>`
-    INSERT INTO cartoons (owner_id, title) VALUES (${ownerId}, ${title}) RETURNING id
+    INSERT INTO cartoons (owner_id, title)
+    SELECT ${ownerId}, ${title}
+    WHERE (SELECT count(*) FROM cartoons WHERE owner_id = ${ownerId}) < ${maxCartoonsPerUser}
+    RETURNING id
   `;
-  return row!.id;
+  return row?.id ?? null;
 }
 
 /** The changes below match the owner too, so that only the owner can make them. */

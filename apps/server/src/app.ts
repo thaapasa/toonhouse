@@ -4,6 +4,7 @@ import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono, type MiddlewareHandler } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { csrf } from 'hono/csrf';
+import { secureHeaders } from 'hono/secure-headers';
 
 import { type AuthEnv, authRoutes, sessionMiddleware } from './auth/routes.ts';
 import { cartoonRoutes } from './cartoons/routes.ts';
@@ -16,6 +17,37 @@ const webDir =
   process.env.WEB_DIR ?? path.join(import.meta.dirname, '../../web/dist');
 
 export const app = new Hono<AuthEnv>();
+
+// The web app draws inline SVG with style attributes, adds the `@font-face`
+// rules in a `<style>` element, and makes the preview image from a `blob:` URL
+// with the fonts as `data:` URLs. Browsers ignore HSTS over plain HTTP, so it
+// does no harm in development.
+app.use(
+  secureHeaders({
+    contentSecurityPolicy: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", 'data:', 'blob:'],
+      fontSrc: ["'self'", 'data:'],
+      connectSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
+      frameAncestors: ["'none'"],
+    },
+    xFrameOptions: 'DENY',
+  }),
+);
+
+// The API answers depend on the session, and a cartoon can stop being public at
+// any time, so no cache may keep them. A route can set its own value, as the
+// preview image does.
+app.use('/api/*', async (c, next) => {
+  await next();
+  if (!c.res.headers.has('cache-control'))
+    c.header('cache-control', 'no-store');
+});
 
 app.get('/health', async (c) => {
   await sql`SELECT 1`;

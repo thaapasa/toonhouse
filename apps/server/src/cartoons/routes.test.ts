@@ -2,8 +2,10 @@ import type { Cartoon, Sharing } from '@toonhouse/api';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { app } from '../app.ts';
+import { sql } from '../db.ts';
 import { login, request } from '../test/api.ts';
 import { createGroup, createUser, resetDatabase } from '../test/db.ts';
+import { maxCartoonsPerUser } from './repository.ts';
 
 let owner: string;
 let member: string;
@@ -83,6 +85,20 @@ describe('creating', () => {
       cookie: owner,
     });
     expect(res.status).toBe(400);
+  });
+
+  it('refuses a cartoon over the limit of the user', async () => {
+    const first = await create();
+    await sql`
+      INSERT INTO cartoons (owner_id, title)
+      SELECT ${first.owner.id}, 'X' FROM generate_series(2, ${maxCartoonsPerUser})
+    `;
+    const res = await request('/api/app/cartoons', {
+      method: 'POST',
+      json: { title: 'X' },
+      cookie: owner,
+    });
+    expect(res.status).toBe(409);
   });
 });
 

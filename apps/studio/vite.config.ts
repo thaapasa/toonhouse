@@ -6,9 +6,12 @@ import { defineConfig } from 'vite';
 import { saveRigPlugin } from './server/saveRig.ts';
 
 const port = Number(process.env.STUDIO_PORT ?? 10711);
+// The studio writes files in the repo, so it listens only on this computer
+// unless STUDIO_HOST asks for more, such as `0.0.0.0` for another device.
+const host = process.env.STUDIO_HOST ?? 'localhost';
 
 // The studio only runs on the dev server. It has no production build.
 export default defineConfig({
   plugins: [react(), saveRigPlugin(resolve(import.meta.dirname, '../..'))],
-  server: { port, strictPort: true, host: true },
+  server: { port, strictPort: true, host },
 });

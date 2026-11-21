@@ -13,6 +13,9 @@ export const en = {
   'home.noPublicCartoons': 'There are no public cartoons yet.',
   'home.newCartoon': 'New cartoon',
   'home.newCartoonTitle': 'New cartoon',
+  'home.newCartoonError': 'Making the cartoon failed.',
+  'home.tooManyCartoons':
+    'You have as many cartoons as one user can have. Delete a cartoon to make a new one.',
   'home.edit': 'Edit: {title}',
   'home.watch': 'Watch: {title}',
   'home.byOwner': 'By {name}',
@@ -45,6 +48,7 @@ export const en = {
   'profile.currentPassword': 'Current password',
   'profile.wrongPassword': 'The password is wrong.',
   'profile.resetError': 'Resetting the password failed.',
+  'profile.tooManyAttempts': 'Too many attempts. Try again in a few minutes.',
   'profile.newPassword': 'New password',
   'profile.newPasswordInfo':
     'Copy the password and keep it safe. It shows only this once.',

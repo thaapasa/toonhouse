@@ -37,10 +37,14 @@ function reply(res: ServerResponse, status: number, body: object) {
   res.end(JSON.stringify(body));
 }
 
-/** Requests from a page on another host would change files on this one. */
+/**
+ * Requests from a page on another host would change files on this one. The
+ * browser always sends `Origin` with a POST, so a request without it doesn't
+ * come from the studio.
+ */
 function sameOrigin(req: IncomingMessage): boolean {
   const { origin, host } = req.headers;
-  if (!origin) return true;
+  if (!origin) return false;
   try {
     return new URL(origin).host === host;
   } catch {

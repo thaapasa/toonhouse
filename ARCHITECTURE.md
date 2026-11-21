@@ -258,6 +258,14 @@ export client to update.
 The web app calls the API under `/api/app`. The server serves the build of the
 web app from `apps/web/dist`, and every other path gets its `index.html`.
 
+Every response has a Content-Security-Policy that allows only files from the app
+itself, plus `data:` and `blob:` URLs for images and fonts, which the preview
+image needs. The policy has no `unsafe-eval`, so the web app runs Zod without
+its compiled parsers. API answers have `Cache-Control: no-store`, because they
+depend on the session. The built files in `assets/` have a content hash in their
+names, so browsers keep them for a year. `index.html` and `version.json` must
+always come from the server.
+
 ### Users and sessions
 
 Users and groups are added on the server with the commands in
@@ -271,11 +279,13 @@ cookie, and the database stores only a SHA-256 hash of the token, so a copy of
 the database doesn't let anyone log in. The web app has no other way to
 authenticate, such as personal tokens.
 
-The server counts the login attempts per username and per client address in
-memory, and refuses a login before it checks the password. Each check takes tens
-of milliseconds of Argon2 work, so a flood of logins would slow down the whole
-server. One server process doesn't need the counts to survive a restart. The
-client address is the last entry of `X-Forwarded-For`, which Caddy adds.
+The server counts the login attempts per client address, and per username from
+each address, in memory, and refuses a login before it checks the password.
+Counting the username with the address means that failed logins from elsewhere
+can't lock a user out. Each check takes tens of milliseconds of Argon2 work, so
+a flood of logins would slow down the whole server. One server process doesn't
+need the counts to survive a restart. The client address is the last entry of
+`X-Forwarded-For`, which Caddy adds.
 
 ### Visibility
 

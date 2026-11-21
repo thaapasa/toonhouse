@@ -2,7 +2,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
 import type { Cartoon } from '@toonhouse/api';
 
-import { cartoonQuery, cartoonsQuery, createCartoon, meQuery } from '../api.ts';
+import {
+  ApiError,
+  cartoonQuery,
+  cartoonsQuery,
+  createCartoon,
+  meQuery,
+} from '../api.ts';
 import { AppHeader } from '../components/AppHeader.tsx';
 import { EditIcon, PlayIcon, PlusIcon } from '../components/icons.tsx';
 import { PreviewImage } from '../components/PreviewImage.tsx';
@@ -10,23 +16,46 @@ import { PageMessage } from '../components/RequireUser.tsx';
 import { useI18n } from '../i18n/index.tsx';
 
 export function HomePage() {
+  const { tr } = useI18n();
   const me = useQuery(meQuery);
   const loggedIn = !!me.data?.user;
+  const create = useCreateCartoon();
   return (
     <div className="page">
-      <AppHeader actions={loggedIn && <NewCartoonButton />} />
+      <AppHeader
+        actions={
+          loggedIn && (
+            <button
+              type="button"
+              className="button primary"
+              disabled={create.isPending}
+              onClick={() => create.mutate()}
+            >
+              <PlusIcon />
+              {tr('home.newCartoon')}
+            </button>
+          )
+        }
+      />
       <main className="home">
+        {create.isError && (
+          <p role="alert" className="error">
+            {create.error instanceof ApiError && create.error.status === 409
+              ? tr('home.tooManyCartoons')
+              : tr('home.newCartoonError')}
+          </p>
+        )}
         <CartoonLists loggedIn={loggedIn} />
       </main>
     </div>
   );
 }
 
-function NewCartoonButton() {
+function useCreateCartoon() {
   const { tr } = useI18n();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const create = useMutation({
+  return useMutation({
     mutationFn: () => createCartoon(tr('home.newCartoonTitle')),
     onSuccess: async (cartoon) => {
       queryClient.setQueryData(cartoonQuery(cartoon.id).queryKey, cartoon);
@@ -37,17 +66,6 @@ function NewCartoonButton() {
       });
     },
   });
-  return (
-    <button
-      type="button"
-      className="button primary"
-      disabled={create.isPending}
-      onClick={() => create.mutate()}
-    >
-      <PlusIcon />
-      {tr('home.newCartoon')}
-    </button>
-  );
 }
 
 function CartoonLists({ loggedIn }: { loggedIn: boolean }) {

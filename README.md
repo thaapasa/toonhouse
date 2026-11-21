@@ -83,6 +83,9 @@ The server reads its settings from the environment, and in development also from
 `apps/server/.env`. [apps/server/.env.example](apps/server/.env.example) lists
 them. In production, `DATABASE_URL` must be set.
 
+The studio saves files in the repo, so it listens only on `localhost`. To open
+it from another device, start it with `STUDIO_HOST=0.0.0.0 pnpm studio`.
+
 ### Users and groups
 
 The app can't add users or groups. Add them with these commands:

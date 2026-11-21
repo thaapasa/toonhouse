@@ -78,6 +78,7 @@ export const cartoonRoutes = new Hono<AuthEnv>()
     async (c) => {
       const userId = c.var.user.id;
       const id = await createCartoon(userId, c.req.valid('json').title);
+      if (!id) return c.json({ error: 'Too many cartoons' }, 409);
       return c.json(await getCartoon(id, userId), 201);
     },
   )
