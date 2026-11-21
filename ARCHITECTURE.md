@@ -11,8 +11,8 @@ The requirements are in [specs/](specs/README.md), and the UI design is in
 ## Apps
 
 - **Web app** (`apps/web`): the player and the editor, built with React and
-  Vite. The server serves it at https://piirretyt.pomeranssi.fi. The editor
-  works on an iPad.
+  Vite. The server serves it, and it will run at
+  https://piirretyt.pomeranssi.fi. The editor works on an iPad.
 - **Server** (`apps/server`): a Node server that stores the cartoons and serves
   the assets and the web app. It never renders video. See [Server](#server).
 - **Export client** (`apps/export`): a CLI that runs on the user's own computer.
@@ -35,9 +35,10 @@ same web app in a browser.
   [The frame of a scene](#the-frame-of-a-scene).
 - `packages/api`: the Zod schemas of the API between the server and the web app.
   Both validate the requests and the responses with them.
-- `packages/stage`: the React components that the web app and the studio share,
-  such as the stage that draws the renderer output and the playback controls,
-  and the code that finds the SVG files of a rig or a background.
+- `packages/stage`: the React code that the web app and the studio share: the
+  stage that draws the renderer output, the `usePlayback` hook that plays it,
+  and the code that finds the SVG files of a rig or a background. The playback
+  controls are in each app.
 
 ## Deterministic rendering
 
@@ -479,5 +480,7 @@ page and checks again the next time.
 
 ## Hosting
 
-The app runs at https://piirretyt.pomeranssi.fi, on the pomeranssi.fi server
-next to the other services. An English host name may come later.
+The app is not deployed yet. It will run at https://piirretyt.pomeranssi.fi, on
+the pomeranssi.fi server next to the other services. An English host name may
+come later. [specs/deployment.md](specs/deployment.md) lists what the deployment
+needs.

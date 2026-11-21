@@ -17,6 +17,19 @@ the background, and the camera can move on the [timeline](timeline.md).
 - [ ] If the background has layers, they move at different speeds when the
       camera zooms or pans, so that the far layers move less than the near ones.
 
+## Technical notes
+
+### The camera in the frame of a scene
+
+The `camera-moves` branch works out the camera in `SceneDrawing` in the web app.
+Since then, `sceneFrame` in `packages/renderer` builds the frame of a scene for
+the editor, the player and the preview image, and export will use it too. When
+the branch is rebased, put the camera into `sceneFrame`. It calls `cameraAt`,
+returns the camera with the frame, draws the scene through the camera and wraps
+the bubbles in the transform of the ground layer. An option gives the editor its
+view of the ground layer. Then every caller of `sceneFrame` draws through the
+camera, and `SceneDrawing` keeps only the mask and the SVG symbols.
+
 ## Open questions
 
 - Can a shot in the cartoon set its own camera view, or does only the scene move

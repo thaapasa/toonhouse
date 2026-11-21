@@ -38,12 +38,12 @@ with them, and the public cartoons can be watched without logging in. See
 
 ## Access
 
-- [ ] A user who is not logged in can watch the public cartoons.
+- [x] A user who is not logged in can watch the public cartoons.
 - [x] Only a logged-in user can open the editor, make a cartoon or change one.
 - [x] A user can edit only their own cartoons.
 - [x] A user can have at most 1000 cartoons. The limit protects the disk space
-      of the server, because each cartoon can hold up to 10 MB of content and 1
-      MB of preview image. Even at the limit, one user can store about 11 GB in
+      of the server, because each cartoon can hold up to 10 MB of content and 3
+      MB of preview image. Even at the limit, one user can store about 13 GB in
       the worst case. When the user has 1000, the app tells them to delete a
       cartoon before making a new one.
 

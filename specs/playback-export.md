@@ -1,7 +1,8 @@
 # Playback and export
 
-- [x] User can watch a cartoon in the browser at
-      https://piirretyt.pomeranssi.fi.
+- [x] User can watch a cartoon in the browser.
+- [ ] The app runs at https://piirretyt.pomeranssi.fi. See
+      [Deployment](deployment.md).
 - [x] User can watch the cartoon from the start, in full screen.
 - [x] A tap on a cartoon in the lists of the app plays it. The owner has a
       separate button to edit it.

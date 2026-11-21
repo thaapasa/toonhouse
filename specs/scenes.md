@@ -13,7 +13,15 @@ parts of its scenes in a row.
       actors.
 - [ ] User can select a locked actor and unlock it from outside the stage, such
       as from the timeline or a list of the actors.
+- [x] User can add a scene to the cartoon, and open any scene of the cartoon in
+      the editor.
 - [x] Scenes are saved on the server, and the user can open them later.
+- [x] The editor saves the cartoon by itself a moment after each edit, and at
+      once when the page goes to the background. The user doesn't need to save.
+- [x] The editor shows whether the edits are saved, not saved yet or being
+      saved, and tells the user when they can't be saved.
+- [x] If a save fails because the device is offline or the server has an error,
+      the editor tells the user and tries again after a few seconds.
 - [x] The editor opens the latest saved version of the cartoon.
 - [x] If the server refuses a save, for example because the cartoon is too
       large, the editor tells the user what is wrong. It tries again after the
@@ -76,6 +84,9 @@ have clips, such as the sun moving across the sky.
       own place on it, so actors can stand nearer to the camera or further from
       it.
 - [x] If actors overlap, the one nearer to the bottom of the frame is in front.
+- [x] A background can have layers in front of the actors, such as a bush that
+      an actor walks behind. The layers after the ground layer are in front of
+      all actors.
 - [x] If the user adds an actor without picking a place, it goes to the start
       point of the background.
 - [x] A background can have a perspective. Then an actor gets smaller as it goes
@@ -91,7 +102,23 @@ have clips, such as the sun moving across the sky.
 - [x] User can start a clip of the background on the timeline, as for any other
       actor.
 
-## Open questions
+## Technical notes
 
-- Can a background have layers in front of the actors, such as a bush that an
-  actor walks behind?
+### Splitting the editor
+
+The editor is one large component, `Editor` in `apps/web/src/editor`. It keeps
+the selection in three state variables, `selected`, `walking` and `bubbleId`,
+and picks the open scene by its index. Several places check with `isMoving`
+whether an action is a walk. Each new thing to select, such as a camera move,
+needs changes in all of them. Shot composition (see [Cartoon](cartoon.md)) needs
+a view of the whole cartoon that shares the content, undo and saving with the
+scene editor, but not the selection. When shot composition starts:
+
+- Split the editor into an editor shell and a scene editor. The shell owns the
+  content of the cartoon, undo, saving and the mode, such as editing a scene or
+  composing shots. The scene editor owns the selection.
+- Pick the open scene by its id, not by its index.
+- Keep the selection as one union: an actor, an action, a bubble or the camera.
+  A hook checks the selection against the scene, so that an undo can't leave an
+  id that no longer exists, and it knows which actions are walks.
+- Move the choice of the toolbar for the selection into a component of its own.
