@@ -1,6 +1,5 @@
 import type {
   BirdRig,
-  Clip,
   CutoutRig,
   PropRig,
   RabbitRig,
@@ -15,13 +14,9 @@ import wizardRig from '../../../assets/characters/wizard/rig.json';
 import testTree from '../../../assets/fixtures/props/test-tree/rig.json';
 import { legJoint } from './bird.ts';
 import {
-  BIRD_CLIPS,
   BIRD_WALK_SPEED,
   clipById,
   clipsFor,
-  CUTOUT_CLIPS,
-  PROP_CLIPS,
-  RABBIT_CLIPS,
   RABBIT_HOP_SPEED,
   WALK_SPEED,
 } from './clips/index.ts';
@@ -36,62 +31,11 @@ const rabbit = bunny as RabbitRig;
 const wizard = wizardRig as CutoutRig;
 const tree = testTree as PropRig;
 
-/** Every number in a value, in a fixed order. */
-function numbers(v: unknown): number[] {
-  if (typeof v === 'number') return [v];
-  if (Array.isArray(v)) return v.flatMap(numbers);
-  if (v && typeof v === 'object') return Object.values(v).flatMap(numbers);
-  return [];
-}
-
 function parts(node: DrawNode): string[] {
   if (node.type === 'part') return [node.part];
   if (node.type === 'group') return node.children.flatMap(parts);
   return [];
 }
-
-const cases: [string, Clip, Rig][] = [
-  ...CUTOUT_CLIPS.map((c): [string, Clip, Rig] => [`cutout ${c.id}`, c, rig]),
-  ...CUTOUT_CLIPS.map((c): [string, Clip, Rig] => [
-    `cutout ${c.id} with a staff`,
-    c,
-    wizard,
-  ]),
-  ...BIRD_CLIPS.map((c): [string, Clip, Rig] => [`bird ${c.id}`, c, bird]),
-  ...RABBIT_CLIPS.map((c): [string, Clip, Rig] => [
-    `rabbit ${c.id}`,
-    c,
-    rabbit,
-  ]),
-  ...PROP_CLIPS.map((c): [string, Clip, Rig] => [`prop ${c.id}`, c, tree]),
-];
-
-describe.each(cases)('clip %s', (_, clip, clipRig) => {
-  it('gives the same frame for the same time', () => {
-    for (const t of [0, 0.37, clip.duration / 2]) {
-      expect(clip.frameAt(t)).toEqual(clip.frameAt(t));
-    }
-  });
-
-  it('ends where it starts when it loops', () => {
-    const a = clip.frameAt(0);
-    const b = clip.frameAt(clip.duration);
-    if (a.kind === 'background' || b.kind === 'background') return;
-    const pa = numbers(a.pose);
-    const pb = numbers(b.pose);
-    pa.forEach((v, i) => expect(pb[i]).toBeCloseTo(v, 6));
-    expect('face' in b && b.face).toEqual('face' in a && a.face);
-  });
-
-  it('draws finite numbers at every frame', () => {
-    for (let t = 0; t <= clip.duration; t += 1 / 30) {
-      const drawing = drawCharacter(clipRig, clip.frameAt(t), {
-        facing: 1,
-      });
-      for (const n of numbers(drawing)) expect(Number.isFinite(n)).toBe(true);
-    }
-  });
-});
 
 describe.each([
   ['cutout', clipById('cutout', 'walk'), WALK_SPEED],

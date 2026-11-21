@@ -44,6 +44,16 @@ describe('library rigs', () => {
       }
     });
 
+    it('ends where it starts when it loops', () => {
+      const a = clip.frameAt(0);
+      const b = clip.frameAt(clip.duration);
+      if (a.kind === 'background' || b.kind === 'background') return;
+      const pa = numbers(a.pose);
+      const pb = numbers(b.pose);
+      pa.forEach((v, i) => expect(pb[i]).toBeCloseTo(v, 6));
+      expect('face' in b && b.face).toEqual('face' in a && a.face);
+    });
+
     it('draws finite numbers at every frame', () => {
       for (const t of frameTimes(clip)) {
         const drawing = drawCharacter(rig, clip.frameAt(t), { facing: 1 });

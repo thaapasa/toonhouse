@@ -88,16 +88,24 @@ const lettersOf = (s: string) =>
   Array.from(graphemes.segment(s), (g) => g.segment);
 
 /**
+ * The width of a letter that the fonts don't have, such as an emoji, in ems.
+ * An emoji is a bit wider than 1 em.
+ */
+const UNKNOWN_WIDTH = 1.2;
+
+/**
  * Breaks the text of the bubble into lines of at most `bubble.width`. A word
  * that is wider than that breaks between its letters.
  */
 export function layoutText(bubble: Bubble, font: BubbleFontId): TextLayout {
   const m = styleMetrics(font, styleOf(bubble));
   const size = bubble.fontSize;
-  // A letter without a width, such as an emoji, counts as 1 em. The composed
-  // form finds the width of a letter typed with a combining accent.
+  // The composed form finds the width of a letter typed with a combining
+  // accent.
   const widthOf = (letter: string) =>
-    m.widths.get(letter) ?? m.widths.get(letter.normalize('NFC')) ?? 1;
+    m.widths.get(letter) ??
+    m.widths.get(letter.normalize('NFC')) ??
+    UNKNOWN_WIDTH;
   const measureLetters = (letters: readonly string[]) => {
     let w = 0;
     for (const l of letters) w += widthOf(l);
