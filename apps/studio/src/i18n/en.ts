@@ -307,6 +307,9 @@ export const en = {
   'colorSetting.outline': 'Outline',
   'color.charcoal': 'Charcoal',
   'color.plum': 'Plum',
+  'colorSetting.nails': 'Nails',
+  'colorSetting.skirt': 'Skirt',
+  'colorSetting.boots': 'Boots',
 };
 
 export type TextKey = keyof typeof en;

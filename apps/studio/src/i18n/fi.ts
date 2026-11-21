@@ -308,4 +308,7 @@ export const fi: Texts = {
   'colorSetting.outline': 'Ääriviiva',
   'color.charcoal': 'Hiilenharmaa',
   'color.plum': 'Luumu',
+  'colorSetting.nails': 'Kynnet',
+  'colorSetting.skirt': 'Hame',
+  'colorSetting.boots': 'Saappaat',
 };

@@ -160,3 +160,24 @@ I rendered frames of the idle with a blink, the walk, the wave and the talk, and
 looked at the face at 4×. The lids cover the eye, and the mouth patch does not
 show. The pivots and the face coordinates of the rig did not change, because the
 redrawn parts have the same frames as the traced ones.
+
+## Color presets
+
+The emo girl has color settings for the skin, the hair, the nails, the shirt,
+the skirt, the boots and the outline. A hair preset colors the streak too, a
+shirt preset the skull logo, a skirt preset the plaid, and a boot preset the
+sole and the laces. Each preset keeps a strong contrast between the main color
+and its detail, as in the drawings, such as a red skirt with a black plaid.
+
+- The eyelids follow the skin, the sleeves follow the shirt and the face lines
+  follow the outline, through `colorRoles`. The mouth patch got the class
+  `c-skin`, so that it follows the skin.
+- The default outline `#452332` is the `plum` preset. The other outline presets
+  are the same as the boy's.
+- The pupil is part of the outline paths and has no role of its own, so the girl
+  has no eye setting. A redraw that gives the pupil its own layer would allow
+  one.
+- The earrings stay silver.
+- Light hair, such as the white or the blond preset, shows a thin line across
+  the hair at the height of the chin. It is in the default colors too: it is the
+  edge where the clipped hair layers of the head meet.
