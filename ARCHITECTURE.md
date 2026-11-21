@@ -253,9 +253,14 @@ Each save also names the revision of the content that it edited, and the
 revision goes up by one with each save. If someone has saved the cartoon after
 that revision, in another window or on another device, the server refuses the
 save with 409 too. The editor then lets the user keep their version, which it
-saves over the other one, or load the saved version. A 409 can also come from a
-save of the same editor whose answer was lost, so the editor first loads the
-content, and if the server has what the editor sent, it goes on from there.
+saves over the other one, or load the saved version.
+
+A 409 can also come from a save of the same editor whose answer was lost. So
+each time the editor opens, it makes a random editor ID, and each save sends it.
+The server stores the ID of the latest save with the content. On a 409, the
+editor loads the content, and if the ID is its own, it goes on from that
+revision. The edits that an editor keeps in the browser have its ID too, so the
+next editor counts the saves of that editor as its own.
 
 #### Planned upgrades
 
@@ -367,8 +372,10 @@ the user is no longer its owner, the editor tells the user and stops.
 
 When the editor can't save for now, it keeps the edits in the `localStorage` of
 the browser, and the next editor of the cartoon starts from them and saves them.
-This happens when the login has ended, after a conflict, and when the editor
-closes before its edits are saved. A closed editor sends its edits once more,
+This happens when the login has ended, after a conflict, and when the page goes
+to the background or the editor closes before its edits are saved. While the
+editor can't save, it writes them at most once a second, so that a drag doesn't
+write the whole cartoon on each move. A closed editor sends its edits once more,
 but doesn't try again, so that it can't race the next editor.
 
 The library assets come from `assets/` through `import.meta.glob`, so the build

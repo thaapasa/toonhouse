@@ -152,12 +152,22 @@ export async function getContent(
   userId: string | null,
 ): Promise<SavedContent | null> {
   const [row] = await sql<
-    { content: CartoonContent; contentRevision: number }[]
+    {
+      content: CartoonContent;
+      contentRevision: number;
+      contentEditor: string | null;
+    }[]
   >`
-    SELECT c.content, c.content_revision FROM cartoons c
+    SELECT c.content, c.content_revision, c.content_editor FROM cartoons c
     WHERE c.id = ${id} AND ${canWatch(userId)}
   `;
-  return row ? { revision: row.contentRevision, content: row.content } : null;
+  return row
+    ? {
+        revision: row.contentRevision,
+        editor: row.contentEditor,
+        content: row.content,
+      }
+    : null;
 }
 
 /**
@@ -168,13 +178,14 @@ export async function getContent(
 export async function setContent(
   id: string,
   ownerId: string,
-  revision: number,
-  content: CartoonContent,
+  save: { revision: number; editor: string; content: CartoonContent },
 ): Promise<number | 'conflict' | null> {
   const [row] = await sql<{ contentRevision: number }[]>`
-    UPDATE cartoons SET content = ${sql.json(content)},
-      content_revision = content_revision + 1, updated_at = now()
-    WHERE id = ${id} AND owner_id = ${ownerId} AND content_revision = ${revision}
+    UPDATE cartoons SET content = ${sql.json(save.content)},
+      content_revision = content_revision + 1,
+      content_editor = ${save.editor}, updated_at = now()
+    WHERE id = ${id} AND owner_id = ${ownerId}
+      AND content_revision = ${save.revision}
     RETURNING content_revision
   `;
   if (row) return row.contentRevision;

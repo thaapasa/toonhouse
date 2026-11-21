@@ -1,4 +1,4 @@
-import type { SavedContent } from '@toonhouse/api';
+import type { SaveContentRequest, SavedContent } from '@toonhouse/api';
 import type { CartoonContent } from '@toonhouse/model';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -19,11 +19,16 @@ const content = (n: number): CartoonContent => ({
 
 const conflict = () =>
   new ApiError(409, { error: 'x', reason: 'revision' as const });
+const offline = () => new TypeError('Load failed');
 
 /** A fake server that answers each save when the test says so. */
-function setup(start = content(0)) {
-  const server: SavedContent = { revision: 0, content: start };
-  const sent: SavedContent[] = [];
+function setup(keptBy: string | null = null) {
+  const server: SavedContent = {
+    revision: 0,
+    editor: null,
+    content: content(0),
+  };
+  const sent: SaveContentRequest[] = [];
   const answers: {
     resolve(): void;
     reject(e: unknown): void;
@@ -31,16 +36,16 @@ function setup(start = content(0)) {
   }[] = [];
   let kept: SavedContent | null = null;
   const states: SaveState[] = [];
-  const reload = vi.fn();
   const saver = createSaver(
     {
       send: (body) =>
         new Promise<number>((resolve, reject) => {
-          const save = JSON.parse(body) as SavedContent;
+          const save = JSON.parse(body) as SaveContentRequest;
           sent.push(save);
           const store = () => {
             server.revision += 1;
-            server.content = save.content;
+            server.editor = save.editor;
+            server.content = save.content as unknown as CartoonContent;
           };
           answers.push({
             resolve: () => {
@@ -52,7 +57,7 @@ function setup(start = content(0)) {
             // The server stores the save, but the answer doesn't arrive.
             lose: () => {
               store();
-              reject(new TypeError('Load failed'));
+              reject(offline());
             },
           });
         }),
@@ -66,23 +71,25 @@ function setup(start = content(0)) {
       },
       onState: (s) => states.push(s),
       onSaved: () => {},
-      reload,
+      reload: () => {},
     },
-    start,
-    0,
-    false,
+    { content: content(0), revision: 0, unsaved: false, keptBy },
   );
-  const answer = async () => {
-    answers.shift()!.resolve();
-    await vi.advanceTimersByTimeAsync(0);
+  const settle = () => vi.advanceTimersByTimeAsync(0);
+  const answer = async (how: 'resolve' | 'lose' = 'resolve') => {
+    answers.shift()![how]();
+    await settle();
+  };
+  const fail = async (e: unknown) => {
+    answers.shift()!.reject(e);
+    await settle();
   };
   return {
     saver,
     server,
     sent,
-    answers,
     answer,
-    reload,
+    fail,
     kept: () => kept,
     state: () => states.at(-1)?.status,
   };
@@ -104,8 +111,19 @@ describe('saver', () => {
     await t.answer();
     await vi.advanceTimersByTimeAsync(SAVE_DELAY);
     await t.answer();
-    expect(t.server).toEqual({ revision: 2, content: content(2) });
+    expect(t.server.content).toEqual(content(2));
     expect(t.state()).toBe('saved');
+  });
+
+  it('saves an edit made during a save that the server refuses', async () => {
+    const t = setup();
+    t.saver.update(content(1));
+    void t.saver.save();
+    t.saver.update(content(2));
+    await t.fail(new ApiError(400));
+    await vi.advanceTimersByTimeAsync(SAVE_DELAY);
+    await t.answer();
+    expect(t.server.content).toEqual(content(2));
   });
 
   it('sends a flush asked for during a save at once after it', async () => {
@@ -113,67 +131,89 @@ describe('saver', () => {
     t.saver.update(content(1));
     void t.saver.save();
     t.saver.update(content(2));
-    void t.saver.save(true);
+    t.saver.hide();
+    expect(t.kept()?.content).toEqual(content(2));
     expect(t.sent).toHaveLength(1);
     await t.answer();
     expect(t.sent).toHaveLength(2);
     await t.answer();
     expect(t.server.content).toEqual(content(2));
+    expect(t.kept()).toBeNull();
   });
 
   it('keeps the edits after a lost login, also the later ones', async () => {
     const t = setup();
     t.saver.update(content(1));
     void t.saver.save();
-    t.answers.shift()!.reject(new ApiError(401));
-    await vi.advanceTimersByTimeAsync(0);
+    await t.fail(new ApiError(401));
     expect(t.state()).toBe('loggedOut');
     t.saver.update(content(2));
     await vi.advanceTimersByTimeAsync(RETRY_DELAY);
     expect(t.sent).toHaveLength(1);
-    expect(t.kept()).toEqual({ revision: 0, content: content(2) });
+    expect(t.kept()?.content).toEqual(content(2));
   });
 
-  it('tells the user of a save from elsewhere and keeps the edits', async () => {
+  it('goes on from its own save after answers were lost', async () => {
     const t = setup();
-    t.server.revision = 5;
-    t.server.content = content(9);
+    t.saver.update(content(1));
+    void t.saver.save();
+    await t.answer('lose');
+    // The network stays down for two more tries.
+    t.saver.update(content(2));
+    await vi.advanceTimersByTimeAsync(SAVE_DELAY);
+    await t.fail(offline());
+    t.saver.update(content(3));
+    await vi.advanceTimersByTimeAsync(SAVE_DELAY);
+    await t.fail(offline());
+    await vi.advanceTimersByTimeAsync(RETRY_DELAY);
+    // The server is at revision 1 from the lost answer, so this gets 409.
+    await t.answer();
+    await vi.advanceTimersByTimeAsync(SAVE_DELAY);
+    await t.answer();
+    expect(t.server).toMatchObject({ revision: 2, content: content(3) });
+    expect(t.state()).toBe('saved');
+  });
+
+  it('counts the saves of the editor that it goes on from as its own', async () => {
+    const before = crypto.randomUUID();
+    const t = setup(before);
+    Object.assign(t.server, { revision: 1, editor: before });
+    t.saver.update(content(1));
+    await vi.advanceTimersByTimeAsync(SAVE_DELAY);
+    await t.answer();
+    await vi.advanceTimersByTimeAsync(SAVE_DELAY);
+    await t.answer();
+    expect(t.server).toMatchObject({ revision: 2, content: content(1) });
+  });
+
+  it('asks the user after a save of another editor, and keeps the edits', async () => {
+    const t = setup();
+    Object.assign(t.server, {
+      revision: 5,
+      editor: crypto.randomUUID(),
+      content: content(9),
+    });
     t.saver.update(content(1));
     void t.saver.save();
     await t.answer();
     expect(t.state()).toBe('conflict');
-    expect(t.kept()).toEqual({ revision: 0, content: content(1) });
+    expect(t.kept()?.content).toEqual(content(1));
 
+    // After an undo back to the content that it started from.
+    t.saver.update(content(0));
     void t.saver.keepMine();
     await vi.advanceTimersByTimeAsync(0);
     await t.answer();
-    expect(t.server).toEqual({ revision: 6, content: content(1) });
+    expect(t.server).toMatchObject({ revision: 6, content: content(0) });
     expect(t.kept()).toBeNull();
-  });
-
-  it('takes a save whose answer was lost as its own', async () => {
-    const t = setup();
-    t.saver.update(content(1));
-    void t.saver.save();
-    t.answers.shift()!.lose();
-    await vi.advanceTimersByTimeAsync(0);
-    expect(t.state()).toBe('error');
-    t.saver.update(content(2));
-    await vi.advanceTimersByTimeAsync(SAVE_DELAY);
-    // The save of revision 0 gets 409, since the server is at 1.
-    await t.answer();
-    await vi.advanceTimersByTimeAsync(SAVE_DELAY);
-    await t.answer();
-    expect(t.server).toEqual({ revision: 2, content: content(2) });
-    expect(t.state()).toBe('saved');
   });
 
   it('keeps the unsaved edits when the editor closes, and tries no more', async () => {
     const t = setup();
     t.saver.update(content(1));
     t.saver.close();
-    expect(t.kept()).toEqual({ revision: 0, content: content(1) });
-    t.answers.shift()!.reject(new TypeError('Load failed'));
+    expect(t.kept()?.content).toEqual(content(1));
+    await t.fail(offline());
     await vi.advanceTimersByTimeAsync(RETRY_DELAY * 2);
     expect(t.sent).toHaveLength(1);
     expect(t.kept()).not.toBeNull();

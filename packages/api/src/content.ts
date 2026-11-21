@@ -179,12 +179,27 @@ void sameAsModel;
  */
 const Revision = z.number().int().min(0);
 
-/** The content of a cartoon with its revision, as the server sends it. */
+/**
+ * The editor that saves, a random id for each time the editor opens. A web app
+ * that lost the answer to a save sees from it that the newer revision on the
+ * server is its own.
+ */
+const EditorId = z.uuid();
+
+/**
+ * The content of a cartoon with its revision, and the editor that saved it,
+ * as the server sends it. `null` for a cartoon that no editor has saved.
+ */
 export const SavedContent = z.object({
   revision: Revision,
+  editor: EditorId.nullable(),
   content: CartoonContent,
 });
-export type SavedContent = { revision: number; content: Content };
+export type SavedContent = {
+  revision: number;
+  editor: string | null;
+  content: Content;
+};
 
 /**
  * The body of a save. The server checks the version of the content before the
@@ -192,6 +207,7 @@ export type SavedContent = { revision: number; content: Content };
  */
 export const SaveContentRequest = z.object({
   revision: Revision,
+  editor: EditorId,
   content: z.looseObject({ version: z.number() }),
 });
 export type SaveContentRequest = z.infer<typeof SaveContentRequest>;

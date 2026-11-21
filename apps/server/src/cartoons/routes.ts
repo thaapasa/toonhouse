@@ -150,12 +150,11 @@ export const cartoonRoutes = new Hono<AuthEnv>()
       if (!content.success) {
         return c.json({ error: 'Invalid content' }, 400);
       }
-      const revision = await setContent(
-        id,
-        userId,
-        body.revision,
-        content.data,
-      );
+      const revision = await setContent(id, userId, {
+        revision: body.revision,
+        editor: body.editor,
+        content: content.data,
+      });
       if (revision === null) return refuse(c, id, userId);
       if (revision === 'conflict') {
         return c.json(

@@ -68,6 +68,7 @@ import { placeActors } from './placement.ts';
 import { PreviewButton } from './PreviewButton.tsx';
 import { PropertiesPane } from './PropertiesPane.tsx';
 import { SaveProblem } from './SaveProblem.tsx';
+import type { SaverStart } from './saver.ts';
 import {
   actionsOf,
   addPoint,
@@ -123,17 +124,17 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
   const { tr } = useI18n();
   const queryClient = useQueryClient();
   // The edits kept over a login go on from where they were.
-  const [start] = useState(() => {
+  const [start] = useState((): SaverStart => {
     const kept = keptContent(cartoon.id);
     const from = kept ?? props.initial;
-    return { ...from, content: withScene(from.content), unsaved: !!kept };
+    return {
+      content: withScene(from.content),
+      revision: from.revision,
+      unsaved: !!kept,
+      keptBy: kept?.editor ?? null,
+    };
   });
-  const doc = useCartoonContent(
-    cartoon.id,
-    start.content,
-    start.revision,
-    start.unsaved,
-  );
+  const doc = useCartoonContent(cartoon.id, start);
   const scenes = doc.content.scenes;
   const [sceneIndex, setSceneIndex] = useState(0);
   const index = Math.min(sceneIndex, scenes.length - 1);

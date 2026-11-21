@@ -16,7 +16,7 @@ import {
   undoStep,
 } from './history.ts';
 import { clearKeptContent, keepContent } from './keptContent.ts';
-import { createSaver, type SaveState } from './saver.ts';
+import { createSaver, type SaverStart, type SaveState } from './saver.ts';
 
 export type { SaveState } from './saver.ts';
 
@@ -42,23 +42,17 @@ export interface CartoonContentState {
   retry(): void;
 }
 
-/**
- * Edits `initial`, which has the revision `revision` on the server. With
- * `unsaved`, the server doesn't have `initial` yet, such as for the edits kept
- * over a login, and the editor saves it at once.
- */
+/** Edits the content of `start`. See `SaverStart` for the rest of it. */
 export function useCartoonContent(
   cartoonId: string,
-  initial: CartoonContent,
-  revision: number,
-  unsaved = false,
+  start: SaverStart,
 ): CartoonContentState {
   const queryClient = useQueryClient();
   const [history, setHistory] = useState<History<CartoonContent>>(() =>
-    newHistory(initial),
+    newHistory(start.content),
   );
   const [saveState, setSaveState] = useState<SaveState>({
-    status: unsaved ? 'unsaved' : 'saved',
+    status: start.unsaved ? 'unsaved' : 'saved',
   });
   const [saver] = useState(() =>
     createSaver(
@@ -72,9 +66,7 @@ export function useCartoonContent(
           queryClient.setQueryData(contentQuery(cartoonId).queryKey, saved),
         reload: () => location.reload(),
       },
-      initial,
-      revision,
-      unsaved,
+      start,
     ),
   );
 
@@ -82,16 +74,17 @@ export function useCartoonContent(
 
   useEffect(() => {
     saver.open();
+    const hide = () => saver.hide();
     const flush = () => {
-      if (document.visibilityState === 'hidden') void saver.save(true);
+      if (document.visibilityState === 'hidden') hide();
     };
     document.addEventListener('visibilitychange', flush);
-    window.addEventListener('pagehide', flush);
+    window.addEventListener('pagehide', hide);
     // A new version of the app loads only when no edit is lost by it.
     const removeSaver = saveBeforeReload(() => saver.prepareReload());
     return () => {
       document.removeEventListener('visibilitychange', flush);
-      window.removeEventListener('pagehide', flush);
+      window.removeEventListener('pagehide', hide);
       removeSaver();
       saver.close();
     };

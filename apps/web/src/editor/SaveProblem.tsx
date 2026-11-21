@@ -46,7 +46,10 @@ export function SaveProblem(props: {
   // The same problem again, such as after each edit, stays closed.
   const key = problem?.join();
   if (!problem || closed === key) return null;
-  const close = () => setClosed(key!);
+  // A conflict waits for a choice, since nothing else would bring it back.
+  const close = () => {
+    if (state.status !== 'conflict') setClosed(key!);
+  };
   return (
     <Dialog title={tr(problem[0])} onClose={close}>
       <p className="muted">{tr(problem[1])}</p>

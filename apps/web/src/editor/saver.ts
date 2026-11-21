@@ -61,26 +61,11 @@ export function failure(e: unknown): Failure {
   }
 }
 
-/** Whether two JSON values are the same, in any order of the keys. */
-export function sameJson(a: unknown, b: unknown): boolean {
-  if (a === b) return true;
-  if (typeof a !== 'object' || typeof b !== 'object' || !a || !b) return false;
-  if (Array.isArray(a) !== Array.isArray(b)) return false;
-  const ka = Object.keys(a);
-  const kb = Object.keys(b);
-  return (
-    ka.length === kb.length &&
-    ka.every((k) =>
-      sameJson(
-        (a as Record<string, unknown>)[k],
-        (b as Record<string, unknown>)[k],
-      ),
-    )
-  );
-}
+/** How often a stopped saver keeps the edits in the browser, at most. */
+const KEEP_DELAY = 1000;
 
 export interface SaverDeps {
-  /** Sends a save, the JSON of a `SavedContent`, and gives the new revision. */
+  /** Sends a save, the JSON of a `SaveContentRequest`, and gives the new revision. */
   send(body: string, keepalive: boolean): Promise<number>;
   /** Loads the content on the server. */
   load(): Promise<SavedContent>;
@@ -94,11 +79,28 @@ export interface SaverDeps {
   reload(): void;
 }
 
+export interface SaverStart {
+  content: CartoonContent;
+  revision: number;
+  /** The server doesn't have `content` yet, such as for kept edits. */
+  unsaved: boolean;
+  /**
+   * The editor that kept the edits this editor starts from. Its saves count
+   * as this editor's own.
+   */
+  keptBy: string | null;
+}
+
 export interface Saver {
   /** The editor shows `content` now. */
   update(content: CartoonContent): void;
   /** Saves now, or right after the save that runs. */
   save(keepalive?: boolean): Promise<void>;
+  /**
+   * The page goes to the background and may never come back. The saver keeps
+   * what is not saved in the browser and saves it.
+   */
+  hide(): void;
   /**
    * Gets ready for a reload of the page: saves, or keeps what can't be saved
    * in the browser. Tells whether nothing is lost by the reload.
@@ -119,19 +121,17 @@ export interface Saver {
   close(): void;
 }
 
-export function createSaver(
-  deps: SaverDeps,
-  initial: CartoonContent,
-  initialRevision: number,
-  unsaved: boolean,
-): Saver {
-  let latest = initial;
-  let saved: CartoonContent | null = unsaved ? null : initial;
-  let revision = initialRevision;
+export function createSaver(deps: SaverDeps, start: SaverStart): Saver {
+  // Each save names this editor. A 409 for a revision that this editor, or
+  // the one whose edits it goes on with, saved last is no conflict: the
+  // answer to that save was lost.
+  const editor = crypto.randomUUID();
+  const mine = new Set([editor, start.keptBy].filter((id) => id !== null));
+  let latest = start.content;
+  let saved: CartoonContent | null = start.unsaved ? null : start.content;
+  let revision = start.revision;
   // The content that the server refused. The saver doesn't send it again.
   let refused: CartoonContent | null = null;
-  // The content of a save that got no answer. The server may have it.
-  let unanswered: CartoonContent | null = null;
   // Why the saver sends nothing until the user acts.
   let stopped: 'loggedOut' | 'conflict' | 'gone' | 'reloading' | null = null;
   let closed = false;
@@ -139,52 +139,80 @@ export function createSaver(
   // A save asked for while another one runs.
   let next: 'none' | 'normal' | 'keepalive' = 'none';
   let timer: ReturnType<typeof setTimeout> | undefined;
-  let state: SaveState = { status: unsaved ? 'unsaved' : 'saved' };
+  let keepTimer: ReturnType<typeof setTimeout> | undefined;
+  let state: SaveState = { status: start.unsaved ? 'unsaved' : 'saved' };
 
   const set = (s: SaveState) => {
     state = s;
     deps.onState(s);
   };
-  const later = (delay: number) => {
+  const cancel = () => {
     clearTimeout(timer);
-    if (!closed) timer = setTimeout(() => void save(), delay);
+    timer = undefined;
   };
-  const keepLatest = () => deps.keep({ revision, content: latest });
+  const later = (delay: number) => {
+    cancel();
+    if (closed) return;
+    timer = setTimeout(() => {
+      timer = undefined;
+      void save();
+    }, delay);
+  };
+
+  /** Keeps the latest content in the browser, now. */
+  function keepNow() {
+    clearTimeout(keepTimer);
+    keepTimer = undefined;
+    const kept = deps.keep({ revision, editor, content: latest });
+    if (state.status === 'loggedOut' && state.kept !== kept)
+      set({ status: 'loggedOut', kept });
+    return kept;
+  }
+  /** Keeps the latest content soon, so that a drag doesn't write on each move. */
+  function keepSoon() {
+    keepTimer ??= setTimeout(keepNow, KEEP_DELAY);
+  }
+  const unsaved = () => !stopped && latest !== saved;
 
   function accept(content: CartoonContent, rev: number) {
     revision = rev;
     saved = content;
     refused = null;
-    unanswered = null;
     if (latest === content) {
+      clearTimeout(keepTimer);
+      keepTimer = undefined;
       deps.clearKept();
-      deps.onSaved({ revision, content });
+      deps.onSaved({ revision, editor, content });
       set({ status: 'saved' });
     } else {
-      if (closed) keepLatest();
+      if (closed) keepNow();
       set({ status: 'unsaved' });
     }
   }
 
   function stop(why: 'loggedOut' | 'conflict' | 'gone') {
     stopped = why;
-    clearTimeout(timer);
+    cancel();
     if (why === 'gone') {
       deps.clearKept();
       set({ status: 'gone' });
     } else if (why === 'loggedOut') {
-      set({ status: 'loggedOut', kept: keepLatest() });
+      set({
+        status: 'loggedOut',
+        kept: deps.keep({ revision, editor, content: latest }),
+      });
     } else {
-      keepLatest();
+      keepNow();
       set({ status: 'conflict' });
     }
   }
 
   /**
-   * A 409 for the revision can come from a save of this editor whose answer
-   * was lost. If the server has what this editor sent, it is no conflict.
+   * After a 409 for the revision, tells whether the newer revision is this
+   * editor's own. Then the saver goes on from it and saves the latest content
+   * again.
    */
-  async function checkConflict(content: CartoonContent): Promise<boolean> {
+  async function checkConflict(): Promise<boolean> {
     let server: SavedContent;
     try {
       server = await deps.load();
@@ -193,70 +221,67 @@ export function createSaver(
       later(RETRY_DELAY);
       return false;
     }
-    const mine = [content, unanswered].find(
-      (c) => c && sameJson(c, server.content),
-    );
-    if (!mine) {
+    if (!server.editor || !mine.has(server.editor)) {
       stop('conflict');
       return false;
     }
-    accept(mine, server.revision);
+    revision = server.revision;
+    saved = null;
+    set({ status: 'unsaved' });
     return true;
   }
 
   async function attempt(content: CartoonContent, keepalive: boolean) {
     set({ status: 'saving' });
-    const body = JSON.stringify({ revision, content });
+    const body = JSON.stringify({ revision, editor, content });
     try {
       const rev = await deps.send(
         body,
         keepalive && body.length < KEEPALIVE_LIMIT,
       );
       accept(content, rev);
-      return true;
     } catch (e) {
       const why = failure(e);
       switch (why) {
         case 'error':
-          unanswered = content;
           set({ status: 'error' });
           later(RETRY_DELAY);
-          return false;
+          break;
         case 'invalid':
         case 'tooLarge':
           refused = content;
           set({ status: 'refused', reason: why });
-          return false;
+          break;
         case 'revision':
-          return checkConflict(content);
+          await checkConflict();
+          break;
         case 'version':
           // A new version of the app has a new format of the cartoon.
           stopped = 'reloading';
           deps.reload();
-          return false;
+          break;
         default:
           stop(why);
-          return false;
       }
     }
   }
 
   function save(keepalive = false): Promise<void> {
-    clearTimeout(timer);
+    cancel();
     if (running) {
       if (keepalive) next = 'keepalive';
       else if (next === 'none') next = 'normal';
       return running;
     }
     const content = latest;
-    if (stopped || content === saved || content === refused)
-      return Promise.resolve();
-    running = attempt(content, keepalive).then((ok) => {
+    if (!unsaved() || content === refused) return Promise.resolve();
+    running = attempt(content, keepalive).then(() => {
       running = null;
       const after = next;
       next = 'none';
       if (after !== 'none') void save(after === 'keepalive');
-      else if (ok && latest !== saved) later(SAVE_DELAY);
+      // An edit made during the save, unless a retry is planned already.
+      else if (!timer && unsaved() && latest !== refused) later(SAVE_DELAY);
     });
     return running;
   }
@@ -270,14 +295,10 @@ export function createSaver(
   return {
     update(content) {
       latest = content;
-      if (stopped === 'loggedOut') {
-        const kept = keepLatest();
-        if (state.status === 'loggedOut' && state.kept !== kept)
-          set({ status: 'loggedOut', kept });
-      } else if (stopped === 'conflict') keepLatest();
+      if (stopped === 'loggedOut' || stopped === 'conflict') keepSoon();
       if (stopped || running) return;
       if (content === saved) {
-        clearTimeout(timer);
+        cancel();
         if (state.status !== 'saved') set({ status: 'saved' });
       } else {
         if (state.status !== 'unsaved') set({ status: 'unsaved' });
@@ -285,10 +306,16 @@ export function createSaver(
       }
     },
     save,
+    hide() {
+      if (unsaved() || stopped === 'loggedOut' || stopped === 'conflict')
+        keepNow();
+      void save(true);
+    },
     async prepareReload() {
       if (await settle()) return true;
-      if (latest === refused) return keepLatest();
-      return state.status === 'loggedOut' ? state.kept : stopped === 'conflict';
+      if (latest === refused) return keepNow();
+      if (stopped === 'loggedOut' || stopped === 'conflict') return keepNow();
+      return false;
     },
     async keepMine() {
       try {
@@ -298,7 +325,8 @@ export function createSaver(
         return;
       }
       stopped = null;
-      unanswered = null;
+      // The latest content may be the one saved last, after an undo.
+      saved = null;
       await save();
     },
     retry() {
@@ -308,6 +336,7 @@ export function createSaver(
     },
     loadSaved() {
       stopped = 'reloading';
+      clearTimeout(keepTimer);
       deps.clearKept();
       deps.reload();
     },
@@ -316,8 +345,9 @@ export function createSaver(
     },
     close() {
       closed = true;
-      clearTimeout(timer);
-      if (!stopped && latest !== saved) keepLatest();
+      cancel();
+      if (unsaved() || stopped === 'loggedOut' || stopped === 'conflict')
+        keepNow();
       void save(true);
     },
   };

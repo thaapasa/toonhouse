@@ -270,10 +270,11 @@ describe('content', () => {
     ],
   };
 
+  const editor = crypto.randomUUID();
   const save = (id: string, json: unknown, cookie = owner, revision = 0) =>
     request(`/api/app/cartoons/${id}/content`, {
       method: 'PUT',
-      json: { revision, content: json },
+      json: { revision, editor, content: json },
       cookie,
     });
   const load = (id: string, cookie = owner) =>
@@ -283,6 +284,7 @@ describe('content', () => {
     const { id } = await create();
     expect(await (await load(id)).json()).toEqual({
       revision: 0,
+      editor: null,
       content: { version: 1, scenes: [] },
     });
   });
@@ -292,7 +294,11 @@ describe('content', () => {
     const res = await save(id, content);
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ revision: 1 });
-    expect(await (await load(id)).json()).toEqual({ revision: 1, content });
+    expect(await (await load(id)).json()).toEqual({
+      revision: 1,
+      editor,
+      content,
+    });
   });
 
   // A key with an underscore also checks that the keys in the JSON keep their
