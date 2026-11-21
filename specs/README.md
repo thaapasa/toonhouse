@@ -18,6 +18,10 @@ A file can have a "Technical notes" section for plans about the code that a
 later feature needs, such as a refactoring to do when that feature starts. The
 notes go after the requirements and before the open questions.
 
+A file can also have a section for decisions about what the app doesn't cover on
+purpose, so that reviewers don't raise those cases again. It goes after the
+requirements.
+
 A file can end with an "Open questions" section for decisions that are not made
 yet.
 

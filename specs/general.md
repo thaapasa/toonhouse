@@ -54,8 +54,8 @@ The saver doesn't guard against rare cases, and this is a decision, not a gap.
 Code that handles them would be harder to read and to maintain, and simple code
 matters more here. In these cases, the user can lose edits:
 
-- The user edits the same cartoon in several windows or on several devices at
-  the same time.
+- The user edits the same cartoon in several tabs or windows of the same browser
+  at the same time.
 - A new version of the app is deployed while the user edits. This includes edits
   that the browser kept in an older format.
 - The browser tab crashes while it is in view.
