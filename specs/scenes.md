@@ -24,7 +24,9 @@ parts of its scenes in a row.
       editor opened it, the editor doesn't overwrite that save without asking.
       The user keeps their own version or loads the saved one.
 - [x] If the editor closes before its edits are saved, the next editor of the
-      cartoon on the same device starts from those edits and saves them.
+      cartoon on the same device starts from those edits and saves them. If the
+      cartoon was saved elsewhere since, the user chooses between those edits
+      and the saved version.
 - [x] If the cartoon has been removed while the user edits it, the editor tells
       the user and stops saving.
 - [x] User can undo and redo the edits of a scene.

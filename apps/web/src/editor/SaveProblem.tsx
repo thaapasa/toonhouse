@@ -22,7 +22,9 @@ function texts(state: SaveState): [TextKey, TextKey] | null {
         state.kept ? 'save.loggedOutInfo' : 'save.loggedOutNotKept',
       ];
     case 'conflict':
-      return ['save.conflictTitle', 'save.conflictInfo'];
+      return state.atOpen
+        ? ['save.keptTitle', 'save.keptInfo']
+        : ['save.conflictTitle', 'save.conflictInfo'];
     case 'gone':
       return ['save.refusedTitle', 'save.goneInfo'];
     default:
@@ -61,14 +63,14 @@ export function SaveProblem(props: {
               className="button"
               onClick={props.onLoadSaved}
             >
-              {tr('save.loadSaved')}
+              {tr(state.atOpen ? 'save.useSaved' : 'save.loadSaved')}
             </button>
             <button
               type="button"
               className="button primary"
               onClick={props.onKeepMine}
             >
-              {tr('save.keepMine')}
+              {tr(state.atOpen ? 'save.useKept' : 'save.keepMine')}
             </button>
           </>
         ) : (

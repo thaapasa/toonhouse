@@ -59,13 +59,13 @@ import { addBubble, newBubble, removeBubble, updateBubble } from './bubbles.ts';
 import { CartoonTitle } from './CartoonTitle.tsx';
 import { EditorStage, type WalkEdit } from './EditorStage.tsx';
 import type { EditRun } from './history.ts';
-import { keptContent } from './keptContent.ts';
+import { clearKeptContent, keptContent } from './keptContent.ts';
 import { editorCommand, isTyping } from './keys.ts';
 import { LibraryPanel, type LibraryTab } from './LibraryPanel.tsx';
 import { PreviewButton } from './PreviewButton.tsx';
 import { PropertiesPane } from './PropertiesPane.tsx';
 import { SaveProblem } from './SaveProblem.tsx';
-import type { SaverStart } from './saver.ts';
+import { type SaverStart, startFrom } from './saver.ts';
 import {
   actionsOf,
   addPoint,
@@ -121,14 +121,12 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
   const queryClient = useQueryClient();
   // The edits kept over a login go on from where they were.
   const [start] = useState((): SaverStart => {
-    const kept = keptContent(cartoon.id);
-    const from = kept ?? props.initial;
-    return {
-      content: withScene(from.content),
-      revision: from.revision,
-      unsaved: !!kept,
-      keptBy: kept?.editor ?? null,
-    };
+    const { dropKept, ...start } = startFrom(
+      props.initial,
+      keptContent(cartoon.id),
+    );
+    if (dropKept) clearKeptContent(cartoon.id);
+    return { ...start, content: withScene(start.content) };
   });
   const doc = useCartoonContent(cartoon.id, start);
   const scenes = doc.content.scenes;

@@ -123,6 +123,11 @@ export const fi: Texts = {
     'Palvelin ei enää anna tallentaa tätä piirrettyä. Se on ehkä poistettu, tai sisään on kirjautunut toinen käyttäjä.',
   'save.keepMine': 'Pidä oma versioni',
   'save.loadSaved': 'Lataa tallennettu versio',
+  'save.keptTitle': 'Tallentamattomia muutoksia tällä laitteella',
+  'save.keptInfo':
+    'Tällä laitteella on piirretyn muutoksia, joita ei tallennettu, ja piirretty on sen jälkeen tallennettu muualla. Käytetäänkö tämän laitteen tallentamattomia muutoksia vai tallennettua versiota?',
+  'save.useKept': 'Käytä tallentamattomia muutoksia',
+  'save.useSaved': 'Käytä tallennettua versiota',
   'save.retry': 'Yritä uudelleen',
   'editor.scenes': 'Kohtaukset',
   'editor.scene': 'Kohtaus {n}',

@@ -117,6 +117,11 @@ export const en = {
     'The server no longer lets you save this cartoon. It may have been removed, or another user has logged in.',
   'save.keepMine': 'Keep my version',
   'save.loadSaved': 'Load the saved version',
+  'save.keptTitle': 'Unsaved edits on this device',
+  'save.keptInfo':
+    'This device has edits to the cartoon that were not saved, and the cartoon has been saved elsewhere since. Use the unsaved edits from this device, or the saved version?',
+  'save.useKept': 'Use the unsaved edits',
+  'save.useSaved': 'Use the saved version',
   'save.retry': 'Try again',
   'editor.scenes': 'Scenes',
   'editor.scene': 'Scene {n}',

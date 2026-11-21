@@ -16,7 +16,13 @@ import {
   undoStep,
 } from './history.ts';
 import { clearKeptContent, keepContent } from './keptContent.ts';
-import { createSaver, type SaverStart, type SaveState } from './saver.ts';
+import {
+  createSaver,
+  type Saver,
+  type SaverStart,
+  type SaveState,
+  startState,
+} from './saver.ts';
 
 export type { SaveState } from './saver.ts';
 
@@ -51,10 +57,8 @@ export function useCartoonContent(
   const [history, setHistory] = useState<History<CartoonContent>>(() =>
     newHistory(start.content),
   );
-  const [saveState, setSaveState] = useState<SaveState>({
-    status: start.unsaved ? 'unsaved' : 'saved',
-  });
-  const [saver] = useState(() =>
+  const [saveState, setSaveState] = useState(() => startState(start));
+  const [saver] = useState((): Saver =>
     createSaver(
       {
         send: (body, keepalive) => saveContent(cartoonId, body, keepalive),

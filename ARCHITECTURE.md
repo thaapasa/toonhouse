@@ -279,8 +279,11 @@ A 409 can also come from a save of the same editor whose answer was lost. So
 each time the editor opens, it makes a random editor ID, and each save sends it.
 The server stores the ID of the latest save with the content. On a 409, the
 editor loads the content, and if the ID is its own, it goes on from that
-revision. The edits that an editor keeps in the browser have its ID too, so the
-next editor counts the saves of that editor as its own.
+revision. The edits that an editor keeps in the browser have its ID and revision
+too. The next editor that goes on with them counts only one save of that editor
+as its own: the save of the kept edits as the next revision, which a closing
+editor sends. A later save of that editor may have newer edits, since it may
+still be open in another window.
 
 #### Planned upgrades
 
@@ -407,6 +410,13 @@ to the background or the editor closes before its edits are saved. While the
 editor can't save, it writes them at most once a second, so that a drag doesn't
 write the whole cartoon on each move. A closed editor sends its edits once more,
 but doesn't try again, so that it can't race the next editor.
+
+When the editor opens, it compares the kept edits with the content on the
+server. If the server has the same revision, the editor goes on with the kept
+edits. If the server is one revision ahead from the editor that kept them, that
+editor saved them as it closed, and the editor drops them. Otherwise, the
+cartoon was saved elsewhere after the edits were kept, and the user chooses
+between the kept edits and the saved version.
 
 The stage asks the renderer where each actor is at the current time. The
 renderer goes through the actions of the actor in the order of their times: an

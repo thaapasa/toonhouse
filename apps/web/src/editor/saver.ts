@@ -22,11 +22,14 @@ const KEEPALIVE_LIMIT = 60_000;
  * - `loggedOut`: the login has ended. The edits are kept in the browser, if
  *   `kept`, and saved after the user logs in again.
  * - `conflict`: someone else saved the cartoon after the revision that the
- *   editor edited. The user keeps their version or loads the saved one.
+ *   editor edited. The user keeps their version or loads the saved one. With
+ *   `atOpen`, the editor opened with kept edits that are older than the
+ *   saved content.
  * - `gone`: the cartoon was removed, or the user is not its owner.
  */
 export type SaveState =
-  | { status: 'saved' | 'unsaved' | 'saving' | 'error' | 'conflict' | 'gone' }
+  | { status: 'saved' | 'unsaved' | 'saving' | 'error' | 'gone' }
+  | { status: 'conflict'; atOpen: boolean }
   | { status: 'refused'; reason: 'invalid' | 'tooLarge' }
   | { status: 'loggedOut'; kept: boolean };
 
@@ -85,10 +88,68 @@ export interface SaverStart {
   /** The server doesn't have `content` yet, such as for kept edits. */
   unsaved: boolean;
   /**
-   * The editor that kept the edits this editor starts from. Its saves count
-   * as this editor's own.
+   * The editor that kept the edits this editor starts from. Its save of them
+   * counts as this editor's own.
    */
   keptBy: string | null;
+  /** The kept edits are older than the saved content, so the user chooses. */
+  ask: boolean;
+}
+
+/**
+ * Where an editor starts, from the content on the server and the edits kept
+ * in this browser. `dropKept` tells that the kept edits are saved already.
+ */
+export function startFrom(
+  server: SavedContent,
+  kept: SavedContent | null,
+): SaverStart & { dropKept: boolean } {
+  const fresh = { revision: server.revision, keptBy: null, ask: false };
+  if (!kept) {
+    return {
+      ...fresh,
+      content: server.content,
+      unsaved: false,
+      dropKept: false,
+    };
+  }
+  // The save of the editor that kept them landed after it closed.
+  const landed =
+    server.revision === kept.revision + 1 && server.editor === kept.editor;
+  if (landed) {
+    return {
+      ...fresh,
+      content: server.content,
+      unsaved: false,
+      dropKept: true,
+    };
+  }
+  return {
+    content: kept.content,
+    revision: kept.revision,
+    unsaved: true,
+    keptBy: kept.editor,
+    ask: server.revision !== kept.revision,
+    dropKept: false,
+  };
+}
+
+/** Whether two JSON values are the same, in any order of the keys. */
+function sameJson(a: unknown, b: unknown): boolean {
+  if (a === b) return true;
+  if (typeof a !== 'object' || typeof b !== 'object' || !a || !b) return false;
+  if (Array.isArray(a) !== Array.isArray(b)) return false;
+  const ka = Object.keys(a);
+  const kb = Object.keys(b);
+  return (
+    ka.length === kb.length &&
+    ka.every((k) =>
+      sameJson(
+        (a as Record<string, unknown>)[k],
+        (b as Record<string, unknown>)[k],
+      ),
+    )
+  );
 }
 
 export interface Saver {
@@ -121,26 +182,46 @@ export interface Saver {
   close(): void;
 }
 
+/** The state of the save when the editor opens. */
+export const startState = (start: SaverStart): SaveState =>
+  start.ask
+    ? { status: 'conflict', atOpen: true }
+    : { status: start.unsaved ? 'unsaved' : 'saved' };
+
 export function createSaver(deps: SaverDeps, start: SaverStart): Saver {
-  // Each save names this editor. A 409 for a revision that this editor, or
-  // the one whose edits it goes on with, saved last is no conflict: the
-  // answer to that save was lost.
+  // Each save names this editor. A 409 for a revision that this editor saved
+  // last is no conflict: the answer to that save was lost.
   const editor = crypto.randomUUID();
-  const mine = new Set([editor, start.keptBy].filter((id) => id !== null));
+  // The editor whose kept edits this one goes on with may have saved them
+  // once more as it closed. Only that save, the next revision with the kept
+  // content, counts as this editor's own, because the other editor may still
+  // be open and save newer edits.
+  const keptSave = start.keptBy && {
+    editor: start.keptBy,
+    revision: start.revision + 1,
+    content: JSON.parse(JSON.stringify(start.content)) as unknown,
+  };
+  const isMine = (s: SavedContent) =>
+    s.editor === editor ||
+    (!!keptSave &&
+      s.editor === keptSave.editor &&
+      s.revision === keptSave.revision &&
+      sameJson(s.content, keptSave.content));
   let latest = start.content;
   let saved: CartoonContent | null = start.unsaved ? null : start.content;
   let revision = start.revision;
   // The content that the server refused. The saver doesn't send it again.
   let refused: CartoonContent | null = null;
   // Why the saver sends nothing until the user acts.
-  let stopped: 'loggedOut' | 'conflict' | 'gone' | 'reloading' | null = null;
+  let stopped: 'loggedOut' | 'conflict' | 'gone' | 'reloading' | null =
+    start.ask ? 'conflict' : null;
   let closed = false;
   let running: Promise<void> | null = null;
   // A save asked for while another one runs.
   let next: 'none' | 'normal' | 'keepalive' = 'none';
   let timer: ReturnType<typeof setTimeout> | undefined;
   let keepTimer: ReturnType<typeof setTimeout> | undefined;
-  let state: SaveState = { status: start.unsaved ? 'unsaved' : 'saved' };
+  let state = startState(start);
 
   const set = (s: SaveState) => {
     state = s;
@@ -203,7 +284,7 @@ export function createSaver(deps: SaverDeps, start: SaverStart): Saver {
       });
     } else {
       keepNow();
-      set({ status: 'conflict' });
+      set({ status: 'conflict', atOpen: false });
     }
   }
 
@@ -221,7 +302,7 @@ export function createSaver(deps: SaverDeps, start: SaverStart): Saver {
       later(RETRY_DELAY);
       return false;
     }
-    if (!server.editor || !mine.has(server.editor)) {
+    if (!isMine(server)) {
       stop('conflict');
       return false;
     }
@@ -321,7 +402,8 @@ export function createSaver(deps: SaverDeps, start: SaverStart): Saver {
       try {
         revision = (await deps.load()).revision;
       } catch {
-        set({ status: 'conflict' });
+        // The dialog stays for another try.
+        set({ ...state });
         return;
       }
       stopped = null;

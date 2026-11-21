@@ -9,6 +9,7 @@ import {
   RETRY_DELAY,
   SAVE_DELAY,
   type SaveState,
+  startFrom,
 } from './saver.ts';
 import { newScene } from './sceneEdit.ts';
 
@@ -73,7 +74,7 @@ function setup(keptBy: string | null = null) {
       onSaved: () => {},
       reload: () => {},
     },
-    { content: content(0), revision: 0, unsaved: false, keptBy },
+    { content: content(0), revision: 0, unsaved: false, keptBy, ask: false },
   );
   const settle = () => vi.advanceTimersByTimeAsync(0);
   const answer = async (how: 'resolve' | 'lose' = 'resolve') => {
@@ -186,6 +187,23 @@ describe('saver', () => {
     expect(t.server).toMatchObject({ revision: 2, content: content(1) });
   });
 
+  it('counts no newer save of the editor that it goes on from as its own', async () => {
+    // A second window opened from the kept edits of the first one, and then
+    // the first one saved newer edits.
+    const before = crypto.randomUUID();
+    const t = setup(before);
+    Object.assign(t.server, {
+      revision: 1,
+      editor: before,
+      content: content(5),
+    });
+    t.saver.update(content(1));
+    await vi.advanceTimersByTimeAsync(SAVE_DELAY);
+    await t.answer();
+    expect(t.state()).toBe('conflict');
+    expect(t.server.content).toEqual(content(5));
+  });
+
   it('asks the user after a save of another editor, and keeps the edits', async () => {
     const t = setup();
     Object.assign(t.server, {
@@ -224,5 +242,42 @@ describe('saver', () => {
     expect(failure(new ApiError(409, { error: 'x', reason: 'version' }))).toBe(
       'version',
     );
+  });
+});
+
+describe('start of the editor', () => {
+  const editor = crypto.randomUUID();
+  const kept = { revision: 3, editor, content: content(1) };
+
+  it('goes on with the kept edits of the same revision', () => {
+    const server = { revision: 3, editor: null, content: content(0) };
+    expect(startFrom(server, kept)).toMatchObject({
+      content: content(1),
+      unsaved: true,
+      keptBy: editor,
+      ask: false,
+    });
+  });
+
+  it('drops kept edits that their editor saved as it closed', () => {
+    const server = { revision: 4, editor, content: content(1) };
+    expect(startFrom(server, kept)).toMatchObject({
+      content: content(1),
+      unsaved: false,
+      dropKept: true,
+    });
+  });
+
+  it('asks about kept edits older than a save from elsewhere', () => {
+    // The laptop kept edits, and then the iPad saved.
+    const server = {
+      revision: 5,
+      editor: crypto.randomUUID(),
+      content: content(2),
+    };
+    expect(startFrom(server, kept)).toMatchObject({
+      content: content(1),
+      ask: true,
+    });
   });
 });
