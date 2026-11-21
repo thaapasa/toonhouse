@@ -23,16 +23,6 @@ export const MIN_SCENE_LENGTH = 10;
 /** The time after the last action of a scene, in seconds. */
 const SCENE_TAIL = 4;
 
-/**
- * How fast a clip moves its rig forward on average, in rig pixels a second.
- * 0 for the clips that stay in place.
- */
-export function clipSpeed(clip: Clip): number {
-  const end = clip.frameAt(clip.duration);
-  if (end.kind === 'background') return 0;
-  return end.travel / clip.duration;
-}
-
 /** The clip of a kind with the id, or its first clip, the idle one. */
 export function clipOf(kind: ClipKind, id: ClipId): Clip {
   const clips = clipsFor(kind);
@@ -75,6 +65,42 @@ function frameTravel(clip: Clip, t: number): number {
   return frame.kind === 'background' ? 0 : frame.travel;
 }
 
+/** How many times `travelLookup` samples one loop of a clip. */
+const LOOKUP_SAMPLES = 32;
+/**
+ * How many halvings `clipTimeAtTravel` does at most between two samples. For
+ * a loop of 3 seconds this finds the time to about a microsecond, far less
+ * than a pixel at any walking speed.
+ */
+const HALVINGS = 16;
+
+const lookups = new WeakMap<Clip, number[]>();
+
+/**
+ * The travel of a clip at even steps over one loop, the last one at the end
+ * of the loop. The timeline asks for walk times on every frame, and the
+ * samples save most of the work. The same clip always gives the same
+ * samples, so the cache doesn't change any result.
+ */
+function travelLookup(clip: Clip): number[] {
+  let samples = lookups.get(clip);
+  if (!samples) {
+    samples = Array.from({ length: LOOKUP_SAMPLES + 1 }, (_, i) =>
+      frameTravel(clip, (i / LOOKUP_SAMPLES) * clip.duration),
+    );
+    lookups.set(clip, samples);
+  }
+  return samples;
+}
+
+/**
+ * How fast a clip moves its rig forward on average, in rig pixels a second.
+ * 0 for the clips that stay in place.
+ */
+export function clipSpeed(clip: Clip): number {
+  return travelLookup(clip)[LOOKUP_SAMPLES]! / clip.duration;
+}
+
 /**
  * How far a clip has moved its rig at the time `ct` in the clip, in rig
  * pixels, counting the loops before it. The scene assumes that `travel` never
@@ -83,28 +109,40 @@ function frameTravel(clip: Clip, t: number): number {
 function travelAt(clip: Clip, ct: number): number {
   const loops = Math.floor(ct / clip.duration);
   return (
-    loops * frameTravel(clip, clip.duration) +
+    loops * travelLookup(clip)[LOOKUP_SAMPLES]! +
     frameTravel(clip, ct - loops * clip.duration)
   );
 }
 
 /**
  * The first time in a clip when its rig has moved `travel` rig pixels from the
- * start of the clip. Within a loop it searches by halves, since the clips
- * only give the travel at a time.
+ * start of the clip. The clips only give the travel at a time, so this finds
+ * the samples around it. Between them, the travel of a walk is often even, so
+ * the first guess is on a straight line between the samples. If that misses,
+ * it searches by halves.
  */
 function clipTimeAtTravel(clip: Clip, travel: number): number {
-  const perLoop = frameTravel(clip, clip.duration);
+  const samples = travelLookup(clip);
+  const perLoop = samples[LOOKUP_SAMPLES]!;
   const loops = Math.floor(travel / perLoop);
   const rest = travel - loops * perLoop;
-  let lo = 0;
-  let hi = rest > 0 ? clip.duration : 0;
-  for (let i = 0; i < 60 && hi > 0; i++) {
+  const start = loops * clip.duration;
+  if (rest <= 0) return start;
+  const gap = clip.duration / LOOKUP_SAMPLES;
+  // The first sample at or past `rest`. Sample 0 has a travel of 0.
+  let i = 1;
+  while (i < LOOKUP_SAMPLES && samples[i]! < rest) i++;
+  let lo = (i - 1) * gap;
+  let hi = i * gap;
+  const from = samples[i - 1]!;
+  const guess = lo + (gap * (rest - from)) / (samples[i]! - from);
+  if (Math.abs(frameTravel(clip, guess) - rest) < 1e-6) return start + guess;
+  for (let k = 0; k < HALVINGS; k++) {
     const mid = (lo + hi) / 2;
     if (frameTravel(clip, mid) >= rest) hi = mid;
     else lo = mid;
   }
-  return loops * clip.duration + hi;
+  return start + hi;
 }
 
 /**
@@ -119,10 +157,15 @@ function walkedAt(clip: Clip, action: Action, elapsed: number): number {
   );
 }
 
-/** How long a walking action takes to move its rig `distance` rig pixels. */
+/**
+ * How long a walking action takes to move its rig `distance` rig pixels, and
+ * then to finish its step, see `Clip.step`.
+ */
 function timeToWalk(clip: Clip, action: Action, distance: number): number {
   const start = clipTime(action, clip.duration, 0);
-  const end = clipTimeAtTravel(clip, travelAt(clip, start) + distance);
+  let end = clipTimeAtTravel(clip, travelAt(clip, start) + distance);
+  // The margin keeps an arrival right at a landing from waiting a whole step.
+  if (clip.step) end = Math.ceil(end / clip.step - 1e-4) * clip.step;
   return Math.max(0, (end - start) / actionSpeed(action));
 }
 
@@ -237,17 +280,19 @@ export function actorStateAt(
       at = walk.at;
       facing = walk.facing;
       if (current) {
-        if (walk.arrived === null) {
+        // At the last point, the actor finishes its step in place, and then
+        // it stands still until its next action.
+        const arrived =
+          walk.arrived === null ? null : timeToWalk(clip, action, walk.arrived);
+        if (arrived === null || elapsed < arrived) {
           const clipT = clipTime(action, clip.duration, elapsed);
           return { at, facing, clip: clip.id, clipT, action };
         }
-        // After the last point, the actor stands still until its next action.
-        const arrived = timeToWalk(clip, action, walk.arrived);
         return {
           at,
           facing,
           clip: clipsFor(kind)[0]!.id,
-          clipT: Math.max(0, elapsed - arrived),
+          clipT: elapsed - arrived,
           action,
         };
       }

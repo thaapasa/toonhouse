@@ -214,5 +214,12 @@ export interface Clip<F extends ClipFrame = ClipFrame> {
   /** Length in seconds. A looping clip ends where it starts. */
   duration: number;
   loops: boolean;
+  /**
+   * For a clip that moves, the seconds between the moments when the rig is
+   * back on the ground, from the start of the clip. A walk that gets to its
+   * last point plays on in place until the next of these. Without it, the
+   * actor stops at once.
+   */
+  step?: number;
   frameAt(t: number): F;
 }

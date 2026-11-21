@@ -259,14 +259,50 @@ describe('a walk on the ground', () => {
     );
   });
 
-  it('arrives when the hop has moved the rabbit to the last point', () => {
+  it('finishes the hop at the last point and sits when it lands', () => {
     const hop = clipById('rabbit', 'hop');
+    const period = hop.duration / 3;
+    // 250 rig pixels is in the jump of the second hop.
     const a = actor([
       { id: '1', t: 0, clip: 'hop', path: [{ x: 250, y: 700 }] },
     ]);
     const arrives = walkTime(a, 'rabbit', flat, a.actions[0]!)!;
-    expect(hop.frameAt(arrives).travel).toBeCloseTo(250, 6);
-    expect(arrives).not.toBeCloseTo(250 / RABBIT_HOP_SPEED, 2);
+    expect(arrives).toBeCloseTo(2 * period, 6);
+    expect(actorEnd(a, 'rabbit', flat)).toBe(arrives);
+    expect(actorStateAt(a, 'rabbit', flat, arrives - 0.01)).toMatchObject({
+      at: { x: 250, y: 700 },
+      clip: 'hop',
+    });
+    expect(actorStateAt(a, 'rabbit', flat, arrives + 0.01)).toMatchObject({
+      at: { x: 250, y: 700 },
+      clip: 'idle',
+    });
+  });
+
+  it('lands on a whole hop of the clip when the hop starts in the middle', () => {
+    const hop = clipById('rabbit', 'hop');
+    const period = hop.duration / 3;
+    const action = {
+      id: '1',
+      t: 1,
+      clip: 'hop' as const,
+      path: [{ x: 200, y: 700 }],
+      clipStart: 0.5,
+      speed: 2,
+    };
+    const arrives = walkTime(actor([action]), 'rabbit', flat, action)!;
+    const landing = (hop.duration * 0.5 + arrives * 2) / period;
+    expect(landing).toBeCloseTo(Math.round(landing), 6);
+  });
+
+  it('stops a walk at once at the last point', () => {
+    const a = actor([
+      { id: '1', t: 0, clip: 'walk', path: [{ x: 100, y: 700 }] },
+    ]);
+    expect(walkTime(a, 'cutout', flat, a.actions[0]!)).toBeCloseTo(
+      100 / WALK_SPEED,
+      5,
+    );
   });
 });
 

@@ -99,6 +99,8 @@ export const hop: Clip<RabbitFrame> = {
   kind: 'rabbit',
   duration: PERIOD * HOPS,
   loops: true,
+  // The rabbit lands at the end of each hop, so it can stop in a sitting pose.
+  step: PERIOD,
   frameAt(t) {
     const k = Math.floor(t / PERIOD);
     const u = t / PERIOD - k;

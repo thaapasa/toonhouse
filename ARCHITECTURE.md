@@ -373,9 +373,11 @@ renderer goes through the actions of the actor in the order of their times: an
 action plays its clip until the next action starts, and a walk moves the actor
 along its path as far as the `travel` of the walk clip says, so that the feet
 don't slide. The travel doesn't have to be even: a hop stays in place while the
-rabbit crouches. With a perspective, the actor gets smaller further away, so the
-same travel covers fewer frame pixels there. The size is linear in y, so the
-renderer can work out the distance along a line of the path exactly.
+rabbit crouches. When a hop gets to the last point in the air, the rabbit
+finishes the hop in place and sits when it lands. The clip's `step` sets when it
+can stop. With a perspective, the actor gets smaller further away, so the same
+travel covers fewer frame pixels there. The size is linear in y, so the renderer
+can work out the distance along a line of the path exactly.
 
 The stage shows the frame and a band around it, wide enough for the largest
 character or prop of the library at the size that the background gives the
