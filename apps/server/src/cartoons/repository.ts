@@ -82,16 +82,19 @@ export async function getCartoon(
   return row ? toCartoon(row, userId) : null;
 }
 
-/** Creates a private cartoon and returns its id. */
 /**
- * The most cartoons that one user can have. Each cartoon can hold up to a
- * megabyte of content and a megabyte of preview image, so without a limit one
- * user could fill the disk of the database. The limit is there for disk space
- * only, so it is far above what anyone makes by hand.
+ * The most cartoons that one user can have. Each cartoon can hold up to 10 MB
+ * of content and 1 MB of preview image, so without a limit one user could fill
+ * the disk of the database. The limit is there for disk space only, so it is far
+ * above what anyone makes by hand. At the limit, one user can still store about
+ * 11 GB in the worst case.
  */
 export const maxCartoonsPerUser = 1000;
 
-/** Returns the ID of the new cartoon, or `null` if the user has too many. */
+/**
+ * Creates a private cartoon and returns its ID, or `null` if the user has too
+ * many.
+ */
 export async function createCartoon(
   ownerId: string,
   title: string,
