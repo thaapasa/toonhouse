@@ -1,6 +1,7 @@
-import type { Actor, Background, ClipKind, Scene } from '@toonhouse/model';
+import type { Background, ClipKind } from '@toonhouse/model';
 import { describe, expect, it } from 'vitest';
 
+import type { CastActor, CastScene } from './cast.ts';
 import {
   clipOf,
   clipsFor,
@@ -27,12 +28,15 @@ const flat: Background = {
   ground: { layer: 'ground', start: { x: 800, y: 700 }, actorScale: 1 },
 };
 
-const actor = (actions: Actor['actions'], at = { x: 0, y: 700 }): Actor => ({
+const actor = (
+  actions: CastActor['actions'],
+  at = { x: 0, y: 700 },
+): CastActor => ({
   id: 'a',
   asset: { kind: 'character', id: 'boy' },
   at,
   facing: 1,
-  scale: 1,
+  settings: { scale: 1, colors: {} },
   actions,
 });
 
@@ -327,7 +331,7 @@ describe('background state', () => {
 });
 
 describe('scene length', () => {
-  const scene = (actors: Actor[]): Scene => ({
+  const scene = (actors: CastActor[]): CastScene => ({
     id: 's',
     background: 'flat',
     backgroundActions: [],

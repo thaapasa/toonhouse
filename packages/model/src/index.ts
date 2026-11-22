@@ -10,6 +10,7 @@ export type {
   Action,
   Actor,
   ActorAsset,
+  ActorSettings,
   Bubble,
   BubbleBorder,
   BubbleFontId,
@@ -18,6 +19,8 @@ export type {
   CameraEntry,
   CameraView,
   CartoonContent,
+  CastMember,
+  ColorChoice,
   Scene,
   SceneCamera,
 } from './cartoon.ts';

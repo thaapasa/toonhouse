@@ -12,14 +12,48 @@ export const CARTOON_VERSION = 1;
 /** What a cartoon is made of. The title and the sharing are kept apart. */
 export interface CartoonContent {
   version: typeof CARTOON_VERSION;
+  /** The characters and props of the cartoon, which its actors can use. */
+  cast?: CastMember[];
   scenes: Scene[];
 }
 
 /** The content of a new cartoon. */
 export const emptyContent = (): CartoonContent => ({
   version: CARTOON_VERSION,
+  cast: [],
   scenes: [],
 });
+
+/**
+ * The preset that the user picked for each color setting, by setting id, such
+ * as `{ "hair": "black" }`. A setting that it leaves out uses the preset of
+ * the level above it, and in the library the first preset.
+ */
+export type ColorChoice = Record<string, string>;
+
+/**
+ * The settings of a character or a prop that the user can change. Each one
+ * that is left out comes from the level above: an actor from its cast member,
+ * and a cast member from the library.
+ */
+export interface ActorSettings {
+  /** The size of the actor against the default size of the background. */
+  scale?: number;
+  /** Each color setting is a setting of its own. */
+  colors?: ColorChoice;
+}
+
+/**
+ * A character or a prop of one cartoon, made from the library and named by
+ * the user, such as "Grandma". Each actor that uses it changes with it.
+ */
+export interface CastMember {
+  /** Unique within the cartoon. */
+  id: string;
+  name: string;
+  asset: ActorAsset;
+  settings: ActorSettings;
+}
 
 /** A background with actors on it, and a timeline for them. */
 export interface Scene {
@@ -52,7 +86,10 @@ export interface ActorAsset {
 export interface Actor {
   /** Unique within the scene. */
   id: string;
+  /** The character or the prop. With a cast member, it is the asset of the cast member. */
   asset: ActorAsset;
+  /** The id of the cast member that the actor uses, if any. */
+  cast?: string;
   /**
    * Where the ground point of the actor is at the start of the scene, on the
    * ground layer, in the pixels of the background frame.
@@ -60,8 +97,8 @@ export interface Actor {
   at: Pt;
   /** Which way the actor faces at the start: 1 right, -1 left. */
   facing: 1 | -1;
-  /** The size of the actor against the default size of the background. */
-  scale: number;
+  /** The settings that the actor sets in this scene only. */
+  overrides?: ActorSettings;
   /** The actions of the actor. The order doesn't matter, only the times. */
   actions: Action[];
 }

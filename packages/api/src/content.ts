@@ -59,6 +59,13 @@ export const CONTENT_LIMITS = {
   bubbleText: 5000,
   /** The app makes the ids, which are UUIDs. */
   id: 64,
+  /** The name of a cast member. The editor draws it in lists and on the timeline. */
+  castName: 200,
+  /** The ids of the color settings and the presets of the library. */
+  colorId: 64,
+  castMembers: 1000,
+  /** The color settings of one character or prop. */
+  colorSettings: 100,
   scenes: 1000,
   actors: 1000,
   actions: 10_000,
@@ -94,15 +101,38 @@ const Action = z.looseObject({
 /** The id of a library asset: its pack and its name, such as `sunny/oak`. */
 const AssetId = z.string().regex(/^[a-z0-9-]{1,32}\/[a-z0-9-]{1,64}$/);
 
+const Asset = z.looseObject({
+  kind: z.enum(['character', 'prop']),
+  id: AssetId,
+});
+
+// The ids of the color settings and their presets come from the library. A
+// cartoon keeps an id that the library no longer has, and the renderer uses
+// the first preset for it.
+const ColorId = z.string().min(1).max(L.colorId);
+
+const Settings = z.looseObject({
+  scale: range(L.scale).exactOptional(),
+  colors: z
+    .record(ColorId, ColorId)
+    .refine((c) => Object.keys(c).length <= L.colorSettings)
+    .exactOptional(),
+});
+
+const CastMember = z.looseObject({
+  id: Id,
+  name: z.string().max(L.castName),
+  asset: Asset,
+  settings: Settings,
+});
+
 const Actor = z.looseObject({
   id: Id,
-  asset: z.looseObject({
-    kind: z.enum(['character', 'prop']),
-    id: AssetId,
-  }),
+  asset: Asset,
+  cast: Id.exactOptional(),
   at: Point,
   facing: z.union([z.literal(1), z.literal(-1)]),
-  scale: range(L.scale),
+  overrides: Settings.exactOptional(),
   actions: z.array(Action).max(L.actions),
 });
 
@@ -179,6 +209,7 @@ const Scene = z.looseObject({
 /** The scenes of a cartoon, in the latest format. See `CartoonContent` in the model. */
 export const CartoonContent = z.looseObject({
   version: z.literal(CARTOON_VERSION),
+  cast: z.array(CastMember).max(L.castMembers).exactOptional(),
   scenes: z.array(Scene).max(L.scenes),
 });
 export type CartoonContent = Content;

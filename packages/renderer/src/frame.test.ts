@@ -5,6 +5,7 @@ import testHills from '../../../assets/fixtures/backgrounds/test-hills/backgroun
 import boy from '../../../assets/packs/sunny/characters/blond-boy/rig.json';
 import { actorScaleAt } from './background.ts';
 import { cameraBounds } from './camera.ts';
+import { type CastScene, castScene } from './cast.ts';
 import { clipOf } from './clips/index.ts';
 import { actorKind, type Library, sceneFrame } from './frame.ts';
 
@@ -24,7 +25,7 @@ const actor = (id: string, asset: string, actions: Actor['actions'] = []) =>
     asset: { kind: 'character', id: asset },
     at: { x: 800, y: 900 },
     facing: 1,
-    scale: 1.5,
+    overrides: { scale: 1.5 },
     actions,
   }) satisfies Actor;
 
@@ -45,7 +46,7 @@ const bubble = (id: string, actorId?: string) => ({
   ...(actorId && { actorId }),
 });
 
-const scene: Scene = {
+const stored: Scene = {
   id: 's',
   background: 'hills',
   backgroundActions: [],
@@ -55,6 +56,7 @@ const scene: Scene = {
   ],
   bubbles: [bubble('attached', 'a'), bubble('free'), bubble('orphan', 'gone')],
 };
+const scene = castScene(stored, []);
 
 describe('scene frame', () => {
   it('leaves out the actors whose asset the library does not have', () => {
@@ -79,6 +81,28 @@ describe('scene frame', () => {
     expect(p.box!.y + p.box!.height).toBeGreaterThan(p.anchor.head.y);
   });
 
+  it('draws the actor in the colors and the size of its cast member', () => {
+    const shirt = rig.colorSettings!.find((c) => c.id === 'shirt')!;
+    const red = shirt.presets[1]!;
+    const cast = [
+      {
+        id: 'm',
+        name: 'Boy',
+        asset: { kind: 'character' as const, id: 'boy' },
+        settings: { scale: 2, colors: { shirt: red.id } },
+      },
+    ];
+    const a = { ...actor('a', 'boy'), cast: 'm', overrides: {} };
+    const p = sceneFrame(
+      castScene({ ...stored, actors: [a] }, cast),
+      bg,
+      library,
+      0,
+    ).actors[0]!;
+    expect(p.drawing.scale).toBe(2);
+    expect(p.colors).toMatchObject(red.colors);
+  });
+
   it('takes the bubble fonts from the library', () => {
     const { bubbleContext } = sceneFrame(scene, bg, library, 0);
     expect(bubbleContext.fontOf(scene.bubbles![0]!)).toBe('bangers');
@@ -98,12 +122,12 @@ describe('scene frame', () => {
     // The camera shows the top left quarter of the background at zoom 2.
     const camera = { x: bg.width / 4, y: bg.height / 4, zoom: 2 };
     const free = { ...bubble('free'), at: { x: 900, y: 300 } };
-    const zoomed: Scene = {
+    const zoomed: CastScene = {
       ...scene,
       bubbles: [free],
       camera: { start: camera, entries: [] },
     };
-    const boxOf = (s: Scene, ground = false) =>
+    const boxOf = (s: CastScene, ground = false) =>
       sceneFrame(s, bg, library, 1, { ground }).bubbles[0]!.box;
 
     it('keeps its size in the picture and stays inside it', () => {

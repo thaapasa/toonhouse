@@ -1,4 +1,3 @@
-import { CONTENT_LIMITS } from '@toonhouse/api';
 import {
   type Action,
   type Actor,
@@ -20,7 +19,6 @@ import {
   savedPoint,
   setClip,
   setLength,
-  setScale,
   setSpeed,
   startAction,
   stepSize,
@@ -109,7 +107,6 @@ describe('actors', () => {
       asset: { kind: 'character', id: 'boy' },
       at: { x: 10, y: 20 },
       facing: 1,
-      scale: 1,
       actions: [
         { id: 'w', t: 0, clip: 'walk', path: [{ x: 100, y: 20 }] },
         wave('a', 3),
@@ -153,13 +150,6 @@ describe('scenes', () => {
 
 describe('properties', () => {
   const action: Action = { id: 'a', t: 1, clip: 'walk', path: [] };
-
-  it('keeps the size inside the limits of the server', () => {
-    const actor = { scale: 1 } as Actor;
-    expect(setScale(actor, 0).scale).toBe(CONTENT_LIMITS.scale.min);
-    expect(setScale(actor, 5000).scale).toBe(CONTENT_LIMITS.scale.max);
-    expect(setScale(actor, 1.23456).scale).toBe(1.2346);
-  });
 
   it('leaves the speed out when it is the normal speed', () => {
     expect(setSpeed(action, 1.5).speed).toBe(1.5);

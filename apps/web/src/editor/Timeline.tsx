@@ -11,8 +11,13 @@
 // time. `useTimelineZoom` has the zoom. The timeline goes on a bit past the end
 // of the scene, so that the end shows and the user can start new actions
 // after it.
-import type { Background, Bubble, Scene } from '@toonhouse/model';
-import { clamp, sortedActions, walkTime } from '@toonhouse/renderer';
+import type { Background, Bubble, CastMember } from '@toonhouse/model';
+import {
+  type CastScene,
+  clamp,
+  sortedActions,
+  walkTime,
+} from '@toonhouse/renderer';
 import {
   type PointerEvent,
   type ReactNode,
@@ -75,7 +80,9 @@ export interface TimelineSelection {
 }
 
 interface Props {
-  scene: Scene;
+  scene: CastScene;
+  /** The cast of the cartoon, for the names of the actors. */
+  cast: readonly CastMember[];
   background: Background | null;
   sceneNumber: number;
   sceneCount: number;
@@ -218,7 +225,7 @@ export function Timeline(props: Props) {
       walkTimes: new Map(),
     });
   }
-  const actorNames = names.actors(scene);
+  const actorNames = names.actors(scene, props.cast);
   for (const actor of scene.actors) {
     const kind = kindOf(actor.asset);
     if (!kind) continue;

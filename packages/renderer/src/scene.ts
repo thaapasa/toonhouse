@@ -5,7 +5,6 @@
 // next action.
 import type {
   Action,
-  Actor,
   Background,
   Clip,
   ClipId,
@@ -17,6 +16,7 @@ import type {
 import { actorScaleAt, minScaleY } from './background.ts';
 import { bubbleEnd } from './bubbles/bubble.ts';
 import { cameraEntryEnd } from './camera.ts';
+import type { CastActor, CastScene } from './cast.ts';
 import { clipOf, restClip } from './clips/index.ts';
 
 /** The frames a second that the editor, the player and export step by. */
@@ -218,13 +218,13 @@ interface WalkResult {
  */
 function walkAlong(
   bg: Background,
-  actor: Actor,
+  actor: CastActor,
   from: Pt,
   path: readonly Pt[],
   facing: 1 | -1,
   distance: number,
 ): WalkResult {
-  const scaleAt = (y: number) => actorScaleAt(bg, y) * actor.scale;
+  const scaleAt = (y: number) => actorScaleAt(bg, y) * actor.settings.scale;
   const knee = minScaleY(bg);
   let at = from;
   let left = distance;
@@ -248,7 +248,7 @@ function walkAlong(
  * the actor, which sets its clips.
  */
 export function actorStateAt(
-  actor: Actor,
+  actor: CastActor,
   kind: ClipKind,
   bg: Background,
   t: number,
@@ -306,7 +306,7 @@ export function actorStateAt(
  * null if the action doesn't walk. The next action can stop it earlier.
  */
 export function walkTime(
-  actor: Actor,
+  actor: CastActor,
   kind: ClipKind,
   bg: Background,
   action: Action,
@@ -329,7 +329,11 @@ export function walkTime(
  * When the last action of an actor ends by itself: when the last walk gets
  * to its last point, or else when the last action starts.
  */
-export function actorEnd(actor: Actor, kind: ClipKind, bg: Background): number {
+export function actorEnd(
+  actor: CastActor,
+  kind: ClipKind,
+  bg: Background,
+): number {
   const actions = sortedActions(actor.actions);
   const last = actions.at(-1);
   if (!last) return 0;
@@ -373,9 +377,9 @@ export function minSceneLength(scene: Scene): number {
  * least `MIN_SCENE_LENGTH`. `kindOf` gives the rig kind of an actor.
  */
 export function sceneLength(
-  scene: Scene,
+  scene: CastScene,
   bg: Background | null,
-  kindOf: (actor: Actor) => ClipKind | null,
+  kindOf: (actor: CastActor) => ClipKind | null,
 ): number {
   if (scene.length !== undefined)
     return Math.max(scene.length, minSceneLength(scene));

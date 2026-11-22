@@ -9,6 +9,7 @@ import { describe, expect, it } from 'vitest';
 import { newBubble } from '../editor/bubbles.ts';
 import { newId, newScene } from '../editor/sceneEdit.ts';
 import { BACKGROUNDS, CHARACTERS, PROPS } from '../library/index.ts';
+import { colorIds } from './colorIds.ts';
 import { v1 } from './v1.ts';
 
 const SEE = 'See "Cartoon format versions" in ARCHITECTURE.md.';
@@ -35,7 +36,6 @@ describe('cartoon format', () => {
       asset: { kind, id },
       at: { x: 0, y: 0 },
       facing: 1,
-      scale: 1,
       actions: [],
     });
     const content = {
@@ -125,6 +125,21 @@ describe('library', () => {
     for (const [kind, ids] of Object.entries(clips)) {
       const has = clipsFor(kind as ClipKind).map((c) => c.id);
       expect(has, `${kind}. ${SEE}`).toEqual(expect.arrayContaining(ids));
+    }
+  });
+
+  it('keeps the color settings and the presets of each character and prop', () => {
+    for (const [id, settings] of Object.entries(colorIds)) {
+      const asset = [...CHARACTERS, ...PROPS].find((a) => a.id === id);
+      expect(asset, `${id}. ${SEE}`).toBeDefined();
+      for (const [setting, presets] of Object.entries(settings)) {
+        const has = asset!.rig.colorSettings
+          ?.find((c) => c.id === setting)
+          ?.presets.map((p) => p.id);
+        expect(has, `${id} ${setting}. ${SEE}`).toEqual(
+          expect.arrayContaining(presets),
+        );
+      }
     }
   });
 });

@@ -1,6 +1,7 @@
 import type { Bubble, Scene } from '@toonhouse/model';
 import { describe, expect, it } from 'vitest';
 
+import { castScene } from '../cast.ts';
 import { IDENTITY, scaling } from '../math.ts';
 import { sceneLength } from '../scene.ts';
 import {
@@ -57,7 +58,9 @@ describe('bubble length', () => {
       actors: [],
       bubbles: [bubble({ t: 20, length: 5 })],
     };
-    expect(sceneLength(scene, null, () => null)).toBeGreaterThanOrEqual(25);
+    expect(
+      sceneLength(castScene(scene, []), null, () => null),
+    ).toBeGreaterThanOrEqual(25);
   });
 });
 

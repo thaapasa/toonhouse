@@ -6,6 +6,7 @@ import type {
   BubbleBorder,
   BubbleFontId,
   BubbleShape,
+  CastMember,
   Scene,
 } from '@toonhouse/model';
 import {
@@ -44,6 +45,8 @@ const L = CONTENT_LIMITS;
 
 interface Props {
   scene: Scene;
+  /** The cast of the cartoon, for the names of the actors. */
+  cast: readonly CastMember[];
   bubble: Bubble;
   /** Where the actors are now, so that a bubble stays in place when it moves to another actor. */
   anchors: ReadonlyMap<string, BubbleAnchor>;
@@ -81,7 +84,7 @@ export function BubbleSection(props: Props) {
     if (props.textFocus > 0) textRef.current?.focus();
   }, [props.textFocus]);
 
-  const actorNames = names.actors(scene);
+  const actorNames = names.actors(scene, props.cast);
   const actor = scene.actors.find((a) => a.id === bubble.actorId);
   const packFont = actor
     ? LIBRARY.actorFont(actor.asset)

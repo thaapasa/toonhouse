@@ -2,8 +2,7 @@
 // cartoon. The image stays until the user sets a new one, even if the scene
 // changes.
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { Scene } from '@toonhouse/model';
-import { sceneFrame } from '@toonhouse/renderer';
+import { type CastScene, sceneFrame } from '@toonhouse/renderer';
 import { useEffect } from 'react';
 
 import { cartoonQuery, cartoonsQuery, uploadPreview } from '../api.ts';
@@ -19,7 +18,7 @@ const STATUS_MS = 3000;
 export function PreviewButton(props: {
   cartoonId: string;
   /** The frame on the stage, or `undefined` if the scene has no background. */
-  frame: { scene: Scene; bg: BackgroundAsset; t: number } | undefined;
+  frame: { scene: CastScene; bg: BackgroundAsset; t: number } | undefined;
 }) {
   const { tr } = useI18n();
   const queryClient = useQueryClient();

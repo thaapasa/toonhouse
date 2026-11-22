@@ -6,7 +6,6 @@
 // gives the rig of a character or a prop, a background by its id and the
 // default bubble fonts of the asset packs.
 import type {
-  Actor,
   ActorAsset,
   Background,
   BackgroundFrame,
@@ -14,7 +13,8 @@ import type {
   ClipKind,
   Matrix,
   Rig,
-  Scene,
+  RoleColors,
+  RolePatterns,
 } from '@toonhouse/model';
 
 import {
@@ -34,7 +34,9 @@ import {
   type PlacedBubble,
 } from './bubbles/bubble.ts';
 import { cameraAt, pictureToGround } from './camera.ts';
+import type { CastActor, CastScene } from './cast.ts';
 import { clipOf } from './clips/index.ts';
+import { colorRig, presetColors, presetPatterns } from './colors.ts';
 import {
   type Bounds,
   type DrawNode,
@@ -70,8 +72,13 @@ export const actorKind = (
 
 /** An actor at the time of the frame, on the ground layer. */
 export interface PlacedActor {
-  actor: Actor;
+  actor: CastActor;
+  /** The rig as the library has it, without the colors of the actor. */
   rig: Rig;
+  /** The colors of the color roles of the actor, to paint its parts with. */
+  colors: RoleColors;
+  /** The patterns over the color roles of the actor. */
+  patterns: RolePatterns;
   kind: ClipKind;
   state: ActorState;
   drawing: SceneActor;
@@ -109,7 +116,7 @@ const loop = (t: number, duration: number) =>
   duration > 0 ? ((t % duration) + duration) % duration : 0;
 
 function placeActor(
-  actor: Actor,
+  actor: CastActor,
   rig: Rig,
   bg: Background,
   t: number,
@@ -118,11 +125,13 @@ function placeActor(
   const state = actorStateAt(actor, kind, bg, t);
   const clip = clipOf(kind, state.clip);
   const frame = clip.frameAt(loop(state.clipT, clip.duration));
-  const { node, rigOutline } = drawRig(rig, frame, {
+  const { colors: choice, scale } = actor.settings;
+  const colors = presetColors(rig, choice);
+  const { node, rigOutline } = drawRig(colorRig(rig, colors), frame, {
     facing: state.facing,
   });
   const { at } = state;
-  const s = actorScaleAt(bg, at.y) * actor.scale;
+  const s = actorScaleAt(bg, at.y) * scale;
   const b = partBounds(node);
   const box = b && {
     x: at.x + b.x * s,
@@ -134,9 +143,11 @@ function placeActor(
   return {
     actor,
     rig,
+    colors,
+    patterns: presetPatterns(rig, choice),
     kind,
     state,
-    drawing: { id: actor.id, node, x: at.x, y: at.y, scale: actor.scale },
+    drawing: { id: actor.id, node, x: at.x, y: at.y, scale },
     rigOutline,
     box,
     anchor: {
@@ -148,7 +159,7 @@ function placeActor(
 }
 
 /** The frame of the clip of the background at time `t`. */
-function backgroundFrame(scene: Scene, t: number): BackgroundFrame {
+function backgroundFrame(scene: CastScene, t: number): BackgroundFrame {
   const state = backgroundStateAt(scene.backgroundActions, t);
   const clip = clipOf('background', state.clip);
   return clip.frameAt(loop(state.clipT, clip.duration));
@@ -177,7 +188,7 @@ function mappedBubble(p: PlacedBubble, m: Matrix): PlacedBubble {
  * get smaller when the camera zooms in.
  */
 export function sceneFrame(
-  scene: Scene,
+  scene: CastScene,
   bg: Background,
   library: Library,
   t: number,

@@ -14,6 +14,7 @@ import type {
   Actor,
   Bubble,
   CartoonContent,
+  CastMember,
   ClipId,
   Pt,
   Scene,
@@ -23,6 +24,7 @@ import {
   backgroundClips,
   backgroundStateAt,
   cameraHolder,
+  castScene,
   clipsFor,
   FPS,
   isMoving,
@@ -40,6 +42,7 @@ import {
   BackgroundIcon,
   BackIcon,
   BubbleIcon,
+  CastIcon,
   CharacterIcon,
   PlayIcon,
   PropertiesIcon,
@@ -69,11 +72,20 @@ import {
   withBackground,
 } from './cameraEdit.ts';
 import { CartoonTitle } from './CartoonTitle.tsx';
+import { CastMemberDialog, FromActorDialog } from './CastDialogs.tsx';
+import {
+  addCastMember,
+  castFromActor,
+  newCastMember,
+  overrideScale,
+  removeCastMember,
+} from './castEdit.ts';
 import { EditorStage, type WalkEdit } from './EditorStage.tsx';
 import type { EditRun } from './history.ts';
 import { clearKeptContent, keptContent } from './keptContent.ts';
 import { editorCommand, isTyping } from './keys.ts';
 import { LibraryPanel, type LibraryTab } from './LibraryPanel.tsx';
+import { useNames } from './names.ts';
 import { PreviewButton } from './PreviewButton.tsx';
 import { PropertiesPane } from './PropertiesPane.tsx';
 import { SaveProblem } from './SaveProblem.tsx';
@@ -130,6 +142,7 @@ function freeSpot(bg: BackgroundAsset, actors: readonly Actor[]): Pt {
 export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
   const { cartoon } = props;
   const { tr } = useI18n();
+  const names = useNames();
   const queryClient = useQueryClient();
   // The edits kept over a login go on from where they were.
   const [start] = useState((): SaverStart => {
@@ -142,9 +155,12 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
   });
   const doc = useCartoonContent(cartoon.id, start);
   const scenes = doc.content.scenes;
+  const cast = doc.content.cast ?? [];
   const [sceneIndex, setSceneIndex] = useState(0);
   const index = Math.min(sceneIndex, scenes.length - 1);
-  const scene = scenes[index]!;
+  // The edits change the scene as it is saved, and the rest of the editor
+  // sees the settings of each actor worked out from the cast.
+  const scene = castScene(scenes[index]!, cast);
   const bg = backgroundAsset(scene.background);
   const [library, setLibrary] = useState<LibraryTab | null>(
     scene.background ? null : 'background',
@@ -158,6 +174,12 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
   const [cameraSelected, setCameraSelected] = useState(false);
   const [textFocus, setTextFocus] = useState(0);
   const [removing, setRemoving] = useState(false);
+  // The cast member whose dialog is open, or the actor to make one from.
+  const [castDialog, setCastDialog] = useState<
+    | { type: 'member'; id: string }
+    | { type: 'fromActor'; actorId: string }
+    | null
+  >(null);
   const [paneOpen, setPaneOpenState] = useState(
     () => localStorage.getItem(PANE_KEY) !== 'false',
   );
@@ -178,7 +200,9 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
   const [focusPoint, setFocusPoint] = useState<number | null>(null);
 
   const lengthOf = (s: Scene) =>
-    sceneLength(s, bg?.background ?? null, (a) => kindOf(a.asset));
+    sceneLength(castScene(s, cast), bg?.background ?? null, (a) =>
+      kindOf(a.asset),
+    );
   const duration = lengthOf(scene);
   const playback = usePlayback({
     duration,
@@ -272,14 +296,17 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
     setRemoving(false);
   };
 
-  const addActor = (asset: RigAsset) => {
+  /** Adds a library character or prop, or a cast member, to the scene. */
+  const addActor = (asset: RigAsset | CastMember) => {
     if (!bg) return;
+    const member = 'name' in asset ? asset : null;
+    const from = 'name' in asset ? asset.asset : asset;
     const actor: Actor = {
       id: newId(),
-      asset: { kind: asset.kind, id: asset.id },
+      asset: { kind: from.kind, id: from.id },
+      ...(member && { cast: member.id }),
       at: freeSpot(bg, scene.actors),
       facing: 1,
-      scale: 1,
       actions: [],
     };
     editScene((s) => ({ ...s, actors: [...s.actors, actor] }));
@@ -287,6 +314,17 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
     setWalking(null);
     setLibrary(null);
   };
+  /** Makes a cast member from a library asset and opens its dialog. */
+  const newMember = (asset: RigAsset) => {
+    const member = newCastMember(asset, names.asset(asset));
+    doc.edit((c) => addCastMember(c, member));
+    setCastDialog({ type: 'member', id: member.id });
+  };
+  const makeFromActor = (actorId: string, name: string) => {
+    doc.edit((c) => castFromActor(c, scene.id, actorId, name).content);
+    setCastDialog(null);
+  };
+
   const setBackground = (id: string) => {
     editScene((s) => withBackground(s, id));
     setLibrary(null);
@@ -364,7 +402,7 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
   };
 
   const onKey = useEffectEvent((e: KeyboardEvent) => {
-    if (removing || isTyping(e.target)) return;
+    if (removing || castDialog || isTyping(e.target)) return;
     const command = editorCommand(e);
     if (!command) return;
     // Also keeps the keys from pressing the focused button or scrolling.
@@ -456,13 +494,15 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
       const kind = selectedKind;
       const state = actorStateAt(selectedActor, kind, bg.background, t);
       const id = selectedActor.id;
+      // A new size from the size buttons is an override of this actor.
+      const { scale } = selectedActor.settings;
       const resize = (step: 1 | -1) => {
-        const next = stepSize(selectedActor.scale, step);
-        return next === selectedActor.scale
+        const next = stepSize(scale, step);
+        return next === scale
           ? undefined
           : () =>
               editScene((s) =>
-                updateActor(s, id, (a) => ({ ...a, scale: next })),
+                updateActor(s, id, (a) => overrideScale(a, next)),
               );
       };
       toolbar = (
@@ -539,6 +579,11 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
         );
       }}
       onFocusPoint={setFocusPoint}
+      cast={cast}
+      onEditMember={(id) => setCastDialog({ type: 'member', id })}
+      onCastFromActor={(actorId) =>
+        setCastDialog({ type: 'fromActor', actorId })
+      }
       attached={attached}
       onAttach={setAttached}
       onClose={() => setPaneOpen(false)}
@@ -595,6 +640,13 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
 
       <div className="editor-body">
         <nav className="tool-rail" aria-label={tr('editor.library')}>
+          <IconButton
+            label="editor.cast"
+            pressed={library === 'cast'}
+            onClick={bg ? () => toggleLibrary('cast') : undefined}
+          >
+            <CastIcon />
+          </IconButton>
           <IconButton
             label="editor.characters"
             pressed={library === 'character'}
@@ -704,7 +756,10 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
             <LibraryPanel
               tab={library}
               background={scene.background}
+              cast={cast}
               onAdd={addActor}
+              onNewMember={newMember}
+              onEditMember={(id) => setCastDialog({ type: 'member', id })}
               onBackground={setBackground}
               onClose={() => setLibrary(null)}
             />
@@ -727,6 +782,7 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
 
       <Timeline
         scene={scene}
+        cast={cast}
         background={bg?.background ?? null}
         sceneNumber={index}
         sceneCount={scenes.length}
@@ -796,6 +852,36 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
         onLoadSaved={doc.loadSaved}
         onRetry={doc.retry}
       />
+      {castDialog?.type === 'member' &&
+        (() => {
+          const member = cast.find((m) => m.id === castDialog.id);
+          // An undo can take the cast member away.
+          if (!member) return null;
+          return (
+            <CastMemberDialog
+              member={member}
+              content={doc.content}
+              onEdit={doc.edit}
+              onRemove={() => {
+                doc.edit((c) => removeCastMember(c, member.id));
+                setCastDialog(null);
+              }}
+              onClose={() => setCastDialog(null)}
+            />
+          );
+        })()}
+      {castDialog?.type === 'fromActor' &&
+        (() => {
+          const actor = scene.actors.find((a) => a.id === castDialog.actorId);
+          if (!actor) return null;
+          return (
+            <FromActorDialog
+              initialName={names.asset(actor.asset)}
+              onCreate={(name) => makeFromActor(actor.id, name)}
+              onClose={() => setCastDialog(null)}
+            />
+          );
+        })()}
       {removing && (
         <Dialog
           title={tr('editor.removeSceneTitle', { n: index + 1 })}

@@ -8,6 +8,32 @@ import type { CartoonContent } from '@toonhouse/model';
 
 export const v1 = {
   version: 1,
+  cast: [
+    {
+      id: '0a1b2c3d-1e2f-4a3b-8c4d-5e6f7a8b9c01',
+      name: 'Ville',
+      asset: {
+        kind: 'character',
+        id: 'sunny/blond-boy',
+      },
+      settings: {
+        scale: 1.2,
+        colors: {
+          hair: 'black',
+          shirt: 'red',
+        },
+      },
+    },
+    {
+      id: '1b2c3d4e-2f3a-4b4c-9d5e-6f7a8b9c0d12',
+      name: 'Big oak',
+      asset: {
+        kind: 'prop',
+        id: 'sunny/oak',
+      },
+      settings: {},
+    },
+  ],
   scenes: [
     {
       id: '6f1c2b9e-1d4a-4c1e-9a51-0d1f6c2a7b10',
@@ -39,12 +65,18 @@ export const v1 = {
             kind: 'character',
             id: 'sunny/blond-boy',
           },
+          cast: '0a1b2c3d-1e2f-4a3b-8c4d-5e6f7a8b9c01',
           at: {
             x: 420.5,
             y: 910,
           },
           facing: 1,
-          scale: 1.4,
+          overrides: {
+            scale: 1.4,
+            colors: {
+              shirt: 'blue',
+            },
+          },
           actions: [
             {
               id: 'f4a5b6c7-6f5a-4b4c-8e7b-9a3c5d6e7f85',
@@ -92,7 +124,9 @@ export const v1 = {
             y: 960,
           },
           facing: -1,
-          scale: 0.7,
+          overrides: {
+            scale: 0.7,
+          },
           actions: [
             {
               id: 'e9fa0b1c-beaf-4a9b-9dc0-4f8bacbdceda',
@@ -118,7 +152,9 @@ export const v1 = {
             y: 1000,
           },
           facing: 1,
-          scale: 0.5,
+          overrides: {
+            scale: 0.5,
+          },
           actions: [
             {
               id: '1c2d3e4f-e1d2-4dce-8af3-7cbe1dfe01ad',
@@ -149,7 +185,6 @@ export const v1 = {
             y: 820,
           },
           facing: 1,
-          scale: 1,
           actions: [
             {
               id: '4f5a6b7c-b4a5-4af1-9d26-afe14a1234d0',

@@ -43,6 +43,15 @@ export {
 } from './camera.ts';
 export type { CartoonEntry, CartoonTimeline } from './cartoon.ts';
 export { cartoonTime, cartoonTimeline } from './cartoon.ts';
+export type { CastActor, CastScene, Settings } from './cast.ts';
+export {
+  actorSettings,
+  castActor,
+  castMemberOf,
+  castScene,
+  DEFAULT_SCALE,
+  mergeSettings,
+} from './cast.ts';
 export {
   backgroundClips,
   clipOf,
@@ -50,7 +59,6 @@ export {
   HIP_HEIGHT,
   restClip,
 } from './clips/index.ts';
-export type { ColorChoice } from './colors.ts';
 export { colorRig, presetColors, presetPatterns } from './colors.ts';
 export type {
   Bounds,
@@ -80,3 +88,4 @@ export {
   sortedActions,
   walkTime,
 } from './scene.ts';
+export type { ColorChoice } from '@toonhouse/model';

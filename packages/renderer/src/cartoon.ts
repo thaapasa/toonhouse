@@ -3,14 +3,16 @@
 // whose background isn't in the library, such as a scene without one yet.
 // Shots will change how the time of the cartoon maps to a scene and a time
 // in it, and the player and export get it from here.
-import type { Background, CartoonContent, Scene } from '@toonhouse/model';
+import type { Background, CartoonContent } from '@toonhouse/model';
 
+import { type CastScene, castScene } from './cast.ts';
 import { actorKind, type Library } from './frame.ts';
 import { clamp } from './math.ts';
 import { sceneLength } from './scene.ts';
 
 export interface CartoonEntry {
-  scene: Scene;
+  /** The scene with the settings of its actors from the cast. */
+  scene: CastScene;
   background: Background;
   /** When the scene starts in the cartoon, in seconds. */
   start: number;
@@ -29,7 +31,8 @@ export function cartoonTimeline(
 ): CartoonTimeline {
   const entries: CartoonEntry[] = [];
   let start = 0;
-  for (const scene of content.scenes) {
+  for (const stored of content.scenes) {
+    const scene = castScene(stored, content.cast);
     const background =
       scene.background === null
         ? undefined

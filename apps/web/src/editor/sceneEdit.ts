@@ -244,11 +244,6 @@ export function stepSize(scale: number, step: 1 | -1): number {
   return SIZES.findLast((s) => s < scale - 1e-6) ?? scale;
 }
 
-export const setScale = (actor: Actor, scale: number): Actor => ({
-  ...actor,
-  scale: Math.round(clamp(scale, L.scale.min, L.scale.max) * 1e4) / 1e4,
-});
-
 /** Sets the speed of an action. The normal speed 1 leaves the field out. */
 export function setSpeed(action: Action, speed: number): Action {
   const v = Math.round(clamp(speed, L.speed.min, L.speed.max) * 1e4) / 1e4;

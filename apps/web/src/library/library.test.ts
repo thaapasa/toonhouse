@@ -11,6 +11,7 @@ import {
 } from '@toonhouse/renderer';
 import { describe, expect, it } from 'vitest';
 
+import { isTextKey } from '../i18n/index.tsx';
 import { BACKGROUNDS, CHARACTERS, LIBRARY, PROPS } from './index.ts';
 
 /** Every number in a value, in a fixed order. */
@@ -113,5 +114,16 @@ describe('library packs', () => {
     expect(backgroundFont('sunny/meadow')).toBe('comic-relief');
     expect(backgroundFont('adventure/harbor')).toBe('indie-flower');
     expect(backgroundFont(null)).toBe('comic-relief');
+  });
+});
+
+describe('library texts', () => {
+  // The user picks the colors by the names of the color settings.
+  it('has a name for every color setting', () => {
+    const ids = [...CHARACTERS, ...PROPS].flatMap(
+      (a) => a.rig.colorSettings?.map((s) => s.id) ?? [],
+    );
+    const missing = ids.filter((id) => !isTextKey(`colorSetting.${id}`));
+    expect(missing).toEqual([]);
   });
 });

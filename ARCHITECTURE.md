@@ -171,6 +171,29 @@ The colors and the patterns are data of the rig, so the renderer stays pure. A
 test in `apps/studio` checks that every role in a preset is in the SVG layers or
 drawn by the renderer, and that the first preset matches the drawings.
 
+### The cast
+
+The content of a cartoon has a `cast`: the cast members, each with a name, the
+character or the prop of the library, and its `settings`. An actor can name a
+cast member in `cast`, and it keeps the asset of the cast member in `asset` too,
+so the code that needs only the rig doesn't look up the cast. The settings of an
+actor in its scene are in `overrides`. The settings are the size and the preset
+of each color setting, by the id of the setting. A setting that a level leaves
+out comes from the level above: an actor from its cast member, and a cast member
+from the library, which has the size 1 and the first preset of each color
+setting.
+
+`castScene` in `packages/renderer` works out the settings of each actor of a
+scene from the cast, and the renderer draws the scene that it returns. So the
+editor and the player call it before `sceneFrame`, and `cartoonTimeline` calls
+it for each scene. The editor makes its edits on the scene as it is saved, and
+the rest of the editor sees the worked-out settings.
+
+If the cast no longer has the cast member of an actor, the actor starts from the
+library, as an actor without a cast member does. When the user removes a cast
+member, the editor first copies its settings into the overrides of each of its
+actors, so that they look the same as before.
+
 ### Backgrounds
 
 Each background has a folder in `assets/packs/<pack>/backgrounds/` with a
@@ -308,9 +331,10 @@ server stores them.
 The app is not deployed yet, so until the first deploy the format can change in
 ways that break the saved cartoons, without a new version or a converter. The
 tests in `apps/web/src/format` keep a saved cartoon of version 1 that uses every
-field, and a list of the library ids that saved cartoons refer to. They fail
-when a change could break the saved cartoons. Before the first deploy, update
-them to match. After it, the change needs a new version.
+field, and a list of the library ids that saved cartoons refer to, with the ids
+of the color settings and their presets. They fail when a change could break the
+saved cartoons. Before the first deploy, update them to match. After it, the
+change needs a new version.
 
 Every save from the web app includes the version that the web app knows. If the
 version is older than the latest, the server refuses the save with 409, and the

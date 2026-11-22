@@ -8,7 +8,7 @@
 // Each asset shows once its SVG files have loaded. Until then, the drawing
 // leaves it out, so that the user doesn't see the limbs of a character
 // without its body.
-import type { Scene } from '@toonhouse/model';
+import type { RoleColors, RolePatterns, Scene } from '@toonhouse/model';
 import {
   type Bounds,
   cameraBounds,
@@ -21,6 +21,7 @@ import {
   type PartSources,
   PartSymbols,
 } from '@toonhouse/stage';
+import { useMemo } from 'react';
 
 import { backgroundAsset, rigAsset, sceneFiles } from '../library/index.ts';
 import { loadedSources, useSources } from '../library/sources.ts';
@@ -57,12 +58,17 @@ export function SceneDrawing(props: {
   useSources(sceneFiles(props.scene));
   const bgAsset = backgroundAsset(props.scene.background);
   const bgSources = bgAsset && loadedSources(bgAsset.files);
-  const actors: { id: string; sources: PartSources }[] = [];
+  const actors: { id: string; sources: PartSources; paint: string }[] = [];
   const waiting = new Set<string>();
-  for (const { actor } of frame.actors) {
+  for (const { actor, colors, patterns } of frame.actors) {
     const asset = rigAsset(actor.asset);
     const sources = asset && loadedSources(asset.files);
-    if (sources) actors.push({ id: actor.id, sources });
+    if (sources)
+      actors.push({
+        id: actor.id,
+        sources,
+        paint: JSON.stringify({ colors, patterns }),
+      });
     else waiting.add(actor.id);
   }
   const node = leaveOut(frame.node, waiting);
@@ -72,11 +78,12 @@ export function SceneDrawing(props: {
   return (
     <>
       {bgSources && <PartSymbols prefix={prefix} sources={bgSources} />}
-      {actors.map(({ id, sources }) => (
-        <PartSymbols
+      {actors.map(({ id, sources, paint }) => (
+        <ActorSymbols
           key={id}
           prefix={actorPrefix(prefix, id)}
           sources={sources}
+          paint={paint}
         />
       ))}
       {props.offstage ? (
@@ -102,5 +109,34 @@ export function SceneDrawing(props: {
       </g>
       <Drawing node={frame.bubbleNode} prefix={prefix} />
     </>
+  );
+}
+
+/**
+ * The parts of an actor in its colors. The frame gives new color objects in
+ * every frame, so they come in as JSON text, and the parts are parsed again
+ * only when the colors change.
+ */
+function ActorSymbols(props: {
+  prefix: string;
+  sources: PartSources;
+  /** The colors and the patterns of the roles as JSON. */
+  paint: string;
+}) {
+  const { colors, patterns } = useMemo(
+    () =>
+      JSON.parse(props.paint) as {
+        colors: RoleColors;
+        patterns: RolePatterns;
+      },
+    [props.paint],
+  );
+  return (
+    <PartSymbols
+      prefix={props.prefix}
+      sources={props.sources}
+      colors={colors}
+      patterns={patterns}
+    />
   );
 }

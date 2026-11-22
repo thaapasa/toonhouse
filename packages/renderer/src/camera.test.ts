@@ -16,6 +16,7 @@ import {
   ease,
   pictureToGround,
 } from './camera.ts';
+import { castScene } from './cast.ts';
 import { minSceneLength, sceneLength } from './scene.ts';
 
 const bg = testHills as Background;
@@ -188,7 +189,9 @@ describe('pictureToGround', () => {
 describe('scene length', () => {
   it('lasts past the end of the last camera move', () => {
     const s = scene([{ id: 'm', t: 8, length: 6, to: close }]);
-    expect(sceneLength(s, bg, () => null)).toBeGreaterThanOrEqual(14);
+    expect(
+      sceneLength(castScene(s, []), bg, () => null),
+    ).toBeGreaterThanOrEqual(14);
     expect(minSceneLength(s)).toBeGreaterThan(8);
   });
 });

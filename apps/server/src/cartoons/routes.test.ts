@@ -285,7 +285,7 @@ describe('content', () => {
     expect(await (await load(id)).json()).toEqual({
       revision: 0,
       editor: null,
-      content: { version: 1, scenes: [] },
+      content: { version: 1, cast: [], scenes: [] },
     });
   });
 

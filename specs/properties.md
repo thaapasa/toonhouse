@@ -30,7 +30,7 @@ buttons don't have, or a point of a walk to the pixel.
       are big enough for a finger.
 - [x] Places are in the pixels of the background frame, the size is in percent,
       the speed is a multiplier of the normal speed and times are in seconds.
-- [ ] When the user selects an actor, the pane shows its settings, such as its
+- [x] When the user selects an actor, the pane shows its settings, such as its
       color preset, and which of them are overrides. See [Cast](cast.md).
 - [ ] When the user selects an actor, the pane lists its changes in the middle
       of the scene. See [Timeline](timeline.md).

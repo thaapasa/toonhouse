@@ -8,7 +8,7 @@ with the [character studio](studio.md).
 - [x] User can pick a character or a prop from the library.
 - [ ] A character has clips, such as standing, walking, waving and jumping.
 - [ ] The same clip works on every character that has the same rig kind.
-- [ ] A character or a prop has settings with defaults, such as color presets
+- [x] A character or a prop has settings with defaults, such as color presets
       for its clothes and its size. See [Cast](cast.md).
 - [ ] The colors of a character or a prop are split into color roles, such as
       the skin, the hair, the shirt and the logo on the shirt. Each color in its
@@ -16,16 +16,16 @@ with the [character studio](studio.md).
 - [ ] The color roles and the color presets are made by hand for each character
       or prop, so that every preset is a set of colors that suits that
       character.
-- [ ] A color preset sets the color roles of its color setting. A role that no
+- [x] A color preset sets the color roles of its color setting. A role that no
       setting colors keeps the color that the character has in the library.
 - [ ] A character or a prop has color settings, such as the skin, the hair and
       the shirt. Each setting has its own color presets, and the user picks one
       preset for each setting.
-- [ ] A color preset of a setting can color several roles, such as the shirt and
+- [x] A color preset of a setting can color several roles, such as the shirt and
       the stripes on it.
 - [ ] The outline is a color setting of its own, with one color for all the
       lines of the character, so that the lines suit the other colors.
-- [ ] The first color preset of each setting is the default, and it has the
+- [x] The first color preset of each setting is the default, and it has the
       colors that the character has in the library.
 - [ ] Every character and prop in the library has color settings from the time
       it is added, for the colors that a user would want to change. A person has
@@ -37,10 +37,10 @@ with the [character studio](studio.md).
 - [ ] A color setting colors the shades and the details of a thing together,
       such as the dark and the light shades of the leaves or the sole of a shoe,
       so that they still match.
-- [ ] A color preset can draw a pattern over a role, such as stars on the robe
+- [x] A color preset can draw a pattern over a role, such as stars on the robe
       and the hat of a wizard, or flowers on a dress. The app draws the pattern
       in code, so it stays sharp and moves with the part.
-- [ ] If a character gets new parts, a saved cartoon still shows its actors in
+- [x] If a character gets new parts, a saved cartoon still shows its actors in
       the colors that the user picked.
 - [x] Each layer of a character has its own place in the draw order, so the
       front hair can be in front of the arms while the back hair is behind the

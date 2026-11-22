@@ -3,14 +3,12 @@
 // colors that the renderer draws itself, such as the rubber-hose limbs, come
 // from the rig, and `colorRig` sets them from the roles.
 import type {
+  ColorChoice,
   ColorPreset,
   Rig,
   RoleColors,
   RolePatterns,
 } from '@toonhouse/model';
-
-/** The preset that the user picked for each color setting, by setting id. */
-export type ColorChoice = Record<string, string>;
 
 /**
  * The preset of each color setting in `choice`. A setting that `choice` leaves

@@ -7,6 +7,7 @@ import type {
   Action,
   Actor,
   Bubble,
+  CastMember,
   ClipId,
   Pt,
   Scene,
@@ -16,6 +17,9 @@ import {
   actorStateAt,
   backgroundClips,
   type BubbleAnchor,
+  type CastActor,
+  castMemberOf,
+  type CastScene,
   clipsFor,
   clipStartOf,
   isMoving,
@@ -32,9 +36,15 @@ import {
   PinIcon,
 } from '../components/icons.tsx';
 import { useI18n } from '../i18n/index.tsx';
-import { type BackgroundAsset, kindOf } from '../library/index.ts';
+import { type BackgroundAsset, kindOf, rigAsset } from '../library/index.ts';
 import { BubbleSection } from './BubbleSection.tsx';
 import { CameraSection } from './CameraSection.tsx';
+import {
+  clearOverride,
+  hasSetting,
+  overrideColor,
+  overrideScale,
+} from './castEdit.ts';
 import type { EditRun } from './history.ts';
 import { useNames } from './names.ts';
 import { NumberField } from './NumberField.tsx';
@@ -47,16 +57,18 @@ import {
   setClip,
   setClipStart,
   setLength,
-  setScale,
   setSpeed,
   updateAction,
   updateActions,
   updateActor,
 } from './sceneEdit.ts';
+import { SettingsFields } from './SettingsFields.tsx';
 import type { TimelineSelection } from './Timeline.tsx';
 
 interface Props {
-  scene: Scene;
+  scene: CastScene;
+  /** The cast of the cartoon. */
+  cast: readonly CastMember[];
   bg: BackgroundAsset | null;
   selection: TimelineSelection | null;
   /** The selected bubble, which the pane shows instead of the selection. */
@@ -78,6 +90,9 @@ interface Props {
   onClipChanged(actorId: string | null, action: Action): void;
   /** The walk point that the user works on in the pane, to show on the stage. */
   onFocusPoint(index: number | null): void;
+  onEditMember(id: string): void;
+  /** Makes a cast member from the actor, which has none. */
+  onCastFromActor(actorId: string): void;
   /** Whether the pane has its own column beside the stage. */
   attached: boolean;
   onAttach(attached: boolean): void;
@@ -105,6 +120,7 @@ export function PropertiesPane(props: Props) {
       <BubbleSection
         key={props.bubble.id}
         scene={scene}
+        cast={props.cast}
         bubble={props.bubble}
         anchors={props.anchors}
         textFocus={props.textFocus}
@@ -195,17 +211,37 @@ function SceneSection(props: Props) {
   );
 }
 
-function ActorSection(props: Props & { actor: Actor }) {
+function ActorSection(props: Props & { actor: CastActor }) {
   const { tr } = useI18n();
   const names = useNames();
   const { actor } = props;
+  const member = castMemberOf(actor, props.cast);
+  const rig = rigAsset(actor.asset)?.rig;
   const edit = (fn: (a: Actor) => Actor) =>
     props.onEdit((s) => updateActor(s, actor.id, fn));
   const move = (p: Partial<Pt>) =>
     edit((a) => ({ ...a, at: savedPoint({ ...a.at, ...p }) }));
   return (
     <div className="pane-section">
-      <h3>{names.actors(props.scene).get(actor.id)}</h3>
+      <h3>{names.actors(props.scene, props.cast).get(actor.id)}</h3>
+      <div className="pane-row cast-row">
+        <span>
+          {member
+            ? tr('cast.memberName', { name: names.member(member) })
+            : tr('cast.none')}
+        </span>
+        <button
+          type="button"
+          className="button small"
+          onClick={() =>
+            member
+              ? props.onEditMember(member.id)
+              : props.onCastFromActor(actor.id)
+          }
+        >
+          {tr(member ? 'cast.editMember' : 'cast.fromActor')}
+        </button>
+      </div>
       <p className="muted small">{tr('properties.startHint')}</p>
       <NumberField
         label={tr('properties.x')}
@@ -240,20 +276,29 @@ function ActorSection(props: Props & { actor: Actor }) {
           ))}
         </div>
       </div>
-      <NumberField
-        label={tr('properties.size')}
-        value={actor.scale * 100}
-        step={10}
-        decimals={1}
-        unit="%"
-        onChange={(v) => edit((a) => setScale(a, v / 100))}
-      />
+      {rig && (
+        <>
+          <h4>{tr('settings.title')}</h4>
+          {member && <p className="muted small">{tr('settings.actorHint')}</p>}
+          <SettingsFields
+            rig={rig}
+            settings={actor.settings}
+            isOverride={(key) => hasSetting(actor.overrides, key)}
+            hasMember={member !== undefined}
+            onScale={(v) => edit((a) => overrideScale(a, v))}
+            onColor={(setting, preset) =>
+              edit((a) => overrideColor(a, setting, preset))
+            }
+            onClear={(key) => edit((a) => clearOverride(a, key))}
+          />
+        </>
+      )}
     </div>
   );
 }
 
 function ActionSection(
-  props: Props & { actor: Actor | undefined; action: Action },
+  props: Props & { actor: CastActor | undefined; action: Action },
 ) {
   const { tr } = useI18n();
   const names = useNames();
@@ -369,7 +414,7 @@ function pointKey(p: Pt): number {
 
 function WalkPath(
   props: Props & {
-    actor: Actor;
+    actor: CastActor;
     action: Action;
     kind: Exclude<ReturnType<typeof kindOf>, null>;
     onEditAction(fn: (a: Action) => Action): void;

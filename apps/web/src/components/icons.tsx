@@ -83,6 +83,24 @@ export const CharacterIcon = () => (
   </Icon>
 );
 
+/** Two people, for the cast of the cartoon. */
+export const CastIcon = () => (
+  <Icon>
+    <circle cx="9" cy="8" r="3" />
+    <path d="M3 20v-1.5a6 6 0 0 1 12 0V20" />
+    <path d="M15.5 5.2a3 3 0 0 1 0 5.6" />
+    <path d="M18 13.5a6 6 0 0 1 3 5V20" />
+  </Icon>
+);
+
+/** An arrow that turns back, for going back to the value of the level above. */
+export const ResetIcon = () => (
+  <Icon size={18}>
+    <path d="M4 12a8 8 0 1 0 2.4-5.7" />
+    <path d="M4 4v4h4" />
+  </Icon>
+);
+
 export const PropIcon = () => (
   <Icon>
     <path d="M12 3l6 8h-3l4 6H5l4-6H6z" />
