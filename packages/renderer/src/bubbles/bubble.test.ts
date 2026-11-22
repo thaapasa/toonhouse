@@ -54,7 +54,6 @@ describe('bubble length', () => {
     const scene: Scene = {
       id: 's',
       background: null,
-      backgroundActions: [],
       actors: [],
       bubbles: [bubble({ t: 20, length: 5 })],
     };

@@ -1,19 +1,20 @@
 # Farm: work log
 
 A farmyard with a red barn, a silo, a farmhouse and a haystack, a wooden fence,
-fields on far hills and a blue sky. The sun and the clouds come from
-[shared](../../shared/LOG.md). Work files are in `assets/work/bg/`.
+fields on far hills and a blue sky. Work files are in `assets/work/bg/`.
 
 ## Frame and layers
+
+The sky, with the sun and the clouds, belongs to the scene, and the default sky
+of the background is the `blue` preset. The flat `sky.svg` layer of `#9fd8f2`
+and the sun and the clouds as parts on it were removed when the sky became apart
+from the backgrounds.
 
 The frame is 2048×1152 (16:9). Every layer is an SVG with
 `viewBox="0 0 2048 1152"`.
 
 | Layer        | Depth | What it is                                                 |
 | ------------ | ----- | ---------------------------------------------------------- |
-| `sky.svg`    | 0     | flat blue `#9fd8f2`, opaque                                |
-| sun          | 0     | `shared/sun.svg`, moved by the `day` clip                  |
-| clouds       | 0     | three shared clouds, moved by the `drift` clip             |
 | `far.svg`    | 0.2   | rolling hills with a patchwork of fields, top at y ≈ 470   |
 | `middle.svg` | 0.5   | barn, silo, farmhouse, trees and haystack on a grassy rise |
 | `ground.svg` | 1     | a wooden fence (y ≈ 720 to 790) and grass in front of it   |

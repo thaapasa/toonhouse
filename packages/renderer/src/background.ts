@@ -1,14 +1,7 @@
 // Draws a background with the actors on it, as the camera sees it. The
 // camera moves the layers of the background by their depth, so that the far
 // layers move less than the near ones.
-import type {
-  Background,
-  BackgroundFrame,
-  BackgroundPart,
-  CameraView,
-  Matrix,
-  Pt,
-} from '@toonhouse/model';
+import type { Background, CameraView, Matrix } from '@toonhouse/model';
 
 import type { Bounds, DrawNode } from './draw.ts';
 import {
@@ -20,6 +13,14 @@ import {
   scaling,
   translation,
 } from './math.ts';
+import {
+  drawClouds,
+  drawFalling,
+  drawSky,
+  mistVeil,
+  nightTint,
+  type SkyWeather,
+} from './skyDraw.ts';
 
 /**
  * The view of the camera on the ground layer. The view has the shape of the
@@ -92,64 +93,6 @@ export function layerTransform(
   return multiply(scaling(k), translation(-v.x, -v.y));
 }
 
-/**
- * The point on the quadratic curve from `from` through `top` to `to`, from
- * 0 at the start to 1 at the end. The curve is at `top` halfway.
- */
-export function arcPoint(arc: { from: Pt; top: Pt; to: Pt }, u: number): Pt {
-  const { from, top, to } = arc;
-  const c = {
-    x: 2 * top.x - (from.x + to.x) / 2,
-    y: 2 * top.y - (from.y + to.y) / 2,
-  };
-  const a = (1 - u) * (1 - u);
-  const b = 2 * u * (1 - u);
-  const e = u * u;
-  return {
-    x: a * from.x + b * c.x + e * to.x,
-    y: a * from.y + b * c.y + e * to.y,
-  };
-}
-
-/**
- * The x of a drifting part. It leaves the frame on one side and comes back
- * on the other, and the speed is rounded so that it goes across a whole
- * number of times in `loop` seconds.
- */
-export function driftX(
-  bg: Background,
-  part: BackgroundPart,
-  t: number,
-  loop: number,
-): number {
-  const speed = part.drift?.speed ?? 0;
-  if (speed === 0) return part.at.x;
-  const scale = part.scale ?? 1;
-  // How far the part reaches past its pivot, so that it goes out of sight
-  // before it comes back.
-  const reach = Math.max(part.pivot.x, part.width - part.pivot.x) * scale;
-  const span = bg.width + 2 * reach;
-  const laps = Math.round((speed * loop) / span) || Math.sign(speed);
-  const x = part.at.x + reach + ((laps * span) / loop) * t;
-  return (((x % span) + span) % span) - reach;
-}
-
-/** Where a part of the background is at one frame of a clip. */
-export function partPosition(
-  bg: Background,
-  part: BackgroundPart,
-  frame: BackgroundFrame,
-): Pt {
-  if (part.arc && frame.arc !== null) return arcPoint(part.arc, frame.arc);
-  if (part.drift && frame.drift) {
-    return {
-      x: driftX(bg, part, frame.drift.t, frame.drift.loop),
-      y: part.at.y,
-    };
-  }
-  return part.at;
-}
-
 /** An actor to draw on the ground layer. */
 export interface SceneActor {
   /** Names the parts of the actor apart from the others. See `DrawNode`. */
@@ -204,22 +147,43 @@ export function minScaleY(bg: Background): number | null {
 }
 
 /**
- * The background and the actors as the camera sees them, in the pixels of
- * the picture, which has the size of the frame. The actors stand on the
- * ground layer and are drawn right after it, so the layers after the ground
- * layer are in front of them. The actors are drawn from the top of the frame
- * to the bottom, so that an actor nearer to the camera is in front of one
- * further away. Actors at the same y keep their order.
+ * The background and the actors as the camera sees them, with the sky and
+ * the weather of the scene, in the pixels of the picture, which has the size
+ * of the frame. The actors stand on the ground layer and are drawn right
+ * after it, so the layers after the ground layer are in front of them. The
+ * actors are drawn from the top of the frame to the bottom, so that an actor
+ * nearer to the camera is in front of one further away. Actors at the same y
+ * keep their order.
+ *
+ * The sky is behind all layers. Outdoors, a veil of mist goes after each
+ * layer before the ground layer, so the far layers get hazier, and the rain
+ * and the snow fall both right before the ground layer and in front of
+ * everything. Indoors, they all go before the first layer, so that they show
+ * only through the windows. The night tints everything but the sky, and the
+ * bubbles, which the frame draws apart.
  */
 export function drawScene(
   bg: Background,
-  frame: BackgroundFrame,
   camera: Camera,
-  actors: readonly SceneActor[] = [],
+  actors: readonly SceneActor[],
+  sky: SkyWeather,
 ): DrawNode {
-  const parts = Object.entries(bg.parts ?? {});
   const { ground } = bg;
-  const children = bg.layers.map((layer): DrawNode => {
+  const indoor = bg.indoor ?? false;
+  // The sky and the weather are at depth 0, which the camera doesn't move.
+  const atSky = layerTransform(bg, camera, 0);
+  const inSky = (node: DrawNode | null): DrawNode[] =>
+    node ? [{ type: 'group', transform: atSky, children: [node] }] : [];
+  const groundAt = bg.layers.findIndex((l) => l.id === ground.layer);
+  const tinted: DrawNode[] = inSky(drawClouds(bg, sky));
+  if (indoor) {
+    tinted.push(...inSky(mistVeil(bg, sky)));
+    tinted.push(...inSky(drawFalling(bg, sky, 'far')));
+  }
+  bg.layers.forEach((layer, i) => {
+    if (!indoor && i === groundAt) {
+      tinted.push(...inSky(drawFalling(bg, sky, 'far')));
+    }
     const nodes: DrawNode[] = [
       {
         type: 'part',
@@ -229,21 +193,7 @@ export function drawScene(
         transform: IDENTITY,
       },
     ];
-    for (const [id, p] of parts) {
-      if (p.layer !== layer.id) continue;
-      const at = partPosition(bg, p, frame);
-      nodes.push({
-        type: 'part',
-        part: id,
-        width: p.width,
-        height: p.height,
-        transform: multiply(
-          translation(at.x, at.y),
-          multiply(scaling(p.scale ?? 1), translation(-p.pivot.x, -p.pivot.y)),
-        ),
-      });
-    }
-    if (layer.id === ground.layer) {
+    if (i === groundAt) {
       const byDepth = [...actors].sort((a, b) => a.y - b.y);
       for (const a of byDepth) {
         nodes.push({
@@ -257,13 +207,22 @@ export function drawScene(
         });
       }
     }
-    return {
+    tinted.push({
       type: 'group',
       transform: layerTransform(bg, camera, layer.depth),
       children: nodes,
-    };
+    });
+    if (!indoor && i < groundAt) tinted.push(...inSky(mistVeil(bg, sky)));
   });
-  return { type: 'group', children };
+  if (!indoor) tinted.push(...inSky(drawFalling(bg, sky, 'near')));
+  const tint = nightTint(sky, indoor);
+  return {
+    type: 'group',
+    children: [
+      ...inSky(drawSky(bg, sky)),
+      { type: 'group', ...(tint && { tint }), children: tinted },
+    ],
+  };
 }
 
 /** The depth of the ground layer, which the actors move with. */

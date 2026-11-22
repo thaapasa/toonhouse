@@ -18,6 +18,7 @@ import { bubbleEnd } from './bubbles/bubble.ts';
 import { cameraEntryEnd } from './camera.ts';
 import type { CastActor, CastScene } from './cast.ts';
 import { clipOf, restClip } from './clips/index.ts';
+import { changeEnd } from './sky.ts';
 
 /** The frames a second that the editor, the player and export step by. */
 export const FPS = 30;
@@ -57,10 +58,7 @@ export interface ActorState {
 }
 
 /** How far a clip has moved its rig at `t` within one loop, in rig pixels. */
-function frameTravel(clip: Clip, t: number): number {
-  const frame = clip.frameAt(t);
-  return frame.kind === 'background' ? 0 : frame.travel;
-}
+const frameTravel = (clip: Clip, t: number): number => clip.frameAt(t).travel;
 
 /** How many times `travelLookup` samples one loop of a clip. */
 const LOOKUP_SAMPLES = 32;
@@ -340,21 +338,6 @@ export function actorEnd(
   return last.t + (walkTime(actor, kind, bg, last) ?? 0);
 }
 
-/** The clip of the background at time `t`, and the time in it. */
-export function backgroundStateAt(
-  actions: readonly Action[],
-  t: number,
-): { clip: ClipId; clipT: number; action: Action | null } {
-  const action = sortedActions(actions).findLast((a) => a.t <= t) ?? null;
-  if (!action) return { clip: 'idle', clipT: t, action: null };
-  const { duration } = clipOf('background', action.clip);
-  return {
-    clip: action.clip,
-    clipT: clipTime(action, duration, t - action.t),
-    action,
-  };
-}
-
 /**
  * The shortest length that the user can set for a scene: a bit after its last
  * action or bubble starts, so that each shows on the timeline, and at least a
@@ -362,10 +345,11 @@ export function backgroundStateAt(
  */
 export function minSceneLength(scene: Scene): number {
   const starts = [
-    ...scene.backgroundActions,
     ...scene.actors.flatMap((a) => a.actions),
     ...(scene.bubbles ?? []),
     ...(scene.camera?.entries ?? []),
+    ...(scene.sky?.changes ?? []),
+    ...(scene.weather?.changes ?? []),
   ].map((a) => a.t);
   return Math.max(1, Math.max(0, ...starts) + 0.1);
 }
@@ -385,9 +369,10 @@ export function sceneLength(
     return Math.max(scene.length, minSceneLength(scene));
   let end = Math.max(
     0,
-    ...scene.backgroundActions.map((a) => a.t),
     ...(scene.bubbles ?? []).map(bubbleEnd),
     ...(scene.camera?.entries ?? []).map(cameraEntryEnd),
+    ...(scene.sky?.changes ?? []).map(changeEnd),
+    ...(scene.weather?.changes ?? []).map(changeEnd),
   );
   if (bg) {
     for (const actor of scene.actors) {

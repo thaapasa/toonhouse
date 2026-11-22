@@ -1,7 +1,6 @@
-// The toolbar of the selected actor or the background: a button for each of
-// its clips, which starts the clip at the current time, and the tools for the
-// actor.
-import type { Clip, ClipId, ClipKind } from '@toonhouse/model';
+// The toolbar of the selected actor: a button for each of its clips, which
+// starts the clip at the current time, and the tools for the actor.
+import type { Clip, ClipId } from '@toonhouse/model';
 
 import { IconButton } from '../components/IconButton.tsx';
 import {
@@ -11,6 +10,7 @@ import {
   DeleteIcon,
   DoneIcon,
   EditIcon,
+  PlusIcon,
   RemoveActionIcon,
   SmallerIcon,
   TurnIcon,
@@ -27,7 +27,6 @@ export interface ActorTools {
 }
 
 interface Props {
-  kind: ClipKind;
   clips: readonly Clip[];
   /** The clip that plays at the current time. */
   current: ClipId;
@@ -48,7 +47,7 @@ export function ActionBar(props: Props) {
     >
       {props.clips.map((clip) => {
         const Icon = CLIP_ICONS[clip.id];
-        const label = names.clip(props.kind, clip.id);
+        const label = names.clip(clip.id);
         return (
           <button
             key={clip.id}
@@ -164,6 +163,44 @@ export function CameraBar(props: {
       <IconButton
         className="bar-button"
         label={props.removeLabel}
+        onClick={props.onRemove}
+      >
+        <DeleteIcon />
+      </IconButton>
+    </div>
+  );
+}
+
+/**
+ * The toolbar of the row of the time of day or the weather: a new change at
+ * the current time, and the removal of the change that the scene holds there.
+ */
+export function ChangeBar(props: {
+  row: 'time' | 'weather';
+  onAdd?: (() => void) | undefined;
+  onRemove?: (() => void) | undefined;
+}) {
+  const { tr } = useI18n();
+  const k = props.row === 'time' ? 'sky' : 'weather';
+  return (
+    <div
+      className="action-bar"
+      role="toolbar"
+      aria-label={tr(
+        props.row === 'time' ? 'editor.timeOfDay' : 'editor.weather',
+      )}
+    >
+      <IconButton
+        className="bar-button"
+        label={`${k}.addChange`}
+        onClick={props.onAdd}
+      >
+        <PlusIcon size={20} />
+      </IconButton>
+      <div className="divider" />
+      <IconButton
+        className="bar-button"
+        label={`${k}.removeChange`}
         onClick={props.onRemove}
       >
         <DeleteIcon />

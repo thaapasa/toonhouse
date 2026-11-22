@@ -23,7 +23,12 @@ import {
 } from '@toonhouse/stage';
 import { useMemo } from 'react';
 
-import { backgroundAsset, rigAsset, sceneFiles } from '../library/index.ts';
+import {
+  backgroundAsset,
+  rigAsset,
+  sceneFiles,
+  SKY_FILES,
+} from '../library/index.ts';
 import { loadedSources, useSources } from '../library/sources.ts';
 
 /** How much of what is outside the frame shows through the mask. */
@@ -58,6 +63,7 @@ export function SceneDrawing(props: {
   useSources(sceneFiles(props.scene));
   const bgAsset = backgroundAsset(props.scene.background);
   const bgSources = bgAsset && loadedSources(bgAsset.files);
+  const skySources = loadedSources(SKY_FILES);
   const actors: { id: string; sources: PartSources; paint: string }[] = [];
   const waiting = new Set<string>();
   for (const { actor, colors, patterns } of frame.actors) {
@@ -77,6 +83,7 @@ export function SceneDrawing(props: {
     : { x: 0, y: 0, width: bg.width, height: bg.height };
   return (
     <>
+      {skySources && <PartSymbols prefix={prefix} sources={skySources} />}
       {bgSources && <PartSymbols prefix={prefix} sources={bgSources} />}
       {actors.map(({ id, sources, paint }) => (
         <ActorSymbols

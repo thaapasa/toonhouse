@@ -253,7 +253,8 @@ describe('content', () => {
       {
         id: 's1',
         background: 'sunny/meadow',
-        backgroundActions: [{ id: 'b1', t: 0, clip: 'day' }],
+        sky: { start: 18, changes: [{ id: 'c1', t: 2, length: 4, to: 22 }] },
+        weather: { start: { rain: 0.5 }, changes: [] },
         actors: [
           {
             id: 'a1',

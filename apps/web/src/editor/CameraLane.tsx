@@ -7,7 +7,7 @@
 // end, where its view is. Dragging the start or the end of a move changes only
 // that time, so the views stay and the move gets faster or slower. Dragging
 // the block moves the whole move, and dragging a jump moves the jump.
-import type { CameraEntry, Scene } from '@toonhouse/model';
+import type { CameraEasing, CameraEntry, Scene } from '@toonhouse/model';
 import {
   cameraEntryEnd,
   cameraHolder,
@@ -25,7 +25,7 @@ import { formatTime } from './timelineMath.ts';
 import { useLaneDrag } from './useLaneDrag.ts';
 
 /** The height of the curve of the easing in a block, in CSS pixels. */
-const CURVE = 18;
+export const CURVE = 18;
 
 /** A part of a camera move or jump that the user drags. */
 interface Grip {
@@ -52,11 +52,14 @@ interface Props {
 }
 
 /** The curve of an easing as SVG points, `width` wide. */
-function curvePoints(m: CameraEntry, width: number): string {
+export function curvePoints(
+  easing: CameraEasing | undefined,
+  width: number,
+): string {
   const steps = 16;
   return Array.from({ length: steps + 1 }, (_, i) => {
     const u = i / steps;
-    const v = ease(m.easing ?? DEFAULT_EASING, u);
+    const v = ease(easing ?? DEFAULT_EASING, u);
     return `${u * width},${CURVE - v * (CURVE - 2) - 1}`;
   }).join(' ');
 }
@@ -143,7 +146,7 @@ export function CameraLane(props: Props) {
               height={CURVE}
               aria-hidden
             >
-              <polyline points={curvePoints(m, width)} />
+              <polyline points={curvePoints(m.easing, width)} />
             </svg>
           </button>,
           mark(

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import testBush from '../../../assets/fixtures/props/test-bush/rig.json';
 import testTree from '../../../assets/fixtures/props/test-tree/rig.json';
-import { clipOf } from './clips/index.ts';
+import { clipOf, inWind } from './clips/index.ts';
 import { type DrawNode, drawRig } from './draw.ts';
 import { drawOrder } from './order.ts';
 import { swayOf } from './prop.ts';
@@ -93,5 +93,21 @@ describe('prop', () => {
     });
     const [, , left, right] = at(0.5);
     expect(left!.angle).not.toBeCloseTo(right!.angle, 3);
+  });
+});
+
+describe('wind of the weather', () => {
+  it('sways more in a stronger wind either way, and gently in still air', () => {
+    const frame = rustle.frameAt(1.3);
+    const angle = (wind: number) =>
+      Math.abs(swayOf(tree, 1, inWind(frame, wind)).angle);
+    expect(angle(0)).toBeCloseTo(Math.abs(swayOf(tree, 1, frame).angle));
+    expect(angle(0)).toBeGreaterThan(0);
+    expect(angle(0.5)).toBeGreaterThan(angle(0));
+    expect(angle(-0.5)).toBeCloseTo(angle(0.5));
+  });
+
+  it('keeps an idle prop still in any wind', () => {
+    expect(swayOf(tree, 1, inWind(idle.frameAt(1), 1)).angle).toBe(0);
   });
 });

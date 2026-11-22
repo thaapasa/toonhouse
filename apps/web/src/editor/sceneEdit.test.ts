@@ -55,35 +55,42 @@ describe('moving a whole action', () => {
   const scene = (actions: Action[], length?: number): Scene => ({
     id: 's',
     background: 'park',
-    backgroundActions: actions,
-    actors: [],
+    actors: [
+      {
+        id: 'x',
+        asset: { kind: 'character', id: 'boy' },
+        at: { x: 0, y: 0 },
+        facing: 1,
+        actions,
+      },
+    ],
     ...(length !== undefined && { length }),
   });
-  const starts = (s: Scene) => actionsOf(s, null).map((a) => a.t);
+  const starts = (s: Scene) => actionsOf(s, 'x').map((a) => a.t);
 
   it('moves its start and its end together', () => {
     const s = scene([wave('a', 1), wave('b', 2), wave('c', 4), wave('d', 6)]);
-    const moved = moveBlock(s, null, 'b', 2.5, 10);
+    const moved = moveBlock(s, 'x', 'b', 2.5, 10);
     expect(moved.t).toBe(2.5);
     expect(starts(moved.scene)).toEqual([1, 2.5, 4.5, 6]);
   });
 
   it('keeps the actions in their order', () => {
     const s = scene([wave('a', 1), wave('b', 2), wave('c', 4), wave('d', 6)]);
-    expect(starts(moveBlock(s, null, 'b', 0, 10).scene)).toEqual([
+    expect(starts(moveBlock(s, 'x', 'b', 0, 10).scene)).toEqual([
       1, 1.1, 3.1, 6,
     ]);
-    expect(starts(moveBlock(s, null, 'b', 5, 10).scene)).toEqual([
+    expect(starts(moveBlock(s, 'x', 'b', 5, 10).scene)).toEqual([
       1, 3.9, 5.9, 6,
     ]);
   });
 
   it('makes the scene longer to keep the last action as long', () => {
     const s = scene([wave('a', 1), wave('b', 2)]);
-    const later = moveBlock(s, null, 'b', 5, 10).scene;
+    const later = moveBlock(s, 'x', 'b', 5, 10).scene;
     expect(starts(later)).toEqual([1, 5]);
     expect(later.length).toBe(13);
-    expect(moveBlock(s, null, 'b', 1.5, 10).scene.length).toBeUndefined();
+    expect(moveBlock(s, 'x', 'b', 1.5, 10).scene.length).toBeUndefined();
   });
 });
 
@@ -92,8 +99,8 @@ describe('scene length', () => {
     const s: Scene = {
       id: 's',
       background: 'park',
-      backgroundActions: [wave('a', 5)],
       actors: [],
+      camera: { entries: [{ id: 'a', t: 5, to: { x: 0, y: 0, zoom: 1 } }] },
     };
     expect(setLength(s, 8).length).toBe(8);
     expect(setLength(s, 2).length).toBe(5.1);
@@ -191,7 +198,7 @@ describe('updateScene', () => {
       scenes: [newScene()],
     };
     const scene = content.scenes[0]!;
-    const edit = (actorId: string | null) =>
+    const edit = (actorId: string) =>
       updateScene(content, scene.id, (s) =>
         updateActions(s, actorId, (list) => list.map((a) => a)),
       );

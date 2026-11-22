@@ -163,31 +163,11 @@ export interface PropFrame extends FrameBase {
   pose: PropPose;
 }
 
-/**
- * What a clip of a background gives for one moment. The background sets the
- * path of each part, so the same clip works on every background.
- */
-export interface BackgroundFrame {
-  kind: 'background';
-  /**
-   * How far the parts with an arc, such as the sun, are along it, from 0 at
-   * the start to 1 at the end. Null leaves them where they rest.
-   */
-  arc: number | null;
-  /**
-   * How long the parts that drift, such as clouds, have moved, in seconds,
-   * and the time after which they are back where they started. Null leaves
-   * them where they rest.
-   */
-  drift: { t: number; loop: number } | null;
-}
-
-export type ClipFrame =
-  CutoutFrame | BirdFrame | RabbitFrame | PropFrame | BackgroundFrame;
-/** The kinds of things that clips work on: the rig kinds and backgrounds. */
+export type ClipFrame = CutoutFrame | BirdFrame | RabbitFrame | PropFrame;
+/** The rig kinds, which clips work on. */
 export type ClipKind = ClipFrame['kind'];
 
-/** The ids of all clips, of every rig kind and of backgrounds. */
+/** The ids of all clips, of every rig kind. */
 export const CLIP_IDS = [
   'idle',
   'walk',
@@ -198,16 +178,11 @@ export const CLIP_IDS = [
   'hop',
   'lookout',
   'rustle',
-  'day',
-  'drift',
 ] as const;
 
 export type ClipId = (typeof CLIP_IDS)[number];
 
-/**
- * A motion for the rigs of one kind, or for backgrounds. The frame at `t`
- * depends only on `t`.
- */
+/** A motion for the rigs of one kind. The frame at `t` depends only on `t`. */
 export interface Clip<F extends ClipFrame = ClipFrame> {
   id: ClipId;
   kind: F['kind'];

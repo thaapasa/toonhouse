@@ -1,5 +1,5 @@
 // The frame of a scene at a time `t`: where each actor is and its drawing,
-// the frame of the background clip, the bubbles, and the tree to draw. The
+// the sky and the weather, the bubbles, and the tree to draw. The
 // editor, the player and the preview image draw it, and export will too.
 //
 // The renderer doesn't load the library. The app passes in a `Library` that
@@ -8,7 +8,6 @@
 import type {
   ActorAsset,
   Background,
-  BackgroundFrame,
   BubbleFontId,
   ClipKind,
   Matrix,
@@ -35,7 +34,7 @@ import {
 } from './bubbles/bubble.ts';
 import { cameraAt, pictureToGround } from './camera.ts';
 import type { CastActor, CastScene } from './cast.ts';
-import { clipOf } from './clips/index.ts';
+import { clipOf, inWind } from './clips/index.ts';
 import { colorRig, presetColors, presetPatterns } from './colors.ts';
 import {
   type Bounds,
@@ -45,7 +44,8 @@ import {
   type RigOutline,
 } from './draw.ts';
 import { transformPoint } from './math.ts';
-import { type ActorState, actorStateAt, backgroundStateAt } from './scene.ts';
+import { type ActorState, actorStateAt } from './scene.ts';
+import { type SkyWeather, skyWeatherAt } from './skyDraw.ts';
 
 /** The library assets that a scene refers to. */
 export interface Library {
@@ -96,7 +96,8 @@ export interface PlacedActor {
  */
 export interface SceneFrame {
   background: Background;
-  backgroundFrame: BackgroundFrame;
+  /** The sky and the weather at the time of the frame. */
+  sky: SkyWeather;
   /** The actors whose character or prop is in the library. */
   actors: PlacedActor[];
   /** The fonts and the anchors of the bubbles. */
@@ -115,16 +116,22 @@ export interface SceneFrame {
 const loop = (t: number, duration: number) =>
   duration > 0 ? ((t % duration) + duration) % duration : 0;
 
+/**
+ * An actor at `t`. A prop sways more in a stronger `wind`, so that its clip
+ * gives only the gusts.
+ */
 function placeActor(
   actor: CastActor,
   rig: Rig,
   bg: Background,
   t: number,
+  wind: number,
 ): PlacedActor {
   const kind = rig.kind;
   const state = actorStateAt(actor, kind, bg, t);
   const clip = clipOf(kind, state.clip);
-  const frame = clip.frameAt(loop(state.clipT, clip.duration));
+  const clipFrame = clip.frameAt(loop(state.clipT, clip.duration));
+  const frame = clipFrame.kind === 'prop' ? inWind(clipFrame, wind) : clipFrame;
   const { colors: choice, scale } = actor.settings;
   const colors = presetColors(rig, choice);
   const { node, rigOutline } = drawRig(colorRig(rig, colors), frame, {
@@ -158,13 +165,6 @@ function placeActor(
   };
 }
 
-/** The frame of the clip of the background at time `t`. */
-function backgroundFrame(scene: CastScene, t: number): BackgroundFrame {
-  const state = backgroundStateAt(scene.backgroundActions, t);
-  const clip = clipOf('background', state.clip);
-  return clip.frameAt(loop(state.clipT, clip.duration));
-}
-
 /** A bubble in picture pixels mapped by `m`, which only scales and moves. */
 function mappedBubble(p: PlacedBubble, m: Matrix): PlacedBubble {
   const corner = transformPoint(m, p.box);
@@ -194,9 +194,10 @@ export function sceneFrame(
   t: number,
   options: { pop?: boolean; ground?: boolean } = {},
 ): SceneFrame {
+  const sky = skyWeatherAt(scene, bg, t);
   const actors = scene.actors.flatMap((actor) => {
     const rig = library.rig(actor.asset);
-    return rig ? [placeActor(actor, rig, bg, t)] : [];
+    return rig ? [placeActor(actor, rig, bg, t, sky.weather.wind)] : [];
   });
   const byId = new Map(scene.actors.map((a) => [a.id, a]));
   const free = library.backgroundFont(scene.background);
@@ -217,12 +218,11 @@ export function sceneFrame(
     bubbleContext,
     options.pop ?? true,
   );
-  const frame = backgroundFrame(scene, t);
   let node = drawScene(
     bg,
-    frame,
     camera,
     actors.map((p) => p.drawing),
+    sky,
   );
   if (options.ground) {
     const toGround = pictureToGround(bg, camera);
@@ -231,7 +231,7 @@ export function sceneFrame(
   }
   return {
     background: bg,
-    backgroundFrame: frame,
+    sky,
     actors,
     bubbleContext,
     bubbles,

@@ -15,7 +15,7 @@ const SNAP_DISTANCE = 8;
 /** A loop narrower than this, in CSS pixels, shows as a flat fill. */
 const MIN_TOOTH = 4;
 
-/** The actions of one row of the timeline: an actor or the background. */
+/** The actions of one row of the timeline, which is an actor. */
 export interface TimelineRow {
   kind: ClipKind;
   actions: Action[];

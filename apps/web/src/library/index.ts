@@ -1,5 +1,6 @@
 // The library: the asset packs in assets/packs/, each with a folder for each
-// of its characters, props and backgrounds. The JSON files load with the web app,
+// of its characters, props and backgrounds, and the drawings of the sky in
+// assets/sky/, which every pack uses. The JSON files load with the web app,
 // so the editor and the player know the rigs and the backgrounds at once.
 // The SVG files are separate files of the build, and `sources.ts` loads them
 // when a drawing needs them, so the web app doesn't grow with the library.
@@ -23,6 +24,7 @@ import {
   backgroundSources,
   packOf,
   rigSources,
+  skySources,
 } from '@toonhouse/stage';
 
 import type { PartFiles } from './sources.ts';
@@ -46,7 +48,7 @@ const svgUrls = import.meta.glob<string>(
     '../../../../assets/packs/*/characters/*/*.svg',
     '../../../../assets/packs/*/props/*/*.svg',
     '../../../../assets/packs/*/backgrounds/*/*.svg',
-    '../../../../assets/packs/*/shared/*.svg',
+    '../../../../assets/sky/*.svg',
   ],
   { eager: true, query: '?url&no-inline', import: 'default' },
 );
@@ -62,7 +64,7 @@ export interface RigAsset {
 export interface BackgroundAsset {
   id: string;
   background: Background;
-  /** The URL of the SVG of each layer and part, by its id. */
+  /** The URL of the SVG of each layer, by its id. */
   files: PartFiles;
 }
 
@@ -96,6 +98,12 @@ export const BACKGROUNDS: readonly BackgroundAsset[] = Object.entries(
     };
   })
   .sort((a, b) => a.id.localeCompare(b.id));
+
+/** The URL of the SVG of the sun and of each cloud, by its part id. */
+export const SKY_FILES: PartFiles = skySources(
+  '../../../../assets/sky/',
+  svgUrls,
+);
 
 /**
  * The pack.json of an asset pack in assets/packs/: the assets of one art
@@ -149,10 +157,11 @@ export const LIBRARY: Library = {
 export const kindOf = (asset: ActorAsset): ClipKind | null =>
   actorKind(LIBRARY, asset);
 
-/** The SVG files of the background and the actors of a scene. */
+/** The SVG files of the sky, the background and the actors of a scene. */
 export function sceneFiles(scene: Scene): PartFiles[] {
   const bg = backgroundAsset(scene.background);
   return [
+    SKY_FILES,
     ...(bg ? [bg.files] : []),
     ...scene.actors.flatMap((a) => {
       const asset = rigAsset(a.asset);

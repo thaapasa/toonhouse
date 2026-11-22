@@ -7,12 +7,16 @@ under a warm evening sky. It is the first background of the
 
 ## Frame and layers
 
+The sky belongs to the scene, and the default sky of the background is the
+`peach` preset, which has the color of the flat `sky.svg` layer, `#f3c98b`, that
+the background had before the sky became apart from it. The background sets no
+path for the sun, so the sun rises from the bottom of the frame.
+
 The frame is 2048×1152 (16:9). Every layer is an SVG with
 `viewBox="0 0 2048 1152"`.
 
 | Layer        | Depth | What it is                                                 |
 | ------------ | ----- | ---------------------------------------------------------- |
-| `sky.svg`    | 0     | flat warm evening color `#f3c98b`, opaque                  |
 | `far.svg`    | 0.1   | the sea from the horizon at y ≈ 560 down, with two islands |
 | `middle.svg` | 0.45  | the stilt houses and the ships, roofs at y ≈ 450           |
 | `ground.svg` | 1     | the pier deck from y ≈ 900, with posts and cargo behind it |
@@ -64,4 +68,4 @@ fills the frame under them. The far layer is mixed 35 % with the sky color.
 ## What could be better
 
 - The middle layer is twice the size of the largest earlier layer.
-- There are no clips: the sea doesn't move and the sky has no sun.
+- The sea doesn't move.

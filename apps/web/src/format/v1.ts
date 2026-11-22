@@ -38,26 +38,6 @@ export const v1 = {
     {
       id: '6f1c2b9e-1d4a-4c1e-9a51-0d1f6c2a7b10',
       background: 'sunny/meadow',
-      backgroundActions: [
-        {
-          id: 'b6a7f0d2-2b1c-4f0e-8a3d-5c9e1f2a3b41',
-          t: 0,
-          clip: 'day',
-          clipStart: 0.25,
-        },
-        {
-          id: 'c1d2e3f4-3c2d-4e1f-9b4e-6d0f2a3b4c52',
-          t: 6,
-          type: 'clip',
-          clip: 'drift',
-          speed: 2,
-        },
-        {
-          id: 'd2e3f4a5-4d3e-4f2a-8c5f-7e1a3b4c5d63',
-          t: 12.5,
-          clip: 'idle',
-        },
-      ],
       actors: [
         {
           id: 'e3f4a5b6-5e4f-4a3b-9d6a-8f2b4c5d6e74',
@@ -408,12 +388,87 @@ export const v1 = {
         ],
       },
       length: 14,
+      seed: 3_141_592_653,
+      sky: {
+        look: { kind: 'preset', id: 'blue' },
+        sun: true,
+        start: 17.5,
+        changes: [
+          {
+            id: 'f1a2b3c4-1b2c-4d3e-8f4a-5b6c7d8e9f10',
+            t: 2,
+            length: 6,
+            to: 21,
+            easing: 'linear',
+          },
+          {
+            id: 'a2b3c4d5-2c3d-4e4f-9a5b-6c7d8e9f0a21',
+            t: 10,
+            length: 0,
+            to: 30,
+          },
+        ],
+      },
+      weather: {
+        start: {
+          clouds: 0.5,
+          cloudDark: 0.2,
+          wind: -0.4,
+          rain: 0,
+          snow: 0.1,
+          mist: 0.3,
+        },
+        changes: [
+          {
+            id: 'b3c4d5e6-3d4e-4f5a-8b6c-7d8e9f0a1b32',
+            t: 4,
+            length: 3,
+            to: { rain: 0.8, clouds: 1, cloudDark: 0.7 },
+            easing: 'ease-in',
+          },
+          {
+            id: 'c4d5e6f7-4e5f-4a6b-9c7d-8e9f0a1b2c43',
+            t: 9,
+            length: 2,
+            to: { wind: 0.6, snow: 0, mist: 0 },
+          },
+        ],
+      },
     },
     {
       id: 'd2e3f4a5-ed3e-4d8a-8abf-d87ad3abcd09',
       background: null,
-      backgroundActions: [],
       actors: [],
+      sky: {
+        look: { kind: 'gradient', top: '#203060', bottom: '#f0a070' },
+        sun: false,
+        changes: [],
+      },
+      weather: { changes: [] },
+    },
+    {
+      id: 'e3f4a5b6-fe4f-4e9b-9bc0-e98be4bcde10',
+      background: 'adventure/harbor',
+      actors: [],
+      sky: { look: { kind: 'space' }, changes: [] },
+    },
+    {
+      id: 'f4a5b6c7-0f5a-4fac-8cd1-f09cf5cdef21',
+      background: 'sunny/farm',
+      actors: [],
+      sky: { look: { kind: 'preset', id: 'peach' }, changes: [] },
+    },
+    {
+      id: 'a5b6c7d8-1a6b-4abd-9de2-a1ad06def032',
+      background: 'sunny/village',
+      actors: [],
+      sky: { look: { kind: 'preset', id: 'pale' }, changes: [] },
+    },
+    {
+      id: 'b6c7d8e9-2b7c-4bce-8ef3-b2be17ef0143',
+      background: 'sunny/meadow',
+      actors: [],
+      sky: { look: { kind: 'preset', id: 'lilac' }, changes: [] },
     },
   ],
 } satisfies CartoonContent;

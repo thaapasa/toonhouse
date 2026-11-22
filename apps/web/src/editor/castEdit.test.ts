@@ -38,7 +38,6 @@ const content = (actors: Actor[][]): CartoonContent => ({
   scenes: actors.map((list, i) => ({
     id: `s${i}`,
     background: null,
-    backgroundActions: [],
     actors: list,
   })),
 });

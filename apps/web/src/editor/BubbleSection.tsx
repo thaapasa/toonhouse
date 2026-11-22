@@ -407,7 +407,7 @@ function Toggle(props: {
   );
 }
 
-function ColorField(props: {
+export function ColorField(props: {
   label: TextKey;
   value: string;
   onChange(value: string): void;

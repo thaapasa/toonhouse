@@ -1,5 +1,6 @@
 import type { Pt } from './geometry.ts';
 import type { ClipId } from './pose.ts';
+import type { SceneSky, SceneWeather } from './sky.ts';
 
 /**
  * The version of the cartoon format. It goes up by one when the format changes
@@ -61,8 +62,6 @@ export interface Scene {
   id: string;
   /** The id of a library background, or null before the user picks one. */
   background: string | null;
-  /** The actions of the background, such as the sun moving across the sky. */
-  backgroundActions: Action[];
   actors: Actor[];
   /** The speech bubbles of the scene, both attached and free. */
   bubbles?: Bubble[];
@@ -73,6 +72,16 @@ export interface Scene {
    * the scene ends a few seconds after its last action.
    */
   length?: number;
+  /**
+   * A random integer that the editor picks for a new scene. It places the
+   * clouds, the drops and the stars, so that each scene looks a little
+   * different. Without it, the renderer makes one from the id of the scene.
+   */
+  seed?: number;
+  /** The sky and the time of day. Without it, the default sky at noon. */
+  sky?: SceneSky;
+  /** The weather. Without it, fair weather. */
+  weather?: SceneWeather;
 }
 
 /** The library character or prop that an actor uses. */
@@ -134,8 +143,7 @@ export interface Action {
   speed?: number;
   /**
    * Where in its clip the action starts, as a part of one loop of the clip
-   * from 0 to 1, 0 if not set. With 0.5, the sun of a day starts high on
-   * the sky.
+   * from 0 to 1, 0 if not set.
    */
   clipStart?: number;
 }

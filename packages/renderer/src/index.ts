@@ -36,6 +36,7 @@ export {
   cameraHolder,
   DEFAULT_EASING,
   ease,
+  easeIntegral,
   isJump,
   pictureToGround,
   sortedCameraEntries,
@@ -53,10 +54,10 @@ export {
   mergeSettings,
 } from './cast.ts';
 export {
-  backgroundClips,
   clipOf,
   clipsFor,
   HIP_HEIGHT,
+  inWind,
   restClip,
 } from './clips/index.ts';
 export { colorRig, presetColors, presetPatterns } from './colors.ts';
@@ -65,9 +66,11 @@ export type {
   ClipShape,
   DrawNode,
   DrawOptions,
+  GradientStop,
   PathStyle,
   RigDrawing,
   RigOutline,
+  VerticalGradient,
 } from './draw.ts';
 export { drawRig, partBounds } from './draw.ts';
 export type { Library, PlacedActor, SceneFrame } from './frame.ts';
@@ -79,7 +82,6 @@ export type { ActorState } from './scene.ts';
 export {
   actionSpeed,
   actorStateAt,
-  backgroundStateAt,
   clipStartOf,
   FPS,
   isMoving,
@@ -88,4 +90,22 @@ export {
   sortedActions,
   walkTime,
 } from './scene.ts';
+export type { SkyState } from './sky.ts';
+export {
+  changeEnd,
+  DEFAULT_SKY,
+  FAIR_WEATHER,
+  NOON,
+  sceneSeed,
+  sceneSky,
+  skyStateAt,
+  sortedTimeChanges,
+  sortedWeatherChanges,
+  startWeather,
+  WEATHER_KEYS,
+  weatherAt,
+  windDrift,
+} from './sky.ts';
+export type { FallBand, SkyWeather } from './skyDraw.ts';
+export { restingSky, SKY_PARTS, skyColors, skyWeatherAt } from './skyDraw.ts';
 export type { ColorChoice } from '@toonhouse/model';

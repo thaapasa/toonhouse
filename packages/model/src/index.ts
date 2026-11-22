@@ -1,10 +1,8 @@
 export type {
   Background,
   BackgroundArc,
-  BackgroundDrift,
   BackgroundGround,
   BackgroundLayer,
-  BackgroundPart,
 } from './background.ts';
 export type {
   Action,
@@ -27,7 +25,6 @@ export type {
 export { CARTOON_VERSION, emptyContent } from './cartoon.ts';
 export type { Matrix, Pt } from './geometry.ts';
 export type {
-  BackgroundFrame,
   BirdFace,
   BirdFrame,
   BirdPose,
@@ -73,3 +70,13 @@ export type {
   RolePatterns,
   StaffHold,
 } from './rig.ts';
+export type {
+  SceneSky,
+  SceneWeather,
+  Sky,
+  SkyPresetId,
+  TimeChange,
+  WeatherChange,
+  WeatherState,
+} from './sky.ts';
+export { SKY_PRESET_IDS } from './sky.ts';

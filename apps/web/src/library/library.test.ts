@@ -1,12 +1,14 @@
-// Plays every clip on every character, prop and background of the library,
-// so that a new asset can't break the renderer without a failing test.
-import type { Clip } from '@toonhouse/model';
+// Plays every clip on every character and prop of the library, and draws
+// every background in several kinds of weather, so that a new asset can't
+// break the renderer without a failing test.
+import type { Background, Clip } from '@toonhouse/model';
 import {
-  backgroundClips,
   clipsFor,
   drawRig,
   drawScene,
   restClip,
+  restingSky,
+  type SkyWeather,
   wholeBackground,
 } from '@toonhouse/renderer';
 import { describe, expect, it } from 'vitest';
@@ -49,7 +51,6 @@ describe('library rigs', () => {
     it('ends where it starts when it loops', () => {
       const a = clip.frameAt(0);
       const b = clip.frameAt(clip.duration);
-      if (a.kind === 'background' || b.kind === 'background') return;
       const pa = numbers(a.pose);
       const pb = numbers(b.pose);
       pa.forEach((v, i) => expect(pb[i]).toBeCloseTo(v, 6));
@@ -65,9 +66,24 @@ describe('library rigs', () => {
   });
 });
 
+/** A noon in fair weather, and a stormy night past midnight with everything. */
+const skies = (bg: Background): [string, (t: number) => SkyWeather][] => [
+  ['fair', (t) => ({ ...restingSky(bg), t, drift: 0.2 * t })],
+  [
+    'storm',
+    (t) => ({
+      ...restingSky(bg, 7),
+      hour: 26.5,
+      weather: { clouds: 1, cloudDark: 1, wind: -1, rain: 1, snow: 1, mist: 1 },
+      drift: -t,
+      t,
+    }),
+  ],
+];
+
 const backgroundCases = BACKGROUNDS.flatMap(({ id, background }) =>
-  backgroundClips(background).map(
-    (clip) => [`${id} ${clip.id}`, background, clip] as const,
+  skies(background).map(
+    ([name, sky]) => [`${id} ${name}`, background, sky] as const,
   ),
 );
 
@@ -76,7 +92,7 @@ describe('library backgrounds', () => {
     expect(BACKGROUNDS.length).toBeGreaterThan(0);
   });
 
-  describe.each(backgroundCases)('%s', (_, background, clip) => {
+  describe.each(backgroundCases)('%s', (_, background, sky) => {
     const { rig } = CHARACTERS[0]!;
     const idle = restClip(rig.kind);
     const draw = (t: number) => {
@@ -84,21 +100,20 @@ describe('library backgrounds', () => {
       const { x, y } = background.ground.start;
       return drawScene(
         background,
-        clip.frameAt(t),
         wholeBackground(background),
         [{ id: 'a', node, x, y }],
+        sky(t),
       );
     };
 
     it('draws the same for the same time', () => {
-      for (const t of [0, 0.37, clip.duration / 2]) {
+      for (const t of [0, 0.37, 10]) {
         expect(draw(t)).toEqual(draw(t));
       }
     });
 
-    it('draws finite numbers at every frame', () => {
-      // A background clip can be long, so this draws a frame a second.
-      for (let t = 0; t <= clip.duration; t += 1) {
+    it('draws finite numbers', () => {
+      for (let t = 0; t <= 20; t += 1) {
         for (const n of numbers(draw(t))) expect(Number.isFinite(n)).toBe(true);
       }
     });

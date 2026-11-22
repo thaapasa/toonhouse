@@ -21,8 +21,6 @@ import type {
 } from '@toonhouse/model';
 import {
   actorStateAt,
-  backgroundClips,
-  backgroundStateAt,
   cameraHolder,
   castScene,
   clipsFor,
@@ -59,7 +57,13 @@ import {
   LIBRARY,
   type RigAsset,
 } from '../library/index.ts';
-import { ActionBar, BubbleBar, CameraBar, WalkBar } from './ActionBar.tsx';
+import {
+  ActionBar,
+  BubbleBar,
+  CameraBar,
+  ChangeBar,
+  WalkBar,
+} from './ActionBar.tsx';
 import { addBubble, newBubble, removeBubble, updateBubble } from './bubbles.ts';
 import {
   addCameraEntry,
@@ -110,6 +114,18 @@ import {
   updateActor,
   updateScene,
 } from './sceneEdit.ts';
+import {
+  addChange,
+  canAddChange,
+  changeHolder,
+  changesOf,
+  dragChange,
+  newTimeChange,
+  newWeatherChange,
+  nextScene,
+  removeChange,
+  type SkyRow,
+} from './skyEdit.ts';
 import { Timeline, type TimelineSelection } from './Timeline.tsx';
 import { timelineLength } from './timelineMath.ts';
 import { useCartoonContent } from './useCartoonContent.ts';
@@ -172,6 +188,8 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
   const [bubbleTool, setBubbleTool] = useState(false);
   // A selected camera takes the place of the other selections.
   const [cameraSelected, setCameraSelected] = useState(false);
+  // So does a selected row of the time of day or the weather.
+  const [skyRow, setSkyRow] = useState<SkyRow | null>(null);
   const [textFocus, setTextFocus] = useState(0);
   const [removing, setRemoving] = useState(false);
   // The cast member whose dialog is open, or the actor to make one from.
@@ -216,14 +234,11 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
 
   // An undo can take away the selected actor or action. An actor whose
   // character or prop isn't in the library can't be selected.
-  const found =
-    selected?.actorId == null
-      ? undefined
-      : scene.actors.find((a) => a.id === selected.actorId);
+  const found = selected && scene.actors.find((a) => a.id === selected.actorId);
   const selectedKind = found ? kindOf(found.asset) : null;
   const selectedActor = found && selectedKind ? found : null;
   const selection: TimelineSelection | null =
-    !selected || !bg || (selected.actorId !== null && !selectedActor)
+    !selected || !bg || !selectedActor
       ? null
       : {
           actorId: selected.actorId,
@@ -251,15 +266,26 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
     setSelected(sel);
     setBubbleId(null);
     setCameraSelected(false);
+    setSkyRow(null);
   };
   const selectBubble = (id: string) => {
     setBubbleId(id);
     setSelected(null);
     setWalking(null);
     setCameraSelected(false);
+    setSkyRow(null);
   };
   const selectCamera = () => {
     setCameraSelected(true);
+    setSkyRow(null);
+    setSelected(null);
+    setBubbleId(null);
+    walkDone();
+    setBubbleTool(false);
+  };
+  const selectSkyRow = (row: SkyRow) => {
+    setSkyRow(row);
+    setCameraSelected(false);
     setSelected(null);
     setBubbleId(null);
     walkDone();
@@ -284,7 +310,18 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
     setLibrary(list[i]?.background ? null : 'background');
   };
   const addScene = () => {
-    doc.edit((c) => ({ ...c, scenes: [...c.scenes, newScene()] }));
+    // The new scene goes on from the sky and the weather at the end of the
+    // last scene.
+    const last = scenes.at(-1);
+    const end =
+      last &&
+      sceneLength(
+        castScene(last, cast),
+        backgroundAsset(last.background)?.background ?? null,
+        (a) => kindOf(a.asset),
+      );
+    const next = nextScene(last, end ?? 0);
+    doc.edit((c) => ({ ...c, scenes: [...c.scenes, next] }));
     openScene(scenes.length);
     setLibrary('background');
   };
@@ -347,9 +384,7 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
     };
     editScene((s) => updateActions(s, actorId, (a) => startAction(a, action)));
     setSelected({ actorId, actionId: action.id });
-    setWalking(
-      actorId !== null && moves ? { actorId, actionId: action.id } : null,
-    );
+    setWalking(moves ? { actorId, actionId: action.id } : null);
   };
 
   const editWalk = (fn: (path: Pt[]) => Pt[], run?: EditRun) => {
@@ -433,9 +468,41 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
     playback.seek(entry.t + (entry.length ?? 0));
   };
 
+  /** Adds a change of the time of day or the weather at the current time. */
+  const addSkyChange = (row: SkyRow) => {
+    const at = Math.min(now(), CONTENT_LIMITS.time);
+    const change =
+      row === 'time'
+        ? newTimeChange(scene, newId(), at)
+        : newWeatherChange(scene, newId(), at);
+    if (!change) return;
+    editScene((s) => addChange(s, row, change));
+    // The pane shows the change at its end, where the user sets its target.
+    playback.seek(change.t + change.length);
+  };
+
   const holder = cameraHolder(scene, t);
   let toolbar: ReactNode = null;
-  if (bg && cameraSelected) {
+  if (bg && skyRow) {
+    const row = skyRow;
+    const { change, moving } = changeHolder(changesOf(scene, row), t);
+    toolbar = (
+      <ChangeBar
+        row={row}
+        onAdd={
+          canAddChange(scene, row, now()) ? () => addSkyChange(row) : undefined
+        }
+        onRemove={
+          change
+            ? () => {
+                editScene((s) => removeChange(s, row, change.id));
+                if (moving) playback.seek(change.t);
+              }
+            : undefined
+        }
+      />
+    );
+  } else if (bg && cameraSelected) {
     const at = now();
     const { entry, moving } = holder;
     toolbar = (
@@ -507,7 +574,6 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
       };
       toolbar = (
         <ActionBar
-          kind={kind}
           clips={clipsFor(kind)}
           current={state.action?.clip ?? restClip(kind).id}
           onClip={startClip}
@@ -527,17 +593,6 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
               setSelected(null);
             },
           }}
-        />
-      );
-    } else {
-      const state = backgroundStateAt(scene.backgroundActions, t);
-      toolbar = (
-        <ActionBar
-          kind="background"
-          clips={backgroundClips(bg.background)}
-          current={state.action?.clip ?? 'idle'}
-          onClip={startClip}
-          onRemoveAction={onRemoveAction}
         />
       );
     }
@@ -561,19 +616,18 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
       anchors={frame?.bubbleContext.anchors ?? new Map()}
       textFocus={textFocus}
       cameraSelected={cameraSelected}
+      skyRow={skyRow}
       t={t}
       onEditBubble={(fn, run) =>
         selectedBubble && editBubble(selectedBubble.id, fn, run)
       }
       duration={duration}
       fps={FPS}
-      onEdit={(fn) => editScene(fn)}
+      onEdit={(fn, run) => editScene(fn, run)}
       onSeek={playback.seek}
       onClipChanged={(actorId, action) => {
         setWalking(
-          actorId !== null &&
-            selectedKind &&
-            isMoving(selectedKind, action.clip)
+          selectedKind && isMoving(selectedKind, action.clip)
             ? { actorId, actionId: action.id }
             : null,
         );
@@ -829,6 +883,20 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
         onSelectCamera={(at) => {
           selectCamera();
           if (at !== undefined) playback.seek(at);
+        }}
+        skyRow={skyRow}
+        onSelectSkyRow={(row, at) => {
+          selectSkyRow(row);
+          if (at !== undefined) playback.seek(at);
+        }}
+        onChangeDrag={(row, id, part, at, run) => {
+          editScene((s) => dragChange(s, row, id, part, at), run);
+          const moved = changesOf(
+            dragChange(scene, row, id, part, at),
+            row,
+          ).find((c) => c.id === id);
+          if (moved)
+            playback.seek(part === 'start' ? moved.t : moved.t + moved.length);
         }}
         onCameraDrag={(id, part, at, run) => {
           editScene((s) => dragCameraEntry(s, id, part, at), run);

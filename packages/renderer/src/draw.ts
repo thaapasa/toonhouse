@@ -23,12 +23,33 @@ export interface PathStyle {
   dash?: readonly number[];
 }
 
+/** A color stop of a gradient, at `at` from 0 at the top to 1 at the bottom. */
+export interface GradientStop {
+  at: number;
+  color: string;
+  /** 1 if not set. */
+  opacity?: number;
+}
+
+/** A gradient from the top of a shape to its bottom. */
+export interface VerticalGradient {
+  type: 'vertical';
+  stops: readonly GradientStop[];
+}
+
 export type DrawNode =
   | {
       type: 'group';
       transform?: Matrix;
       /** Brightness of everything in the group, from 0 to 1. */
       shade?: number;
+      /**
+       * A CSS hex color that the colors of everything in the group are
+       * multiplied by, such as the blue of the night. White changes nothing.
+       */
+      tint?: string;
+      /** How much the group covers what is behind it, from 0 to 1. */
+      opacity?: number;
       /**
        * The actor that the parts in the group belong to, such as a
        * character on a background. The parts of each actor have their own
@@ -79,7 +100,7 @@ export type DrawNode =
       y: number;
       width: number;
       height: number;
-      fill: string;
+      fill: string | VerticalGradient;
     };
 
 /** The pivot points and the bones of a drawing, for showing the rig in the studio. */

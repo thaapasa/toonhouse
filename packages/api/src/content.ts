@@ -2,6 +2,7 @@ import {
   CARTOON_VERSION,
   type CartoonContent as Content,
   CLIP_IDS,
+  SKY_PRESET_IDS,
 } from '@toonhouse/model';
 import { z } from 'zod';
 
@@ -55,6 +56,13 @@ export const CONTENT_LIMITS = {
   zoom: { min: 0.01, max: 1000 },
   /** The height of a line against the size of the text. */
   lineSpacing: { min: 0, max: 100 },
+  /**
+   * The time of day in hours. It doesn't wrap, so a change can go on to the
+   * next days. This is far more days than a scene can go through.
+   */
+  hour: { min: 0, max: 100_000 },
+  /** The renderer hashes the seed as a 32-bit integer. */
+  seed: { min: 0, max: 0xffff_ffff },
   /** The renderer wraps the text of each bubble in every frame. */
   bubbleText: 5000,
   /** The app makes the ids, which are UUIDs. */
@@ -72,6 +80,8 @@ export const CONTENT_LIMITS = {
   pathPoints: 10_000,
   bubbles: 10_000,
   cameraEntries: 10_000,
+  timeChanges: 10_000,
+  weatherChanges: 10_000,
 } as const;
 
 const L = CONTENT_LIMITS;
@@ -181,20 +191,56 @@ const CameraView = z.looseObject({
   zoom: range(L.zoom),
 });
 
+const Easing = z
+  .enum(['linear', 'ease-in', 'ease-out', 'ease-in-out'])
+  .exactOptional();
+
 const CameraEntry = z.looseObject({
   id: Id,
   t: Time,
   to: CameraView,
   length: Time.exactOptional(),
-  easing: z
-    .enum(['linear', 'ease-in', 'ease-out', 'ease-in-out'])
-    .exactOptional(),
+  easing: Easing,
+});
+
+const Sky = z.discriminatedUnion('kind', [
+  z.looseObject({ kind: z.literal('preset'), id: z.enum(SKY_PRESET_IDS) }),
+  z.looseObject({ kind: z.literal('gradient'), top: Color, bottom: Color }),
+  z.looseObject({ kind: z.literal('space') }),
+]);
+
+const Hour = range(L.hour);
+
+const TimeChange = z.looseObject({
+  id: Id,
+  t: Time,
+  length: Time,
+  to: Hour,
+  easing: Easing,
+});
+
+const Unit = range({ min: 0, max: 1 }).exactOptional();
+
+const WeatherValues = z.looseObject({
+  clouds: Unit,
+  cloudDark: Unit,
+  wind: range({ min: -1, max: 1 }).exactOptional(),
+  rain: Unit,
+  snow: Unit,
+  mist: Unit,
+});
+
+const WeatherChange = z.looseObject({
+  id: Id,
+  t: Time,
+  length: Time,
+  to: WeatherValues,
+  easing: Easing,
 });
 
 const Scene = z.looseObject({
   id: Id,
   background: AssetId.nullable(),
-  backgroundActions: z.array(Action).max(L.actions),
   actors: z.array(Actor).max(L.actors),
   bubbles: z.array(Bubble).max(L.bubbles).exactOptional(),
   camera: z
@@ -204,6 +250,21 @@ const Scene = z.looseObject({
     })
     .exactOptional(),
   length: Time.exactOptional(),
+  seed: z.number().int().min(L.seed.min).max(L.seed.max).exactOptional(),
+  sky: z
+    .looseObject({
+      look: Sky.exactOptional(),
+      sun: z.boolean().exactOptional(),
+      start: Hour.exactOptional(),
+      changes: z.array(TimeChange).max(L.timeChanges),
+    })
+    .exactOptional(),
+  weather: z
+    .looseObject({
+      start: WeatherValues.exactOptional(),
+      changes: z.array(WeatherChange).max(L.weatherChanges),
+    })
+    .exactOptional(),
 });
 
 /** The scenes of a cartoon, in the latest format. See `CartoonContent` in the model. */

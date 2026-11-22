@@ -49,7 +49,6 @@ const bubble = (id: string, actorId?: string) => ({
 const stored: Scene = {
   id: 's',
   background: 'hills',
-  backgroundActions: [],
   actors: [
     actor('a', 'boy', [{ id: 'w', t: 0, clip: 'wave' }]),
     actor('gone', 'removed'),

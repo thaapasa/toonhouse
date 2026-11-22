@@ -1,19 +1,20 @@
 # Meadow: work log
 
 A green meadow with flowers, a row of trees behind it, far hills and a blue sky.
-The sun and the clouds come from [shared](../../shared/LOG.md). Work files are
-in `assets/work/bg/`.
+Work files are in `assets/work/bg/`.
 
 ## Frame and layers
+
+The sky, with the sun and the clouds, belongs to the scene, and the default sky
+of the background is the `blue` preset. The flat `sky.svg` layer of `#94d4f4`
+and the sun and the clouds as parts on it were removed when the sky became apart
+from the backgrounds.
 
 The frame is 2048×1152 (16:9). Every layer is an SVG with
 `viewBox="0 0 2048 1152"`, so the layers line up when stacked.
 
 | Layer        | Depth | What it is                                     |
 | ------------ | ----- | ---------------------------------------------- |
-| `sky.svg`    | 0     | flat blue `#94d4f4`, opaque                    |
-| sun          | 0     | `shared/sun.svg`, moved by the `day` clip      |
-| clouds       | 0     | three shared clouds, moved by the `drift` clip |
 | `hills.svg`  | 0.2   | two rows of pale rolling hills, top at y ≈ 300 |
 | `trees.svg`  | 0.5   | a row of leafy trees, tops at y ≈ 380          |
 | `ground.svg` | 1     | grass with flowers, top edge at y ≈ 790        |

@@ -15,7 +15,7 @@ import { newScene } from './sceneEdit.ts';
 
 const content = (n: number): CartoonContent => ({
   version: 1,
-  scenes: [{ ...newScene(), id: `s${n}` }],
+  scenes: [{ ...newScene(), id: `s${n}`, seed: n }],
 });
 
 const conflict = () =>

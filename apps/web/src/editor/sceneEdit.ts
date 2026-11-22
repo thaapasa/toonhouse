@@ -18,11 +18,17 @@ const SAME_TIME = 1e-6;
 
 export const newId = () => crypto.randomUUID();
 
+/**
+ * A random seed for the look of the clouds, the rain, the snow, the mist and
+ * the stars of a scene.
+ */
+export const newSeed = () => crypto.getRandomValues(new Uint32Array(1))[0]!;
+
 export const newScene = (): Scene => ({
   id: newId(),
   background: null,
-  backgroundActions: [],
   actors: [],
+  seed: newSeed(),
 });
 
 /**
@@ -108,24 +114,17 @@ export const removeAction = (
   actionId: string,
 ): Action[] => actions.filter((a) => a.id !== actionId);
 
-/** The action of an actor, or of the background if `actorId` is null. */
-export function actionsOf(scene: Scene, actorId: string | null): Action[] {
-  if (actorId === null) return scene.backgroundActions;
+/** The actions of an actor. */
+export function actionsOf(scene: Scene, actorId: string): Action[] {
   return scene.actors.find((a) => a.id === actorId)?.actions ?? [];
 }
 
-/** Changes the actions of an actor, or of the background if `actorId` is null. */
+/** Changes the actions of an actor. */
 export function updateActions(
   scene: Scene,
-  actorId: string | null,
+  actorId: string,
   fn: (actions: readonly Action[]) => Action[],
 ): Scene {
-  if (actorId === null) {
-    const backgroundActions = fn(scene.backgroundActions);
-    return backgroundActions === scene.backgroundActions
-      ? scene
-      : { ...scene, backgroundActions };
-  }
   return updateActor(scene, actorId, (a) => {
     const actions = fn(a.actions);
     return actions === a.actions ? a : { ...a, actions };
@@ -161,16 +160,16 @@ export function moveStart(
 }
 
 /**
- * Moves a whole action of an actor, or of the background if `actorId` is
- * null, so that it starts at `t` and stays as long: its start and the start of
- * the next action move together. It stays between the action before it and
- * the action after the next one, so that the actions keep their order. The
- * last action ends with the scene, which is `sceneEnd` seconds long, so the
- * scene gets longer if needed. Gives the new scene and the new start.
+ * Moves a whole action of an actor, so that it starts at `t` and stays as
+ * long: its start and the start of the next action move together. It stays
+ * between the action before it and the action after the next one, so that
+ * the actions keep their order. The last action ends with the scene, which
+ * is `sceneEnd` seconds long, so the scene gets longer if needed. Gives the
+ * new scene and the new start.
  */
 export function moveBlock(
   scene: Scene,
-  actorId: string | null,
+  actorId: string,
   actionId: string,
   t: number,
   sceneEnd: number,

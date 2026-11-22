@@ -7,6 +7,7 @@ import {
   packOf,
   resolve,
   rigSources,
+  skySources,
 } from './library.ts';
 
 describe('library files', () => {
@@ -26,8 +27,8 @@ describe('library files', () => {
     expect(resolve(dir, './sky.svg')).toBe(
       '../../assets/packs/sunny/backgrounds/farm/sky.svg',
     );
-    expect(resolve(dir, '../../shared/sun.svg')).toBe(
-      '../../assets/packs/sunny/shared/sun.svg',
+    expect(resolve(dir, '../../shared/hill.svg')).toBe(
+      '../../assets/packs/sunny/shared/hill.svg',
     );
   });
 
@@ -51,15 +52,28 @@ describe('library files', () => {
     expect(() => rigSources(rig, 'a/girl/', files)).toThrow('a/girl/head.svg');
   });
 
-  it('finds the layers and the parts of a background', () => {
+  it('finds the layers of a background', () => {
     const bg = {
-      layers: [{ id: 'sky', svg: 'sky.svg' }],
-      parts: { sun: { svg: '../shared/sun.svg' } },
+      layers: [{ id: 'hills', svg: 'hills.svg' }],
     } as unknown as Background;
-    const files = { 'b/farm/sky.svg': 'sky', 'b/shared/sun.svg': 'sun' };
-    expect(backgroundSources(bg, 'b/farm/', files)).toEqual({
-      sky: 'sky',
-      sun: 'sun',
+    const files = { 'b/farm/hills.svg': 'hills' };
+    expect(backgroundSources(bg, 'b/farm/', files)).toEqual({ hills: 'hills' });
+  });
+
+  it('finds the drawings of the sky', () => {
+    const files = Object.fromEntries(
+      ['sun', 'cloud-1', 'cloud-2', 'cloud-3', 'cloud-4'].map((f) => [
+        `a/sky/${f}.svg`,
+        f,
+      ]),
+    );
+    expect(skySources('a/sky/', files)).toEqual({
+      'sky-sun': 'sun',
+      'sky-cloud-1': 'cloud-1',
+      'sky-cloud-2': 'cloud-2',
+      'sky-cloud-3': 'cloud-3',
+      'sky-cloud-4': 'cloud-4',
     });
+    expect(() => skySources('a/', files)).toThrow('a/sun.svg');
   });
 });

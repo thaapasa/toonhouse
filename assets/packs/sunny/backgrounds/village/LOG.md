@@ -1,19 +1,21 @@
 # Village: work log
 
 The edge of a village: a dirt road in front, a row of pastel houses on a low
-green hill, tall trees behind the houses and a blue sky. The sun and the clouds
-come from [shared](../../shared/LOG.md). Work files are in `assets/work/bg/`.
+green hill, tall trees behind the houses and a blue sky. Work files are in
+`assets/work/bg/`.
 
 ## Frame and layers
+
+The sky, with the sun and the clouds, belongs to the scene, and the default sky
+of the background is the `blue` preset. The flat `sky.svg` layer of `#8fcff0`
+and the sun and the clouds as parts on it were removed when the sky became apart
+from the backgrounds.
 
 The frame is 2048×1152 (16:9). Every layer is an SVG with
 `viewBox="0 0 2048 1152"`.
 
 | Layer        | Depth | What it is                                                  |
 | ------------ | ----- | ----------------------------------------------------------- |
-| `sky.svg`    | 0     | flat blue `#8fcff0`, opaque                                 |
-| sun          | 0     | `shared/sun.svg`, moved by the `day` clip                   |
-| clouds       | 0     | three shared clouds, moved by the `drift` clip              |
 | `trees.svg`  | 0.25  | round and poplar trees behind the village, tops at y ≈ 240  |
 | `houses.svg` | 0.45  | small houses and a church tower on a hill, roofs at y ≈ 380 |
 | `ground.svg` | 1     | a grass verge (y ≈ 790 to 840) and a sandy road below it    |

@@ -74,7 +74,7 @@ export function ActionBlocks(props: {
         {...drag.handlers(a)}
         onClick={drag.click()}
       >
-        {names.clip(props.row.kind, a.clip)}
+        {names.clip(a.clip)}
         {/* The strip fills up with a darker shade of the clip color as the
             clip plays, once for each loop or once over a whole walk. */}
         <svg

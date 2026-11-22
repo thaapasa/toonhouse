@@ -16,6 +16,8 @@ const TICK_STEPS = [10, 30, 60, 150, 300, 900] as const;
 interface Props {
   clips: readonly Clip[];
   clip: Clip;
+  /** The length of the playback, if not the length of the clip. */
+  duration?: number;
   fps: number;
   playback: Playback;
   loop: boolean;
@@ -28,7 +30,7 @@ interface Props {
 export function ClipBar(props: Props) {
   const { clips, clip, fps, playback, loop, speed } = props;
   const { tr } = useI18n();
-  const frames = Math.round(clip.duration * fps);
+  const frames = Math.round((props.duration ?? clip.duration) * fps);
   const frame = Math.round(playback.t * fps);
   // At most 20 ticks, so that the numbers don't overlap in a long clip.
   const tickStep =

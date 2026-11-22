@@ -22,7 +22,7 @@ import {
 } from './cameraEdit.ts';
 import { NumberField } from './NumberField.tsx';
 
-const EASING_LABELS: Record<CameraEasing, TextKey> = {
+export const EASING_LABELS: Record<CameraEasing, TextKey> = {
   linear: 'camera.linear',
   'ease-in': 'camera.easeIn',
   'ease-out': 'camera.easeOut',

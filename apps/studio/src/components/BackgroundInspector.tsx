@@ -1,34 +1,72 @@
-import type { BackgroundPart } from '@toonhouse/model';
-import { type Camera, clampCamera, layerView } from '@toonhouse/renderer';
+import type { Sky, WeatherState } from '@toonhouse/model';
+import {
+  type Camera,
+  clampCamera,
+  DEFAULT_SKY,
+  layerView,
+  WEATHER_KEYS,
+} from '@toonhouse/renderer';
 
 import type { BackgroundAsset } from '../backgrounds.ts';
-import { useI18n } from '../i18n/index.tsx';
+import { type TextKey, useI18n } from '../i18n/index.tsx';
 import { useRigNames } from '../rigNames.ts';
 
 interface Props {
   asset: BackgroundAsset;
   camera: Camera;
+  hour: number;
+  onHour(hour: number): void;
+  weather: WeatherState;
+  onWeather(weather: WeatherState): void;
 }
 
 const round = (n: number) => Math.round(n);
 
+const skyName = (sky: Sky): TextKey =>
+  sky.kind === 'preset' ? `sky.${sky.id}` : `sky.${sky.kind}`;
+
 /**
- * The layers and the parts of a background, and what the camera shows of
- * each layer. The studio doesn't edit backgrounds yet, so this only shows
- * them.
+ * The layers of a background, and what the camera shows of each layer, with
+ * sliders for the time of day and the weather. The studio doesn't edit
+ * backgrounds yet, and each scene has its own sky and weather, so the sliders
+ * only change the preview.
  */
-export function BackgroundInspector({ asset, camera }: Props) {
+export function BackgroundInspector({ asset, camera, ...props }: Props) {
   const { tr } = useI18n();
   const names = useRigNames();
   const bg = asset.background;
-  const parts = Object.entries(bg.parts ?? {});
   const c = clampCamera(bg, camera);
-  const motion = (p: BackgroundPart) =>
-    p.arc
-      ? tr('motionArc')
-      : p.drift
-        ? tr('motionDrift', { n: p.drift.speed })
-        : tr('motionNone');
+  const slider = (
+    id: string,
+    label: string,
+    value: number,
+    range: { min: number; max: number; step: number },
+    set: (v: number) => void,
+  ) => (
+    <div key={id} className="tune-row">
+      <label className="tune-label" htmlFor={`sky-${id}`}>
+        {label}
+      </label>
+      <input
+        type="range"
+        aria-label={label}
+        {...range}
+        value={value}
+        onChange={(e) => set(Number(e.target.value))}
+      />
+      <input
+        id={`sky-${id}`}
+        className="tune-number"
+        type="number"
+        {...range}
+        value={value}
+        onChange={(e) => {
+          const v = Number(e.target.value);
+          if (e.target.value !== '' && Number.isFinite(v)) set(v);
+        }}
+      />
+    </div>
+  );
 
   return (
     <aside className="inspector" aria-label={tr('properties')}>
@@ -54,7 +92,32 @@ export function BackgroundInspector({ asset, camera }: Props) {
                 ? tr('perspectiveOf', { ...bg.ground.perspective })
                 : tr('perspectiveNone')}
             </dd>
+            <dt>{tr('defaultSky')}</dt>
+            <dd>{tr(skyName(bg.sky ?? DEFAULT_SKY))}</dd>
+            <dt>{tr('place')}</dt>
+            <dd>{tr(bg.indoor ? 'indoors' : 'outdoors')}</dd>
           </dl>
+        </section>
+
+        <section className="inspector-section">
+          <div className="section-title">{tr('skyWeather')}</div>
+          <div className="hint">{tr('skyWeatherHint')}</div>
+          {slider(
+            'hour',
+            tr('hour'),
+            props.hour,
+            { min: 0, max: 24, step: 0.25 },
+            props.onHour,
+          )}
+          {WEATHER_KEYS.map((k) =>
+            slider(
+              k,
+              tr(`weather.${k}`),
+              props.weather[k],
+              { min: k === 'wind' ? -1 : 0, max: 1, step: 0.05 },
+              (v) => props.onWeather({ ...props.weather, [k]: v }),
+            ),
+          )}
         </section>
 
         <section className="inspector-section">
@@ -64,7 +127,6 @@ export function BackgroundInspector({ asset, camera }: Props) {
           <ol className="draw-order">
             {[...bg.layers].reverse().map((l) => {
               const v = layerView(bg, c, l.depth);
-              const own = parts.filter(([, p]) => p.layer === l.id);
               return (
                 <li key={l.id} className="order-row layer-row">
                   <div className="order-name">
@@ -81,13 +143,6 @@ export function BackgroundInspector({ asset, camera }: Props) {
                         n: round((bg.width / v.width) * 100),
                       })}
                     </span>
-                    {own.length > 0 && (
-                      <span className="order-kind">
-                        {tr('partsOn', {
-                          list: own.map(([id]) => names.part(id)).join(', '),
-                        })}
-                      </span>
-                    )}
                   </div>
                 </li>
               );
@@ -95,20 +150,6 @@ export function BackgroundInspector({ asset, camera }: Props) {
           </ol>
           <div className="order-end">{tr('orderBack')}</div>
         </section>
-
-        {parts.length > 0 && (
-          <section className="inspector-section">
-            <div className="section-title">{tr('movingParts')}</div>
-            {parts.map(([id, p]) => (
-              <div key={id} className="order-row layer-row">
-                <div className="order-name">
-                  <span>{names.part(id)}</span>
-                  <span className="order-kind">{motion(p)}</span>
-                </div>
-              </div>
-            ))}
-          </section>
-        )}
 
         <section className="inspector-section">
           <div className="section-title">{tr('camera')}</div>
