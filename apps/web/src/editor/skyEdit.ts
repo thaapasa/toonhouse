@@ -16,6 +16,7 @@ import type {
 import {
   changeEnd,
   clamp,
+  dayHour,
   FAIR_WEATHER,
   NOON,
   skyStateAt,
@@ -241,9 +242,6 @@ export const weatherAtChange = (
   change: WeatherChange,
   key: keyof WeatherState,
 ) => savedWeather(key, weatherAt(scene, change.t)[key]);
-
-/** The hour of a day, from 0 to 24. */
-const dayHour = (h: number) => ((h % 24) + 24) % 24;
 
 /**
  * A new scene after `prev`, which ends at `end`. It starts with the sky, the

@@ -14,6 +14,7 @@ import {
 } from '@toonhouse/renderer';
 
 import { type TextKey, useI18n } from '../i18n/index.tsx';
+import type { BlockDrag } from './blockEdit.ts';
 import {
   type CameraDrag,
   dragCameraEntry,
@@ -22,7 +23,7 @@ import {
 } from './cameraEdit.ts';
 import { NumberField } from './NumberField.tsx';
 
-export const EASING_LABELS: Record<CameraEasing, TextKey> = {
+const EASING_LABELS: Record<CameraEasing, TextKey> = {
   linear: 'camera.linear',
   'ease-in': 'camera.easeIn',
   'ease-out': 'camera.easeOut',
@@ -86,50 +87,18 @@ export function CameraSection(props: {
         />
       )}
       {entry && !isJump(entry) && (
-        <>
-          <NumberField
-            label={tr('properties.start')}
-            value={entry.t}
-            step={frame}
-            decimals={2}
-            unit={tr('properties.seconds')}
-            onChange={(v) => drag(entry.id, 'start', v, false)}
-          />
-          <NumberField
-            label={tr('camera.length')}
-            value={entry.length ?? 0}
-            step={0.1}
-            decimals={2}
-            unit={tr('properties.seconds')}
-            onChange={(v) => drag(entry.id, 'end', entry.t + v, true)}
-          />
-          <div className="pane-row">
-            <span>{tr('camera.easing')}</span>
-          </div>
-          <div
-            className="segmented easing"
-            role="group"
-            aria-label={tr('camera.easing')}
-          >
-            {CAMERA_EASINGS.map((e) => (
-              <button
-                key={e}
-                type="button"
-                aria-pressed={(entry.easing ?? DEFAULT_EASING) === e}
-                onClick={() =>
-                  props.onEdit((s) =>
-                    updateCameraEntry(s, entry.id, (m) => ({
-                      ...m,
-                      easing: e,
-                    })),
-                  )
-                }
-              >
-                {tr(EASING_LABELS[e])}
-              </button>
-            ))}
-          </div>
-        </>
+        <BlockTiming
+          t={entry.t}
+          length={entry.length ?? 0}
+          easing={entry.easing}
+          fps={props.fps}
+          onDrag={(part, v, seek) => drag(entry.id, part, v, seek)}
+          onEasing={(easing) =>
+            props.onEdit((s) =>
+              updateCameraEntry(s, entry.id, (m) => ({ ...m, easing })),
+            )
+          }
+        />
       )}
       <h4>{tr(entry && !isJump(entry) ? 'camera.moveTo' : 'camera.view')}</h4>
       {moving && entry && (
@@ -176,5 +145,60 @@ export function CameraSection(props: {
       </button>
       <p className="muted small">{tr('camera.hint')}</p>
     </div>
+  );
+}
+
+/**
+ * The start, the length and the easing of a block on the timeline, such as a
+ * camera move or a change of the time of day. `onDrag` changes a time as a
+ * drag on the timeline does, and with `seek` the playhead follows the end.
+ */
+export function BlockTiming(props: {
+  t: number;
+  length: number;
+  easing: CameraEasing | undefined;
+  fps: number;
+  onDrag(part: BlockDrag, t: number, seek: boolean): void;
+  onEasing(easing: CameraEasing): void;
+}) {
+  const { tr } = useI18n();
+  return (
+    <>
+      <NumberField
+        label={tr('properties.start')}
+        value={props.t}
+        step={1 / props.fps}
+        decimals={2}
+        unit={tr('properties.seconds')}
+        onChange={(v) => props.onDrag('start', v, false)}
+      />
+      <NumberField
+        label={tr('camera.length')}
+        value={props.length}
+        step={0.1}
+        decimals={2}
+        unit={tr('properties.seconds')}
+        onChange={(v) => props.onDrag('end', props.t + v, true)}
+      />
+      <div className="pane-row">
+        <span>{tr('camera.easing')}</span>
+      </div>
+      <div
+        className="segmented easing"
+        role="group"
+        aria-label={tr('camera.easing')}
+      >
+        {CAMERA_EASINGS.map((e) => (
+          <button
+            key={e}
+            type="button"
+            aria-pressed={(props.easing ?? DEFAULT_EASING) === e}
+            onClick={() => props.onEasing(e)}
+          >
+            {tr(EASING_LABELS[e])}
+          </button>
+        ))}
+      </div>
+    </>
   );
 }

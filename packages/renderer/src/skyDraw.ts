@@ -218,7 +218,7 @@ const PHASES: readonly [hour: number, phase: Phase][] = [
 const DAYTIME: Phase = { day: 1, dusk: 0, night: 0 };
 
 /** The hour of a day, from 0 to 24. */
-const dayHour = (hour: number) => ((hour % 24) + 24) % 24;
+export const dayHour = (hour: number) => ((hour % 24) + 24) % 24;
 
 /** How much of the day, the dusk and the night there is at the time of day. */
 export function phaseAt(hour: number): Phase {
@@ -454,11 +454,24 @@ const CLOUD_SPEED = 0.1;
 const STORM_GRAY = '#6f7886';
 
 /**
+ * Where a cloud that is `presence` of the way in is along its loop, from the
+ * place `u` that it has when fully in. A cloud that is partly in stays near
+ * the nearer edge of the frame, more so the less it is in, and crosses the
+ * frame faster. The ends of the loop stay in place, so the cloud never jumps
+ * when its loop wraps around, which a slide from a fixed side would do.
+ */
+function sideward(u: number, presence: number): number {
+  if (presence >= 1) return u;
+  if (u <= 0) return 0;
+  return 1 / (1 + ((1 - u) / u) ** (1 / presence));
+}
+
+/**
  * The clouds. Each slot has its own place, size and drawing from the seed,
  * and a threshold. A slot shows when `clouds` passes its threshold, and it
- * slides in from its side of the frame to its place, so that the clouds
- * don't appear in place. The wind moves the clouds, and a cloud that leaves
- * the frame comes back on the other side.
+ * slides in from the nearer side of the frame to its place, so that the
+ * clouds don't appear in place. The wind moves the clouds, and a cloud that
+ * leaves the frame comes back on the other side.
  */
 export function drawClouds(bg: Background, sw: SkyWeather): DrawNode | null {
   const { clouds, cloudDark } = sw.weather;
@@ -481,9 +494,10 @@ export function drawClouds(bg: Background, sw: SkyWeather): DrawNode | null {
     // The larger clouds look nearer, so they move faster.
     const speed = CLOUD_SPEED * w * (0.5 + size * 4);
     const moved = r(3) * w + sw.drift * speed + reach;
-    const home = (((moved % span) + span) % span) - reach;
-    const from = r(4) < 0.5 ? -reach : w + reach;
-    const x = lerp(from, home, presence);
+    // How far the cloud is along its loop, from just outside the left edge
+    // to just outside the right edge, which are the same place on the loop.
+    const u = (((moved % span) + span) % span) / span;
+    const x = -reach + span * sideward(u, presence);
     const y = (0.12 + 0.2 * r(5)) * h;
     slots.push({ size, node: skyPart(id, x, y, scale) });
   }

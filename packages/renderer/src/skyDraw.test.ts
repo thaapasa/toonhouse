@@ -187,6 +187,30 @@ describe('clouds', () => {
     }
   });
 
+  it('moves a cloud that is partly in without jumps as the wind blows', () => {
+    // At 0.3 the clouds of this seed have a slot that is only partly in.
+    const weather = { ...FAIR_WEATHER, clouds: 0.3, wind: 1 };
+    const at = (drift: number) =>
+      clouds(drawClouds(bg, sw({ seed: 12345, drift, weather })));
+    const step = 0.01;
+    // Over a step of drift a cloud moves under 0.2 % of the frame width when
+    // fully in. A cloud partly in crosses faster, but a jump back over the
+    // frame would be far more than this.
+    const most = 0.03 * bg.width;
+    const inFrame = (x: number) => x > 0 && x < bg.width;
+    let before = at(0);
+    for (let d = step; d < 40; d += step) {
+      const now = at(d);
+      for (const [key, x] of now) {
+        const was = before.get(key)!;
+        // A cloud that goes out on one side comes back on the other.
+        if (!inFrame(x) && !inFrame(was)) continue;
+        expect(Math.abs(x - was)).toBeLessThan(most);
+      }
+      before = now;
+    }
+  });
+
   it('puts the clouds of another seed in other places', () => {
     const a = clouds(drawClouds(bg, sw({ seed: 1 })));
     const b = clouds(drawClouds(bg, sw({ seed: 2 })));

@@ -12,9 +12,8 @@ import {
   type WeatherState,
 } from '@toonhouse/model';
 import {
-  CAMERA_EASINGS,
   changeEnd,
-  DEFAULT_EASING,
+  NOON,
   restingSky,
   sceneSky,
   skyColors,
@@ -26,9 +25,8 @@ import { useRef } from 'react';
 import { IconButton } from '../components/IconButton.tsx';
 import { DeleteIcon, PlusIcon } from '../components/icons.tsx';
 import { type TextKey, useI18n } from '../i18n/index.tsx';
-import type { BlockDrag } from './blockEdit.ts';
 import { ColorField } from './BubbleSection.tsx';
-import { EASING_LABELS } from './CameraSection.tsx';
+import { BlockTiming } from './CameraSection.tsx';
 import type { EditRun } from './history.ts';
 import { NumberField } from './NumberField.tsx';
 import { newSeed } from './sceneEdit.ts';
@@ -117,7 +115,7 @@ export function SkyFields(props: {
   const mode = modeOf(sky);
   const colors = useEditRun(onEdit);
   const sun = scene.sky?.sun ?? true;
-  const start = scene.sky?.start ?? 12;
+  const start = scene.sky?.start ?? NOON;
   const setLook = (look: Sky | undefined) => {
     colors.end();
     onEdit((s) => setSkyLook(s, look));
@@ -343,61 +341,26 @@ function ChangeTiming(props: {
   onEdit: Edit;
   onSeek(t: number): void;
 }) {
-  const { tr } = useI18n();
   const { row, change } = props;
-  /**
-   * Changes a time of the change as a drag on the timeline does. With `seek`,
-   * the playhead goes to the end of the change, where the pane keeps showing
-   * the change.
-   */
-  const drag = (part: BlockDrag, v: number, seek: boolean) => {
-    props.onEdit((s) => dragChange(s, row, change.id, part, v));
-    const moved = changesOf(
-      dragChange(props.scene, row, change.id, part, v),
-      row,
-    ).find((c) => c.id === change.id);
-    if (seek && moved) props.onSeek(changeEnd(moved));
-  };
   return (
-    <>
-      <NumberField
-        label={tr('properties.start')}
-        value={change.t}
-        step={1 / props.fps}
-        decimals={2}
-        unit={tr('properties.seconds')}
-        onChange={(v) => drag('start', v, false)}
-      />
-      <NumberField
-        label={tr('camera.length')}
-        value={change.length}
-        step={0.1}
-        decimals={2}
-        unit={tr('properties.seconds')}
-        onChange={(v) => drag('end', change.t + v, true)}
-      />
-      <div className="pane-row">
-        <span>{tr('camera.easing')}</span>
-      </div>
-      <div
-        className="segmented easing"
-        role="group"
-        aria-label={tr('camera.easing')}
-      >
-        {CAMERA_EASINGS.map((e) => (
-          <button
-            key={e}
-            type="button"
-            aria-pressed={(change.easing ?? DEFAULT_EASING) === e}
-            onClick={() =>
-              props.onEdit((s) => setChangeEasing(s, row, change.id, e))
-            }
-          >
-            {tr(EASING_LABELS[e])}
-          </button>
-        ))}
-      </div>
-    </>
+    <BlockTiming
+      t={change.t}
+      length={change.length}
+      easing={change.easing}
+      fps={props.fps}
+      onDrag={(part, v, seek) => {
+        props.onEdit((s) => dragChange(s, row, change.id, part, v));
+        // The playhead goes to the end, where the pane keeps showing the change.
+        const moved = changesOf(
+          dragChange(props.scene, row, change.id, part, v),
+          row,
+        ).find((c) => c.id === change.id);
+        if (seek && moved) props.onSeek(changeEnd(moved));
+      }}
+      onEasing={(e) =>
+        props.onEdit((s) => setChangeEasing(s, row, change.id, e))
+      }
+    />
   );
 }
 

@@ -2,9 +2,10 @@
 // for the weather and one for each actor, with the actions as blocks from
 // their start until the next action. An actor with speech bubbles has a bubble
 // lane under its row, and the free bubbles have a row of their own at the
-// end. Tap or drag the ruler to move the playhead, and tap a row to move it there. Tap an
-// action to select it, and drag it to move it. The time marks on each row
-// move the playhead and change where actions start and the scene ends.
+// end. Tap or drag the ruler to move the playhead, and tap a row to move it
+// there. Tap an action to select it, and drag it to move it. The time marks on
+// each row move the playhead and change where actions start and the scene
+// ends.
 //
 // The wheel scrolls the rows, and Shift + wheel or a sideways swipe scrolls in
 // time. `useTimelineZoom` has the zoom. The timeline goes on a bit past the end

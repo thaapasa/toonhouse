@@ -107,5 +107,11 @@ export {
   windDrift,
 } from './sky.ts';
 export type { FallBand, SkyWeather } from './skyDraw.ts';
-export { restingSky, SKY_PARTS, skyColors, skyWeatherAt } from './skyDraw.ts';
+export {
+  dayHour,
+  restingSky,
+  SKY_PARTS,
+  skyColors,
+  skyWeatherAt,
+} from './skyDraw.ts';
 export type { ColorChoice } from '@toonhouse/model';
