@@ -46,6 +46,24 @@ export function ease(easing: CameraEasing, u: number): number {
   }
 }
 
+/**
+ * The integral of `ease` from 0 to `u`, from 0 to 1. The drift of the
+ * clouds uses it to add up the wind of a weather change in closed form.
+ */
+export function easeIntegral(easing: CameraEasing, u: number): number {
+  const c = clamp01(u);
+  switch (easing) {
+    case 'linear':
+      return (c * c) / 2;
+    case 'ease-in':
+      return c ** 4 / 4;
+    case 'ease-out':
+      return c + ((1 - c) ** 4 - 1) / 4;
+    case 'ease-in-out':
+      return c < 0.5 ? c ** 4 : c - 0.5 + (1 - c) ** 4;
+  }
+}
+
 /** Whether an entry is a jump, which has no length. */
 export const isJump = (m: CameraEntry) => !m.length;
 

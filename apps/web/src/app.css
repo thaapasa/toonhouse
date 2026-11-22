@@ -1335,6 +1335,62 @@ button:disabled {
   padding: 0 6px;
 }
 
+/* The sky and the weather. */
+.segmented.sky-modes button {
+  flex: 1;
+  min-width: 0;
+  padding: 0 4px;
+}
+
+.sky-presets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.sky-preset {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 8px;
+  border: 1px solid var(--line-2);
+  border-radius: 8px;
+  background: var(--field);
+  color: var(--text);
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.sky-preset[aria-pressed='true'] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1.5px var(--accent);
+}
+
+.sky-swatch {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border-radius: 6px;
+  border: 1px solid var(--line-2);
+}
+
+.weather-target {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.weather-target .number-field {
+  flex: 1;
+}
+
+.weather-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .bubble-section h4 {
   margin: 8px 0 0;
   font-weight: 600;
@@ -1665,6 +1721,19 @@ button:disabled {
   fill: none;
   stroke: rgba(255, 255, 255, 0.55);
   stroke-width: 1.5;
+}
+
+/* The rows of the time of day and the weather. */
+.change-block {
+  padding: 0;
+}
+
+.time-block {
+  background: #7a5a2a;
+}
+
+.weather-block {
+  background: #3b5f73;
 }
 
 .time-mark.camera-jump {

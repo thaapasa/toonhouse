@@ -3,7 +3,7 @@
 // "Cartoon format versions" in ARCHITECTURE.md for what such a change needs.
 import { CartoonContent } from '@toonhouse/api';
 import type { Actor, ActorAsset, ClipKind } from '@toonhouse/model';
-import { backgroundClips, clipsFor } from '@toonhouse/renderer';
+import { clipsFor } from '@toonhouse/renderer';
 import { describe, expect, it } from 'vitest';
 
 import { newBubble } from '../editor/bubbles.ts';
@@ -84,13 +84,13 @@ const props = [
   'sunny/round-bush',
   'sunny/spruce',
 ];
-const backgrounds: Record<string, string[]> = {
-  'sunny/farm': ['idle', 'day', 'drift'],
-  'adventure/harbor': ['idle'],
-  'sunny/meadow': ['idle', 'day', 'drift'],
-  'sunny/village': ['idle', 'day', 'drift'],
-};
-const clips: Record<Exclude<ClipKind, 'background'>, string[]> = {
+const backgrounds = [
+  'sunny/farm',
+  'adventure/harbor',
+  'sunny/meadow',
+  'sunny/village',
+];
+const clips: Record<ClipKind, string[]> = {
   cutout: ['idle', 'walk', 'wave', 'talk'],
   bird: ['idle', 'walk', 'peck', 'flap', 'talk'],
   rabbit: ['idle', 'hop', 'lookout', 'talk'],
@@ -112,13 +112,11 @@ describe('library', () => {
     ).toEqual(expect.arrayContaining(props));
   });
 
-  it('keeps every background with its clips', () => {
-    for (const [id, ids] of Object.entries(backgrounds)) {
-      const bg = BACKGROUNDS.find((b) => b.id === id);
-      expect(bg, `${id}. ${SEE}`).toBeDefined();
-      const has = backgroundClips(bg!.background).map((c) => c.id);
-      expect(has, `${id}. ${SEE}`).toEqual(expect.arrayContaining(ids));
-    }
+  it('keeps every background', () => {
+    expect(
+      BACKGROUNDS.map((b) => b.id),
+      SEE,
+    ).toEqual(expect.arrayContaining(backgrounds));
   });
 
   it('keeps the clips of each rig kind', () => {

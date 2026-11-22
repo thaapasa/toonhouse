@@ -3,7 +3,7 @@
 // cast member to the scene, or sets the background. Each picture shows once
 // the SVG files of its asset have loaded.
 import type { CastMember } from '@toonhouse/model';
-import { drawScene, wholeBackground } from '@toonhouse/renderer';
+import { drawScene, restingSky, wholeBackground } from '@toonhouse/renderer';
 import { Drawing, PartSymbols } from '@toonhouse/stage';
 import { memo, useState } from 'react';
 
@@ -22,6 +22,7 @@ import {
   PROPS,
   type RigAsset,
   rigAsset,
+  SKY_FILES,
 } from '../library/index.ts';
 import { loadedSources, useSources } from '../library/sources.ts';
 import { useNames } from './names.ts';
@@ -223,22 +224,20 @@ const BackgroundPicture = memo(function BackgroundPicture({
   asset: BackgroundAsset;
 }) {
   const bg = asset.background;
-  const node = drawScene(
-    bg,
-    { kind: 'background', arc: null, drift: null },
-    wholeBackground(bg),
-  );
+  const node = drawScene(bg, wholeBackground(bg), [], restingSky(bg));
   const prefix = `lib-background-${asset.id}`;
-  useSources([asset.files]);
+  useSources([SKY_FILES, asset.files]);
   const sources = loadedSources(asset.files);
+  const skySources = loadedSources(SKY_FILES);
   return (
     <svg
       className="library-picture background"
       viewBox={`0 0 ${bg.width} ${bg.height}`}
       aria-hidden
     >
-      {sources && (
+      {sources && skySources && (
         <>
+          <PartSymbols prefix={prefix} sources={skySources} />
           <PartSymbols prefix={prefix} sources={sources} />
           <Drawing node={node} prefix={prefix} />
         </>

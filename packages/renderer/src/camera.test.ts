@@ -27,7 +27,6 @@ const corner = { x: bg.width / 4, y: bg.height / 4, zoom: 2 };
 const scene = (entries: CameraEntry[], start?: Scene['camera']): Scene => ({
   id: 's',
   background: 'test-hills',
-  backgroundActions: [],
   actors: [],
   camera: { ...start, entries },
 });
@@ -43,7 +42,6 @@ describe('cameraAt', () => {
     const s: Scene = {
       id: 's',
       background: 'test-hills',
-      backgroundActions: [],
       actors: [],
     };
     expect(cameraAt(s, bg, 3)).toEqual(whole);

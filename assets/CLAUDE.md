@@ -6,6 +6,8 @@ generating images with AI, redrawing them as SVG and checking the result.
 - `examples/`: style references for the art and the UI design. They are not used
   in the app.
 - `packs/`: the asset packs, one folder each. See "Asset packs" below.
+- `sky/`: the sun and the clouds, which every asset pack uses. The renderer
+  draws the moon and the stars in code.
 - `work/`: scratch files from generating and tracing. Git ignores it.
 
 To make an animated 2D character, follow [cutout-toons.md](cutout-toons.md). It
@@ -23,15 +25,12 @@ packs/<pack>/
   characters/<name>/
   props/<name>/
   backgrounds/<name>/
-  shared/
 ```
 
 - `pack.json` has `bubbleFont`, the family of the default font of the speech
   bubbles. It must be one of the fonts in `fonts/`.
 - `style.txt` is the style prompt of the pack. Put it in every prompt for an
   image of the pack, so that the assets of the pack look alike.
-- `shared/` has the pieces that several assets of the pack use, such as the sun
-  and the clouds of the backgrounds.
 - Each asset folder has the files of one asset. The app finds the folders by
   themselves, so a new asset needs no list to add it to.
 
@@ -122,11 +121,11 @@ for each depth, all with the same 2048×1152 frame. The `LOG.md` of each
 background lists its layers, their depths and how they were made. These rules
 come from making the meadow, the farm and the village.
 
-- Generate each layer except the sky as a wide strip, such as 2048×768, with the
-  transparent background sentence. Ask for a "wide panoramic background layer
-  for a side-scrolling 2D cartoon" that "runs across the whole width of the
-  image, touches the left, right and bottom edges", and say that the image above
-  it is fully transparent, with no sky, no sun and no clouds.
+- Generate each layer as a wide strip, such as 2048×768, with the transparent
+  background sentence. Ask for a "wide panoramic background layer for a
+  side-scrolling 2D cartoon" that "runs across the whole width of the image,
+  touches the left, right and bottom edges", and say that the image above it is
+  fully transparent, with no sky, no sun and no clouds.
 - End the prompt with "Empty scene, no figures, no humans, no animals", and
   don't write that characters walk there. Otherwise the image model can draw a
   person in the layer, especially with a style prompt that names a kind of game.
@@ -143,11 +142,15 @@ come from making the meadow, the farm and the village.
   alpha rounded to fully transparent or fully opaque. A far layer that stops
   above the bottom of the frame should repeat its last full row down to the
   bottom, so that no gap opens behind the ground when the camera moves.
-- Make far layers paler by mixing their fill colors with the sky color after
-  tracing. The far fields of the farm came out almost as bright as the near
-  layers, even though the prompt asked for pale colors.
-- Draw the sky as a flat rectangle in the SVG. The sun and the clouds are
-  separate pieces in `packs/<pack>/shared/`.
+- Make far layers paler by mixing their fill colors with the default sky color
+  after tracing. The far fields of the farm came out almost as bright as the
+  near layers, even though the prompt asked for pale colors.
+- Don't draw a sky. The scene has its own sky, which the renderer draws behind
+  the layers, so the top of the far layers stays transparent. Set the default
+  sky of the background in `sky`, and the path of the sun in `sun`, with its
+  ends behind a layer. The sun and the clouds are in `sky/`.
+- For an indoor background, set `indoor` and leave the windows as holes in the
+  layers. The sky and the weather show through them.
 
 ## Props
 

@@ -1,9 +1,4 @@
-import type {
-  BackgroundFrame,
-  Pt,
-  RoleColors,
-  RolePatterns,
-} from '@toonhouse/model';
+import type { Pt, RoleColors, RolePatterns } from '@toonhouse/model';
 import {
   type Camera,
   clamp,
@@ -13,6 +8,7 @@ import {
   layerTransform,
   MAX_ZOOM,
   type SceneActor,
+  type SkyWeather,
   wholeBackground,
 } from '@toonhouse/renderer';
 import {
@@ -29,7 +25,7 @@ import {
   useRef,
 } from 'react';
 
-import type { BackgroundAsset } from '../backgrounds.ts';
+import { type BackgroundAsset, SKY_SOURCES } from '../backgrounds.ts';
 import { useI18n } from '../i18n/index.tsx';
 import { GroundIcon, MinusIcon, PlusIcon } from './icons.tsx';
 import { useSize } from './Viewport.tsx';
@@ -53,7 +49,8 @@ export interface GuestOption {
 
 interface Props {
   asset: BackgroundAsset;
-  frame: BackgroundFrame;
+  /** The sky and the weather to show the background with. */
+  sky: SkyWeather;
   camera: Camera;
   onCamera(camera: Camera): void;
   horizon: boolean;
@@ -76,7 +73,7 @@ interface Pointer {
  * it on the ground layer.
  */
 export function BackgroundView(props: Props) {
-  const { asset, frame, horizon, guest } = props;
+  const { asset, sky, horizon, guest } = props;
   const bg = asset.background;
   const { tr } = useI18n();
   const [ref, { width, height }] = useSize();
@@ -95,7 +92,7 @@ export function BackgroundView(props: Props) {
   // Screen pixels for one pixel of the picture, which has the frame size.
   const k = Math.min(width / bg.width, height / bg.height) || 1;
   const prefix = `bg-${asset.id}`;
-  const node = drawScene(bg, frame, camera, guest ? [guest.actor] : []);
+  const node = drawScene(bg, camera, guest ? [guest.actor] : [], sky);
 
   const set = (c: Camera) => {
     const next = clampCamera(bg, c);
@@ -305,6 +302,7 @@ export function BackgroundView(props: Props) {
           onPointerUp={up}
           onPointerCancel={up}
         >
+          <PartSymbols prefix={prefix} sources={SKY_SOURCES} />
           <PartSymbols prefix={prefix} sources={asset.sources} />
           {guest && (
             <PartSymbols

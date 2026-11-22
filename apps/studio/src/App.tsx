@@ -1,17 +1,20 @@
-import type { ClipId, Pt, Rig } from '@toonhouse/model';
+import type { ClipId, Pt, Rig, WeatherState } from '@toonhouse/model';
 import {
-  backgroundClips,
   type Camera,
   clipOf,
   clipsFor,
   type ColorChoice,
   colorRig,
   drawRig,
+  FAIR_WEATHER,
   FPS,
+  inWind,
+  NOON,
   partBounds,
   presetColors,
   presetPatterns,
   restClip,
+  restingSky,
   wholeBackground,
 } from '@toonhouse/renderer';
 import { usePlayback } from '@toonhouse/stage';
@@ -53,6 +56,12 @@ const KNOWN = {
 
 const NO_CHOICE: ColorChoice = {};
 
+/**
+ * How long the playback of a background loops, in seconds. The rain and the
+ * snow start again from the top at each loop, so it is long.
+ */
+const SKY_LOOP = 60;
+
 const sameRig = (a: Rig, b: Rig) => JSON.stringify(a) === JSON.stringify(b);
 
 function without<T>(record: Record<string, T>, key: string) {
@@ -70,7 +79,10 @@ export function App() {
   const [characterId, setCharacterId] = useState(start.rig);
   const [backgroundId, setBackgroundId] = useState(start.background);
   const [clipId, setClipId] = useState<ClipId>('walk');
-  const [backgroundClipId, setBackgroundClipId] = useState<ClipId>('day');
+  // The time of day and the weather that the background shows. Each scene
+  // has its own, so these are only a preview.
+  const [hour, setHour] = useState(NOON);
+  const [weather, setWeather] = useState<WeatherState>(FAIR_WEATHER);
   const [camera, setCamera] = useState<Camera | null>(null);
   const [horizon, setHorizon] = useState(true);
   // Where the developer has dragged the guest on the background.
@@ -117,11 +129,8 @@ export function App() {
   const clips = clipsFor(rig.kind);
   // Another kind of character may not have the clip, and then it rests.
   const clip = clipOf(rig.kind, clipId);
-  const bgClips = background ? backgroundClips(background.background) : [];
-  const bgClip = bgClips.find((c) => c.id === backgroundClipId) ?? bgClips[0];
-  const activeClip = background && bgClip ? bgClip : clip;
   const playback = usePlayback({
-    duration: activeClip.duration,
+    duration: background ? SKY_LOOP : clip.duration,
     fps: FPS,
     loop,
     speed,
@@ -141,8 +150,7 @@ export function App() {
   });
 
   const pickClip = (id: ClipId) => {
-    if (background) setBackgroundClipId(id);
-    else setClipId(id);
+    setClipId(id);
     playback.seek(0);
     playback.setPlaying(true);
   };
@@ -161,7 +169,7 @@ export function App() {
   };
 
   // A character or a prop on the background plays the clip picked for the
-  // rigs, if it has one, and loops it in the time of the background clip.
+  // rigs, if it has one, and loops it in the time of the background.
   let guest: Guest | null = null;
   const guestAsset = RIGS.find((c) => c.id === guestId);
   const guestRig = guestId === null ? undefined : rigOf(guestId);
@@ -177,7 +185,9 @@ export function App() {
   if (background && guestAsset && guestRig) {
     const gClips = clipsFor(guestRig.kind);
     const gClip = gClips.find((c) => c.id === clipId) ?? gClips[0]!;
-    const gFrame = gClip.frameAt(playback.t % gClip.duration);
+    const clipFrame = gClip.frameAt(playback.t % gClip.duration);
+    const gFrame =
+      clipFrame.kind === 'prop' ? inWind(clipFrame, weather.wind) : clipFrame;
     guest = {
       actor: {
         id: guestAsset.id,
@@ -321,8 +331,9 @@ export function App() {
       : null;
   const clipBar = (
     <ClipBar
-      clips={background ? bgClips : clips}
-      clip={activeClip}
+      clips={clips}
+      clip={clip}
+      {...(background && { duration: SKY_LOOP })}
       fps={FPS}
       playback={playback}
       loop={loop}
@@ -334,6 +345,13 @@ export function App() {
   );
   if (background) {
     const cam = camera ?? wholeBackground(background.background);
+    const sky = {
+      ...restingSky(background.background),
+      hour,
+      weather,
+      drift: weather.wind * playback.t,
+      t: playback.t,
+    };
     return (
       <div className="studio">
         <Header file={background.file} />
@@ -349,7 +367,7 @@ export function App() {
           <main className="main">
             <BackgroundView
               asset={background}
-              frame={(bgClip ?? restClip('background')).frameAt(playback.t)}
+              sky={sky}
               camera={cam}
               onCamera={setCamera}
               horizon={horizon}
@@ -361,7 +379,14 @@ export function App() {
             />
             {clipBar}
           </main>
-          <BackgroundInspector asset={background} camera={cam} />
+          <BackgroundInspector
+            asset={background}
+            camera={cam}
+            hour={hour}
+            onHour={setHour}
+            weather={weather}
+            onWeather={setWeather}
+          />
         </div>
       </div>
     );

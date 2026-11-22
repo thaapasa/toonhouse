@@ -56,9 +56,10 @@ later.
 
 The renderer puts together the frame of a scene at time `t` with `sceneFrame`:
 where each actor is, its clip frame and its drawing, its size on the background,
-the bubbles with their fonts and anchors, the view of the camera, and the tree
-to draw. `cartoonTime` maps a time of the cartoon to a scene and a time in it.
-The editor, the player and the preview image use both, and export will too.
+the sky and the weather, the bubbles with their fonts and anchors, the view of
+the camera, and the tree to draw. `cartoonTime` maps a time of the cartoon to a
+scene and a time in it. The editor, the player and the preview image use both,
+and export will too.
 
 The renderer doesn't load the library. The app passes it a `Library`, which
 gives the rig of a character or a prop, a background by its id, and the default
@@ -76,10 +77,9 @@ All graphics are SVG, so they stay sharp at any size.
 
 - A **rig** is a character or a prop: a tree of bones joined at pivot points,
   with a part on each bone. A part has one or more SVG layers.
-- A **background** has layers at different depths, and parts that its clips
-  move, such as the sun. It is not a rig.
+- A **background** has layers at different depths. It is not a rig.
 - A **clip** is a short motion, such as a walk cycle. A clip works on any rig of
-  the same kind, or on any background.
+  the same kind.
 - A **scene** has a background and actors. Each actor uses a rig and has a list
   of actions on the timeline.
 
@@ -202,8 +202,9 @@ own pixels.
 
 - The **layers** go from the far to the near, which is also the draw order. Each
   layer is an SVG of the whole frame with a depth from 0 to 1. A layer at depth
-  0, such as the sky, is infinitely far away, and the ground layer is at
-  depth 1.
+  0 is infinitely far away, and the ground layer is at depth 1. A background has
+  no sky of its own: the renderer draws the sky of the scene behind the layers,
+  so the far layers have a transparent top.
 - The **ground layer** is the layer that the actors stand on. Each actor has its
   own place on it, so actors can stand nearer to the camera or further from it.
   The background sets the size of the actors, as frame pixels for one pixel of a
@@ -218,21 +219,80 @@ own pixels.
   actor keeps a tenth of its size, so that the user can still see and select it.
   An actor with a fixed size ignores the perspective. The user gives an actor a
   fixed size by turning off "follow the background".
-- The **parts** of a background are drawings on a layer that clips move, such as
-  the sun and the clouds. A part moves with its layer when the camera moves.
-  Parts that several backgrounds of a pack use, such as the sun, can come from
-  the `shared/` folder of the pack.
+- A background gives the **default sky** of the scenes on it, in `sky`, and the
+  path of the sun and the moon, in `sun`. The path starts and ends behind a
+  layer, so that the sun rises from behind it. An **indoor** background, with
+  `indoor`, is a room, and the sky and the weather show only through holes in
+  its layers, which are its windows.
 
-A background is not a rig kind. It has no bones and no ground point, and the
-camera moves its layers, which no rig has. Its parts still have the fields of a
-rig part, and its clips are code clips like the others. A background clip gives
-only how far along its motion it is, and the background sets the path of each
-part: `idle` leaves the parts where they rest, `day` moves each part with an
-`arc` from its start through its top to its end, as the sun rises and sets, and
-`drift` moves each part with a `drift` sideways across the frame, as the clouds
-drift. A drifting part leaves the frame on one side and comes back on the other.
-The renderer rounds its speed so that it goes across a whole number of times in
-one loop of the clip, and the loop ends where it started.
+A background is not a rig kind. It has no bones, no ground point and no clips,
+and the camera moves its layers, which no rig has.
+
+### Sky and weather
+
+Each scene has a sky and a weather of its own, apart from its background, in
+`sky` and `weather`. Both have start values and a list of changes on the
+timeline. A change goes from where the scene is at its start to its target over
+its length, with the easing of the camera moves, and the changes of one kind
+don't overlap. The time of day is in hours and doesn't wrap, so a change to 30
+goes on to 6 in the morning of the next day. A weather change sets only the
+values that it names, such as the rain, and leaves the clouds as they are.
+`skyStateAt` and `weatherAt` in `packages/renderer` compute the time of day and
+the weather at `t`.
+
+The look of the clouds, the drops, the flakes and the stars comes from the
+`seed` of the scene, which the editor sets for a new scene. A scene without a
+seed gets one from a hash of its id, so that moving the scene in the cartoon
+keeps its look. `random` in `packages/renderer` turns the seed, the index of an
+item and a channel into a number, and the renderer uses no other randomness.
+
+The renderer draws the sky and the weather in the picture, at depth 0, in this
+order:
+
+1. The sky, a gradient. A preset sky has its own colors for the day, the dusk
+   and the night, and the renderer blends them by the time of day. A sky that
+   the user picks gets its dusk and night colors by mixing toward a night
+   palette. Space stays dark, with stars, at any time.
+2. The stars, which fade in at dusk, and the sun and the moon on the path of the
+   background. The sun is up from 6 to 18, and the moon from 18 to 6.
+3. The clouds. They have a fixed number of slots, and each slot gets its place,
+   its size, its drawing, a threshold and a side of the frame from the seed. A
+   slot shows when `clouds` passes its threshold, and it slides in from its side
+   to its place, so that the clouds never appear in place. The clouds drift with
+   the wind and come back on the other side of the frame. The cloud drawings
+   can't cover the whole sky, so many dark clouds also turn the sky toward an
+   overcast gray, by `clouds` times `cloudDark`, and the stars, the moon and the
+   sun fade by the same amount.
+4. The layers of the background. Outdoors, a veil of mist goes after each layer
+   before the ground layer, so the far layers get hazier than the near ones, and
+   the far rain and snow go right before the ground layer. Indoors, the mist and
+   the rain and the snow go before the first layer, so they show only through
+   the windows.
+5. The actors and the layers in front of them.
+6. Outdoors, the near rain and snow.
+
+The night tints everything from the clouds on by multiplying its colors with a
+blue color, the `tint` of a group, which the stage draws as an SVG filter.
+Indoors the tint is weaker, as the room has lights. The sky, the stars, the sun
+and the moon don't get the tint, and neither do the bubbles, which the frame
+draws apart. A scene with the sun off has no sun, moon, stars or night.
+
+The clouds and the snow move sideways by the wind added up from the start of the
+scene, `windDrift`, so that they don't jump when the wind changes. Between the
+changes the wind stays the same, and over a change the sum has a closed form, so
+the work grows with the number of changes and not with `t`. The rain and the
+snow fall in loops, each drop and flake at its own speed. The amount of rain
+sets only how many drops show, from the first one up, so the drops that fall
+already keep falling when the rain gets heavier. Each band of rain or snow is
+one path, so that the stage stays fast on an iPad.
+
+The wind also sets how far the props sway in the `rustle` clip. The frame passes
+the wind to the pose of the prop, so the clip itself gives only the gusts, and a
+prop still rustles gently in still air.
+
+The sun and the clouds are SVG drawings in `assets/sky/`, which every asset pack
+uses. The renderer knows their sizes in `SKY_PARTS`, and the stage loads the
+files. The moon and the stars are drawn in code.
 
 ### Camera and parallax
 
@@ -300,9 +360,9 @@ committed to the repo. The characters, the props and the backgrounds are in the
 folders of their asset packs in `assets/packs/`, and the id of each one is
 `<pack>/<name>`, such as `sunny/oak`. The pack is part of the id, so a new pack
 can use any name without checking the other packs. The test art in
-`assets/fixtures/`, a background and two props made of simple shapes, is not
-part of the library. Only the tests use it. The server stores the cartoons that
-users make.
+`assets/fixtures/`, two backgrounds, one of them indoors, and two props made of
+simple shapes, is not part of the library. Only the tests use it. The server
+stores the cartoons that users make.
 
 ## Server
 

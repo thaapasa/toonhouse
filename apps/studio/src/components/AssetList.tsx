@@ -3,12 +3,13 @@ import {
   drawScene,
   partBounds,
   restClip,
+  restingSky,
   wholeBackground,
 } from '@toonhouse/renderer';
 import { Drawing, PartSymbols } from '@toonhouse/stage';
 import type { ReactNode } from 'react';
 
-import type { BackgroundAsset } from '../backgrounds.ts';
+import { type BackgroundAsset, SKY_SOURCES } from '../backgrounds.ts';
 import type { Character } from '../characters.ts';
 import { isTextKey, type TextKey, useI18n } from '../i18n/index.tsx';
 
@@ -136,11 +137,7 @@ function Thumbnail({ character }: { character: Character }) {
 function BackgroundThumbnail({ asset }: { asset: BackgroundAsset }) {
   const prefix = `thumb-bg-${asset.id}`;
   const bg = asset.background;
-  const node = drawScene(
-    bg,
-    restClip('background').frameAt(0),
-    wholeBackground(bg),
-  );
+  const node = drawScene(bg, wholeBackground(bg), [], restingSky(bg));
   return (
     <span className="thumb">
       <svg
@@ -148,6 +145,7 @@ function BackgroundThumbnail({ asset }: { asset: BackgroundAsset }) {
         preserveAspectRatio="xMidYMid slice"
         aria-hidden="true"
       >
+        <PartSymbols prefix={prefix} sources={SKY_SOURCES} />
         <PartSymbols prefix={prefix} sources={asset.sources} />
         <Drawing node={node} prefix={prefix} />
       </svg>

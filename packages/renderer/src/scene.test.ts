@@ -11,7 +11,6 @@ import {
 import {
   actorEnd,
   actorStateAt,
-  backgroundStateAt,
   clipSpeed,
   isMoving,
   MIN_SCENE_LENGTH,
@@ -45,7 +44,6 @@ describe('clip speed', () => {
     expect(clipSpeed(clipOf('cutout', 'walk'))).toBeCloseTo(WALK_SPEED);
     expect(clipSpeed(clipOf('rabbit', 'hop'))).toBeCloseTo(RABBIT_HOP_SPEED);
     expect(clipSpeed(clipOf('cutout', 'wave'))).toBe(0);
-    expect(clipSpeed(clipOf('background', 'day'))).toBe(0);
     expect(isMoving('bird', 'walk')).toBe(true);
     expect(isMoving('prop', 'rustle')).toBe(false);
   });
@@ -224,8 +222,6 @@ describe('a walk on the ground', () => {
             const loops = Math.floor(ct / clip.duration);
             const frame = clip.frameAt(ct - loops * clip.duration);
             const end = clip.frameAt(clip.duration);
-            if (frame.kind === 'background' || end.kind === 'background')
-              return 0;
             return loops * end.travel + frame.travel;
           };
           const start = travelAt(clipStart * clip.duration);
@@ -310,31 +306,10 @@ describe('a walk on the ground', () => {
   });
 });
 
-describe('background state', () => {
-  it('rests until its first action', () => {
-    const actions = [{ id: '1', t: 2, clip: 'day' as const }];
-    expect(backgroundStateAt(actions, 1)).toMatchObject({
-      clip: 'idle',
-      clipT: 1,
-    });
-    expect(backgroundStateAt(actions, 3)).toMatchObject({
-      clip: 'day',
-      clipT: 1,
-    });
-  });
-
-  it('starts a day with the sun in the middle of the sky', () => {
-    const actions = [{ id: '1', t: 2, clip: 'day' as const, clipStart: 0.5 }];
-    const { duration } = clipOf('background', 'day');
-    expect(backgroundStateAt(actions, 2).clipT).toBeCloseTo(duration / 2);
-  });
-});
-
 describe('scene length', () => {
   const scene = (actors: CastActor[]): CastScene => ({
     id: 's',
     background: 'flat',
-    backgroundActions: [],
     actors,
   });
 
@@ -363,5 +338,15 @@ describe('scene length', () => {
     expect(minSceneLength(s)).toBeCloseTo(6.1);
     expect(sceneLength(s, flat, () => 'cutout')).toBeCloseTo(6.1);
     expect(minSceneLength(scene([]))).toBe(1);
+  });
+
+  it('lasts until the changes of the time of day and the weather end', () => {
+    const s: CastScene = {
+      ...scene([]),
+      sky: { changes: [{ id: 'c', t: 5, length: 10, to: 20 }] },
+      weather: { changes: [{ id: 'w', t: 12, length: 2, to: { rain: 1 } }] },
+    };
+    expect(sceneLength(s, flat, () => 'cutout')).toBe(19);
+    expect(minSceneLength(s)).toBeCloseTo(12.1);
   });
 });

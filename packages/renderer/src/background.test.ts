@@ -1,27 +1,20 @@
-import type { Background, BackgroundFrame } from '@toonhouse/model';
+import type { Background, Scene } from '@toonhouse/model';
 import { describe, expect, it } from 'vitest';
 
 import testHills from '../../../assets/fixtures/backgrounds/test-hills/background.json';
 import {
   actorScaleAt,
-  arcPoint,
   clampCamera,
   drawScene,
   layerTransform,
   layerView,
   MAX_ZOOM,
-  partPosition,
   wholeBackground,
 } from './background.ts';
-import { backgroundClips, clipOf } from './clips/index.ts';
 import type { DrawNode } from './draw.ts';
+import { skyWeatherAt } from './skyDraw.ts';
 
 const bg = testHills as Background;
-const sun = bg.parts!.sun!;
-const cloud = bg.parts!.cloudBig!;
-const day = clipOf('background', 'day');
-const drift = clipOf('background', 'drift');
-const idle = clipOf('background', 'idle');
 
 /** Where a point of a layer at `depth` shows in the picture. */
 function seen(depth: number, camera: Parameters<typeof layerView>[1]) {
@@ -112,60 +105,9 @@ describe('parallax', () => {
   });
 });
 
-describe('background clips', () => {
-  it('moves the sun from the start through the top to the end', () => {
-    const at = (t: number) => partPosition(bg, sun, day.frameAt(t));
-    expect(at(0)).toEqual(sun.arc!.from);
-    expect(at(day.duration / 2)).toEqual(sun.arc!.top);
-    expect(at(day.duration)).toEqual(sun.arc!.to);
-    const quarter = at(day.duration / 4);
-    expect(quarter.x).toBeCloseTo(600, 6);
-    expect(quarter.y).toBeCloseTo(307.5, 6);
-    // Higher in the middle than near the ends.
-    expect(at(10).y).toBeLessThan(at(2).y);
-    expect(at(10).y).toBeLessThan(at(18).y);
-  });
-
-  it('keeps the sun where it rests in the other clips', () => {
-    expect(partPosition(bg, sun, idle.frameAt(3))).toEqual(sun.at);
-    expect(partPosition(bg, sun, drift.frameAt(30))).toEqual(sun.at);
-  });
-
-  it('puts the arc through its top halfway', () => {
-    const arc = {
-      from: { x: 0, y: 10 },
-      top: { x: 3, y: -4 },
-      to: { x: 9, y: 0 },
-    };
-    expect(arcPoint(arc, 0.5)).toEqual(arc.top);
-  });
-
-  it('drifts the clouds slowly and back to the start after a loop', () => {
-    const x = (t: number) => partPosition(bg, cloud, drift.frameAt(t)).x;
-    expect(x(0)).toBeCloseTo(cloud.at.x, 6);
-    expect(x(drift.duration)).toBeCloseTo(cloud.at.x, 6);
-    const speed = x(1) - x(0);
-    expect(speed).toBeGreaterThan(0);
-    expect(speed).toBeLessThan(40);
-    // It goes out on the right and comes back on the left.
-    const xs = Array.from({ length: 120 }, (_, i) => x(i));
-    expect(Math.max(...xs)).toBeGreaterThan(1920);
-    expect(Math.min(...xs)).toBeLessThan(0);
-  });
-
-  it('lists only the clips that move something', () => {
-    expect(backgroundClips(bg).map((c) => c.id)).toEqual([
-      'idle',
-      'day',
-      'drift',
-    ]);
-    const plain: Background = { ...bg, parts: {} };
-    expect(backgroundClips(plain).map((c) => c.id)).toEqual(['idle']);
-  });
-});
-
 describe('drawScene', () => {
-  const frame: BackgroundFrame = idle.frameAt(0);
+  const scene: Scene = { id: 's', background: 'hills', actors: [] };
+  const sky = skyWeatherAt(scene, bg, 0);
   const actor: DrawNode = {
     type: 'part',
     part: 'torso',
@@ -183,46 +125,62 @@ describe('drawScene', () => {
     return [];
   }
 
-  it('draws the layers from far to near with the parts and actors on them', () => {
-    const node = drawScene(bg, frame, wholeBackground(bg), [
-      { id: 'boy', node: actor, x: 500, y: 900 },
-    ]);
-    expect(order(node)).toEqual([
-      'sky',
-      'sun',
-      'cloudBig',
-      'cloudSmall',
+  it('draws the sky and the layers from far to near with the actors on the ground', () => {
+    const node = drawScene(
+      bg,
+      wholeBackground(bg),
+      [{ id: 'boy', node: actor, x: 500, y: 900 }],
+      sky,
+    );
+    expect(order(node).filter((p) => !p.startsWith('sky-cloud'))).toEqual([
+      'sky-sun',
       'hills',
       'meadow',
       'ground',
       'actor:boy',
       'grass',
     ]);
+    // The clouds go between the sun and the far layers.
+    const ids = order(node);
+    const clouds = ids.flatMap((p, i) =>
+      p.startsWith('sky-cloud') ? [i] : [],
+    );
+    expect(clouds.length).toBeGreaterThan(0);
+    expect(Math.min(...clouds)).toBeGreaterThan(ids.indexOf('sky-sun'));
+    expect(Math.max(...clouds)).toBeLessThan(ids.indexOf('hills'));
   });
 
   /** The actors on the ground layer, in the order that they are drawn. */
-  function placed(node: DrawNode, b = bg) {
-    const i = b.layers.findIndex((l) => l.id === b.ground.layer);
-    const ground = node.type === 'group' ? node.children[i] : undefined;
-    if (ground?.type !== 'group') return [];
-    return ground.children.flatMap((c) =>
-      c.type === 'group' && c.actor ? [{ id: c.actor, m: c.transform }] : [],
+  function placed(node: DrawNode): { id: string; m: unknown }[] {
+    if (node.type !== 'group') return [];
+    return node.children.flatMap((c) =>
+      c.type === 'group' && c.actor
+        ? [{ id: c.actor, m: c.transform }]
+        : placed(c),
     );
   }
 
   it('stands each actor at its own point, at the size of the background', () => {
-    const node = drawScene(bg, frame, wholeBackground(bg), [
-      { id: 'boy', node: actor, x: 500, y: 700, scale: 2 },
-    ]);
+    const node = drawScene(
+      bg,
+      wholeBackground(bg),
+      [{ id: 'boy', node: actor, x: 500, y: 700, scale: 2 }],
+      sky,
+    );
     expect(placed(node)[0]?.m).toEqual([0.64, 0, 0, 0.64, 500, 700]);
   });
 
   it('draws the actors nearer to the bottom in front', () => {
-    const node = drawScene(bg, frame, wholeBackground(bg), [
-      { id: 'near', node: actor, x: 500, y: 1000 },
-      { id: 'far', node: actor, x: 500, y: 600 },
-      { id: 'alsoNear', node: actor, x: 800, y: 1000 },
-    ]);
+    const node = drawScene(
+      bg,
+      wholeBackground(bg),
+      [
+        { id: 'near', node: actor, x: 500, y: 1000 },
+        { id: 'far', node: actor, x: 500, y: 600 },
+        { id: 'alsoNear', node: actor, x: 800, y: 1000 },
+      ],
+      sky,
+    );
     expect(placed(node).map((a) => a.id)).toEqual(['far', 'near', 'alsoNear']);
   });
 
@@ -244,10 +202,13 @@ describe('drawScene', () => {
 
     it('keeps the size of an actor with a fixed size', () => {
       expect(actorScaleAt(deep, 700, true)).toBe(0.32);
-      const node = drawScene(deep, frame, wholeBackground(deep), [
-        { id: 'boy', node: actor, x: 500, y: 700, fixedSize: true },
-      ]);
-      expect(placed(node, deep)[0]?.m).toEqual([0.32, 0, 0, 0.32, 500, 700]);
+      const node = drawScene(
+        deep,
+        wholeBackground(deep),
+        [{ id: 'boy', node: actor, x: 500, y: 700, fixedSize: true }],
+        sky,
+      );
+      expect(placed(node)[0]?.m).toEqual([0.32, 0, 0, 0.32, 500, 700]);
     });
 
     it('has the same size everywhere without a perspective', () => {

@@ -49,7 +49,6 @@ describe('bubbles in the editor', () => {
     const scene: Scene = {
       id: 's',
       background: null,
-      backgroundActions: [],
       actors: [],
       bubbles: [
         bubble,

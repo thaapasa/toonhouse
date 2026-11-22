@@ -74,7 +74,7 @@ The speech bubbles on the timeline are in [Speech bubbles](bubbles.md).
       keys do this except while the user types a text.
 - [x] User can change or remove an action.
 - [x] User can start the clip of an action from any point of the clip, such as a
-      day with the sun already high on the sky. The timeline shows the first
+      walk that starts in the middle of a step. The timeline shows the first
       loop of the clip as shorter.
 - [x] The speed of an action defaults to 1. The speed is between 0.01 and 1000.
       A walk at speed zero would never get anywhere, and at the top speed a walk

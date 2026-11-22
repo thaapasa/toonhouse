@@ -1,5 +1,4 @@
 import type {
-  BackgroundFrame,
   BirdFrame,
   Clip,
   ClipId,
@@ -9,7 +8,6 @@ import type {
   RabbitFrame,
 } from '@toonhouse/model';
 
-import { BACKGROUND_CLIPS } from './background/index.ts';
 import { BIRD_CLIPS } from './bird/index.ts';
 import { idle } from './idle.ts';
 import { PROP_CLIPS } from './prop/index.ts';
@@ -18,9 +16,9 @@ import { talk } from './talk.ts';
 import { walk } from './walk.ts';
 import { wave } from './wave.ts';
 
-export { backgroundClips } from './background/index.ts';
 export { BIRD_WALK_SPEED } from './bird/index.ts';
 export { HIP_HEIGHT } from './body.ts';
+export { inWind } from './prop/index.ts';
 export { RABBIT_HOP_SPEED } from './rabbit/index.ts';
 export { WALK_SPEED } from './walk.ts';
 
@@ -32,17 +30,16 @@ export const CUTOUT_CLIPS: readonly Clip<CutoutFrame>[] = [
   talk,
 ];
 
-export { BACKGROUND_CLIPS, BIRD_CLIPS, PROP_CLIPS, RABBIT_CLIPS };
+export { BIRD_CLIPS, PROP_CLIPS, RABBIT_CLIPS };
 
 const byKind: Record<ClipKind, readonly Clip[]> = {
   cutout: CUTOUT_CLIPS,
   bird: BIRD_CLIPS,
   rabbit: RABBIT_CLIPS,
   prop: PROP_CLIPS,
-  background: BACKGROUND_CLIPS,
 };
 
-/** The clips that work on the rigs of a kind, or on backgrounds. */
+/** The clips that work on the rigs of a kind. */
 export function clipsFor(kind: ClipKind): readonly Clip[] {
   return byKind[kind];
 }
@@ -51,7 +48,6 @@ export function clipOf(kind: 'cutout', id: ClipId): Clip<CutoutFrame>;
 export function clipOf(kind: 'bird', id: ClipId): Clip<BirdFrame>;
 export function clipOf(kind: 'rabbit', id: ClipId): Clip<RabbitFrame>;
 export function clipOf(kind: 'prop', id: ClipId): Clip<PropFrame>;
-export function clipOf(kind: 'background', id: ClipId): Clip<BackgroundFrame>;
 export function clipOf(kind: ClipKind, id: ClipId): Clip;
 /**
  * The clip of a kind with the id. A kind that doesn't have the clip gets its
@@ -65,11 +61,10 @@ export function restClip(kind: 'cutout'): Clip<CutoutFrame>;
 export function restClip(kind: 'bird'): Clip<BirdFrame>;
 export function restClip(kind: 'rabbit'): Clip<RabbitFrame>;
 export function restClip(kind: 'prop'): Clip<PropFrame>;
-export function restClip(kind: 'background'): Clip<BackgroundFrame>;
 export function restClip(kind: ClipKind): Clip;
 /**
- * The clip that a rig or a background rests in when no action plays: the
- * first clip of its kind, which stands still.
+ * The clip that a rig rests in when no action plays: the first clip of its
+ * kind, which stands still.
  */
 export function restClip(kind: ClipKind): Clip {
   return byKind[kind][0]!;

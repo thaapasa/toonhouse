@@ -1,11 +1,11 @@
-// The timeline of a scene: a row for the camera, one for the background and
-// one for each actor,
-// with the actions as blocks from their start until the next action. An actor
-// with speech bubbles has a bubble lane under its row, and the free bubbles
-// have a row of their own at the end. Tap or
-// drag the ruler to move the playhead, and tap a row to move it there. Tap an
-// action to select it, and drag it to move it. The time marks on each row
-// move the playhead and change where actions start and the scene ends.
+// The timeline of a scene: a row for the camera, one for the time of day, one
+// for the weather and one for each actor, with the actions as blocks from
+// their start until the next action. An actor with speech bubbles has a bubble
+// lane under its row, and the free bubbles have a row of their own at the
+// end. Tap or drag the ruler to move the playhead, and tap a row to move it
+// there. Tap an action to select it, and drag it to move it. The time marks on
+// each row move the playhead and change where actions start and the scene
+// ends.
 //
 // The wheel scrolls the rows, and Shift + wheel or a sideways swipe scrolls in
 // time. `useTimelineZoom` has the zoom. The timeline goes on a bit past the end
@@ -28,15 +28,16 @@ import {
 
 import { IconButton } from '../components/IconButton.tsx';
 import {
-  BackgroundIcon,
   BubbleIcon,
   CameraIcon,
+  CloudIcon,
   DeleteIcon,
   PauseIcon,
   PlayIcon,
   PlusIcon,
   StepBackIcon,
   StepForwardIcon,
+  SunIcon,
   ZoomFitIcon,
   ZoomInIcon,
   ZoomOutIcon,
@@ -44,11 +45,14 @@ import {
 import { useI18n } from '../i18n/index.tsx';
 import { kindOf } from '../library/index.ts';
 import { ActionBlocks } from './ActionBlocks.tsx';
+import type { BlockDrag } from './blockEdit.ts';
 import { BUBBLE_LINE, BubbleLane, bubbleLines } from './BubbleLane.tsx';
 import type { CameraDrag } from './cameraEdit.ts';
 import { CameraLane } from './CameraLane.tsx';
+import { ChangeLane } from './ChangeLane.tsx';
 import type { EditRun } from './history.ts';
 import { useNames } from './names.ts';
+import { changesOf, type SkyRow } from './skyEdit.ts';
 import {
   formatTime,
   midPoints,
@@ -73,9 +77,9 @@ const LANE_START = LABEL_WIDTH + LANE_PAD;
 /** At the deepest zoom, a frame is this wide in CSS pixels. */
 const MAX_FRAME_WIDTH = 24;
 
-/** An actor on the timeline, or the background with `actorId` null. */
+/** An actor on the timeline, and one of its actions. */
 export interface TimelineSelection {
-  actorId: string | null;
+  actorId: string;
   actionId: string | null;
 }
 
@@ -100,19 +104,9 @@ interface Props {
   selection: TimelineSelection | null;
   onSelect(selection: TimelineSelection): void;
   /** Moves a whole action, its start and its end, to start at `t`. */
-  onMoveBlock(
-    actorId: string | null,
-    actionId: string,
-    t: number,
-    run: EditRun,
-  ): void;
+  onMoveBlock(actorId: string, actionId: string, t: number, run: EditRun): void;
   /** Moves only the start of an action, which is the end of the one before. */
-  onMoveStart(
-    actorId: string | null,
-    actionId: string,
-    t: number,
-    run: EditRun,
-  ): void;
+  onMoveStart(actorId: string, actionId: string, t: number, run: EditRun): void;
   /** Sets the length of the scene. */
   onLength(length: number, run: EditRun): void;
   /** The selected speech bubble, if any. */
@@ -127,6 +121,17 @@ interface Props {
   /** Selects the camera, and moves the playhead to `t` if given. */
   onSelectCamera(t?: number): void;
   onCameraDrag(id: string, part: CameraDrag, t: number, run: EditRun): void;
+  /** The selected row of the time of day or the weather, if any. */
+  skyRow: SkyRow | null;
+  /** Selects the row of the time of day or the weather, and moves the playhead to `t` if given. */
+  onSelectSkyRow(row: SkyRow, t?: number): void;
+  onChangeDrag(
+    row: SkyRow,
+    id: string,
+    part: BlockDrag,
+    t: number,
+    run: EditRun,
+  ): void;
 }
 
 export function Timeline(props: Props) {
@@ -209,22 +214,7 @@ export function Timeline(props: Props) {
     onCancel: (from) => props.onSeek(from),
   });
 
-  const rows: (TimelineRow & { actorId: string | null; label: ReactNode })[] =
-    [];
-  if (scene.background) {
-    rows.push({
-      actorId: null,
-      kind: 'background',
-      label: (
-        <>
-          <BackgroundIcon />
-          <span>{tr('editor.background')}</span>
-        </>
-      ),
-      actions: scene.backgroundActions,
-      walkTimes: new Map(),
-    });
-  }
+  const rows: (TimelineRow & { actorId: string; label: ReactNode })[] = [];
   const actorNames = names.actors(scene, props.cast);
   for (const actor of scene.actors) {
     const kind = kindOf(actor.asset);
@@ -455,6 +445,47 @@ export function Timeline(props: Props) {
               </div>
             </div>
           )}
+          {scene.background &&
+            (['time', 'weather'] as const).map((row) => (
+              <div
+                key={row}
+                className="track"
+                aria-selected={props.skyRow === row}
+              >
+                <button
+                  type="button"
+                  className="track-label"
+                  onClick={() => props.onSelectSkyRow(row)}
+                >
+                  {row === 'time' ? <SunIcon /> : <CloudIcon />}
+                  <span>
+                    {tr(row === 'time' ? 'editor.timeOfDay' : 'editor.weather')}
+                  </span>
+                </button>
+                <div
+                  className="lane"
+                  style={{ width }}
+                  onClick={(e) => props.onSeek(timeAt(e, e.currentTarget))}
+                >
+                  <ChangeLane
+                    row={row}
+                    changes={changesOf(scene, row)}
+                    pps={pps}
+                    fps={props.fps}
+                    t={t}
+                    selected={props.skyRow === row}
+                    onSelect={(at) => props.onSelectSkyRow(row, at)}
+                    onDrag={(id, part, at, run) => {
+                      dragMove(run);
+                      props.onChangeDrag(row, id, part, at, run);
+                    }}
+                    onDragDone={unfreeze}
+                    pinches={pinches}
+                    onCancel={revert}
+                  />
+                </div>
+              </div>
+            ))}
           {rows.length === 0 && bubbles.length === 0 && (
             <p className="muted tracks-empty">{tr('editor.emptyTimeline')}</p>
           )}
@@ -464,7 +495,7 @@ export function Timeline(props: Props) {
               props.selection.actorId === row.actorId;
             return [
               <div
-                key={row.actorId ?? 'background'}
+                key={row.actorId}
                 className="track"
                 aria-selected={rowSelected}
               >
@@ -521,12 +552,11 @@ export function Timeline(props: Props) {
                   />
                 </div>
               </div>,
-              row.actorId !== null &&
-                bubbleTrack(
-                  bubblesOf(row.actorId),
-                  `bubbles-${row.actorId}`,
-                  <BubbleIcon size={16} />,
-                ),
+              bubbleTrack(
+                bubblesOf(row.actorId),
+                `bubbles-${row.actorId}`,
+                <BubbleIcon size={16} />,
+              ),
             ];
           })}
           {bubbleTrack(

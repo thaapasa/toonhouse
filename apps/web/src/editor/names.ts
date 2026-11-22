@@ -5,7 +5,6 @@ import type {
   ActorAsset,
   CastMember,
   ClipId,
-  ClipKind,
   Scene,
 } from '@toonhouse/model';
 import { castMemberOf } from '@toonhouse/renderer';
@@ -20,10 +19,7 @@ export function useNames() {
   return {
     asset,
     background: (id: string) => name(`background.${id}`, id),
-    clip: (kind: ClipKind, id: ClipId) =>
-      kind === 'background' && id === 'idle'
-        ? tr('clip.backgroundIdle')
-        : name(`clip.${id}`, id),
+    clip: (id: ClipId) => name(`clip.${id}`, id),
     /** The name of a cast member, or of its character or prop if it has none. */
     member: (m: CastMember) => m.name.trim() || asset(m.asset),
     /**

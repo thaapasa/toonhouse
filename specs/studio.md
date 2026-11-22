@@ -31,7 +31,6 @@ asset files in the repo. See [Characters](characters.md).
       and pick the ground layer.
 - [ ] Developer can set the start point, the perspective and the walking area of
       a background and save them.
-- [x] Developer can play the clips of a background.
 - [x] Developer can zoom and pan the camera on a background, with the fingers or
       with buttons, to see the layers move by their depth.
 - [x] Developer can put a character or a prop on a background, to see it stand

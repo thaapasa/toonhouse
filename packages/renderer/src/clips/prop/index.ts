@@ -33,5 +33,22 @@ export const rustle: Clip<PropFrame> = {
   },
 };
 
+/** In full wind, a prop sways `1 + WIND_SWAY` times as far as in still air. */
+const WIND_SWAY = 1.5;
+
+/**
+ * The frame of a prop clip in the wind of the weather, from -1 to 1. The
+ * clip gives the gusts, and a stronger wind either way makes them sway more.
+ * In still air, `rustle` still sways gently, and `idle` stays still in any
+ * wind.
+ */
+export const inWind = (frame: PropFrame, wind: number): PropFrame => ({
+  ...frame,
+  pose: {
+    ...frame.pose,
+    wind: frame.pose.wind * (1 + WIND_SWAY * Math.min(1, Math.abs(wind))),
+  },
+});
+
 /** The clips of a prop, in the order the studio lists them. */
 export const PROP_CLIPS: readonly Clip<PropFrame>[] = [idle, rustle];

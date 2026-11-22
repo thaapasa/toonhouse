@@ -1,11 +1,12 @@
 // The properties pane: all the data of the selection, which the user can read
 // and change. It shows the scene when nothing is selected, the actor when an
 // actor is selected, and also the action when an action is selected on the
-// timeline. A selected speech bubble and the selected camera show their own
-// sections.
+// timeline. A selected speech bubble, the selected camera and the selected row
+// of the time of day or the weather show their own sections.
 import type {
   Action,
   Actor,
+  Background,
   Bubble,
   CastMember,
   ClipId,
@@ -15,7 +16,6 @@ import type {
 import {
   actionSpeed,
   actorStateAt,
-  backgroundClips,
   type BubbleAnchor,
   type CastActor,
   castMemberOf,
@@ -63,6 +63,14 @@ import {
   updateActor,
 } from './sceneEdit.ts';
 import { SettingsFields } from './SettingsFields.tsx';
+import { changeHolder, changesOf, type SkyRow } from './skyEdit.ts';
+import {
+  NewLookButton,
+  SkyFields,
+  StartWeatherFields,
+  TimeChangeSection,
+  WeatherChangeSection,
+} from './SkySection.tsx';
 import type { TimelineSelection } from './Timeline.tsx';
 
 interface Props {
@@ -84,10 +92,12 @@ interface Props {
   /** The length of the scene in seconds. */
   duration: number;
   fps: number;
-  onEdit(fn: (scene: Scene) => Scene): void;
+  /** The selected row of the time of day or the weather, which the pane shows instead of the selection. */
+  skyRow: SkyRow | null;
+  onEdit(fn: (scene: Scene) => Scene, run?: EditRun): void;
   onSeek(t: number): void;
   /** The clip of an action changed, so the stage may need to show its path. */
-  onClipChanged(actorId: string | null, action: Action): void;
+  onClipChanged(actorId: string, action: Action): void;
   /** The walk point that the user works on in the pane, to show on the stage. */
   onFocusPoint(index: number | null): void;
   onEditMember(id: string): void;
@@ -102,10 +112,9 @@ interface Props {
 export function PropertiesPane(props: Props) {
   const { tr } = useI18n();
   const { scene, bg, selection } = props;
-  const actor =
-    selection?.actorId != null
-      ? scene.actors.find((a) => a.id === selection.actorId)
-      : undefined;
+  const actor = selection
+    ? scene.actors.find((a) => a.id === selection.actorId)
+    : undefined;
   const action =
     selection?.actionId != null
       ? actionsOf(scene, selection.actorId).find(
@@ -139,6 +148,18 @@ export function PropertiesPane(props: Props) {
         onSeek={props.onSeek}
       />
     );
+  else if (props.skyRow)
+    content = (
+      <SkyRowSection
+        scene={scene}
+        bg={bg.background}
+        row={props.skyRow}
+        t={props.t}
+        fps={props.fps}
+        onEdit={props.onEdit}
+        onSeek={props.onSeek}
+      />
+    );
   else if (!selection) content = <SceneSection key={scene.id} {...props} />;
   else
     content = (
@@ -148,7 +169,7 @@ export function PropertiesPane(props: Props) {
         ) : (
           <SceneSection key={scene.id} {...props} />
         )}
-        {action && (
+        {actor && action && (
           <ActionSection
             key={action.id}
             {...props}
@@ -207,6 +228,69 @@ function SceneSection(props: Props) {
       {scene.length === undefined && (
         <p className="muted small">{tr('properties.lengthAuto')}</p>
       )}
+      {props.bg && (
+        <>
+          <SkyFields
+            scene={scene}
+            bg={props.bg.background}
+            onEdit={props.onEdit}
+          />
+          <StartWeatherFields scene={scene} onEdit={props.onEdit} />
+          <NewLookButton onEdit={props.onEdit} />
+        </>
+      )}
+    </div>
+  );
+}
+
+/**
+ * The row of the time of day or the weather: the change that the scene holds
+ * at the current time, or the start values before the first change.
+ */
+function SkyRowSection(props: {
+  scene: Scene;
+  bg: Background;
+  row: SkyRow;
+  t: number;
+  fps: number;
+  onEdit: Props['onEdit'];
+  onSeek(t: number): void;
+}) {
+  const { tr } = useI18n();
+  const { scene, row } = props;
+  if (row === 'time') {
+    const { change, moving } = changeHolder(changesOf(scene, 'time'), props.t);
+    if (change)
+      return (
+        <TimeChangeSection
+          key={change.id}
+          {...props}
+          change={change}
+          moving={moving}
+        />
+      );
+    return (
+      <div className="pane-section">
+        <h3>{tr('editor.timeOfDay')}</h3>
+        <SkyFields scene={scene} bg={props.bg} onEdit={props.onEdit} />
+      </div>
+    );
+  }
+  const { change, moving } = changeHolder(changesOf(scene, 'weather'), props.t);
+  if (change)
+    return (
+      <WeatherChangeSection
+        key={change.id}
+        {...props}
+        change={change}
+        moving={moving}
+      />
+    );
+  return (
+    <div className="pane-section">
+      <h3>{tr('editor.weather')}</h3>
+      <StartWeatherFields scene={scene} onEdit={props.onEdit} />
+      <NewLookButton onEdit={props.onEdit} />
     </div>
   );
 }
@@ -297,17 +381,15 @@ function ActorSection(props: Props & { actor: CastActor }) {
   );
 }
 
-function ActionSection(
-  props: Props & { actor: CastActor | undefined; action: Action },
-) {
+function ActionSection(props: Props & { actor: CastActor; action: Action }) {
   const { tr } = useI18n();
   const names = useNames();
   const { actor, action, bg, scene } = props;
-  const actorId = actor?.id ?? null;
-  const kind = actor ? kindOf(actor.asset) : 'background';
+  const actorId = actor.id;
+  const kind = kindOf(actor.asset);
   if (!kind || !bg) return null;
-  const clips = actor ? clipsFor(kind) : backgroundClips(bg.background);
-  const moves = actor !== undefined && isMoving(kind, action.clip);
+  const clips = clipsFor(kind);
+  const moves = isMoving(kind, action.clip);
 
   const editAction = (fn: (a: Action) => Action) =>
     props.onEdit((s) =>
@@ -319,11 +401,7 @@ function ActionSection(
   const frame = 1 / props.fps;
 
   const changeClip = (clip: ClipId) => {
-    const changed = setClip(
-      action,
-      clip,
-      actor !== undefined && isMoving(kind, clip),
-    );
+    const changed = setClip(action, clip, isMoving(kind, clip));
     editAction(() => changed);
     props.onClipChanged(actorId, changed);
   };
@@ -350,7 +428,7 @@ function ActionSection(
         >
           {clips.map((c) => (
             <option key={c.id} value={c.id}>
-              {names.clip(kind, c.id)}
+              {names.clip(c.id)}
             </option>
           ))}
         </select>
@@ -384,7 +462,7 @@ function ActionSection(
         unit="%"
         onChange={(v) => editAction((a) => setClipStart(a, v / 100))}
       />
-      {moves && actor && (
+      {moves && (
         <WalkPath
           {...props}
           actor={actor}

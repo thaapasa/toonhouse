@@ -3,6 +3,7 @@
 // them here as a record by path. The value of a file can be its SVG text or
 // what loads it.
 import type { Background, Rig } from '@toonhouse/model';
+import { SKY_PARTS } from '@toonhouse/renderer';
 
 import { layerKey } from './Drawing.tsx';
 
@@ -60,8 +61,8 @@ export function rigSources<T>(
 }
 
 /**
- * The SVG files of the layers and the parts of a background in the folder
- * `dir`, by their ids. Throws if a file is missing.
+ * The SVG files of the layers of a background in the folder `dir`, by their
+ * ids. Throws if a file is missing.
  */
 export function backgroundSources<T>(
   bg: Background,
@@ -70,7 +71,20 @@ export function backgroundSources<T>(
 ): Record<string, T> {
   const out: Record<string, T> = {};
   for (const l of bg.layers) out[l.id] = fileAt(files, dir, l.svg);
-  for (const [id, p] of Object.entries(bg.parts ?? {}))
+  return out;
+}
+
+/**
+ * The SVG files of the sun and the clouds in the folder `dir`, which every
+ * asset pack uses, by the ids of their parts in `SKY_PARTS`. Throws if a file
+ * is missing.
+ */
+export function skySources<T>(
+  dir: string,
+  files: Readonly<Record<string, T>>,
+): Record<string, T> {
+  const out: Record<string, T> = {};
+  for (const [id, p] of Object.entries(SKY_PARTS))
     out[id] = fileAt(files, dir, p.svg);
   return out;
 }

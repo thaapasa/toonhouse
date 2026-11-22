@@ -74,8 +74,8 @@ editing. What the cartoon shows is up to the [camera](camera.md).
 ## Backgrounds
 
 A background is an actor too. It can have layers at different depths, such as
-the sky, the hills far away and the ground that the actors stand on, and it can
-have clips, such as the sun moving across the sky.
+the hills far away and the ground that the actors stand on. The sky and the
+weather are apart from the background (see [Sky and weather](sky.md)).
 
 - [x] User can pick a background from the library.
 - [x] A background has one or more layers, each at its own depth. The
@@ -97,10 +97,6 @@ have clips, such as the sun moving across the sky.
 - [ ] By default, an actor follows the background: its perspective and where the
       actors walk. User can turn this off for an actor in a scene, and then the
       actor keeps its size and can go anywhere.
-- [x] A background can have clips, such as the sun moving across the sky or
-      leaves moving in the wind.
-- [x] User can start a clip of the background on the timeline, as for any other
-      actor.
 
 ## Technical notes
 

@@ -6,6 +6,7 @@ export {
   packOf,
   resolve,
   rigSources,
+  skySources,
 } from './library.ts';
 export type { PartSources, PartSymbolsProps } from './PartSymbols.tsx';
 export { PartSymbols } from './PartSymbols.tsx';

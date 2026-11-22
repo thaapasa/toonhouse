@@ -1,0 +1,12 @@
+{
+  "width": 1920,
+  "height": 1080,
+  "sky": { "kind": "preset", "id": "blue" },
+  "indoor": true,
+  "layers": [{ "id": "room", "svg": "room.svg", "depth": 1 }],
+  "ground": {
+    "layer": "room",
+    "start": { "x": 960, "y": 900 },
+    "actorScale": 0.32
+  }
+}

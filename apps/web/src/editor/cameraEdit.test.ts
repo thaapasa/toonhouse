@@ -21,7 +21,6 @@ const close = { x: 600, y: 400, zoom: 2 };
 const scene = (entries: CameraEntry[]): Scene => ({
   id: 's',
   background: 'test-hills',
-  backgroundActions: [],
   actors: [],
   camera: { entries },
 });

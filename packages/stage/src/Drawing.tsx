@@ -1,5 +1,9 @@
 import type { Matrix, PartId } from '@toonhouse/model';
-import type { ClipShape, DrawNode } from '@toonhouse/renderer';
+import type {
+  ClipShape,
+  DrawNode,
+  VerticalGradient,
+} from '@toonhouse/renderer';
 import type { ReactNode } from 'react';
 
 const matrix = (m: Matrix | undefined) =>
@@ -42,20 +46,54 @@ function clipShape(shape: ClipShape) {
   );
 }
 
+const hex = (c: string, i: number) => parseInt(c.slice(i, i + 2), 16) / 255;
+
+/**
+ * The matrix of an SVG filter that multiplies each color by `tint`, a CSS hex
+ * color. The filter works in sRGB, so that it multiplies the colors as they
+ * are written.
+ */
+const tintMatrix = (tint: string) => {
+  const [r, g, b] = [1, 3, 5].map((i) => hex(tint, i).toFixed(4));
+  return `${r} 0 0 0 0 0 ${g} 0 0 0 0 0 ${b} 0 0 0 0 0 1 0`;
+};
+
+function gradient(id: string, fill: VerticalGradient) {
+  return (
+    <linearGradient id={id} x1={0} y1={0} x2={0} y2={1}>
+      {fill.stops.map((s, i) => (
+        <stop
+          key={i}
+          offset={s.at}
+          stopColor={s.color}
+          stopOpacity={s.opacity}
+        />
+      ))}
+    </linearGradient>
+  );
+}
+
 function render(node: DrawNode, prefix: string, key: string): ReactNode {
   switch (node.type) {
     case 'group': {
       const clipId = node.clip ? `${prefix}-clip-${key}` : undefined;
       const inner =
         node.actor === undefined ? prefix : actorPrefix(prefix, node.actor);
+      const tintId = node.tint ? `${prefix}-tint-${key}` : undefined;
       const children = node.children.map((c, i) =>
         render(c, inner, `${key}-${i}`),
+      );
+      const clipped = clipId ? (
+        <g clipPath={`url(#${clipId})`}>{children}</g>
+      ) : (
+        children
       );
       return (
         <g
           key={key}
           data-actor={node.actor}
           transform={matrix(node.transform)}
+          opacity={node.opacity}
           style={
             node.shade === undefined
               ? undefined
@@ -63,7 +101,13 @@ function render(node: DrawNode, prefix: string, key: string): ReactNode {
           }
         >
           {node.clip && <clipPath id={clipId}>{clipShape(node.clip)}</clipPath>}
-          {clipId ? <g clipPath={`url(#${clipId})`}>{children}</g> : children}
+          {node.tint && (
+            <filter id={tintId} colorInterpolationFilters="sRGB">
+              <feColorMatrix type="matrix" values={tintMatrix(node.tint)} />
+            </filter>
+          )}
+          {/* The tint has a group of its own, so that it doesn't replace the shade. */}
+          {tintId ? <g filter={`url(#${tintId})`}>{clipped}</g> : clipped}
         </g>
       );
     }
@@ -120,17 +164,33 @@ function render(node: DrawNode, prefix: string, key: string): ReactNode {
           {node.text}
         </text>
       );
-    case 'rect':
+    case 'rect': {
+      if (typeof node.fill === 'string') {
+        return (
+          <rect
+            key={key}
+            x={node.x}
+            y={node.y}
+            width={node.width}
+            height={node.height}
+            fill={node.fill}
+          />
+        );
+      }
+      const id = `${prefix}-fill-${key}`;
       return (
-        <rect
-          key={key}
-          x={node.x}
-          y={node.y}
-          width={node.width}
-          height={node.height}
-          fill={node.fill}
-        />
+        <g key={key}>
+          {gradient(id, node.fill)}
+          <rect
+            x={node.x}
+            y={node.y}
+            width={node.width}
+            height={node.height}
+            fill={`url(#${id})`}
+          />
+        </g>
       );
+    }
   }
 }
 

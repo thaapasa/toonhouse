@@ -16,8 +16,22 @@ for something else or too vague.
 - **Scene**: a background with actors on it and a timeline for them. The user
   edits each scene on its own. Each scene belongs to one cartoon.
 - **Background**: the actor behind the other actors in a scene. It has one or
-  more layers at different depths, and it can have clips, such as the sun moving
-  across the sky. The user picks it from the library. A background is not a rig.
+  more layers at different depths, and it gives the default sky and the path of
+  the sun. The user picks it from the library. A background is not a rig, and it
+  has no clips.
+- **Sky**: what a scene shows behind all layers of its background: a preset sky,
+  a color or a gradient, or space. Each scene has its own, apart from its
+  background.
+- **Time of day**: the hour in a scene. It sets where the sun and the moon are,
+  the colors of the sky and how dark the scene is.
+- **Time change**: a change of the time of day on the timeline, from the time
+  where the scene is to a new time over a length.
+- **Weather**: the clouds, the wind, the rain, the snow and the mist of a scene.
+- **Weather change**: a change of the weather on the timeline, from the weather
+  where the scene is to new settings over a length. It changes only the settings
+  that it names.
+- **Indoor background**: a background of a room. The sky and the weather show
+  only through its windows.
 - **Depth**: how far a layer of the background is from the camera, from 0 for a
   layer infinitely far away, such as the sky, to 1 for the ground layer. When
   the camera moves, the far layers move less than the near ones.
@@ -129,10 +143,9 @@ for something else or too vague.
   ground, usually under the feet. If the size of an actor changes, its ground
   point stays in place. Not: pivot point, which belongs to a bone.
 - **Part**: a drawing on a bone, such as the head or a wing. A part has one or
-  more layers. A background has parts too: drawings on its layers that clips
-  move, such as the sun. Not: sprite.
+  more layers. Not: sprite.
 - **Layer**: one SVG drawing of a part or a background, such as the front hair
-  of the head or the sky of a background. The layers of a part move together,
+  of the head or the hills of a background. The layers of a part move together,
   but each has its own place in the draw order.
 - **Draw order**: the order in which the layers of a rig and the drawn limbs are
   drawn, from the back to the front. Each rig has a default draw order, and a
@@ -147,13 +160,11 @@ for something else or too vague.
   The word belongs to the asset scripts in `assets/` and `prototypes/`.
 - **Rubber hose**: an arm or a leg that the renderer draws as a bending line
   between two parts, instead of a traced part.
-- **Clip**: a short motion that a character, a prop or a background can play,
-  such as a walk cycle, a wave or the sun moving across the sky. A clip works on
-  every rig of the same kind, or on every background. Use "clip" everywhere, in
-  the code, the docs and the UI. Not: animation, move.
+- **Clip**: a short motion that a character or a prop can play, such as a walk
+  cycle or a wave. A clip works on every rig of the same kind. Use "clip"
+  everywhere, in the code, the docs and the UI. Not: animation, move.
 - **Code clip**: a clip that is written as a TypeScript function from the time
-  to a pose and a face, or to where the parts of a background are. All clips are
-  code clips for now.
+  to a pose and a face. All clips are code clips for now.
 - **Keyframe clip**: a clip that is stored as JSON keyframes and edited in the
   character studio. Planned.
 - **Pose**: the angles and positions of the bones of a rig at one moment.

@@ -1,6 +1,6 @@
 {
   "src": "assets/work/bg-redraw/traced/sun.svg",
-  "out": "assets/packs/sunny/shared/sun.svg",
+  "out": "assets/sky/sun.svg",
   "layers": [
     {
       "name": "outline",

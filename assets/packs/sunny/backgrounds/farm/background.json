@@ -1,8 +1,13 @@
 {
   "width": 2048,
   "height": 1152,
+  "sky": { "kind": "preset", "id": "blue" },
+  "sun": {
+    "from": { "x": 240, "y": 660 },
+    "top": { "x": 1024, "y": 150 },
+    "to": { "x": 1810, "y": 660 }
+  },
   "layers": [
-    { "id": "sky", "svg": "sky.svg", "depth": 0 },
     { "id": "far", "svg": "far.svg", "depth": 0.2 },
     { "id": "middle", "svg": "middle.svg", "depth": 0.5 },
     { "id": "ground", "svg": "ground.svg", "depth": 1 }
@@ -11,51 +16,5 @@
     "layer": "ground",
     "start": { "x": 1024, "y": 900 },
     "actorScale": 0.4
-  },
-  "parts": {
-    "sun": {
-      "svg": "../../shared/sun.svg",
-      "width": 956,
-      "height": 954,
-      "pivot": { "x": 478, "y": 477 },
-      "layer": "sky",
-      "at": { "x": 1560, "y": 220 },
-      "scale": 0.2,
-      "arc": {
-        "from": { "x": 240, "y": 660 },
-        "top": { "x": 1024, "y": 150 },
-        "to": { "x": 1810, "y": 660 }
-      }
-    },
-    "cloudBig": {
-      "svg": "../../shared/cloud-3.svg",
-      "width": 655,
-      "height": 377,
-      "pivot": { "x": 327, "y": 377 },
-      "layer": "sky",
-      "at": { "x": 360, "y": 240 },
-      "scale": 0.5,
-      "drift": { "speed": 40 }
-    },
-    "cloudMiddle": {
-      "svg": "../../shared/cloud-4.svg",
-      "width": 605,
-      "height": 322,
-      "pivot": { "x": 302, "y": 322 },
-      "layer": "sky",
-      "at": { "x": 1400, "y": 150 },
-      "scale": 0.4,
-      "drift": { "speed": 20 }
-    },
-    "cloudSmall": {
-      "svg": "../../shared/cloud-1.svg",
-      "width": 656,
-      "height": 374,
-      "pivot": { "x": 328, "y": 374 },
-      "layer": "sky",
-      "at": { "x": 1650, "y": 300 },
-      "scale": 0.28,
-      "drift": { "speed": 60 }
-    }
   }
 }

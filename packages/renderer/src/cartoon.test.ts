@@ -16,7 +16,6 @@ const library: Library = {
 const scene = (id: string, background: string | null): Scene => ({
   id,
   background,
-  backgroundActions: [],
   actors: [],
 });
 

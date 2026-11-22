@@ -37,6 +37,8 @@ After editing a spec, format it with Prettier: `pnpm format`.
 - [Library](library.md): the asset packs and their art styles.
 - [Characters](characters.md): characters, props and their clips.
 - [Scenes](scenes.md): backgrounds, placing actors and saving scenes.
+- [Sky and weather](sky.md): the sky, the time of day and the weather of a
+  scene.
 - [Timeline](timeline.md): giving actors actions over time.
 - [Speech bubbles](bubbles.md): texts that show on the stage for a time.
 - [Properties pane](properties.md): seeing and changing all the data of the

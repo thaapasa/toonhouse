@@ -2,14 +2,12 @@ import type { ClipId } from '@toonhouse/model';
 import type { ComponentType } from 'react';
 
 import {
-  CloudIcon,
   FlapIcon,
   HopIcon,
   LookoutIcon,
   PeckIcon,
   RustleIcon,
   StandIcon,
-  SunIcon,
   TalkIcon,
   WalkIcon,
   WaveIcon,
@@ -25,8 +23,6 @@ export const CLIP_ICONS: Record<ClipId, ComponentType> = {
   hop: HopIcon,
   lookout: LookoutIcon,
   rustle: RustleIcon,
-  day: SunIcon,
-  drift: CloudIcon,
 };
 
 /** The colors of the actions of each clip on the timeline. */
@@ -40,6 +36,4 @@ export const CLIP_COLORS: Record<ClipId, string> = {
   hop: '#9ccb8b',
   lookout: '#8fd0c9',
   rustle: '#9ccb8b',
-  day: '#f2c46b',
-  drift: '#b8c4d6',
 };
