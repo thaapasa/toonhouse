@@ -18,6 +18,19 @@ for something else or too vague.
 - **Background**: the actor behind the other actors in a scene. It has one or
   more layers at different depths, and it can have clips, such as the sun moving
   across the sky. The user picks it from the library. A background is not a rig.
+- **Sky**: what a scene shows behind all layers of its background: a preset sky,
+  a color or a gradient, or space. Each scene has its own, apart from its
+  background.
+- **Time of day**: the hour in a scene. It sets where the sun and the moon are,
+  the colors of the sky and how dark the scene is.
+- **Time change**: a change of the time of day on the timeline, from the time
+  where the scene is to a new time over a length.
+- **Weather**: the clouds, the wind, the rain, the snow and the mist of a scene.
+- **Weather change**: a change of the weather on the timeline, from the weather
+  where the scene is to new settings over a length. It changes only the settings
+  that it names.
+- **Indoor background**: a background of a room. The sky and the weather show
+  only through its windows.
 - **Depth**: how far a layer of the background is from the camera, from 0 for a
   layer infinitely far away, such as the sky, to 1 for the ground layer. When
   the camera moves, the far layers move less than the near ones.
