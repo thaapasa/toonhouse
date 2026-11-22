@@ -19,8 +19,8 @@ const SAME_TIME = 1e-6;
 export const newId = () => crypto.randomUUID();
 
 /**
- * A random seed for the look of the clouds, the rain, the snow, the mist and
- * the stars of a scene.
+ * A random seed for the look of the clouds, the rain, the snow and the
+ * stars of a scene.
  */
 export const newSeed = () => crypto.getRandomValues(new Uint32Array(1))[0]!;
 

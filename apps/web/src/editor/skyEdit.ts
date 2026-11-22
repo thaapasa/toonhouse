@@ -132,9 +132,15 @@ export function changeHolder<T extends Change>(
 }
 
 /**
- * A new change of the time of day at `t`, which goes to the time where the
- * scene is there. Null if `t` is inside a change or a change doesn't fit
- * before the next one.
+ * How many hours a new time change moves the sun. A change that went to the
+ * time where the scene already is would do nothing until the user set it.
+ */
+const NEW_TIME_CHANGE_HOURS = 3;
+
+/**
+ * A new change of the time of day at `t`, which goes to `NEW_TIME_CHANGE_HOURS`
+ * after the time where the scene is there. Null if `t` is inside a change or a
+ * change doesn't fit before the next one.
  */
 export function newTimeChange(
   scene: Scene,
@@ -143,7 +149,12 @@ export function newTimeChange(
 ): TimeChange | null {
   const length = newBlockLength(changesOf(scene, 'time'), t);
   if (length === null) return null;
-  return { id, t, length, to: savedHour(skyStateAt(scene, t).hour) };
+  return {
+    id,
+    t,
+    length,
+    to: savedHour(skyStateAt(scene, t).hour + NEW_TIME_CHANGE_HOURS),
+  };
 }
 
 /**

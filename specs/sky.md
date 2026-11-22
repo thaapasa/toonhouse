@@ -16,11 +16,13 @@ rain, snow and mist. Both can change on the [timeline](timeline.md).
       example, two scenes with many clouds have their clouds in different
       places. The look comes from a random number that the scene saves, so the
       scene looks the same each time it plays and in the exported video.
-- [x] User can try a different look for the clouds, the rain, the snow, the mist
-      and the stars of a scene with one button.
+- [x] User can try a different look for the clouds, the rain, the snow and the
+      stars of a scene with one button.
 - [x] A new scene starts with the sky, the time of day and the weather that the
       scene before it has at its end. The first scene starts with the default
-      sky of its background, at noon, with fair weather.
+      sky of its background, at noon, with fair weather. If the scene before
+      uses the default sky of its background, the new scene gets the default sky
+      of its own background instead.
 
 ## The sky
 

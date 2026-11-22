@@ -33,15 +33,20 @@ const scene = (
 });
 
 describe('new changes', () => {
-  it('starts a time change at the playhead, at the time of the scene there', () => {
-    const s = scene([{ id: 'a', t: 1, length: 2, to: 20 }]);
+  it('starts a time change at the playhead, 3 hours after the time of the scene there', () => {
+    const s = scene([{ id: 'a', t: 1, length: 2, to: 22 }]);
     expect(newTimeChange(s, 'b', 4)).toEqual({
       id: 'b',
       t: 4,
       length: 2,
-      to: 20,
+      to: 25,
     });
-    expect(newTimeChange(scene(), 'b', 0)).toMatchObject({ to: 10 });
+    expect(newTimeChange(scene(), 'b', 0)).toMatchObject({ to: 13 });
+  });
+
+  it('keeps the target of a new time change inside the saved hours', () => {
+    const s: Scene = { ...scene(), sky: { start: 99_999, changes: [] } };
+    expect(newTimeChange(s, 'b', 0)).toMatchObject({ to: 100_000 });
   });
 
   it('starts a weather change that sets nothing yet', () => {
