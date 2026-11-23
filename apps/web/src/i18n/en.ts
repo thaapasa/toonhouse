@@ -411,6 +411,7 @@ export const en = {
   'colorSetting.shoes': 'Shoes',
   'colorSetting.slippers': 'Slippers',
   'colorSetting.outline': 'Outline',
+  'colorSetting.fur': 'Fur',
   'background.sunny/farm': 'Farm',
   'background.sunny/meadow': 'Meadow',
   'background.sunny/village': 'Village',

@@ -349,6 +349,8 @@ export const fi: Texts = {
   'colorSetting.dress': 'Mekko',
   'colorSetting.slippers': 'Tohvelit',
   'color.lilac': 'Liila',
+  'colorSetting.fur': 'Turkki',
+  'color.winter': 'Talvivalkoinen',
   'color.coral': 'Koralli',
   'color.coral-flowers': 'Koralli kukilla',
   'color.blue-flowers': 'Sininen kukilla',

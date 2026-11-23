@@ -348,6 +348,8 @@ export const en = {
   'colorSetting.dress': 'Dress',
   'colorSetting.slippers': 'Slippers',
   'color.lilac': 'Lilac',
+  'colorSetting.fur': 'Fur',
+  'color.winter': 'Winter white',
   'color.coral': 'Coral',
   'color.coral-flowers': 'Coral with flowers',
   'color.blue-flowers': 'Blue with flowers',

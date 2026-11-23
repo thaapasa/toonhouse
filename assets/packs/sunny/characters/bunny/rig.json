@@ -5,50 +5,91 @@
       "svg": "head.svg",
       "width": 302,
       "height": 277,
-      "pivot": { "x": 130, "y": 240 }
+      "pivot": {
+        "x": 122,
+        "y": 253
+      }
     },
     "ear": {
       "svg": "ear.svg",
       "width": 124,
       "height": 342,
-      "pivot": { "x": 55, "y": 320 }
+      "pivot": {
+        "x": 60,
+        "y": 319
+      }
     },
     "body": {
       "svg": "body.svg",
       "width": 335,
       "height": 275,
-      "pivot": { "x": 165, "y": 185 }
+      "pivot": {
+        "x": 165,
+        "y": 185
+      }
     },
     "paw": {
       "svg": "paw.svg",
       "width": 96,
       "height": 87,
-      "pivot": { "x": 48, "y": 43 }
+      "pivot": {
+        "x": 48,
+        "y": 43
+      }
     },
     "foot": {
       "svg": "foot.svg",
       "width": 286,
       "height": 110,
-      "pivot": { "x": 50, "y": 55 }
+      "pivot": {
+        "x": 46,
+        "y": 51
+      }
     }
   },
   "body": {
-    "neck": { "x": 255, "y": 45 },
-    "shoulderNear": { "x": 285, "y": 150 },
-    "shoulderFar": { "x": 270, "y": 145 },
-    "hipNear": { "x": 170, "y": 190 },
-    "hipFar": { "x": 150, "y": 185 }
+    "neck": {
+      "x": 239,
+      "y": 29
+    },
+    "shoulderNear": {
+      "x": 289,
+      "y": 152
+    },
+    "shoulderFar": {
+      "x": 279,
+      "y": 149
+    },
+    "hipNear": {
+      "x": 125,
+      "y": 150
+    },
+    "hipFar": {
+      "x": 110,
+      "y": 152
+    }
   },
   "ears": {
-    "near": { "x": 115, "y": 45 },
-    "far": { "x": 150, "y": 40 }
+    "near": {
+      "x": 130,
+      "y": 35
+    },
+    "far": {
+      "x": 146,
+      "y": 36
+    }
   },
-  "scales": { "head": 0.8, "ear": 0.75, "paw": 0.5, "foot": 0.45 },
+  "scales": {
+    "head": 0.71,
+    "ear": 0.71,
+    "paw": 0.65,
+    "foot": 0.53
+  },
   "heelHeight": 45,
   "wristHeight": 42,
   "legs": {
     "armLength": 90,
-    "armWidth": 26,
+    "armWidth": 29,
     "thighLength": 68,
     "shankLength": 72,
     "shankWidth": 26
@@ -63,17 +104,194 @@
     "tongue": "#f8778f",
     "teeth": "#ffffff"
   },
+  "colorRoles": {
+    "line": "outline"
+  },
+  "colorSettings": [
+    {
+      "id": "fur",
+      "presets": [
+        {
+          "id": "tan",
+          "colors": {
+            "fur": "#e7a862",
+            "belly": "#fcf0da",
+            "tail": "#f5efeb"
+          }
+        },
+        {
+          "id": "brown",
+          "colors": {
+            "fur": "#a86f45",
+            "belly": "#f3e0c6",
+            "tail": "#f5efeb"
+          }
+        },
+        {
+          "id": "dark-brown",
+          "colors": {
+            "fur": "#74503a",
+            "belly": "#ead6bb",
+            "tail": "#f2ece6"
+          }
+        },
+        {
+          "id": "gray",
+          "colors": {
+            "fur": "#a39d97",
+            "belly": "#f1eeea",
+            "tail": "#f7f5f2"
+          }
+        },
+        {
+          "id": "black",
+          "colors": {
+            "fur": "#544c48",
+            "belly": "#f2eee9",
+            "tail": "#f2eee9"
+          }
+        },
+        {
+          "id": "white",
+          "colors": {
+            "fur": "#f7f2ea",
+            "belly": "#fffdf8",
+            "tail": "#ffffff"
+          }
+        },
+        {
+          "id": "winter",
+          "colors": {
+            "fur": "#e6edf5",
+            "belly": "#ffffff",
+            "tail": "#ffffff"
+          }
+        },
+        {
+          "id": "pink",
+          "colors": {
+            "fur": "#f2a6bf",
+            "belly": "#fdeaf1",
+            "tail": "#fff5f8"
+          }
+        },
+        {
+          "id": "lilac",
+          "colors": {
+            "fur": "#b7a3dc",
+            "belly": "#f3eefb",
+            "tail": "#faf8fd"
+          }
+        }
+      ]
+    },
+    {
+      "id": "eyes",
+      "presets": [
+        {
+          "id": "black",
+          "colors": {
+            "pupil": "#130602"
+          }
+        },
+        {
+          "id": "brown",
+          "colors": {
+            "pupil": "#5a3418"
+          }
+        },
+        {
+          "id": "red",
+          "colors": {
+            "pupil": "#b3263a"
+          }
+        },
+        {
+          "id": "blue",
+          "colors": {
+            "pupil": "#2a6fd0"
+          }
+        }
+      ]
+    },
+    {
+      "id": "outline",
+      "presets": [
+        {
+          "id": "dark-brown",
+          "colors": {
+            "outline": "#442113"
+          }
+        },
+        {
+          "id": "black",
+          "colors": {
+            "outline": "#161414"
+          }
+        },
+        {
+          "id": "charcoal",
+          "colors": {
+            "outline": "#3a3a3f"
+          }
+        },
+        {
+          "id": "navy",
+          "colors": {
+            "outline": "#1c2444"
+          }
+        },
+        {
+          "id": "plum",
+          "colors": {
+            "outline": "#3b1d33"
+          }
+        }
+      ]
+    }
+  ],
   "farShade": 0.82,
-  "shadow": { "rx": 150, "ry": 18 },
+  "shadow": {
+    "rx": 150,
+    "ry": 18
+  },
   "face": {
-    "eye": { "cx": 189, "cy": 124, "rx": 29, "ry": 33 },
+    "eye": {
+      "cx": 189,
+      "cy": 124,
+      "rx": 29,
+      "ry": 33
+    },
     "shutY": 130,
     "mouth": {
-      "back": { "x": 238, "y": 186 },
-      "front": { "x": 277, "y": 196 },
-      "control": { "x": 254, "y": 206 },
+      "back": {
+        "x": 238,
+        "y": 186
+      },
+      "front": {
+        "x": 277,
+        "y": 196
+      },
+      "control": {
+        "x": 254,
+        "y": 206
+      },
       "openDepth": 60,
       "teeth": "M256 199h8v11q0 2-2 2h-4q-2 0-2-2zM265 199h8v11q0 2-2 2h-4q-2 0-2-2z"
     }
-  }
+  },
+  "drawOrder": [
+    "hindLegFar",
+    "footFar",
+    "frontLegFar",
+    "pawFar",
+    "earFar",
+    "hindLegNear",
+    "body",
+    "footNear",
+    "head",
+    "earNear",
+    "frontLegNear",
+    "pawNear"
+  ]
 }

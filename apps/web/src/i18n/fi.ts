@@ -423,6 +423,7 @@ export const fi: Texts = {
   'colorSetting.shoes': 'Kengät',
   'colorSetting.slippers': 'Tossut',
   'colorSetting.outline': 'Ääriviivat',
+  'colorSetting.fur': 'Turkki',
   'background.sunny/farm': 'Maatila',
   'background.sunny/meadow': 'Niitty',
   'background.sunny/village': 'Kylä',

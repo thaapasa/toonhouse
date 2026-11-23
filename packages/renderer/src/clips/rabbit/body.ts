@@ -8,8 +8,8 @@ import { deg, rotate, smoothstep } from '../../math.ts';
 export const HIP_HEIGHT = 78;
 
 /** Where the heels and the bottoms of the paws are when sitting. */
-export const SIT_NEAR: Pt = { x: 12, y: 0 };
-export const SIT_FAR: Pt = { x: -8, y: 0 };
+export const SIT_NEAR: Pt = { x: -40, y: 0 };
+export const SIT_FAR: Pt = { x: -60, y: 0 };
 export const PAW_NEAR: Pt = { x: 128, y: 0 };
 export const PAW_FAR: Pt = { x: 106, y: 0 };
 

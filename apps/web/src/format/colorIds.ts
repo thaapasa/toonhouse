@@ -87,6 +87,21 @@ export const colorIds: Record<string, Record<string, string[]>> = {
     shoes: ['red', 'blue', 'green', 'yellow', 'brown', 'black', 'white'],
     outline: ['dark-brown', 'black', 'charcoal', 'navy', 'plum'],
   },
+  'sunny/bunny': {
+    fur: [
+      'tan',
+      'brown',
+      'dark-brown',
+      'gray',
+      'black',
+      'white',
+      'winter',
+      'pink',
+      'lilac',
+    ],
+    eyes: ['black', 'brown', 'red', 'blue'],
+    outline: ['dark-brown', 'black', 'charcoal', 'navy', 'plum'],
+  },
   'sunny/emo-girl': {
     skin: ['light', 'pale', 'tan', 'brown', 'dark-brown', 'deep'],
     hair: [
