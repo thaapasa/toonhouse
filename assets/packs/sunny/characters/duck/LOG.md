@@ -81,7 +81,7 @@ I read the points from zoomed crops of the pieces with a 20 px grid
 (`inspect-piece.ts --zoom`).
 
 - The head turns around a point low in the neck stub, above the collar.
-- The folded wing turns around its rounded front end and is turned 40°
+- The folded wing turns around its rounded front end and is turned
   (`foldedAngle`), so that it lies along the body with the feather tips at the
   back. The open wing turns around its root.
 - The clips are made for the hen. In the peck, the body tips 75° around its
@@ -89,9 +89,9 @@ I read the points from zoomed crops of the pieces with a 20 px grid
   changes lift the head: the body pivot is near the front and the bottom of the
   body, at (165, 192), and the neck point is further back on the top of the
   body. The hips stay at y 178, so the legs come out of the bottom of the body.
-- The neck and the lids take the color in `colors.feathers`, which is the green
-  of the head. The thighs take `colors.thigh`, the grey of the body, so that
-  they look like a part of it.
+- The lids take the color in `colors.feathers`, which is the green of the head.
+  The neck and the thighs take `colors.neck` and `colors.thigh`, the grey of the
+  body, so that they look like a part of it.
 - The legs are 45 + 78 px long. The hips are 117 px above the ankles when the
   duck stands, so the legs bend a little and bend more in the walk.
 - The head is drawn at 0.56 and the feet at 0.6.
@@ -131,3 +131,9 @@ without the shadow and finding the lowest opaque row, with
   are the grey of the body. With grey thighs, the legs could be long enough to
   bend: they were 28 + 58 px, shorter than the 117 px from the hip to the ankle,
   so they were always straight and the shanks stretched.
+- **Folded wing:** the traced wing pointed its feather tips forward, so it
+  looked the wrong way around. `wing.svg` is now mirrored in its path data, and
+  its pivot moved to the mirrored point.
+- **Neck:** the neck showed below the collar in the green of the head, which
+  looked like a bug. The bird rig now has an optional `colors.neck`, and the
+  duck's neck is the grey of the body.

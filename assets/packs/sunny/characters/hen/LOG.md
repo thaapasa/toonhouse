@@ -92,6 +92,10 @@ The pivots come from the alpha masks, read row by row:
   became a long white pipe. Now most of the drop comes from the body: it tips
   52° around the hips, the legs bend into a crouch, and the head turns until the
   beak points down. The neck stretches about 90 px.
+- **Neck:** the head piece covered the neck almost everywhere, and where the
+  neck showed it looked like a bug. The neck is optional in the bird rig, and
+  the hen has none. The feather ruff of the head covers the joint, also at the
+  bottom of the peck.
 
 ## Checks
 

@@ -121,7 +121,15 @@ export function drawBird(
     footFar: farLeg.foot,
     legNear: { nodes: nearLeg.leg },
     footNear: nearLeg.foot,
-    neck: { nodes: tube(line(neck, headAt), rig.neck.width, colors.feathers) },
+    neck: {
+      nodes: rig.neck
+        ? tube(
+            line(neck, headAt),
+            rig.neck.width,
+            colors.neck ?? colors.feathers,
+          )
+        : [],
+    },
     body: piece('body', pinned(pose.hip, pose.bodyAngle, 1, b0.pivot)),
     head: layered(parts.head, (layer) => [
       {

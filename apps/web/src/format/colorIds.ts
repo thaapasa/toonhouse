@@ -102,6 +102,12 @@ export const colorIds: Record<string, Record<string, string[]>> = {
     eyes: ['black', 'brown', 'red', 'blue'],
     outline: ['dark-brown', 'black', 'charcoal', 'navy', 'plum'],
   },
+  'sunny/duck': {
+    plumage: ['mallard', 'brown', 'white', 'black', 'gray', 'yellow', 'pink'],
+    beak: ['yellow', 'orange', 'pink', 'gray', 'black'],
+    legs: ['orange', 'yellow', 'pink', 'gray', 'black'],
+    outline: ['dark-brown', 'black', 'charcoal', 'navy', 'plum'],
+  },
   'sunny/emo-girl': {
     skin: ['light', 'pale', 'tan', 'brown', 'dark-brown', 'deep'],
     hair: [
@@ -162,6 +168,21 @@ export const colorIds: Record<string, Record<string, string[]>> = {
     slippers: ['purple', 'pink', 'blue', 'red', 'green', 'brown', 'gray'],
     outline: ['dark-brown', 'black', 'charcoal', 'navy', 'plum'],
   },
+  'sunny/hen': {
+    feathers: [
+      'white',
+      'cream',
+      'golden',
+      'brown',
+      'gray',
+      'black',
+      'pink',
+      'light-blue',
+    ],
+    comb: ['red', 'burgundy', 'pink', 'purple', 'blue'],
+    'legs-beak': ['yellow', 'gray', 'pink', 'black', 'orange'],
+    outline: ['dark-brown', 'black', 'charcoal', 'navy', 'plum'],
+  },
   'sunny/raincoat-girl': {
     skin: ['brown', 'pale', 'light', 'tan', 'dark-brown', 'deep'],
     hair: [
@@ -177,6 +198,10 @@ export const colorIds: Record<string, Record<string, string[]>> = {
     coat: ['yellow', 'red', 'blue', 'green', 'pink', 'orange', 'purple'],
     buttons: ['cyan', 'red', 'white', 'black', 'yellow', 'green', 'pink'],
     boots: ['red', 'yellow', 'blue', 'green', 'pink', 'purple', 'black'],
+    outline: ['dark-brown', 'black', 'charcoal', 'navy', 'plum'],
+  },
+  'sunny/squirrel': {
+    fur: ['red', 'orange', 'brown', 'gray', 'black', 'white', 'blue', 'purple'],
     outline: ['dark-brown', 'black', 'charcoal', 'navy', 'plum'],
   },
   'sunny/wizard': {

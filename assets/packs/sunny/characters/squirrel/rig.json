@@ -6,8 +6,8 @@
       "width": 309,
       "height": 266,
       "pivot": {
-        "x": 130,
-        "y": 225
+        "x": 126,
+        "y": 228
       }
     },
     "ear": {
@@ -33,8 +33,8 @@
       "width": 77,
       "height": 88,
       "pivot": {
-        "x": 38,
-        "y": 44
+        "x": 34,
+        "y": 48
       }
     },
     "foot": {
@@ -42,15 +42,15 @@
       "width": 290,
       "height": 110,
       "pivot": {
-        "x": 50,
-        "y": 55
+        "x": 48,
+        "y": 54
       }
     }
   },
   "body": {
     "neck": {
-      "x": 340,
-      "y": 195
+      "x": 364,
+      "y": 191
     },
     "shoulderNear": {
       "x": 385,
@@ -129,28 +129,28 @@
   ],
   "ears": {
     "near": {
-      "x": 120,
-      "y": 40
+      "x": 115,
+      "y": 39
     },
     "far": {
-      "x": 155,
-      "y": 30
+      "x": 145,
+      "y": 41
     }
   },
   "scales": {
-    "head": 0.8,
-    "ear": 0.7,
-    "paw": 0.55,
-    "foot": 0.45
+    "head": 0.68,
+    "ear": 0.77,
+    "paw": 0.67,
+    "foot": 0.52
   },
   "heelHeight": 45,
   "wristHeight": 44,
   "legs": {
     "armLength": 90,
-    "armWidth": 24,
+    "armWidth": 27,
     "thighLength": 68,
     "shankLength": 72,
-    "shankWidth": 24
+    "shankWidth": 14
   },
   "outlineWidth": 5,
   "colors": {
@@ -162,6 +162,107 @@
     "tongue": "#f8778f",
     "teeth": "#ffffff"
   },
+  "colorRoles": {
+    "line": "outline"
+  },
+  "colorSettings": [
+    {
+      "id": "fur",
+      "presets": [
+        {
+          "id": "red",
+          "colors": {
+            "fur": "#f23c06",
+            "belly": "#fceac6"
+          }
+        },
+        {
+          "id": "orange",
+          "colors": {
+            "fur": "#e07a34",
+            "belly": "#f8d6a8"
+          }
+        },
+        {
+          "id": "brown",
+          "colors": {
+            "fur": "#9a5a2e",
+            "belly": "#f5e3c8"
+          }
+        },
+        {
+          "id": "gray",
+          "colors": {
+            "fur": "#8f8a86",
+            "belly": "#f3efe8"
+          }
+        },
+        {
+          "id": "black",
+          "colors": {
+            "fur": "#554b48",
+            "belly": "#e9e1d6"
+          }
+        },
+        {
+          "id": "white",
+          "colors": {
+            "fur": "#f6f2ea",
+            "belly": "#ffffff"
+          }
+        },
+        {
+          "id": "blue",
+          "colors": {
+            "fur": "#5b8fd6",
+            "belly": "#e3eefb"
+          }
+        },
+        {
+          "id": "purple",
+          "colors": {
+            "fur": "#9a6ad0",
+            "belly": "#efe6fb"
+          }
+        }
+      ]
+    },
+    {
+      "id": "outline",
+      "presets": [
+        {
+          "id": "dark-brown",
+          "colors": {
+            "outline": "#3b0603"
+          }
+        },
+        {
+          "id": "black",
+          "colors": {
+            "outline": "#161414"
+          }
+        },
+        {
+          "id": "charcoal",
+          "colors": {
+            "outline": "#3a3a3f"
+          }
+        },
+        {
+          "id": "navy",
+          "colors": {
+            "outline": "#1c2444"
+          }
+        },
+        {
+          "id": "plum",
+          "colors": {
+            "outline": "#3b1d33"
+          }
+        }
+      ]
+    }
+  ],
   "farShade": 0.82,
   "shadow": {
     "rx": 150,
@@ -191,5 +292,19 @@
       "openDepth": 42,
       "teeth": "M248 197h8v12q0 2-2 2h-4q-2 0-2-2zM257 197h8v12q0 2-2 2h-4q-2 0-2-2z"
     }
-  }
+  },
+  "drawOrder": [
+    "hindLegFar",
+    "footFar",
+    "frontLegFar",
+    "pawFar",
+    "earFar",
+    "hindLegNear",
+    "body",
+    "footNear",
+    "head",
+    "earNear",
+    "frontLegNear",
+    "pawNear"
+  ]
 }

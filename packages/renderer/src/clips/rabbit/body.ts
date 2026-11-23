@@ -23,12 +23,15 @@ export const SHOULDER: Pt = { x: 120, y: -35 };
 export const EAR_NEAR = deg(-10);
 export const EAR_FAR = deg(8);
 
+/** The foot scale of the bunny, which the squirrel shares closely. */
+const FOOT_SCALE = 0.53;
+
 /**
  * The tip of the sole in front of the heel, and the height of the heel above
  * the sole, in sheet pixels: the foot pixels of the rig times its scale.
  */
-const TOE_X = 100;
-const HEEL_HEIGHT = 45 * 0.45;
+const TOE_X = 222 * FOOT_SCALE;
+const HEEL_HEIGHT = 45 * FOOT_SCALE;
 
 /**
  * A hind foot that stands on its toes with the heel lifted by `angle`, with

@@ -6,8 +6,8 @@
       "width": 243,
       "height": 372,
       "pivot": {
-        "x": 100,
-        "y": 300
+        "x": 106,
+        "y": 307
       }
     },
     "body": {
@@ -24,8 +24,8 @@
       "width": 184,
       "height": 197,
       "pivot": {
-        "x": 125,
-        "y": 30
+        "x": 124,
+        "y": 34
       }
     },
     "wingOpen": {
@@ -33,8 +33,8 @@
       "width": 193,
       "height": 223,
       "pivot": {
-        "x": 140,
-        "y": 190
+        "x": 156,
+        "y": 168
       }
     },
     "foot": {
@@ -49,16 +49,16 @@
   },
   "body": {
     "neck": {
-      "x": 172,
-      "y": 45
+      "x": 160,
+      "y": 32
     },
     "shoulderNear": {
-      "x": 165,
-      "y": 100
+      "x": 152,
+      "y": 87
     },
     "shoulderFar": {
-      "x": 150,
-      "y": 96
+      "x": 165,
+      "y": 87
     },
     "hipNear": {
       "x": 162,
@@ -70,26 +70,23 @@
     }
   },
   "scales": {
-    "head": 0.6,
-    "wing": 0.75,
-    "wingOpen": 1.05,
+    "head": 0.58,
+    "wing": 0.87,
+    "wingOpen": 0.85,
     "foot": 0.45
   },
   "wings": {
     "foldedAngle": 0,
     "openAngle": 0
   },
-  "neck": {
-    "width": 70
-  },
   "ankleHeight": 75,
   "legs": {
     "thighLength": 55,
     "shankLength": 55,
-    "thighWidth": 26,
+    "thighWidth": 22,
     "shankWidth": 11
   },
-  "outlineWidth": 5,
+  "outlineWidth": 4.5,
   "colors": {
     "outline": "#4f382e",
     "feathers": "#fbf9f4",
@@ -98,6 +95,174 @@
     "beak": "#f9af01",
     "mouth": "#7a1f1a"
   },
+  "colorRoles": {
+    "line": "outline"
+  },
+  "colorSettings": [
+    {
+      "id": "feathers",
+      "presets": [
+        {
+          "id": "white",
+          "colors": {
+            "feathers": "#fbf9f4"
+          }
+        },
+        {
+          "id": "cream",
+          "colors": {
+            "feathers": "#f4e6c4"
+          }
+        },
+        {
+          "id": "golden",
+          "colors": {
+            "feathers": "#e8b25e"
+          }
+        },
+        {
+          "id": "brown",
+          "colors": {
+            "feathers": "#a8552c"
+          }
+        },
+        {
+          "id": "gray",
+          "colors": {
+            "feathers": "#a7a6ae"
+          }
+        },
+        {
+          "id": "black",
+          "colors": {
+            "feathers": "#4a4442"
+          }
+        },
+        {
+          "id": "pink",
+          "colors": {
+            "feathers": "#f4b1c8"
+          }
+        },
+        {
+          "id": "light-blue",
+          "colors": {
+            "feathers": "#a9c8ec"
+          }
+        }
+      ]
+    },
+    {
+      "id": "comb",
+      "presets": [
+        {
+          "id": "red",
+          "colors": {
+            "comb": "#e90e12"
+          }
+        },
+        {
+          "id": "burgundy",
+          "colors": {
+            "comb": "#8e1b3a"
+          }
+        },
+        {
+          "id": "pink",
+          "colors": {
+            "comb": "#f06a8f"
+          }
+        },
+        {
+          "id": "purple",
+          "colors": {
+            "comb": "#8a3fc8"
+          }
+        },
+        {
+          "id": "blue",
+          "colors": {
+            "comb": "#3a7bd5"
+          }
+        }
+      ]
+    },
+    {
+      "id": "legs-beak",
+      "presets": [
+        {
+          "id": "yellow",
+          "colors": {
+            "leg": "#fbaf00",
+            "beak": "#f9af01"
+          }
+        },
+        {
+          "id": "gray",
+          "colors": {
+            "leg": "#8b8f98",
+            "beak": "#bab3a5"
+          }
+        },
+        {
+          "id": "pink",
+          "colors": {
+            "leg": "#f2c2b0",
+            "beak": "#f3dcc4"
+          }
+        },
+        {
+          "id": "black",
+          "colors": {
+            "leg": "#5a5553",
+            "beak": "#6e6864"
+          }
+        },
+        {
+          "id": "orange",
+          "colors": {
+            "leg": "#f57c00",
+            "beak": "#f57c00"
+          }
+        }
+      ]
+    },
+    {
+      "id": "outline",
+      "presets": [
+        {
+          "id": "dark-brown",
+          "colors": {
+            "outline": "#4f382e"
+          }
+        },
+        {
+          "id": "black",
+          "colors": {
+            "outline": "#161414"
+          }
+        },
+        {
+          "id": "charcoal",
+          "colors": {
+            "outline": "#3a3a3f"
+          }
+        },
+        {
+          "id": "navy",
+          "colors": {
+            "outline": "#1c2444"
+          }
+        },
+        {
+          "id": "plum",
+          "colors": {
+            "outline": "#3b1d33"
+          }
+        }
+      ]
+    }
+  ],
   "farShade": 0.82,
   "shadow": {
     "rx": 110,

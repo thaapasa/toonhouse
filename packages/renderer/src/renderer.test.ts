@@ -43,6 +43,12 @@ const robed: CutoutRig = (() => {
   return r;
 })();
 const tree = testTree as PropRig;
+/** The bunny without its own draw order, to test the default order of a rabbit. */
+const plainRabbit: RabbitRig = (() => {
+  const r = { ...rabbit };
+  delete r.drawOrder;
+  return r;
+})();
 
 function parts(node: DrawNode): string[] {
   if (node.type === 'part') return [node.part];
@@ -238,6 +244,19 @@ describe('bird', () => {
     ).toContain('"stroke":"#123456"');
   });
 
+  it('draws a neck only if the rig has one, in the neck color', () => {
+    const idle = clipOf('bird', 'idle').frameAt(0);
+    const strokes = (r: BirdRig) =>
+      JSON.stringify(drawRig(r, idle, { facing: 1 }).node);
+    const colors = { ...bird.colors, neck: '#123456' };
+    const neckless = { ...bird, colors };
+    delete neckless.neck;
+    expect(strokes(neckless)).not.toContain('#123456');
+    expect(strokes({ ...bird, colors, neck: { width: 70 } })).toContain(
+      '"stroke":"#123456"',
+    );
+  });
+
   it('refuses a clip of another kind', () => {
     expect(() =>
       drawRig(bird, clipOf('cutout', 'idle').frameAt(0), {
@@ -395,7 +414,7 @@ describe('draw order', () => {
       'head',
       'wingNear',
     ]);
-    expect(ids(rabbit)).toEqual([
+    expect(ids(plainRabbit)).toEqual([
       'hindLegFar',
       'footFar',
       'frontLegFar',
@@ -434,7 +453,7 @@ describe('draw order', () => {
   it('draws the same with the default order written out', () => {
     const plainTree: PropRig = { ...tree };
     delete plainTree.drawOrder;
-    for (const r of [rig, robed, bird, rabbit, plainTree]) {
+    for (const r of [rig, robed, bird, plainRabbit, plainTree]) {
       const clip = restClip(r.kind);
       const frame = clip.frameAt(0.4);
       const explicit = {

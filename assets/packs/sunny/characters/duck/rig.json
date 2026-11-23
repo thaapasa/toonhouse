@@ -6,8 +6,8 @@
       "width": 276,
       "height": 255,
       "pivot": {
-        "x": 84,
-        "y": 215
+        "x": 87,
+        "y": 292
       }
     },
     "body": {
@@ -15,8 +15,8 @@
       "width": 255,
       "height": 199,
       "pivot": {
-        "x": 165,
-        "y": 192
+        "x": 155,
+        "y": 154
       }
     },
     "wing": {
@@ -24,8 +24,8 @@
       "width": 135,
       "height": 146,
       "pivot": {
-        "x": 100,
-        "y": 28
+        "x": 119,
+        "y": 104
       }
     },
     "wingOpen": {
@@ -33,8 +33,8 @@
       "width": 306,
       "height": 361,
       "pivot": {
-        "x": 285,
-        "y": 275
+        "x": 280,
+        "y": 277
       }
     },
     "foot": {
@@ -42,41 +42,41 @@
       "width": 192,
       "height": 70,
       "pivot": {
-        "x": 80,
-        "y": 26
+        "x": 36,
+        "y": 27
       }
     }
   },
   "body": {
     "neck": {
-      "x": 160,
-      "y": 48
+      "x": 190,
+      "y": 64
     },
     "shoulderNear": {
-      "x": 190,
-      "y": 95
+      "x": 181,
+      "y": 75
     },
     "shoulderFar": {
-      "x": 178,
-      "y": 90
+      "x": 196,
+      "y": 69
     },
     "hipNear": {
-      "x": 165,
-      "y": 178
+      "x": 164,
+      "y": 176
     },
     "hipFar": {
-      "x": 145,
-      "y": 178
+      "x": 150,
+      "y": 182
     }
   },
   "scales": {
     "head": 0.56,
-    "wing": 1,
-    "wingOpen": 0.8,
+    "wing": 1.2,
+    "wingOpen": 0.73,
     "foot": 0.6
   },
   "wings": {
-    "foldedAngle": 40,
+    "foldedAngle": -54,
     "openAngle": 0
   },
   "neck": {
@@ -86,19 +86,215 @@
   "legs": {
     "thighLength": 45,
     "shankLength": 78,
-    "thighWidth": 24,
-    "shankWidth": 12
+    "thighWidth": 21,
+    "shankWidth": 10
   },
-  "outlineWidth": 5,
+  "outlineWidth": 4.5,
   "colors": {
     "outline": "#392a20",
     "feathers": "#00ae47",
     "thigh": "#c9c9c4",
+    "neck": "#c9c9c4",
     "leg": "#fc7100",
     "line": "#392a20",
     "beak": "#f8e600",
     "mouth": "#7a1f1a"
   },
+  "colorRoles": {
+    "feathers": "head",
+    "thigh": "body",
+    "neck": "body",
+    "line": "outline"
+  },
+  "colorSettings": [
+    {
+      "id": "plumage",
+      "presets": [
+        {
+          "id": "mallard",
+          "colors": {
+            "head": "#00ae47",
+            "collar": "#f6f5f2",
+            "breast": "#c19f71",
+            "body": "#c9c9c4",
+            "wing": "#968772",
+            "wing-patch": "#0666c3"
+          }
+        },
+        {
+          "id": "brown",
+          "colors": {
+            "head": "#9c7148",
+            "collar": "#9c7148",
+            "breast": "#b8885a",
+            "body": "#c49a6c",
+            "wing": "#86664a",
+            "wing-patch": "#0666c3"
+          }
+        },
+        {
+          "id": "white",
+          "colors": {
+            "head": "#f7f5ef",
+            "collar": "#f7f5ef",
+            "breast": "#f3efe6",
+            "body": "#f7f5ef",
+            "wing": "#e6e0d4",
+            "wing-patch": "#e6e0d4"
+          }
+        },
+        {
+          "id": "black",
+          "colors": {
+            "head": "#2f5e48",
+            "collar": "#5a5654",
+            "breast": "#56514f",
+            "body": "#5a5654",
+            "wing": "#4b4745",
+            "wing-patch": "#2f6a5a"
+          }
+        },
+        {
+          "id": "gray",
+          "colors": {
+            "head": "#4d5a6b",
+            "collar": "#f6f5f2",
+            "breast": "#f6f5f2",
+            "body": "#7b8796",
+            "wing": "#646f7e",
+            "wing-patch": "#f6f5f2"
+          }
+        },
+        {
+          "id": "yellow",
+          "colors": {
+            "head": "#f9d000",
+            "collar": "#f9d000",
+            "breast": "#f9d000",
+            "body": "#f9d000",
+            "wing": "#f0bf00",
+            "wing-patch": "#f57c00"
+          }
+        },
+        {
+          "id": "pink",
+          "colors": {
+            "head": "#f07ab0",
+            "collar": "#fde0ee",
+            "breast": "#f4b1c8",
+            "body": "#f8c9da",
+            "wing": "#e48fb4",
+            "wing-patch": "#8a3fc8"
+          }
+        }
+      ]
+    },
+    {
+      "id": "beak",
+      "presets": [
+        {
+          "id": "yellow",
+          "colors": {
+            "beak": "#f8e600"
+          }
+        },
+        {
+          "id": "orange",
+          "colors": {
+            "beak": "#f9a01b"
+          }
+        },
+        {
+          "id": "pink",
+          "colors": {
+            "beak": "#f4a6a0"
+          }
+        },
+        {
+          "id": "gray",
+          "colors": {
+            "beak": "#8b8f98"
+          }
+        },
+        {
+          "id": "black",
+          "colors": {
+            "beak": "#4a4644"
+          }
+        }
+      ]
+    },
+    {
+      "id": "legs",
+      "presets": [
+        {
+          "id": "orange",
+          "colors": {
+            "leg": "#fc7100"
+          }
+        },
+        {
+          "id": "yellow",
+          "colors": {
+            "leg": "#f9c000"
+          }
+        },
+        {
+          "id": "pink",
+          "colors": {
+            "leg": "#f2a0a0"
+          }
+        },
+        {
+          "id": "gray",
+          "colors": {
+            "leg": "#8b8f98"
+          }
+        },
+        {
+          "id": "black",
+          "colors": {
+            "leg": "#4a4644"
+          }
+        }
+      ]
+    },
+    {
+      "id": "outline",
+      "presets": [
+        {
+          "id": "dark-brown",
+          "colors": {
+            "outline": "#392a20"
+          }
+        },
+        {
+          "id": "black",
+          "colors": {
+            "outline": "#161414"
+          }
+        },
+        {
+          "id": "charcoal",
+          "colors": {
+            "outline": "#3a3a3f"
+          }
+        },
+        {
+          "id": "navy",
+          "colors": {
+            "outline": "#1c2444"
+          }
+        },
+        {
+          "id": "plum",
+          "colors": {
+            "outline": "#3b1d33"
+          }
+        }
+      ]
+    }
+  ],
   "farShade": 0.82,
   "shadow": {
     "rx": 110,
@@ -128,5 +324,16 @@
       "lower": "M157 137Q200 150 248 139Q244 149 225 152Q185 158 152 152Q141 147 145 140Z",
       "openAngle": 30
     }
-  }
+  },
+  "drawOrder": [
+    "wingFar",
+    "legFar",
+    "footFar",
+    "legNear",
+    "footNear",
+    "neck",
+    "head",
+    "body",
+    "wingNear"
+  ]
 }

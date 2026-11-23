@@ -92,10 +92,10 @@ bend to reach the hands and the feet. Each character has a folder in
 `assets/packs/<pack>/characters/` with a `rig.json` and its SVG pieces.
 
 Birds have a rig of their own kind. Traced pieces make the head, the body with
-the tail, a folded and an open wing, and the feet. The renderer draws the neck
-and the legs. Each leg has two straight bones that bend backwards at the joint,
-as on a real bird, and the head can move forward and back on the neck as well as
-turn.
+the tail, a folded and an open wing, and the feet. The renderer draws the legs,
+and a neck between the body and the head if the rig has one. Each leg has two
+straight bones that bend backwards at the joint, as on a real bird, and the head
+can move forward and back on the neck as well as turn.
 
 Rabbits have a third kind of rig. Traced pieces make the head, an ear, the body
 with the haunch and the tail, a front paw and a long hind foot. Both ears use

@@ -291,7 +291,11 @@ export interface BirdRig extends RigBase {
   scales: { head: number; wing: number; wingOpen: number; foot: number };
   /** Rotation of each wing piece against the body, in degrees. */
   wings: { foldedAngle: number; openAngle: number };
-  neck: { width: number };
+  /**
+   * The neck that joins the head to the body. Without it, the head piece
+   * covers the joint by itself.
+   */
+  neck?: { width: number };
   /** Height of the ankle above the sole, in foot pixels. */
   ankleHeight: number;
   legs: {
@@ -306,10 +310,12 @@ export interface BirdRig extends RigBase {
     /** The feathers, for the neck, the eyelids and the thighs. */
     feathers: string;
     /**
-     * The thighs, if not the feathers, such as when the neck has a color of
+     * The thighs, if not the feathers, such as when the head has a color of
      * its own that the body doesn't share.
      */
     thigh?: string;
+    /** The neck, if not the feathers, such as the body color of a duck. */
+    neck?: string;
     leg: string;
     line: string;
     beak: string;
