@@ -3,9 +3,11 @@
 - [ ] The app works in Chrome, with touch on an iPad or an Android tablet, and
       with a mouse on a computer.
 - [ ] One user can't use up the disk, the memory or the processor of the server,
-      so that the app can open for free signup. The limits of the content, such
-      as the cartoon limit in [Users and login](users.md), cover this now. A
-      feature that lets users upload files needs its own limits.
+      either with what they store or with a single request, so that the app can
+      open for free signup. The limits of the content, such as the cartoon limit
+      in [Users and login](users.md), cover the storage now. A feature that lets
+      users upload files needs its own limits. This requirement doesn't cover a
+      flood of requests, because rate limits are a [free choice](#free-choices).
 - [ ] The server log shows what happened, in one or a few lines for each API
       call. A call that the app makes often, such as a poll, can stay out of the
       log.
@@ -15,6 +17,16 @@
 - [ ] The app doesn't limit what users make. Users can combine anything in the
       library and place actors anywhere, such as a character walking in the sky.
       The app limits something only for a technical reason.
+- [x] Tests cover the renderer, because a bug there breaks the saved cartoons.
+
+## Security
+
+[Users and login](users.md) has the rules for the login, and
+[Sharing](sharing.md) has the rules for who can see a cartoon.
+
+- [ ] The app guards against flaws that a single request can exploit, such as
+      injection, cross-site scripting (XSS), path traversal, cross-site request
+      forgery (CSRF), and ways around the login or the sharing rules.
 
 ## New versions
 
@@ -50,6 +62,8 @@ deploy, the format can change without upgrading the saved cartoons.
       version. The edits that were not saved can be lost.
 - [ ] If an old version of the export client downloads a cartoon, it tells the
       user to update the export client.
+- [ ] Tests cover the upgrades of the cartoon format, because a bug there breaks
+      the saved cartoons.
 
 ## Not required
 
@@ -57,31 +71,19 @@ Toonhouse is a hobby app with few users. The items here are decisions, not gaps.
 Agents don't build guards for them, and reviews don't raise them. If one becomes
 a real problem, the owner fixes it then.
 
-### Security
+### Attacks by volume
 
-The app is safe to deploy and run. A user can't log in without the password and
-can't see the cartoons of other users unless they are shared, as
-[Users and login](users.md) and [Sharing](sharing.md) describe. The app always
-guards against flaws that a single request can exploit, such as injection,
-cross-site scripting (XSS), path traversal, cross-site request forgery (CSRF),
-and ways around the login or the sharing rules.
-
-The app doesn't defend against volume:
-
-- It doesn't defend against attackers with many resources, such as a botnet, a
-  distributed denial-of-service (DDoS) attack or an attacker with many
-  addresses.
-- Rate limits are a free choice. The login limit can stay, but the app doesn't
-  need limits on other requests.
+The app doesn't defend against attackers with many resources, such as a botnet,
+a distributed denial-of-service (DDoS) attack or an attacker with many
+addresses.
 
 ### Uptime and bugs
 
-The app guards the saved cartoons. It upgrades them to new formats, as
-[Saved data](#saved-data) describes, and the database has a backup, as
-[Deployment](deployment.md) describes. The service itself makes no promises:
+The app keeps the saved cartoons safe, as [Saved data](#saved-data) and
+[Deployment](deployment.md) describe. The service itself makes no promises:
 
-- The app makes no promise to stay up. It runs when it works, and the owner can
-  take it down at any time.
+- The app makes no promise to stay up. There is no service level agreement
+  (SLA). The app runs when it works, and the owner can take it down at any time.
 - The app can be down during a deploy.
 - A bug in production, even one that stops the service, gets fixed when someone
   finds it. The app doesn't need monitoring, alerts, or code that guards against
@@ -139,5 +141,7 @@ cases, the user can lose edits:
 - Where the expected errors get their translated text. One simple way is that
   the server sends a code for each expected error, and the web app translates
   the code.
-- How much of the code the tests cover. The renderer and the upgrades of the
-  cartoon format need tests, because a bug there breaks saved cartoons.
+- Rate limits, apart from the login limit in [Users and login](users.md). The
+  app doesn't need limits on other requests.
+- How much of the code the tests cover, beyond the tests of the renderer and the
+  upgrades of the cartoon format.

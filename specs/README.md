@@ -30,8 +30,7 @@ after the requirements and before the technical notes:
   can suggest a change to the user instead of making it.
 
 A behavior that no requirement names is a free choice too. Keep it unless a
-change has a reason. [General](general.md) has the items that apply to the whole
-app.
+change has a reason.
 
 A file can end with an "Open questions" section for decisions that are not made
 yet.
@@ -40,8 +39,8 @@ After editing a spec, format it with Prettier: `pnpm format`.
 
 ## Areas
 
-- [General](general.md): the users, the devices, the languages, new versions,
-  and what the whole app doesn't need.
+- [General](general.md): what applies to the whole app, such as the devices, the
+  languages, security, uptime, saved data and logging.
 - [Users and login](users.md): users, login and groups.
 - [Home page](home.md): the list of cartoons and their preview images.
 - [Profile](profile.md): the user's own name and password.
