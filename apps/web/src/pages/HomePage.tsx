@@ -1,18 +1,27 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
 import type { Cartoon } from '@toonhouse/api';
+import { useState } from 'react';
 
 import {
   ApiError,
   cartoonQuery,
   cartoonsQuery,
   createCartoon,
+  deleteCartoon,
   meQuery,
 } from '../api.ts';
 import { AppHeader } from '../components/AppHeader.tsx';
-import { EditIcon, PlayIcon, PlusIcon } from '../components/icons.tsx';
+import { Dialog } from '../components/Dialog.tsx';
+import {
+  DeleteIcon,
+  EditIcon,
+  PlayIcon,
+  PlusIcon,
+} from '../components/icons.tsx';
 import { PreviewImage } from '../components/PreviewImage.tsx';
 import { PageMessage } from '../components/RequireUser.tsx';
+import { clearKeptContent } from '../editor/keptContent.ts';
 import { useI18n } from '../i18n/index.tsx';
 
 export function HomePage() {
@@ -124,10 +133,14 @@ function CartoonList(props: {
   );
 }
 
-/** A tap on the picture plays the cartoon. The owner gets a button to edit it. */
+/**
+ * A tap on the picture plays the cartoon. The owner gets buttons to edit it and
+ * to delete it.
+ */
 function CartoonCard({ cartoon }: { cartoon: Cartoon }) {
   const { tr } = useI18n();
   const edited = useEditedText(cartoon.updatedAt);
+  const [deleting, setDeleting] = useState(false);
   return (
     <article className="cartoon-card">
       <Link
@@ -161,8 +174,62 @@ function CartoonCard({ cartoon }: { cartoon: Cartoon }) {
             <EditIcon />
           </Link>
         )}
+        {cartoon.canEdit && (
+          <button
+            type="button"
+            className="icon-button"
+            aria-label={tr('home.delete', { title: cartoon.title })}
+            title={tr('home.delete', { title: cartoon.title })}
+            onClick={() => setDeleting(true)}
+          >
+            <DeleteIcon />
+          </button>
+        )}
       </div>
+      {deleting && (
+        <DeleteDialog cartoon={cartoon} onClose={() => setDeleting(false)} />
+      )}
     </article>
+  );
+}
+
+function DeleteDialog(props: { cartoon: Cartoon; onClose: () => void }) {
+  const { tr } = useI18n();
+  const queryClient = useQueryClient();
+  const { id } = props.cartoon;
+  const remove = useMutation({
+    mutationFn: () => deleteCartoon(id),
+    onSuccess: async () => {
+      clearKeptContent(id);
+      queryClient.removeQueries({ queryKey: cartoonQuery(id).queryKey });
+      await queryClient.invalidateQueries(cartoonsQuery);
+    },
+  });
+  return (
+    <Dialog
+      title={tr('home.deleteTitle', { title: props.cartoon.title })}
+      onClose={props.onClose}
+    >
+      <p className="muted">{tr('home.deleteInfo')}</p>
+      {remove.isError && (
+        <p role="alert" className="error">
+          {tr('home.deleteError')}
+        </p>
+      )}
+      <div className="row end">
+        <button type="button" className="button" onClick={props.onClose}>
+          {tr('cancel')}
+        </button>
+        <button
+          type="button"
+          className="button danger"
+          disabled={remove.isPending}
+          onClick={() => remove.mutate()}
+        >
+          {tr('home.deleteConfirm')}
+        </button>
+      </div>
+    </Dialog>
   );
 }
 

@@ -6,7 +6,7 @@ list shows a preview image.
 - [x] A logged-in user can make a new cartoon on the home page. The new cartoon
       opens in the editor.
 - [x] The owner can rename a cartoon in the editor, by tapping its title.
-- [ ] The owner of a cartoon can delete it, after confirming it. Only the owner
+- [x] The owner of a cartoon can delete it, after confirming it. Only the owner
       can delete a cartoon.
 
 ## Preview image

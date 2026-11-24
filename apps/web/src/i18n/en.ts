@@ -22,6 +22,12 @@ export const en = {
   'home.editedToday': 'Edited today',
   'home.editedYesterday': 'Edited yesterday',
   'home.editedOn': 'Edited {date}',
+  'home.delete': 'Delete: {title}',
+  'home.deleteTitle': 'Delete “{title}”?',
+  'home.deleteInfo':
+    'All its scenes and its cast are deleted with it. You can’t undo this.',
+  'home.deleteConfirm': 'Delete',
+  'home.deleteError': 'Deleting the cartoon failed. Try again later.',
 
   'login.open': 'Log in',
   'login.title': 'Log in',

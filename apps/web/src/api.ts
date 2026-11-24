@@ -106,6 +106,9 @@ export const createCartoon = (title: string) =>
 export const renameCartoon = (id: string, title: string) =>
   request(Cartoon, `/cartoons/${id}`, { method: 'PATCH', body: { title } });
 
+export const deleteCartoon = (id: string) =>
+  request(NoContent, `/cartoons/${id}`, { method: 'DELETE' });
+
 /** The scenes of a cartoon with their revision. */
 export const fetchContent = (id: string) =>
   request<SavedContent>(SavedContent, `/cartoons/${id}/content`);

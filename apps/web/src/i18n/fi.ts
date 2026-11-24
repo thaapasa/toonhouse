@@ -25,6 +25,13 @@ export const fi: Texts = {
   'home.editedToday': 'Muokattu tänään',
   'home.editedYesterday': 'Muokattu eilen',
   'home.editedOn': 'Muokattu {date}',
+  'home.delete': 'Poista: {title}',
+  'home.deleteTitle': 'Poistetaanko ”{title}”?',
+  'home.deleteInfo':
+    'Kaikki sen kohtaukset ja roolit poistuvat sen mukana. Tätä ei voi kumota.',
+  'home.deleteConfirm': 'Poista',
+  'home.deleteError':
+    'Piirretyn poisto epäonnistui. Yritä myöhemmin uudelleen.',
 
   'login.open': 'Kirjaudu',
   'login.title': 'Kirjaudu sisään',
