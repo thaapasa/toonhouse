@@ -59,8 +59,10 @@ port as the default.
   the user whether to allow something like this. Allow it.
 - The renderer packages stay pure: no DOM, no clocks and no randomness. The
   scene at time `t` must depend only on the scene data and `t`.
-- Every UI text goes through the translation files, in Finnish and English.
-  Don't write UI text in the components.
+- Every UI text in the editor and the player goes through the translation files,
+  in Finnish and English. Don't write UI text in the components. This includes
+  the expected errors, such as a wrong password. Log messages, the character
+  studio, and the unexpected errors can be in English only.
 - Design the editor and the player for touch first. Every control in them must
   work with a finger on an iPad. The character studio needs to work only with a
   mouse.
@@ -80,6 +82,9 @@ the format.
 - Format the specs with Prettier after editing them: `pnpm format`.
 - Tick a requirement (`- [x]`) in the same commit that implements it.
 - Ask before changing or removing an existing requirement.
+- The "Not required" sections list what the app skips on purpose. Don't build
+  those things, and don't raise them in reviews. The "Free choices" sections,
+  and any behavior that no requirement names, are yours to decide.
 - Each spec can end with an "Open questions" section. Ask the user before you
   implement anything that depends on an open question.
 

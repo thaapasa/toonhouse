@@ -12,7 +12,8 @@ These are the settings of the deployment that the code depends on.
       development database instead of stopping the server.
 - [ ] A scheduled job backs up the database of the app, as for bookkeeper on the
       pomeranssi.fi server. The cartoons and their preview images exist only in
-      the database, so the backup of the database covers them all.
+      the database, so the backup of the database covers them all. The first
+      deploy can go without the backup.
 - [ ] The image is built on Node 26 and keeps the layout of the workspace, with
       the pnpm links from `node_modules` to `packages/`. The server runs its
       TypeScript files through the type stripping of Node, which refuses files
