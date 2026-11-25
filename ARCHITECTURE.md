@@ -627,3 +627,15 @@ The app is not deployed yet. It will run at https://piirretyt.pomeranssi.fi, on
 the pomeranssi.fi server next to the other services. An English host name may
 come later. [specs/deployment.md](specs/deployment.md) lists what the deployment
 needs.
+
+The app runs as one Docker image, which the `Dockerfile` builds. The image has
+the server and the build of the web app, and the server serves both. The server
+runs its TypeScript files through the type stripping of Node, which refuses
+files under `node_modules`. So the image keeps the layout of the workspace, and
+the pnpm links in `node_modules` point to the sources in `packages/`. The image
+has only the packages that the server uses. The renderer, the stage and the
+library assets are in the build of the web app.
+
+The **Release** workflow in `.github/workflows` builds the image and pushes it
+to GitHub Container Registry (GHCR). The steps are in "Running" in
+[README.md](README.md).

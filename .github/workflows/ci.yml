@@ -24,6 +24,19 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: jdx/mise-action@v5
+      - name:
+          Check that the Dockerfile uses the Node.js and pnpm versions from
+          mise.toml
+        run: |
+          for tool in node pnpm; do
+            MISE_VERSION=$(mise current "$tool")
+            ARG=$(echo "$tool" | tr a-z A-Z)_VERSION
+            DOCKER_VERSION=$(sed -n "s/^ARG $ARG=//p" Dockerfile)
+            if [ "$MISE_VERSION" != "$DOCKER_VERSION" ]; then
+              echo "::error::Dockerfile has $tool $DOCKER_VERSION, mise.toml has $MISE_VERSION"
+              exit 1
+            fi
+          done
       - run: pnpm lint
       - run: pnpm format:check
       - run: pnpm typecheck

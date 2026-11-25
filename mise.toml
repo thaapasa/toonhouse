@@ -1,6 +1,9 @@
 [tools]
-node = "26"
-pnpm = "12"
+# The Node.js and pnpm versions for development, CI and the Docker image. When
+# you change them, change NODE_VERSION and PNPM_VERSION in the Dockerfile too.
+# CI checks that they match.
+node = "26.13.1"
+pnpm = "12.19.0"
 "github:visioncortex/vtracer" = "1.0.0-alpha.4"
 # The process manager for local development. See dekit.yaml.
 dekit = "0.10.3"

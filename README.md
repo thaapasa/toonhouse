@@ -125,6 +125,42 @@ default: `SERVER_PORT`, `WEB_PORT`, `STUDIO_PORT`, `DB_PORT` and
 `PROTOTYPES_PORT`. The Vite dev server reads `SERVER_PORT` too, to send the API
 requests to the server.
 
+## Running
+
+The app runs as a single Docker image, `ghcr.io/thaapasa/toonhouse:<version>`,
+built for `linux/arm64`. A reverse proxy such as Caddy sits in front of it and
+handles TLS. PostgreSQL runs in its own container.
+
+The container needs `DATABASE_URL`, the PostgreSQL connection, such as
+`postgres://toonhouse:<password>@db:5432/toonhouse`. The server applies the new
+migrations when it starts.
+
+The image sets `NODE_ENV=production` and `SERVER_PORT=3000`, and runs as user
+`node` (UID 1000). The health check endpoint is `/health`, and it also checks
+the database. Don't publish the port of the container. The server limits failed
+logins per client address, and takes the address from the last entry of
+`X-Forwarded-For`, which only the proxy may set.
+
+To add a user in production, run the commands from "Users and groups" in the
+container, for example
+`docker exec -it <container> node apps/server/src/cli/set-user.ts <username> "<display name>"`.
+The group command is `apps/server/src/cli/group.ts`.
+
+To build the image locally, run `docker build -t toonhouse .`.
+
+### Releases
+
+Run the **Release** workflow from the GitHub Actions tab. Choose the bump level
+and optionally add highlights for the release notes. The workflow:
+
+1. Bumps the version in `package.json` on a release branch.
+2. Builds the image for `linux/arm64` and pushes it to GHCR with the tags
+   `<version>` and `latest`.
+3. Merges the release branch into `main`, tags the commit as `v<version>` and
+   publishes a GitHub Release.
+
+Versions start from `0.x.x`. Use `minor` for features and `patch` for fixes.
+
 ## Asset licenses
 
 The images are generated with Qwen Image 2.1 Turbo. Its license, the Qwen
