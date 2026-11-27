@@ -164,7 +164,14 @@ and optionally add highlights for the release notes. The workflow:
 
 Versions start from `0.x.x`. Use `minor` for features and `patch` for fixes.
 
-## Asset licenses
+## License
 
-The images are generated with Qwen Image 2.1 Turbo. Its license, the Qwen
-Research License Agreement, allows non-commercial use only.
+The code and the art are under the MIT license. See [LICENSE](LICENSE).
+
+The fonts in `assets/fonts/` keep their own licenses, the SIL Open Font License
+or the Apache License 2.0. Each font folder has its license file.
+
+The art is generated with AI. The graphics come from Qwen Image 2.1 Turbo, and
+the style reference `assets/examples/asset-examples.png` comes from ChatGPT. The
+license of Qwen Image 2.1 Turbo, the Qwen Research License Agreement, allows
+only non-commercial use of the model. It sets no limits on the images it makes.
