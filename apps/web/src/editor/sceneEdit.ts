@@ -10,13 +10,15 @@ import type {
 } from '@toonhouse/model';
 import { clamp, minSceneLength, sortedActions } from '@toonhouse/renderer';
 
+import { randomUuid } from './uuid.ts';
+
 // The edits keep the content inside the limits that the server saves.
 const L = CONTENT_LIMITS;
 
 /** Two actions closer than this in seconds start at the same time. */
 const SAME_TIME = 1e-6;
 
-export const newId = () => crypto.randomUUID();
+export const newId = randomUuid;
 
 /**
  * A random seed for the look of the clouds, the rain, the snow and the

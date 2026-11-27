@@ -5,6 +5,7 @@ import { ContentConflict, type SavedContent } from '@toonhouse/api';
 import type { CartoonContent } from '@toonhouse/model';
 
 import { ApiError } from '../api.ts';
+import { randomUuid } from './uuid.ts';
 
 /** How long to wait after an edit before saving it, in milliseconds. */
 export const SAVE_DELAY = 800;
@@ -202,7 +203,7 @@ export const startState = (start: SaverStart): SaveState =>
 export function createSaver(deps: SaverDeps, start: SaverStart): Saver {
   // Each save names this editor. A 409 for a revision that this editor saved
   // last is no conflict: the answer to that save was lost.
-  const editor = crypto.randomUUID();
+  const editor = randomUuid();
   // The editor whose kept edits this one goes on with may have saved them
   // once more as it closed. Only that save, the next revision with the kept
   // content, counts as this editor's own, because the other editor may still
