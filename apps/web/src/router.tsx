@@ -6,6 +6,7 @@ import {
 } from '@tanstack/react-router';
 import { z } from 'zod';
 
+import { CrashPage } from './components/CrashPage.tsx';
 import { EditorPage } from './pages/EditorPage.tsx';
 import { HomePage } from './pages/HomePage.tsx';
 import { LoginPage } from './pages/LoginPage.tsx';
@@ -67,6 +68,7 @@ export const router = createRouter({
     playerRoute,
     editorRoute,
   ]),
+  defaultErrorComponent: CrashPage,
 });
 
 declare module '@tanstack/react-router' {

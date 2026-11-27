@@ -471,4 +471,10 @@ export const fi: Texts = {
   'notFound.title': 'Ei löytynyt',
   'notFound.text': 'Tällaista sivua tai piirrettyä ei ole.',
   'notFound.home': 'Takaisin kotiin',
+
+  'crash.title': 'Jokin meni vikaan',
+  'crash.text':
+    'Sovelluksessa tapahtui virhe. Lataa sivu uudelleen tai palaa etusivulle.',
+  'crash.reload': 'Lataa uudelleen',
+  'crash.home': 'Takaisin kotiin',
 };

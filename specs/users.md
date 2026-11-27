@@ -27,6 +27,9 @@ with them, and the public cartoons can be watched without logging in. See
       address, the server refuses further logins from that address, or with that
       username from that address, for up to 15 minutes. Successful logins do not
       count. Failed logins from other addresses don't lock the user out.
+- [x] The server logs each failed login, each login that the limit refuses, and
+      each password check that the limit refuses, with the username and the
+      client address. The log never shows the password.
 - [x] While a flood of logins fills the memory of the login counter, the server
       refuses new logins until the counts expire, instead of slowing down.
 - [x] If the username or the password is wrong, the error doesn't tell which

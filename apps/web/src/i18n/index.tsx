@@ -75,6 +75,20 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   return <I18nContext value={value}>{children}</I18nContext>;
 }
 
+/**
+ * The text for `key` without the provider, for the error page that shows when
+ * the provider itself fails.
+ */
+export function plainText(key: TextKey): string {
+  let lang: Lang = 'en';
+  try {
+    lang = initialLang();
+  } catch {
+    // Without the storage, the page shows English.
+  }
+  return TEXTS[lang][key];
+}
+
 export function useI18n(): I18n {
   const i18n = useContext(I18nContext);
   if (!i18n) throw new Error('useI18n needs an I18nProvider');

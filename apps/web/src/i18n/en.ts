@@ -458,6 +458,12 @@ export const en = {
   'notFound.title': 'Not found',
   'notFound.text': 'There is no such page or cartoon.',
   'notFound.home': 'Back home',
+
+  'crash.title': 'Something went wrong',
+  'crash.text':
+    'The app ran into an error. Load the page again, or go back to the home page.',
+  'crash.reload': 'Reload',
+  'crash.home': 'Back home',
 };
 
 export type TextKey = keyof typeof en;

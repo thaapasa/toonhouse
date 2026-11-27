@@ -263,6 +263,72 @@ describe('saver', () => {
     expect(t.kept()).not.toBeNull();
   });
 
+  it('goes on from a newer save from elsewhere when all is saved', async () => {
+    const t = setup();
+    Object.assign(t.server, {
+      revision: 3,
+      editor: 'other',
+      content: content(5),
+    });
+    const newer = await t.saver.refresh();
+    expect(newer).toEqual(content(5));
+    t.saver.update(newer!);
+    expect(t.state()).not.toBe('unsaved');
+    t.saver.update(content(6));
+    await vi.advanceTimersByTimeAsync(SAVE_DELAY);
+    await t.answer();
+    expect(t.server.content).toEqual(content(6));
+    expect(t.state()).toBe('saved');
+  });
+
+  it('goes on from a newer save after the save that runs', async () => {
+    const t = setup();
+    t.saver.update(content(1));
+    t.saver.hide();
+    const refresh = t.saver.refresh();
+    // Another editor saves after the answer, before the editor loads.
+    const answered = t.answer();
+    Object.assign(t.server, {
+      revision: 3,
+      editor: 'other',
+      content: content(5),
+    });
+    await answered;
+    expect(await refresh).toEqual(content(5));
+  });
+
+  it('gives nothing when the saved content is not newer', async () => {
+    const t = setup();
+    expect(await t.saver.refresh()).toBeNull();
+  });
+
+  it('leaves unsaved edits for the conflict dialog', async () => {
+    const t = setup();
+    Object.assign(t.server, {
+      revision: 3,
+      editor: 'other',
+      content: content(5),
+    });
+    t.saver.update(content(1));
+    expect(await t.saver.refresh()).toBeNull();
+    await vi.advanceTimersByTimeAsync(SAVE_DELAY);
+    await t.answer();
+    expect(t.state()).toBe('conflict');
+    expect(t.server.content).toEqual(content(5));
+  });
+
+  it('leaves an edit made while it loads', async () => {
+    const t = setup();
+    Object.assign(t.server, {
+      revision: 3,
+      editor: 'other',
+      content: content(5),
+    });
+    const refresh = t.saver.refresh();
+    t.saver.update(content(1));
+    expect(await refresh).toBeNull();
+  });
+
   it('tells a newer revision from an old format', () => {
     expect(failure(conflict())).toBe('revision');
     expect(failure(new ApiError(409, { error: 'x', reason: 'version' }))).toBe(

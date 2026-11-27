@@ -12,6 +12,11 @@
       call. A call that the app makes often, such as a poll, can stay out of the
       log.
 - [x] The UI is in Finnish and in English. The user can switch the language.
+- [x] If a page crashes, the app shows a message with a button that loads the
+      page again and one that goes back to the home page. A web app on the home
+      screen of an iPad has no buttons of its own for these.
+- [x] In the editor and the player, a pinch or a double tap doesn't zoom the
+      page. In the editor, a pinch zooms the stage or the timeline.
 - [ ] Users log in to make cartoons, and each user has their own cartoons. See
       [Users and login](users.md) and [Sharing](sharing.md).
 - [ ] The app doesn't limit what users make. Users can combine anything in the

@@ -8,8 +8,8 @@ The configuration of that server is in its own repo. Nothing is deployed yet.
 These are the settings of the deployment that the code depends on.
 
 - [x] The container sets `NODE_ENV=production`. Without it, the session cookie
-      is not `Secure`, and a missing `DATABASE_URL` falls back to the
-      development database instead of stopping the server.
+      is not `Secure` and has no `__Host-` prefix, and a missing `DATABASE_URL`
+      falls back to the development database instead of stopping the server.
 - [ ] A scheduled job backs up the database of the app, as for bookkeeper on the
       pomeranssi.fi server. The cartoons and their preview images exist only in
       the database, so the backup of the database covers them all. The first
@@ -25,6 +25,9 @@ These are the settings of the deployment that the code depends on.
 - [x] The healthcheck of the container calls `/health`, which also checks the
       database. The slim Node images have no `curl`, so the check can use
       `fetch` in `node`.
+- [x] The server stops within a few seconds on `SIGTERM` and `SIGINT`. Node runs
+      as PID 1 in the container, where a signal has no default handler, so
+      without this `docker stop` waits 10 seconds and then kills the server.
 - [x] The server applies the new migrations when it starts, so a deploy has no
       separate migration step.
 - [x] The server checks the `Origin` of a change against the public URL of the

@@ -380,7 +380,9 @@ The server stores the content of a cartoon, its scenes with their actors and
 actions, as JSON in the `content` column of the cartoon. `packages/model` has
 its types, and `packages/api` the schema that checks a save, with the limits of
 the content. The editor keeps the content inside the same limits, so that a save
-doesn't fail on them.
+doesn't fail on them. The schemas also refuse text that PostgreSQL can't store:
+the NUL character and a lone UTF-16 surrogate. The check of the content covers
+every string and key, including the fields that the schema doesn't know.
 
 Each saved cartoon has the version number of its data format. A change that
 keeps the old cartoons valid, such as a new optional field, keeps the version as
@@ -463,7 +465,10 @@ server stores an Argon2id hash of it.
 A login makes a session. The browser keeps the session token in an HTTP-only
 cookie, and the database stores only a SHA-256 hash of the token, so a copy of
 the database doesn't let anyone log in. The web app has no other way to
-authenticate, such as personal tokens.
+authenticate, such as personal tokens. In production, the cookie is
+`__Host-session`. With the `__Host-` prefix, the browser takes the cookie only
+over HTTPS and only for the host itself, so a subdomain can't set it. Browsers
+refuse such a cookie over plain HTTP, so in development the cookie is `session`.
 
 A session lasts 90 days from the last use. The server extends it at most once a
 day, and then sends the cookie again with the new expiry, because the browser
@@ -475,7 +480,8 @@ Counting the username with the address means that failed logins from elsewhere
 can't lock a user out. Each check takes tens of milliseconds of Argon2 work, so
 a flood of logins would slow down the whole server. One server process doesn't
 need the counts to survive a restart. The client address is the last entry of
-`X-Forwarded-For`, which Caddy adds.
+`X-Forwarded-For`, which Caddy adds. The server logs each failed login and each
+refused one, with the username and the client address.
 
 ### Visibility
 
@@ -535,6 +541,13 @@ that one. If a save fails without an answer or with a server error, the editor
 tries again after a while. If the server refuses the content, the editor tells
 the user and tries again only after the next edit. If the cartoon is gone, or
 the user is no longer its owner, the editor tells the user and stops.
+
+A web app on the home screen of an iPad resumes from memory, so the content of
+an open editor can be days old. When the page comes back to the foreground with
+all edits saved, the saver loads the content. If another editor has saved a
+newer revision, the editor shows it and starts a new undo history, without
+asking. If the editor has edits that are not saved, the next save gets the usual
+conflict.
 
 When the editor can't save for now, it keeps the edits in the `localStorage` of
 the browser, and the next editor of the cartoon starts from them and saves them.

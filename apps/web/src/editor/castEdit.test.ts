@@ -1,4 +1,4 @@
-import { CONTENT_LIMITS } from '@toonhouse/api';
+import { CONTENT_LIMITS, isStorable } from '@toonhouse/api';
 import {
   type Actor,
   CARTOON_VERSION,
@@ -15,6 +15,7 @@ import {
   overrideColor,
   overrideScale,
   removeCastMember,
+  savedName,
 } from './castEdit.ts';
 
 const asset = { kind: 'character' as const, id: 'sunny/grandma' };
@@ -106,5 +107,35 @@ describe('a cast member from an actor', () => {
   it('does nothing for an actor that has a cast member', () => {
     const before = content([[actor('a', { cast: 'm' })]]);
     expect(castFromActor(before, 's0', 'a', 'X').content).toBe(before);
+  });
+});
+
+describe('a saved name', () => {
+  const max = CONTENT_LIMITS.castName;
+
+  it('keeps a name inside the limit', () => {
+    expect(savedName('Grandma')).toBe('Grandma');
+    expect(savedName('x'.repeat(max + 5))).toBe('x'.repeat(max));
+  });
+
+  it('does not split an emoji at the limit', () => {
+    const name = savedName('x'.repeat(max - 1) + '😀');
+    expect(name).toBe('x'.repeat(max - 1));
+    expect(isStorable(name)).toBe(true);
+  });
+});
+
+describe('storable text', () => {
+  it('accepts text with emojis', () => {
+    expect(isStorable('')).toBe(true);
+    expect(isStorable('Mummo 😀👍')).toBe(true);
+  });
+
+  it('refuses NUL and lone surrogates', () => {
+    expect(isStorable('a\u0000b')).toBe(false);
+    expect(isStorable('half \ud83d')).toBe(false);
+    expect(isStorable('\ud83d x')).toBe(false);
+    expect(isStorable('\ude00 x')).toBe(false);
+    expect(isStorable('\ud83d\ud83d\ude00')).toBe(false);
   });
 });

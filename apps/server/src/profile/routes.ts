@@ -3,6 +3,7 @@ import { ResetPasswordRequest, UpdateProfileRequest } from '@toonhouse/api';
 import { Hono } from 'hono';
 
 import {
+  clientIp,
   giveBackPasswordCheck,
   loginRetryAfterSeconds,
   takePasswordCheck,
@@ -31,10 +32,16 @@ export const profileRoutes = new Hono<AuthEnv>()
   .post('/password', zValidator('json', ResetPasswordRequest), async (c) => {
     const userId = c.var.user.id;
     if (!takePasswordCheck(userId)) {
+      console.warn(
+        `Too many password checks for ${JSON.stringify(c.var.user.username)} from ${clientIp(c)}`,
+      );
       c.header('retry-after', String(loginRetryAfterSeconds));
       return c.json({ error: 'Too many attempts' }, 429);
     }
     if (!(await checkPassword(userId, c.req.valid('json').currentPassword))) {
+      console.warn(
+        `Wrong current password for ${JSON.stringify(c.var.user.username)} from ${clientIp(c)}`,
+      );
       // 403 and not 401, so that the client can tell a wrong password from a lost session.
       return c.json({ error: 'Wrong password' }, 403);
     }

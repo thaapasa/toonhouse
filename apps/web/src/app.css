@@ -530,6 +530,9 @@ button:disabled {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  /* A pinch or a double tap must not zoom the page, only the stage and the
+     timeline, which handle their own pinch. The panes still scroll. */
+  touch-action: pan-x pan-y;
 }
 
 .editor-header {
@@ -1831,6 +1834,8 @@ button:disabled {
   flex-direction: column;
   background: #1b1d24;
   color: var(--text);
+  /* A pinch or a double tap must not zoom the page. */
+  touch-action: pan-x pan-y;
 }
 
 .player-header,

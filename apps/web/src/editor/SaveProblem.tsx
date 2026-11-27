@@ -78,6 +78,13 @@ export function SaveProblem(props: {
             {tr('close')}
           </button>
         )}
+        {state.status === 'refused' && (
+          // After a reopen, the editor starts from the refused content with
+          // no undo steps, so undo can't get back to the saved version.
+          <button type="button" className="button" onClick={props.onLoadSaved}>
+            {tr('save.loadSaved')}
+          </button>
+        )}
         {state.status === 'loggedOut' && !state.kept && (
           <button type="button" className="button" onClick={props.onRetry}>
             {tr('save.retry')}

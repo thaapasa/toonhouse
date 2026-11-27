@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { StorableText } from './text.ts';
+
 export const Profile = z.object({
   username: z.string(),
   displayName: z.string(),
@@ -9,7 +11,7 @@ export const Profile = z.object({
 export type Profile = z.infer<typeof Profile>;
 
 export const UpdateProfileRequest = z.object({
-  displayName: z.string().trim().min(1).max(100),
+  displayName: StorableText().trim().min(1).max(100),
 });
 export type UpdateProfileRequest = z.infer<typeof UpdateProfileRequest>;
 

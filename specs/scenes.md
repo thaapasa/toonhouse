@@ -31,6 +31,11 @@ parts of its scenes in a row.
 - [x] If the cartoon was saved in another window or on another device after the
       editor opened it, the editor doesn't overwrite that save without asking.
       The user keeps their own version or loads the saved one.
+- [x] If the editor comes back to the foreground with all its edits saved, and
+      the cartoon was saved elsewhere since, the editor shows the saved version
+      without asking, because no edits are lost.
+- [x] If the server refuses a save, the user can load the saved version in place
+      of the refused edits, also after the editor has opened again.
 - [x] If the editor closes before its edits are saved, the next editor of the
       cartoon on the same device starts from those edits and saves them. If the
       cartoon was saved elsewhere since, the user chooses between those edits

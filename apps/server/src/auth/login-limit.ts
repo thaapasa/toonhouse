@@ -120,7 +120,7 @@ export function resetLoginAttempts(): void {
  * request from as the last `X-Forwarded-For` entry, so the earlier entries can
  * be set by the client and are not used.
  */
-function clientIp(c: Context): string {
+export function clientIp(c: Context): string {
   const forwarded = c.req.header('x-forwarded-for')?.split(',').at(-1)?.trim();
   if (forwarded) return forwarded;
   const incoming = (

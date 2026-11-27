@@ -4,8 +4,10 @@ import { serveStatic } from '@hono/node-server/serve-static';
 import { type Context, Hono, type MiddlewareHandler } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { csrf } from 'hono/csrf';
+import { HTTPException } from 'hono/http-exception';
 import { secureHeaders } from 'hono/secure-headers';
 
+import { clientIp } from './auth/login-limit.ts';
 import { type AuthEnv, authRoutes, sessionMiddleware } from './auth/routes.ts';
 import { cartoonRoutes } from './cartoons/routes.ts';
 import { publicOrigin } from './config.ts';
@@ -76,7 +78,27 @@ app.use('/api/*', (c, next) => {
 
 // The API of the web app, which authenticates with the session cookie.
 const origin = publicOrigin();
-app.use('/api/app/*', csrf(origin ? { origin } : {}), sessionMiddleware);
+const csrfCheck = csrf(origin ? { origin } : {});
+// The check throws its 403 as an `HTTPException`. Hono turns the errors of the
+// later handlers into responses before `next` returns, so this catches only the
+// errors of the check.
+const loggedCsrfCheck: MiddlewareHandler = async (c, next) => {
+  try {
+    await csrfCheck(c, next);
+  } catch (e) {
+    if (e instanceof HTTPException && e.status === 403) {
+      // Hono decodes the path, so it can have a newline that would fake a
+      // log line.
+      const path = JSON.stringify(c.req.path);
+      const from = JSON.stringify(c.req.header('origin') ?? null);
+      console.warn(
+        `Refused ${c.req.method} ${path} from origin ${from} at ${clientIp(c)}`,
+      );
+    }
+    throw e;
+  }
+};
+app.use('/api/app/*', loggedCsrfCheck, sessionMiddleware);
 app.route('/api/app/auth', authRoutes);
 app.route('/api/app/profile', profileRoutes);
 app.route('/api/app/groups', groupRoutes);

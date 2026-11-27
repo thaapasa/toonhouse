@@ -22,8 +22,16 @@ export type SettingKey = { type: 'scale' } | { type: 'color'; id: string };
 export const savedScale = (scale: number) =>
   Math.round(clamp(scale, L.scale.min, L.scale.max) * 1e4) / 1e4;
 
-/** A name inside the limits of the server. */
-export const savedName = (name: string) => name.slice(0, L.castName);
+/**
+ * A name inside the limits of the server. The limit counts UTF-16 code units,
+ * and the cut doesn't split a character that takes two, such as an emoji,
+ * because the server refuses half of one.
+ */
+export function savedName(name: string): string {
+  const cut = name.slice(0, L.castName);
+  const last = cut.charCodeAt(cut.length - 1);
+  return last >= 0xd800 && last <= 0xdbff ? cut.slice(0, -1) : cut;
+}
 
 export const withScale = (
   s: ActorSettings | undefined,

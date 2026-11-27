@@ -8,6 +8,7 @@ import { createMiddleware } from 'hono/factory';
 import { isProduction } from '../config.ts';
 import { sql } from '../db.ts';
 import {
+  clientIp,
   giveBackLoginAttempt,
   loginRetryAfterSeconds,
   takeLoginAttempt,
@@ -23,7 +24,10 @@ import {
 export type AuthEnv = { Variables: { user: User | null } };
 export type UserEnv = { Variables: { user: User } };
 
-const cookieName = 'session';
+// The `__Host-` prefix makes the browser refuse the cookie unless it is Secure,
+// has `Path=/` and has no `Domain`, so another subdomain can't set it. Browsers
+// refuse such a cookie over plain HTTP, so development uses a plain name.
+const cookieName = isProduction ? '__Host-session' : 'session';
 
 // Verified against when the username does not exist, so that response time
 // does not reveal which usernames exist.
@@ -67,6 +71,9 @@ export const authRoutes = new Hono<AuthEnv>()
   .post('/login', zValidator('json', LoginRequest), async (c) => {
     const { username, password } = c.req.valid('json');
     if (!takeLoginAttempt(c, username)) {
+      console.warn(
+        `Too many login attempts for ${JSON.stringify(username)} from ${clientIp(c)}`,
+      );
       c.header('retry-after', String(loginRetryAfterSeconds));
       return c.json({ error: 'Too many login attempts' }, 429);
     }
@@ -78,6 +85,9 @@ export const authRoutes = new Hono<AuthEnv>()
       row?.passwordHash ?? (await dummyHash),
     );
     if (!row || !valid) {
+      console.warn(
+        `Failed login for ${JSON.stringify(username)} from ${clientIp(c)}`,
+      );
       return c.json({ error: 'Invalid username or password' }, 401);
     }
     giveBackLoginAttempt(c, username);
@@ -91,7 +101,7 @@ export const authRoutes = new Hono<AuthEnv>()
   .post('/logout', async (c) => {
     const token = getSessionToken(c);
     if (token) await deleteSession(token);
-    deleteCookie(c, cookieName, { path: '/' });
+    deleteCookie(c, cookieName, { path: '/', secure: isProduction });
     return c.body(null, 204);
   })
   .get('/me', (c) => c.json({ user: c.var.user }));

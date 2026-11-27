@@ -185,6 +185,13 @@ export interface Saver {
   loadSaved(): void;
   /** After a lost login, saves again. */
   retry(): Promise<void>;
+  /**
+   * The page comes back to the foreground, where it may have waited for days.
+   * If all edits are saved, loads the saved content, and gives it if it is
+   * newer than the content of the editor. The saver goes on from it. The
+   * editor shows it in place of its own, since nothing of its own is lost.
+   */
+  refresh(): Promise<CartoonContent | null>;
   /** The editor opens. A saver can open again after it closes. */
   open(): void;
   /**
@@ -266,6 +273,7 @@ export function createSaver(deps: SaverDeps, start: SaverStart): Saver {
     keepTimer ??= setTimeout(keepNow, KEEP_DELAY);
   }
   const unsaved = () => !stopped && latest !== saved;
+  const idle = () => !stopped && !closed && !running && latest === saved;
 
   function accept(content: CartoonContent, rev: number) {
     revision = rev;
@@ -429,6 +437,25 @@ export function createSaver(deps: SaverDeps, start: SaverStart): Saver {
       if (stopped !== 'loggedOut') return Promise.resolve();
       stopped = null;
       return save();
+    },
+    async refresh() {
+      // A save sent as the page went to the background may get its answer
+      // only now.
+      while (running) await running.catch(() => {});
+      if (!idle()) return null;
+      let server: SavedContent;
+      try {
+        server = await deps.load();
+      } catch {
+        return null;
+      }
+      // An edit or a save during the load goes on as before, and a conflict
+      // comes up when it saves.
+      if (!idle() || server.revision <= revision) return null;
+      revision = server.revision;
+      latest = saved = server.content;
+      deps.onSaved(server);
+      return server.content;
     },
     loadSaved() {
       stopped = 'reloading';

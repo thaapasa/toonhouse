@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { Group } from './groups.ts';
+import { StorableText } from './text.ts';
 
 /**
  * Who can watch a cartoon, besides its owner: anyone (`public`), every
@@ -19,7 +20,7 @@ export const Sharing = z.discriminatedUnion('visibility', [
 ]);
 export type Sharing = z.infer<typeof Sharing>;
 
-export const CartoonTitle = z.string().trim().min(1).max(200);
+export const CartoonTitle = StorableText().trim().min(1).max(200);
 
 export const Cartoon = z.object({
   id: z.uuid(),

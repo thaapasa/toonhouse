@@ -79,15 +79,19 @@ export function useCartoonContent(
   useEffect(() => {
     saver.open();
     const hide = () => saver.hide();
-    const flush = () => {
+    const onVisibility = () => {
       if (document.visibilityState === 'hidden') hide();
+      else
+        void saver.refresh().then((newer) => {
+          if (newer) setHistory(newHistory(newer));
+        });
     };
-    document.addEventListener('visibilitychange', flush);
+    document.addEventListener('visibilitychange', onVisibility);
     window.addEventListener('pagehide', hide);
     // A new version of the app loads only when no edit is lost by it.
     const removeSaver = saveBeforeReload(() => saver.prepareReload());
     return () => {
-      document.removeEventListener('visibilitychange', flush);
+      document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('pagehide', hide);
       removeSaver();
       saver.close();

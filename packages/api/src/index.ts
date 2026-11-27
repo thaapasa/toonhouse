@@ -22,3 +22,4 @@ export {
   ResetPasswordResponse,
   UpdateProfileRequest,
 } from './profile.ts';
+export { isStorable } from './text.ts';

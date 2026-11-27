@@ -1,7 +1,9 @@
 import { z } from 'zod';
 
+import { StorableText } from './text.ts';
+
 export const LoginRequest = z.object({
-  username: z.string().trim().min(1).max(100),
+  username: StorableText().trim().min(1).max(100),
   password: z.string().min(1).max(200),
 });
 export type LoginRequest = z.infer<typeof LoginRequest>;

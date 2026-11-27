@@ -87,6 +87,15 @@ describe('creating', () => {
     expect(res.status).toBe(400);
   });
 
+  it('rejects a title that the database cannot store', async () => {
+    const res = await request('/api/app/cartoons', {
+      method: 'POST',
+      json: { title: 'Kana\u0000' },
+      cookie: owner,
+    });
+    expect(res.status).toBe(400);
+  });
+
   it('refuses a cartoon over the limit of the user', async () => {
     const first = await create();
     await sql`
@@ -339,6 +348,31 @@ describe('content', () => {
     const { id } = await create();
     const bad = { ...content, scenes: [{ ...content.scenes[0], actors: 'x' }] };
     expect((await save(id, bad)).status).toBe(400);
+  });
+
+  // PostgreSQL can't store these in jsonb, so without the check the save fails
+  // with 500.
+  it('refuses text that the database cannot store', async () => {
+    const { id } = await create();
+    const scene = content.scenes[0]!;
+    const withName = (name: string) => ({
+      ...content,
+      cast: [
+        {
+          id: 'm1',
+          name,
+          asset: { kind: 'character', id: 'sunny/blond-boy' },
+          settings: {},
+        },
+      ],
+    });
+    expect((await save(id, withName('a\u0000b'))).status).toBe(400);
+    expect((await save(id, withName('half \ud83d'))).status).toBe(400);
+    const unknown = { ...content, scenes: [{ ...scene, note: '\udc00' }] };
+    expect((await save(id, unknown)).status).toBe(400);
+    const key = { ...content, scenes: [{ ...scene, ['a\u0000']: 1 }] };
+    expect((await save(id, key)).status).toBe(400);
+    expect((await save(id, withName('Grandma 😀'))).status).toBe(200);
   });
 
   it('lets only the owner save, and hides private content', async () => {

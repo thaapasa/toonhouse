@@ -6,6 +6,8 @@ import {
 } from '@toonhouse/model';
 import { z } from 'zod';
 
+import { checkStorableJson } from './text.ts';
+
 /**
  * The limits of the content that the server saves. The editor keeps the
  * content inside them, so that a save doesn't fail on them.
@@ -267,12 +269,18 @@ const Scene = z.looseObject({
     .exactOptional(),
 });
 
-/** The scenes of a cartoon, in the latest format. See `CartoonContent` in the model. */
-export const CartoonContent = z.looseObject({
-  version: z.literal(CARTOON_VERSION),
-  cast: z.array(CastMember).max(L.castMembers).exactOptional(),
-  scenes: z.array(Scene).max(L.scenes),
-});
+/**
+ * The scenes of a cartoon, in the latest format. See `CartoonContent` in the
+ * model. The check of the text covers the fields that the schema doesn't know
+ * too, because the server stores them as well.
+ */
+export const CartoonContent = z
+  .looseObject({
+    version: z.literal(CARTOON_VERSION),
+    cast: z.array(CastMember).max(L.castMembers).exactOptional(),
+    scenes: z.array(Scene).max(L.scenes),
+  })
+  .superRefine(checkStorableJson);
 export type CartoonContent = Content;
 
 // The schema and the model must describe the same data, apart from the fields
