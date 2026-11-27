@@ -8,6 +8,8 @@ list shows a preview image.
 - [x] The owner can rename a cartoon in the editor, by tapping its title.
 - [x] The owner of a cartoon can delete it, after confirming it. Only the owner
       can delete a cartoon.
+- [x] Each cartoon of another user shows the name of its owner.
+- [x] Each of the user's own cartoons shows who can watch it.
 
 ## Preview image
 

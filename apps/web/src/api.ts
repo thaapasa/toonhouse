@@ -8,6 +8,7 @@ import {
   ResetPasswordResponse,
   SaveContentResponse,
   SavedContent,
+  type Sharing,
   User,
 } from '@toonhouse/api';
 import { z } from 'zod';
@@ -105,6 +106,9 @@ export const createCartoon = (title: string) =>
 
 export const renameCartoon = (id: string, title: string) =>
   request(Cartoon, `/cartoons/${id}`, { method: 'PATCH', body: { title } });
+
+export const setSharing = (id: string, sharing: Sharing) =>
+  request(Cartoon, `/cartoons/${id}/sharing`, { method: 'PUT', body: sharing });
 
 export const deleteCartoon = (id: string) =>
   request(NoContent, `/cartoons/${id}`, { method: 'DELETE' });

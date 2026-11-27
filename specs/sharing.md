@@ -14,7 +14,8 @@ The visibility of a cartoon tells who can watch it. It is one of these:
    from the groups they belong to.
 4. **Private**: only the owner can watch it.
 
-- [ ] The owner can set the visibility of a cartoon to any of the four.
+- [x] The owner can set the visibility of a cartoon to any of the four, on the
+      home page and in the editor.
 - [x] A new cartoon is private.
 - [x] The owner can always watch and edit their own cartoon, whatever its
       visibility.
@@ -24,7 +25,7 @@ The visibility of a cartoon tells who can watch it. It is one of these:
 
 ## Editing
 
-- [ ] Only the owner can edit a cartoon, its scenes and its cast, change its
+- [x] Only the owner can edit a cartoon, its scenes and its cast, change its
       visibility or delete it.
 
 ## Open questions

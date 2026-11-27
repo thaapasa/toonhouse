@@ -357,6 +357,52 @@ button:disabled {
   font-size: 12px;
 }
 
+/* Who can watch a cartoon. Each choice is a whole row, so that a finger hits
+   it. */
+.sharing-choices {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: calc(100dvh - 300px);
+  overflow-y: auto;
+}
+
+.sharing-choice {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  box-sizing: border-box;
+  padding: 6px 12px;
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  background: var(--field);
+  cursor: pointer;
+}
+
+.sharing-choice:has(input:checked) {
+  border-color: var(--accent);
+}
+
+.sharing-choice input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.sharing-choice > span {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sharing-label {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
 /* Login and profile */
 
 .narrow {

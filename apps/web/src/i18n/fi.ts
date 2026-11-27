@@ -33,6 +33,23 @@ export const fi: Texts = {
   'home.deleteError':
     'Piirretyn poisto epäonnistui. Yritä myöhemmin uudelleen.',
 
+  'sharing.open': 'Jaa: {title}',
+  'sharing.title': 'Kuka voi katsoa ”{title}”?',
+  'sharing.info': 'Vain sinä voit muokata piirrettyä.',
+  'sharing.private': 'Vain minä',
+  'sharing.privateInfo': 'Kukaan muu ei näe piirrettyä.',
+  'sharing.groupInfo': 'Ryhmän jäsenet',
+  'sharing.users': 'Kirjautuneet käyttäjät',
+  'sharing.usersInfo': 'Kaikki sovellukseen kirjautuneet',
+  'sharing.public': 'Kaikki',
+  'sharing.publicInfo': 'Myös ilman kirjautumista',
+  'sharing.error':
+    'Jakamisen muuttaminen epäonnistui. Yritä myöhemmin uudelleen.',
+  'sharing.isPrivate': 'Yksityinen',
+  'sharing.isGroup': 'Jaettu ryhmälle {name}',
+  'sharing.isUsers': 'Jaettu kirjautuneille',
+  'sharing.isPublic': 'Julkinen',
+
   'login.open': 'Kirjaudu',
   'login.title': 'Kirjaudu sisään',
   'login.username': 'Käyttäjätunnus',

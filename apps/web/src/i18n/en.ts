@@ -29,6 +29,23 @@ export const en = {
   'home.deleteConfirm': 'Delete',
   'home.deleteError': 'Deleting the cartoon failed. Try again later.',
 
+  'sharing.open': 'Share: {title}',
+  'sharing.title': 'Who can watch “{title}”?',
+  'sharing.info': 'Only you can edit the cartoon.',
+  'sharing.private': 'Only me',
+  'sharing.privateInfo': 'Nobody else sees the cartoon.',
+  'sharing.groupInfo': 'The members of the group',
+  'sharing.users': 'Logged-in users',
+  'sharing.usersInfo': 'Everyone who has logged in to the app',
+  'sharing.public': 'Everyone',
+  'sharing.publicInfo': 'Also without logging in',
+  'sharing.error':
+    'Changing who can watch the cartoon failed. Try again later.',
+  'sharing.isPrivate': 'Private',
+  'sharing.isGroup': 'Shared with {name}',
+  'sharing.isUsers': 'Shared with logged-in users',
+  'sharing.isPublic': 'Public',
+
   'login.open': 'Log in',
   'login.title': 'Log in',
   'login.username': 'Username',

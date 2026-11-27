@@ -21,6 +21,7 @@ import {
 } from '../components/icons.tsx';
 import { PreviewImage } from '../components/PreviewImage.tsx';
 import { PageMessage } from '../components/RequireUser.tsx';
+import { SharingButton, useSharingText } from '../components/SharingDialog.tsx';
 import { clearKeptContent } from '../editor/keptContent.ts';
 import { useI18n } from '../i18n/index.tsx';
 
@@ -134,12 +135,13 @@ function CartoonList(props: {
 }
 
 /**
- * A tap on the picture plays the cartoon. The owner gets buttons to edit it and
- * to delete it.
+ * A tap on the picture plays the cartoon. The owner gets buttons to edit it,
+ * to share it and to delete it.
  */
 function CartoonCard({ cartoon }: { cartoon: Cartoon }) {
   const { tr } = useI18n();
   const edited = useEditedText(cartoon.updatedAt);
+  const sharing = useSharingText(cartoon);
   const [deleting, setDeleting] = useState(false);
   return (
     <article className="cartoon-card">
@@ -159,7 +161,7 @@ function CartoonCard({ cartoon }: { cartoon: Cartoon }) {
           <div className="card-title">{cartoon.title}</div>
           <div className="card-meta">
             {cartoon.canEdit
-              ? edited
+              ? `${edited} · ${sharing}`
               : tr('home.byOwner', { name: cartoon.owner.displayName })}
           </div>
         </div>
@@ -174,6 +176,7 @@ function CartoonCard({ cartoon }: { cartoon: Cartoon }) {
             <EditIcon />
           </Link>
         )}
+        {cartoon.canEdit && <SharingButton cartoon={cartoon} />}
         {cartoon.canEdit && (
           <button
             type="button"

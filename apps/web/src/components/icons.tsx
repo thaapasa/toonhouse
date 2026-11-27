@@ -227,6 +227,16 @@ export const TurnIcon = () => (
   </Icon>
 );
 
+/** Opens the choice of who can watch a cartoon. */
+export const ShareIcon = () => (
+  <Icon>
+    <circle cx="17" cy="5.5" r="2.5" />
+    <circle cx="6.5" cy="12" r="2.5" />
+    <circle cx="17" cy="18.5" r="2.5" />
+    <path d="M8.7 10.7l6.1-3.9M8.7 13.3l6.1 3.9" />
+  </Icon>
+);
+
 export const DeleteIcon = () => (
   <Icon>
     <path d="M4 7h16" />

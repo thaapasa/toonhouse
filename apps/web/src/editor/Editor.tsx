@@ -49,6 +49,7 @@ import {
   SoundIcon,
   UndoIcon,
 } from '../components/icons.tsx';
+import { SharingButton } from '../components/SharingDialog.tsx';
 import { useI18n } from '../i18n/index.tsx';
 import {
   type BackgroundAsset,
@@ -661,6 +662,7 @@ export function Editor(props: { cartoon: Cartoon; initial: SavedContent }) {
         <CartoonTitle cartoon={cartoon} saveState={doc.saveState} />
         <div className="spacer" />
         <PreviewButton cartoonId={cartoon.id} frame={bg && { scene, bg, t }} />
+        <SharingButton cartoon={cartoon} />
         <IconButton
           label="editor.undo"
           onClick={doc.canUndo ? doc.undo : undefined}
