@@ -10,7 +10,7 @@ export default defineConfig({
   test: {
     include: ['src/**/*.test.ts'],
     environment: 'node',
-    env: { DATABASE_URL: testUrl.href },
+    env: { DATABASE_URL: testUrl.href, PUBLIC_URL: 'https://toonhouse.test' },
     globalSetup: ['src/test/global-setup.ts'],
     // The test files share one database.
     fileParallelism: false,

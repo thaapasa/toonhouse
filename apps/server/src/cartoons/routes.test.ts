@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 
 import { app } from '../app.ts';
 import { sql } from '../db.ts';
-import { login, request } from '../test/api.ts';
+import { login, origin, request } from '../test/api.ts';
 import { createGroup, createUser, resetDatabase } from '../test/db.ts';
 import { maxCartoonsPerUser } from './repository.ts';
 
@@ -454,5 +454,20 @@ describe('cross-site requests', () => {
     });
     expect(res.status).toBe(403);
     expect(await listed(owner)).toEqual([]);
+  });
+
+  it('accepts a change from the public URL without Sec-Fetch-Site', async () => {
+    // Behind the proxy, the request URL is http://, so only PUBLIC_URL matches.
+    // Safari before 16.4 sends no Sec-Fetch-Site.
+    const res = await app.request('/api/app/cartoons', {
+      method: 'POST',
+      headers: {
+        origin,
+        'content-type': 'text/plain',
+        cookie: owner,
+      },
+      body: JSON.stringify({ title: 'X' }),
+    });
+    expect(res.status).not.toBe(403);
   });
 });

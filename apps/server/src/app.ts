@@ -8,6 +8,7 @@ import { secureHeaders } from 'hono/secure-headers';
 
 import { type AuthEnv, authRoutes, sessionMiddleware } from './auth/routes.ts';
 import { cartoonRoutes } from './cartoons/routes.ts';
+import { publicOrigin } from './config.ts';
 import { sql } from './db.ts';
 import { groupRoutes } from './groups/routes.ts';
 import { profileRoutes } from './profile/routes.ts';
@@ -74,7 +75,8 @@ app.use('/api/*', (c, next) => {
 });
 
 // The API of the web app, which authenticates with the session cookie.
-app.use('/api/app/*', csrf(), sessionMiddleware);
+const origin = publicOrigin();
+app.use('/api/app/*', csrf(origin ? { origin } : {}), sessionMiddleware);
 app.route('/api/app/auth', authRoutes);
 app.route('/api/app/profile', profileRoutes);
 app.route('/api/app/groups', groupRoutes);

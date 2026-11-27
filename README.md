@@ -81,7 +81,7 @@ pnpm migrate       # apply the database migrations; the server also does it at s
 
 The server reads its settings from the environment, and in development also from
 `apps/server/.env`. [apps/server/.env.example](apps/server/.env.example) lists
-them. In production, `DATABASE_URL` must be set.
+them. In production, `DATABASE_URL` and `PUBLIC_URL` must be set.
 
 The studio saves files in the repo, so it listens only on `localhost`. To open
 it from another device, start it with `STUDIO_HOST=0.0.0.0 pnpm studio`.
@@ -132,7 +132,10 @@ built for `linux/arm64`. A reverse proxy such as Caddy sits in front of it and
 handles TLS. PostgreSQL runs in its own container.
 
 The container needs `DATABASE_URL`, the PostgreSQL connection, such as
-`postgres://toonhouse:<password>@db:5432/toonhouse`. The server applies the new
+`postgres://toonhouse:<password>@db:5432/toonhouse`, and `PUBLIC_URL`, the
+public address of the app, such as `https://piirretyt.pomeranssi.fi`. The server
+checks the `Origin` of each change against `PUBLIC_URL`, because behind the
+proxy it sees its own address as `http://`. The server applies the new
 migrations when it starts.
 
 The image sets `NODE_ENV=production` and `SERVER_PORT=3000`, and runs as user

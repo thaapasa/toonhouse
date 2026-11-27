@@ -27,7 +27,7 @@ These are the settings of the deployment that the code depends on.
       `fetch` in `node`.
 - [x] The server applies the new migrations when it starts, so a deploy has no
       separate migration step.
-- [ ] The server checks the `Origin` of a change against the public URL of the
+- [x] The server checks the `Origin` of a change against the public URL of the
       app, which it gets from an environment variable, as the cookbook does with
       `PUBLIC_URL`. The `csrf()` middleware of Hono compares the `Origin` to the
       URL of the request, and behind Caddy the server sees that URL as

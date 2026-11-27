@@ -1,7 +1,10 @@
 import { app } from '../app.ts';
 
-/** The origin of `app.request` URLs. */
-export const origin = 'http://localhost';
+/**
+ * The public origin of the app, which `vitest.config.ts` sets in `PUBLIC_URL`.
+ * The `app.request` URLs are `http://localhost`, as behind the proxy.
+ */
+export const origin = new URL(process.env.PUBLIC_URL ?? '').origin;
 
 /**
  * Sends a request to the app. A `json` body is sent as JSON. Like a browser, sends
