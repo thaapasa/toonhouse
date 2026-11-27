@@ -18,12 +18,12 @@ a{color:#ECEDF0}a:hover{color:#FFFFFF}
 
   <header style="height: 48px; flex: none; box-sizing: border-box; display: flex; align-items: center; gap: 12px; padding: 0 12px 0 16px; background: #1C1D22; border-bottom: 1px solid #2A2C34">
     <div style="display: flex; align-items: center; gap: 8px">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F2B544" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"></path><path d="M5 10v10h14V10"></path><path d="M10 15l4 2.5-4 2.5z" fill="#F2B544"></path></svg>
+      <svg width="24" height="24" viewBox="0 0 64 64" aria-hidden="true"><path d="M12 30 L32 13 L52 30 V51 H12 Z" fill="none" stroke="#F2B544" stroke-width="5" stroke-linejoin="round"></path><path d="M27 28.5 L40 36 L27 43.5 Z" fill="#F2B544" stroke="#F2B544" stroke-width="2" stroke-linejoin="round"></path></svg>
       <span style="font-weight: 700; font-size: 15px">Studio</span>
       <span style="padding: 2px 6px; border-radius: 4px; background: #2A2C34; color: #9EA1AC; font-size: 11px; font-weight: 600">dev</span>
     </div>
     <div style="width: 1px; height: 20px; background: #2F313A"></div>
-    <div style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #9EA1AC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">assets/characters/<span style="color: #ECEDF0">girl.rig.json</span></div>
+    <div style="font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; color: #9EA1AC; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">assets/packs/adventure/characters/captain/<span style="color: #ECEDF0">rig.json</span></div>
     <span style="width: 7px; height: 7px; border-radius: 50%; background: #F2B544; flex: none" title="Unsaved changes"></span>
     <div style="flex: 1"></div>
     <button style="height: 32px; border: 0; border-radius: 7px; background: transparent; color: #C9CBD3; font: inherit; font-weight: 500; padding: 0 12px; cursor: pointer">Revert</button>
@@ -35,24 +35,26 @@ a{color:#ECEDF0}a:hover{color:#FFFFFF}
 
   <div style="flex: 1; min-height: 0; display: flex; flex-wrap: wrap">
 
-    <aside aria-label="Assets" style="width: 220px; flex: 1 1 220px; max-width: 220px; box-sizing: border-box; background: #1C1D22; border-right: 1px solid #2A2C34; padding: 10px 8px; display: flex; flex-direction: column; gap: 4px; min-width: 200px">
-      <div style="display: flex; align-items: center; gap: 6px; height: 32px; padding: 0 8px; border-radius: 7px; background: #24262D; color: #8D909B; font-size: 12px; margin-bottom: 6px">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
-        <label for="asset-filter" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Filter assets</label>
-        <input id="asset-filter" placeholder="Filter" style="flex: 1; min-width: 0; border: 0; background: transparent; color: #ECEDF0; font: inherit; font-size: 12px; outline: none">
-      </div>
+    <aside aria-label="Assets" style="width: 220px; flex: 1 1 220px; max-width: 220px; box-sizing: border-box; background: #1C1D22; border-right: 1px solid #2A2C34; padding: 6px 8px; display: flex; flex-direction: column; gap: 2px; min-width: 200px">
       <div style="padding: 8px 8px 4px; color: #8D909B; font-size: 11px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase">Characters</div>
       <sc-for list="{{ characters }}" as="c" hint-placeholder-count="8">
-        <button onClick="{{ c.pick }}" style="height: 36px; border: 0; border-radius: 7px; background: {{ c.bg }}; color: {{ c.fg }}; display: flex; align-items: center; gap: 10px; padding: 0 8px; font: inherit; font-weight: 500; font-size: 13px; cursor: pointer; text-align: left">
-          <span style="width: 24px; height: 24px; flex: none; border-radius: 6px; background: #2E3038; overflow: hidden; display: flex; align-items: flex-start; justify-content: center"><img src="{{ c.src }}" alt="" style="width: 22px"></span>
+        <button onClick="{{ c.pick }}" style="height: 32px; border: 0; border-radius: 7px; background: {{ c.bg }}; color: {{ c.fg }}; display: flex; align-items: center; gap: 10px; padding: 0 8px; font: inherit; font-weight: 500; font-size: 13px; cursor: pointer; text-align: left">
+          <span style="width: 24px; height: 24px; flex: none; border-radius: 6px; background: #2E3038; overflow: hidden; display: flex; align-items: flex-start; justify-content: center"><img src="{{ c.src }}" alt="" style="width: 30px; margin-top: -1px"></span>
           <span style="flex: 1">{{ c.name }}</span>
           <span style="color: #6B6E79; font-size: 11px">{{ c.rig }}</span>
         </button>
       </sc-for>
       <div style="padding: 12px 8px 4px; color: #8D909B; font-size: 11px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase">Props</div>
       <sc-for list="{{ props }}" as="c" hint-placeholder-count="5">
-        <button style="height: 36px; border: 0; border-radius: 7px; background: transparent; color: #C9CBD3; display: flex; align-items: center; gap: 10px; padding: 0 8px; font: inherit; font-weight: 500; font-size: 13px; cursor: pointer; text-align: left">
+        <button style="height: 32px; border: 0; border-radius: 7px; background: transparent; color: #C9CBD3; display: flex; align-items: center; gap: 10px; padding: 0 8px; font: inherit; font-weight: 500; font-size: 13px; cursor: pointer; text-align: left">
           <span style="width: 24px; height: 24px; flex: none; border-radius: 6px; background: #2E3038; overflow: hidden; display: flex; align-items: center; justify-content: center"><img src="{{ c.src }}" alt="" style="max-width: 20px; max-height: 20px"></span>
+          <span style="flex: 1">{{ c.name }}</span>
+        </button>
+      </sc-for>
+      <div style="padding: 12px 8px 4px; color: #8D909B; font-size: 11px; font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase">Backgrounds</div>
+      <sc-for list="{{ backgrounds }}" as="c" hint-placeholder-count="4">
+        <button style="height: 32px; border: 0; border-radius: 7px; background: transparent; color: #C9CBD3; display: flex; align-items: center; gap: 10px; padding: 0 8px; font: inherit; font-weight: 500; font-size: 13px; cursor: pointer; text-align: left">
+          <span style="width: 24px; height: 24px; flex: none; border-radius: 6px; overflow: hidden; display: block"><img src="{{ c.src }}" alt="" style="width: 24px; height: 24px; object-fit: cover; display: block"></span>
           <span style="flex: 1">{{ c.name }}</span>
         </button>
       </sc-for>
@@ -80,36 +82,12 @@ a{color:#ECEDF0}a:hover{color:#FFFFFF}
 
         <div aria-hidden="true" style="position: absolute; left: 0; right: 0; bottom: 64px; border-top: 1px dashed #3A3D46"></div>
 
-        <div style="position: absolute; left: 50%; bottom: 64px; width: 233px; height: 480px; margin-left: -116px">
+        <div style="position: absolute; left: 50%; bottom: 64px; width: 143px; height: 480px; margin-left: -71px">
           <sc-if value="{{ onion }}" hint-placeholder-val="{{ true }}">
-            <img src="/_blob/c4a9447bb173a635c890c9b0b4f7e6c2" alt="" style="position: absolute; left: -26px; top: 0; height: 480px; opacity: 0.14; filter: grayscale(1)">
-            <img src="/_blob/c4a9447bb173a635c890c9b0b4f7e6c2" alt="" style="position: absolute; left: 26px; top: 0; height: 480px; opacity: 0.14; filter: grayscale(1)">
+            <img src="img/captain.png" alt="" style="position: absolute; left: -26px; top: 0; height: 480px; opacity: 0.14; filter: grayscale(1)">
+            <img src="img/captain.png" alt="" style="position: absolute; left: 26px; top: 0; height: 480px; opacity: 0.14; filter: grayscale(1)">
           </sc-if>
-          <img src="/_blob/c4a9447bb173a635c890c9b0b4f7e6c2" alt="Girl" style="position: absolute; left: 0; top: 0; height: 480px">
-          <sc-if value="{{ bones }}" hint-placeholder-val="{{ true }}">
-            <svg width="233" height="480" viewBox="0 0 183 377" aria-hidden="true" style="position: absolute; left: 0; top: 0; overflow: visible">
-              <g fill="none" stroke="#ECEDF0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.9">
-                <path d="M100 135 L103 265"></path>
-                <path d="M100 135 L68 160 L50 205 L85 215"></path>
-                <path d="M100 135 L140 160"></path>
-                <path d="M165 195 L150 215"></path>
-                <path d="M103 265 L85 268 L80 320 L72 350"></path>
-                <path d="M103 265 L120 268 L125 320 L130 350"></path>
-                <path d="M100 135 L104 70"></path>
-              </g>
-              <path d="M140 160 L165 195" fill="none" stroke="#F2B544" stroke-width="4" stroke-linecap="round"></path>
-              <g fill="#1C1D22" stroke="#ECEDF0" stroke-width="1.6">
-                <circle cx="104" cy="70" r="3.2"></circle><circle cx="100" cy="135" r="3.2"></circle><circle cx="103" cy="265" r="3.2"></circle>
-                <circle cx="68" cy="160" r="3.2"></circle><circle cx="50" cy="205" r="3.2"></circle><circle cx="85" cy="215" r="3.2"></circle>
-                <circle cx="165" cy="195" r="3.2"></circle><circle cx="150" cy="215" r="3.2"></circle>
-                <circle cx="85" cy="268" r="3.2"></circle><circle cx="80" cy="320" r="3.2"></circle><circle cx="72" cy="350" r="3.2"></circle>
-                <circle cx="120" cy="268" r="3.2"></circle><circle cx="125" cy="320" r="3.2"></circle><circle cx="130" cy="350" r="3.2"></circle>
-              </g>
-              <circle cx="140" cy="160" r="5" fill="#F2B544" stroke="#15161A" stroke-width="1.6"></circle>
-              <circle cx="140" cy="160" r="10" fill="none" stroke="#F2B544" stroke-width="1" stroke-dasharray="2 2"></circle>
-            </svg>
-            <div style="position: absolute; left: 196px; top: 176px; padding: 3px 7px; border-radius: 5px; background: #F2B544; color: #15161A; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 11px; font-weight: 500; white-space: nowrap">arm_r.upper · 34°</div>
-          </sc-if>
+          <img src="img/captain.png" alt="Captain" style="position: absolute; left: 0; top: 0; height: 480px">
         </div>
 
         <div style="position: absolute; left: 12px; bottom: 12px; display: flex; align-items: center; gap: 8px; color: #8D909B; font-size: 12px">
@@ -141,7 +119,7 @@ a{color:#ECEDF0}a:hover{color:#FFFFFF}
           </button>
           <button aria-label="Next keyframe" title="Next keyframe" style="width: 34px; height: 34px; border: 0; border-radius: 7px; background: transparent; color: #ECEDF0; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 5v14"></path><path d="M5 5l10 7-10 7z"></path></svg></button>
           <button aria-pressed="true" aria-label="Loop" title="Loop" style="width: 34px; height: 34px; border: 0; border-radius: 7px; background: transparent; color: #F2B544; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l3 3-3 3"></path><path d="M4 11V9a4 4 0 0 1 4-4h12"></path><path d="M7 22l-3-3 3-3"></path><path d="M20 13v2a4 4 0 0 1-4 4H4"></path></svg></button>
-          <div style="margin-left: 8px; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap"><span style="font-weight: 600">Frame 9</span><span style="color: #9EA1AC"> / 24 · 24 fps</span></div>
+          <div style="margin-left: 8px; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap"><span style="font-weight: 600">Frame 39</span><span style="color: #9EA1AC"> / 77 · 30 fps</span></div>
           <div style="flex: 1"></div>
           <div role="group" aria-label="Speed" style="display: flex; padding: 2px; border-radius: 7px; background: #26282F">
             <sc-for list="{{ speeds }}" as="sp" hint-placeholder-count="4">
@@ -173,7 +151,7 @@ a{color:#ECEDF0}a:hover{color:#FFFFFF}
               </div>
             </div>
           </sc-for>
-          <div aria-hidden="true" style="position: absolute; top: 0; bottom: 10px; left: calc(132px + 0.3478 * (100% - 144px)); width: 0">
+          <div aria-hidden="true" style="position: absolute; top: 0; bottom: 10px; left: calc(132px + 0.513 * (100% - 144px)); width: 0">
             <div style="position: absolute; left: -1px; top: 0; bottom: 0; width: 2px; background: #F2B544"></div>
             <div style="position: absolute; left: -6px; top: 0; width: 12px; height: 12px; background: #F2B544; border-radius: 2px 2px 6px 6px"></div>
           </div>
@@ -211,18 +189,18 @@ a{color:#ECEDF0}a:hover{color:#FFFFFF}
             <div style="display: flex; align-items: center; gap: 10px">
               <label for="hair" style="width: 80px; color: #C9CBD3">Hair</label>
               <select id="hair" style="flex: 1; height: 32px; border: 0; border-radius: 7px; background: #26282F; color: #ECEDF0; font: inherit; font-size: 13px; padding: 0 8px">
-                <option>Ponytail</option><option>Short</option><option>Bun</option>
+                <option>Curly</option><option>Bun</option><option>Short</option>
               </select>
             </div>
             <div style="display: flex; align-items: center; gap: 10px">
-              <label for="outfit" style="width: 80px; color: #C9CBD3">Outfit</label>
+              <label for="outfit" style="width: 80px; color: #C9CBD3">Top</label>
               <select id="outfit" style="flex: 1; height: 32px; border: 0; border-radius: 7px; background: #26282F; color: #ECEDF0; font: inherit; font-size: 13px; padding: 0 8px">
-                <option>Overalls</option><option>Hoodie</option><option>Dress</option>
+                <option>Coat</option><option>Shirt</option><option>Vest</option>
               </select>
             </div>
             <div style="display: flex; align-items: center; gap: 10px">
-              <span style="width: 80px; color: #C9CBD3">Glasses</span>
-              <button role="switch" onClick="{{ toggleGlasses }}" aria-checked="{{ glasses }}" aria-label="Glasses" style="width: 36px; height: 20px; border: 0; border-radius: 10px; background: {{ glassesBg }}; position: relative; cursor: pointer; padding: 0">
+              <span style="width: 80px; color: #C9CBD3">Earring</span>
+              <button role="switch" onClick="{{ toggleGlasses }}" aria-checked="{{ glasses }}" aria-label="Earring" style="width: 36px; height: 20px; border: 0; border-radius: 10px; background: {{ glassesBg }}; position: relative; cursor: pointer; padding: 0">
                 <span style="position: absolute; top: 2px; left: {{ glassesKnob }}; width: 16px; height: 16px; border-radius: 50%; background: #FFFFFF"></span>
               </button>
             </div>
@@ -273,28 +251,25 @@ class Component extends DCLogic {
   constructor(props) {
     super(props);
     this.state = {
-      char: 'girl', clip: 'walk', speed: '1×', playing: true, bones: true, onion: false, tab: 'look', slot: 2, glasses: false,
-      colors: ['#E2622B', '#F6C9A0', '#F7B92B', '#2F86C8', '#FCE8C4', '#2F86C8'],
+      char: 'captain', clip: 'walk', speed: '1×', playing: true, bones: false, onion: false, tab: 'look', slot: 3, glasses: true,
+      colors: ['#C98B5E', '#5A3418', '#B3261E', '#0F2E45', '#A7801C', '#6A2A2A', '#2A1E1E'],
     };
   }
   renderVals() {
     const s = this.state;
-    const U = {
-      boy: '/_blob/2f23f7b6c56616cdafbe2829609ddb9c', girl: '/_blob/c4a9447bb173a635c890c9b0b4f7e6c2', adult: '/_blob/68e10496b58b3e5601fc371571a99c06',
-      dog: '/_blob/4e78c9a71df7bb2fce676cb1740fabc9', cat: '/_blob/a7009ec24244c014aa55cd5bcb2c09eb', bear: '/_blob/bbd62fce766aaab50ebd205a3e1e7e8b',
-      dragon: '/_blob/dbbb8d1a87d198120c811089e9d0ff1a', wizard: '/_blob/52da563468aca2fb96dd189630e284e7',
-    };
-    const chars = [['boy', 'Boy', 'human'], ['girl', 'Girl', 'human'], ['adult', 'Adult', 'human'], ['wizard', 'Wizard', 'human'],
-      ['bear', 'Bear', 'biped'], ['dragon', 'Dragon', 'biped'], ['dog', 'Dog', 'quad'], ['cat', 'Cat', 'quad']];
+    const chars = [['captain', 'Captain', 'adventure'], ['quartermaster', 'Quartermaster', 'adventure'], ['boy', 'Boy', 'sunny'], ['bunny', 'Bunny', 'sunny'],
+      ['duck', 'Duck', 'sunny'], ['emo-girl', 'Emo girl', 'sunny'], ['grandma', 'Grandma', 'sunny'], ['hen', 'Hen', 'sunny'],
+      ['raincoat-girl', 'Raincoat girl', 'sunny'], ['squirrel', 'Squirrel', 'sunny'], ['wizard', 'Wizard', 'sunny']];
     const characters = chars.map(([id, name, rig]) => ({
-      name, rig, src: U[id], bg: s.char === id ? '#2E3038' : 'transparent', fg: s.char === id ? '#FFFFFF' : '#C9CBD3',
+      name, rig, src: 'img/' + id + '.png', bg: s.char === id ? '#2E3038' : 'transparent', fg: s.char === id ? '#FFFFFF' : '#C9CBD3',
       pick: () => this.setState({ char: id }),
     }));
-    const props = [['Campfire', '/_blob/3d03a75affe24ddbf4cacc73f4d391ec'], ['Tree', '/_blob/a9f2da738fd13b1f2848a507334f76ec'],
-      ['Tent', '/_blob/30f56b1033842ee33ac689ae341c8261'], ['Chest', '/_blob/9dcab96129d374b082d5a8a91372b896'], ['Signpost', '/_blob/dc35d803fa5f17ce83e87f61bcddcf1a']]
-      .map(([name, src]) => ({ name, src }));
-    const compatible = ['boy', 'girl', 'adult', 'wizard'].map((id) => ({ name: id, src: U[id] }));
-    const clipList = [['idle', 'Idle', '48f'], ['walk', 'Walk', '24f'], ['run', 'Run', '16f'], ['wave', 'Wave', '30f'], ['talk', 'Talk', '12f'], ['jump', 'Jump', '28f'], ['sit', 'Sit', '20f']];
+    const props = [['Apple tree', 'apple-tree'], ['Flowering bush', 'flowering-bush'], ['Hedge', 'hedge'], ['Oak', 'oak'], ['Round bush', 'round-bush'], ['Spruce', 'spruce']]
+      .map(([name, id]) => ({ name, src: 'img/' + id + '.png' }));
+    const backgrounds = [['Harbor', 'harbor'], ['Farm', 'farm'], ['Meadow', 'meadow'], ['Village', 'village']]
+      .map(([name, id]) => ({ name, src: 'img/' + id + '.jpg' }));
+    const compatible = ['captain', 'quartermaster', 'boy', 'emo-girl', 'grandma', 'raincoat-girl', 'wizard'].map((id) => ({ name: id, src: 'img/' + id + '.png' }));
+    const clipList = [['idle', 'Idle', '120f'], ['walk', 'Walk', '77f'], ['wave', 'Wave', '96f'], ['talk', 'Talk', '90f']];
     const clips = clipList.map(([id, name, len]) => ({
       name, len, on: s.clip === id, bg: s.clip === id ? '#F2B544' : '#26282F', fg: s.clip === id ? '#15161A' : '#ECEDF0',
       sub: s.clip === id ? '#5A4A20' : '#8D909B', pick: () => this.setState({ clip: id }),
@@ -303,21 +278,21 @@ class Component extends DCLogic {
       label, on: s.speed === label, bg: s.speed === label ? '#3A3D46' : 'transparent', fg: s.speed === label ? '#ECEDF0' : '#9EA1AC',
       pick: () => this.setState({ speed: label }),
     }));
-    const frames = [0, 4, 8, 12, 16, 20].map((f) => ({ left: (f / 23 * 100).toFixed(2) + '%', label: String(f) }));
-    const pos = (fs) => fs.map((f) => ({ left: (f / 23 * 100).toFixed(2) + '%' }));
+    const frames = [0, 10, 20, 30, 40, 50, 60, 70].map((f) => ({ left: (f / 76 * 100).toFixed(2) + '%', label: String(f) }));
+    const pos = (fs) => fs.map((f) => ({ left: (f / 76 * 100).toFixed(2) + '%' }));
     const boneRows = [
-      ['root', [0, 12, 23]], ['torso', [0, 6, 12, 18, 23]], ['head', [0, 12, 23]], ['arm_l.upper', [0, 6, 12, 18, 23]],
-      ['arm_r.upper', [0, 6, 12, 18, 23]], ['leg_l.upper', [0, 3, 6, 12, 15, 18, 23]], ['leg_r.upper', [0, 3, 6, 9, 12, 18, 23]],
+      ['root', [0, 38, 76]], ['torso', [0, 19, 38, 57, 76]], ['head', [0, 38, 76]], ['arm_l.upper', [0, 19, 38, 57, 76]],
+      ['arm_r.upper', [0, 19, 38, 57, 76]], ['leg_l.upper', [0, 10, 19, 38, 48, 57, 76]], ['leg_r.upper', [0, 10, 19, 29, 38, 57, 76]],
     ].map(([name, keys]) => ({
       name, keys: pos(keys), rowBg: name === 'arm_r.upper' ? '#26282F' : 'transparent',
       fg: name === 'arm_r.upper' ? '#F2B544' : '#C9CBD3', key: name === 'arm_r.upper' ? '#F2B544' : '#9EA1AC',
     }));
-    const slotNames = ['Hair', 'Skin', 'Shirt', 'Overalls', 'Socks', 'Shoes'];
+    const slotNames = ['Skin', 'Hair', 'Bandana', 'Jacket', 'Trousers', 'Boots', 'Outline'];
     const slots = slotNames.map((name, i) => ({
       name, color: s.colors[i], on: s.slot === i, bg: s.slot === i ? '#26282F' : 'transparent', ring: s.slot === i ? '#F2B544' : 'transparent',
       pick: () => this.setState({ slot: i }),
     }));
-    const pal = ['#D9342B', '#F08A24', '#F7B92B', '#5FA53A', '#2F86C8', '#7E4FA3', '#EF7A85', '#F0A868', '#8B5A2B', '#5A3A22', '#FCE8C4', '#A8ADB2', '#34404D', '#1E6B4A'];
+    const pal = ['#B3261E', '#C9672A', '#D9A441', '#A7801C', '#5E7D3A', '#1E6B4A', '#2F5E8A', '#0F2E45', '#5B3F7A', '#C98B5E', '#8B5A2B', '#5A3418', '#6A2A2A', '#2A1E1E'];
     const cur = s.colors[s.slot];
     const palette = pal.map((hex) => ({
       hex, ring: hex === cur ? '0 0 0 2px #1C1D22, 0 0 0 4px #ECEDF0' : 'inset 0 0 0 1px rgba(255,255,255,0.12)',
@@ -327,7 +302,7 @@ class Component extends DCLogic {
       .map(([name, d]) => ({ name, indent: 8 + d * 14 + 'px', bg: name === 'arm_r.upper' ? '#2E3038' : 'transparent', fg: name === 'arm_r.upper' ? '#F2B544' : '#C9CBD3' }));
     const isLook = s.tab === 'look';
     return {
-      characters, props, compatible, clips, speeds, frames, boneRows, slots, palette, tree,
+      characters, props, backgrounds, compatible, clips, speeds, frames, boneRows, slots, palette, tree,
       playing: s.playing, paused: !s.playing, playLabel: s.playing ? 'Pause' : 'Play', togglePlay: () => this.setState({ playing: !s.playing }),
       bones: s.bones, bonesBg: s.bones ? '#2E3038' : 'transparent', toggleBones: () => this.setState({ bones: !s.bones }),
       onion: s.onion, onionBg: s.onion ? '#2E3038' : 'transparent', toggleOnion: () => this.setState({ onion: !s.onion }),

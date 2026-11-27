@@ -21,6 +21,8 @@ canvas path.
 - `project/canvas.json`: the board layout. It gives the title, position and size
   of each board, and the board order.
 - `project/*.dc.html`: one file per board.
+- `project/img/`: the sample characters, objects and backgrounds that the boards
+  show, as PNG and JPEG images.
 
 The iPad boards are 1194 × 834 px, with Finnish text:
 
@@ -39,6 +41,11 @@ The dev tool board is 1440 × 900 px, with English text:
 - `Studio.dc.html`, "Character studio (dev tool)": the character studio with
   assets, clips, a viewport, keyframe controls and an inspector.
 
+The favicon board is 1194 × 950 px, with English text:
+
+- `Favicons.dc.html`, "Favicon options": favicon candidates at 128 px, in dark
+  and light browser tabs at 16 px, and at 32 px.
+
 Each board is an HTML page with inline styles and a `DCLogic` component script
 that fills in the sample data. The boards load `support.js` from the canvas
 runtime, so they do not render when you open them from disk. Read them for
@@ -46,8 +53,8 @@ colors, spacing, type and structure, and open the canvas to see them.
 
 ## Last sync
 
-- Canvas version: 1794553520-d70b
-- Date: 2026-11-13
+- Canvas version: 1795805811-dc0e
+- Date: 2026-11-27
 
 ## Sync
 
