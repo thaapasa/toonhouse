@@ -25,6 +25,12 @@ function initialLang(): Lang {
   return navigator.language.toLowerCase().startsWith('fi') ? 'fi' : 'en';
 }
 
+/** Sets the language of the page and the title of the browser tab. */
+function applyLang(lang: Lang) {
+  document.documentElement.lang = lang;
+  document.title = TEXTS[lang].appName;
+}
+
 interface I18n {
   lang: Lang;
   setLang(lang: Lang): void;
@@ -39,12 +45,12 @@ const I18nContext = createContext<I18n | null>(null);
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState(() => {
     const l = initialLang();
-    document.documentElement.lang = l;
+    applyLang(l);
     return l;
   });
   const setLang = useCallback((l: Lang) => {
     localStorage.setItem(STORAGE_KEY, l);
-    document.documentElement.lang = l;
+    applyLang(l);
     setLangState(l);
   }, []);
   const value = useMemo<I18n>(() => {

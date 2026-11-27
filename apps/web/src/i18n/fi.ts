@@ -1,7 +1,7 @@
 import type { Texts } from './en.ts';
 
 export const fi: Texts = {
-  appName: 'Toonhouse',
+  appName: 'Piirretyt',
   language: 'Kieli',
   loading: 'Ladataan…',
   loadError: 'Lataus epäonnistui. Yritä myöhemmin uudelleen.',
