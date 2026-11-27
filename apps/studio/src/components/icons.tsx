@@ -15,7 +15,7 @@ export const LogoIcon = () => (
   <svg {...common} width={20} height={20} stroke="#F2B544" strokeWidth={2}>
     <path d="M3 11l9-7 9 7" />
     <path d="M5 10v10h14V10" />
-    <path d="M10 15l4 2.5-4 2.5z" fill="#F2B544" />
+    <path d="M10.5 10l4.5 3-4.5 3z" fill="#F2B544" />
   </svg>
 );
 
