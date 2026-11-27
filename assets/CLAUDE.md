@@ -5,6 +5,8 @@ generating images with AI, redrawing them as SVG and checking the result.
 
 - `examples/`: style references for the art and the UI design. They are not used
   in the app.
+- `icons/`: the app icon, `app-icon.svg`. It is the "Bubble + play, no
+  background" option of the favicon board in `design/`.
 - `packs/`: the asset packs, one folder each. See "Asset packs" below.
 - `sky/`: the sun and the clouds, which every asset pack uses. The renderer
   draws the moon and the stars in code.
