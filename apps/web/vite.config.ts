@@ -28,7 +28,15 @@ export default defineConfig({
     port,
     strictPort: true,
     host: true,
-    // The trailing slash keeps the proxy off the module /src/api.ts.
-    proxy: { '/api/': `http://localhost:${serverPort}` },
+    proxy: {
+      // The trailing slash keeps the proxy off the module /src/api.ts.
+      '/api/': {
+        target: `http://localhost:${serverPort}`,
+        // The server's CSRF check compares the Origin of a change to the
+        // Host. Browsers don't send Sec-Fetch-Site to an http:// LAN
+        // address, so on a tablet the Origin is the only thing it can check.
+        changeOrigin: false,
+      },
+    },
   },
 });
